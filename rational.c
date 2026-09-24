@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /*
   rational.c: Coded by Tadayoshi Funaba 2008-2012
 

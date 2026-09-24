@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_SHAPE_H
 #define RUBY_SHAPE_H
 

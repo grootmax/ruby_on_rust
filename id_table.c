@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /* This file is included by symbol.c */
 
 #include "id_table.h"

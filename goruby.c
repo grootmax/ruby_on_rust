@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 static void Init_golf_prelude(void);
 static void *goruby_options(int argc, char **argv);
 static int goruby_run_node(void *arg);

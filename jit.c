@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 // Glue code shared between YJIT and ZJIT for use from Rust.
 // For FFI safety and bindgen compatibility reasons, certain types of C
 // functions require wrapping before they can be called from Rust. Those show

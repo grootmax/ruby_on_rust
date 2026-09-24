@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_ENCINDEX_H
 #define RUBY_ENCINDEX_H 1
 /**********************************************************************

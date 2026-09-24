@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include <alloca.h>
 #include <string.h>
 #include <stdarg.h>

@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_ISEQ_H
 #define RUBY_ISEQ_H 1
 /**********************************************************************

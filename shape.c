@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include "vm_core.h"
 #include "vm_sync.h"
 #include "shape.h"

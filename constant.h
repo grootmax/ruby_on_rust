@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef CONSTANT_H
 #define CONSTANT_H
 /**********************************************************************

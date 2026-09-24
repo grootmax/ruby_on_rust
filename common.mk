@@ -2067,6 +2067,12 @@ fix-depends: PHONY
 check-depends: PHONY
 	$(BASERUBY) -C $(srcdir) tool/mkdepend.rb --scope=all --sources --check
 
+update-porting-ledger: PHONY
+	python3 $(srcdir)/tool/update_porting_ledger.py
+
+check-porting-ledger: PHONY
+	python3 $(srcdir)/tool/update_porting_ledger.py --verify
+
 gc/Makefile:
 	$(MAKEDIRS) $(@D)
 	$(MESSAGE_BEGIN) \

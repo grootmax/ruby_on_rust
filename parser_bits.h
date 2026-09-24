@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef INTERNAL_BITS2_H                                  /*-*-C-*-vi:se ft=c:*/
 #define INTERNAL_BITS2_H
 /**

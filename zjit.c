@@ -1,3 +1,4 @@
+/* @porting-status: in-progress - Rust ZJIT experimental JIT bindings */
 #include "internal.h"
 #include "internal/sanitizers.h"
 #include "internal/string.h"

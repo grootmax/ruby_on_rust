@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /************************************************
 
   enumerator.c - provides Enumerator class

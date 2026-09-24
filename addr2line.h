@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_ADDR2LINE_H
 #define RUBY_ADDR2LINE_H
 /**********************************************************************

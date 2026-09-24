@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /**********************************************************************
 
   compile.c - ruby node tree -> VM instruction sequence

@@ -1,3 +1,4 @@
+/* @porting-status: in-progress - Rust YJIT compiler headers */
 #ifndef YJIT_H
 #define YJIT_H 1
 //

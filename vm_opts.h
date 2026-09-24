@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_VM_OPTS_H/*-*-c-*-*/
 #define RUBY_VM_OPTS_H
 /**********************************************************************

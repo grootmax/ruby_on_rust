@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_SYMBOL_H
 #define RUBY_SYMBOL_H 1
 /**********************************************************************

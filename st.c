@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /* This is a public domain general purpose hash table package
    originally written by Peter Moore @ UCB.
 

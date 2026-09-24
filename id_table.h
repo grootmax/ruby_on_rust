@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_ID_TABLE_H
 #define RUBY_ID_TABLE_H 1
 #include "ruby/internal/config.h"

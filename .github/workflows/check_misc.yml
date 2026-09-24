@@ -116,6 +116,10 @@ jobs:
       - run: make check-depends
         if: always()
 
+      - name: Verify porting ledger
+        run: python3 tool/update_porting_ledger.py --verify
+        if: always()
+
       - name: Check if to generate documents
         id: rdoc
         run: |

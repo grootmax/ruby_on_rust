@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /**********************************************************************
 
   memory_view.c - Memory View

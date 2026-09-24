@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /********************************************************************
  Flush register windows on sparc.
 

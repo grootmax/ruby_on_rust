@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include "ruby.h"
 #include "internal.h"
 #include "internal/file.h"

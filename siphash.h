@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef SIPHASH_H
 #define SIPHASH_H 1
 #include <stdlib.h>

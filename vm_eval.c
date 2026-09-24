@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /**********************************************************************
 
   vm_eval.c - Included into vm.c.

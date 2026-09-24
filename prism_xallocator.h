@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef PRISM_XALLOCATOR_H
 #define PRISM_XALLOCATOR_H
 

@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /**********************************************************************
   regsyntax.c -  Onigmo (Oniguruma-mod) (regular expression library)
 **********************************************************************/

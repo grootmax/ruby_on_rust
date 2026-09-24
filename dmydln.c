@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 // This file is used by miniruby, not ruby.
 // ruby uses dln.c.
 

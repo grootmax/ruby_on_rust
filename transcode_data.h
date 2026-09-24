@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_TRANSCODE_DATA_H
 #define RUBY_TRANSCODE_DATA_H 1
 /**********************************************************************

@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_DARRAY_H
 #define RUBY_DARRAY_H
 
