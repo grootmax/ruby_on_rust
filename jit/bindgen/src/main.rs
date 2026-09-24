@@ -367,7 +367,6 @@ fn main() {
 
     const TYPE_REPLACEMENTS: &[(&str, &str)] = &[
         ("pub type ruby_rstruct_flags = u32;", "pub type ruby_rstruct_flags = usize;"),
-        ("extern \"C\" {", "unsafe extern \"C\" {"),
     ];
     for (needle, replacement) in TYPE_REPLACEMENTS {
         assert!(bindings_string.contains(needle), "no line to replace: {needle}");
