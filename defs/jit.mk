@@ -35,13 +35,35 @@ $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	    MACOSX_DEPLOYMENT_TARGET=11.0 \
 	    $(CARGO) $(CARGO_VERBOSE) build --manifest-path '$(top_srcdir)/Cargo.toml' $(CARGO_BUILD_ARGS)
 	$(RUST_LIB_TOUCH)
-else ifneq ($(strip $(RLIB_DIR)),) # combo build
+else
 
-$(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
+CORE_RS_SRC_FILES = $(wildcard \
+	$(top_srcdir)/core_rs/Cargo.* \
+	$(top_srcdir)/core_rs/src/*.rs \
+	$(top_srcdir)/core_rs/src/*/*.rs \
+	)
+
+CORE_RS_RLIB = $(TOP_BUILD_DIR)/target/release/libcore_rs.rlib
+
+$(CORE_RS_RLIB): $(CORE_RS_SRC_FILES) target/.rustc-version
 	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
+	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=core_rs \
+	    --edition=2024 \
+	    --crate-type=rlib \
+	    $(RUSTC_FLAGS) \
+	    '--out-dir=$(@D)' \
+	    '$(top_srcdir)/core_rs/src/lib.rs'
+
+ifneq ($(strip $(RLIB_DIR)),) # combo build
+
+$(RUST_LIB): $(srcdir)/ruby.rs $(CORE_RS_RLIB) target/.rustc-version
+	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
 	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
 	    $(RUSTC_FLAGS) \
 	    '-L$(@D)' \
+	    --extern=core_rs \
 	    --extern=yjit \
 	    --extern=zjit \
 	    --crate-type=staticlib \
@@ -56,12 +78,25 @@ $(YJIT_RLIB): $(JIT_RLIB)
 $(ZJIT_RLIB): $(JIT_RLIB)
 $(JIT_RLIB): target/.rustc-version
 	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
 	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=jit \
 	    --edition=2024 \
 	    $(JIT_RUST_FLAGS) \
 	    $(RUSTC_FLAGS) \
 	    '--out-dir=$(@D)' \
 	    '$(top_srcdir)/jit/src/lib.rs'
+else # standard direct rustc build
+$(RUST_LIB): $(srcdir)/ruby.rs $(CORE_RS_RLIB) target/.rustc-version
+	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
+	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
+	    $(RUSTC_FLAGS) \
+	    '-L$(@D)' \
+	    --extern=core_rs \
+	    --crate-type=staticlib \
+	    '--out-dir=$(@D)' \
+	    '$(top_srcdir)/ruby.rs'
+endif # ifneq ($(strip $(RLIB_DIR)),)
 endif # ifneq ($(JIT_CARGO_SUPPORT),no)
 
 RUST_LIB_SYMBOLS = $(RUST_LIB:.a=).symbols
