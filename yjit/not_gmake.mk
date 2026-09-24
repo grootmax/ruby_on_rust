@@ -7,9 +7,9 @@
 $(YJIT_LIBS): yjit-static-lib
 	$(empty)
 
-yjit-static-lib:
+yjit-static-lib: $(JIT_RLIB)
 	$(ECHO) 'building Rust YJIT (release mode)'
-	$(Q) $(RUSTC) $(YJIT_RUSTC_ARGS)
+	$(Q) $(RUSTC) '-L$(dir $(JIT_RLIB))' --extern=jit $(YJIT_RUSTC_ARGS)
 
 # Assume GNU flavor LD and OBJCOPY. Works on FreeBSD 13, at least.
 $(RUST_LIBOBJ): $(YJIT_LIBS)

@@ -2522,7 +2522,7 @@ pub struct iseq_label_data {
 pub struct iseq_compile_data_ensure_node_stack {
     pub _address: u8,
 }
-unsafe extern "C" {
+extern "C" {
     pub fn rb_bug(fmt: *const ::std::os::raw::c_char, ...) -> !;
     pub fn rb_gc_mark(obj: VALUE);
     pub fn rb_gc_mark_movable(obj: VALUE);
