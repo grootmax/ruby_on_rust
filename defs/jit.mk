@@ -35,7 +35,7 @@ $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	    MACOSX_DEPLOYMENT_TARGET=11.0 \
 	    $(CARGO) $(CARGO_VERBOSE) build --manifest-path '$(top_srcdir)/Cargo.toml' $(CARGO_BUILD_ARGS)
 	$(RUST_LIB_TOUCH)
-else
+else ifneq ($(RUST_LIB),)
 
 CORE_RS_SRC_FILES = $(wildcard \
 	$(top_srcdir)/core_rs/Cargo.* \
@@ -99,6 +99,7 @@ $(RUST_LIB): $(srcdir)/ruby.rs $(CORE_RS_RLIB) target/.rustc-version
 endif # ifneq ($(strip $(RLIB_DIR)),)
 endif # ifneq ($(JIT_CARGO_SUPPORT),no)
 
+ifneq ($(RUST_LIB),)
 RUST_LIB_SYMBOLS = $(RUST_LIB:.a=).symbols
 $(RUST_LIBOBJ): $(RUST_LIB)
 	$(ECHO) 'partial linking $(RUST_LIB) into $@'
@@ -139,4 +140,5 @@ $(RUST_LIB_SYMBOLS): $(RUST_LIB)
 	> $@
 
 $(RUST_LIBOBJ): $(RUST_LIB_SYMBOLS)
+endif
 endif
