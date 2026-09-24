@@ -37,6 +37,6 @@ When migrating C scalar accessors and global state to Rust:
      }
      ```
 
-4. **C Header Retention**:
+4. **C Header Retention & Non-JIT Fallbacks**:
    - Keep C declarations in headers (e.g. `internal/parse.h`) unchanged so C callers continue seamlessly without modified include files.
-   - Remove original C implementations from source files (e.g. `version.c`).
+   - Provide C fallback implementations in source files (e.g. `version.c`) guarded by `#if !USE_YJIT && !USE_ZJIT` so non-JIT builds (where the Rust static library is not linked) link without missing symbol errors.
