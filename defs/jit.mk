@@ -39,7 +39,7 @@ else ifneq ($(strip $(RLIB_DIR)),) # combo build
 
 $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	$(ECHO) 'building $(@F)'
-	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
+	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2021 \
 	    $(RUSTC_FLAGS) \
 	    '-L$(@D)' \
 	    --extern=yjit \
@@ -57,7 +57,7 @@ $(ZJIT_RLIB): $(JIT_RLIB)
 $(JIT_RLIB): target/.rustc-version
 	$(ECHO) 'building $(@F)'
 	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=jit \
-	    --edition=2024 \
+	    --edition=2021 \
 	    $(JIT_RUST_FLAGS) \
 	    $(RUSTC_FLAGS) \
 	    '--out-dir=$(@D)' \

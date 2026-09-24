@@ -14,16 +14,53 @@ pub static GLOBAL_ALLOCATOR: StatsAlloc = StatsAlloc { alloc_size: AtomicUsize::
 #[allow(non_upper_case_globals)]
 #[allow(clippy::all)]
 pub mod cruby {
-    pub type VALUE = usize;
-    pub type rb_cref_t = std::ffi::c_void;
-    pub type rb_callcache = std::ffi::c_void;
-    pub type rb_execution_context_struct = std::ffi::c_void;
+    #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+    #[repr(transparent)]
+    pub struct VALUE(pub usize);
+
+    #[repr(C)]
+    pub struct rb_control_frame_struct {
+        _data: [u8; 0],
+        _marker: std::marker::PhantomData<(*mut u8, std::marker::PhantomPinned)>,
+    }
+
+    #[repr(C)]
+    pub struct rb_execution_context_struct {
+        _data: [u8; 0],
+        _marker: std::marker::PhantomData<(*mut u8, std::marker::PhantomPinned)>,
+    }
     pub type rb_execution_context_t = rb_execution_context_struct;
-    pub type rb_method_cfunc_t = std::ffi::c_void;
-    pub type rb_method_definition_struct = std::ffi::c_void;
-    pub type rb_method_definition_t = rb_method_definition_struct;
-    pub type rb_control_frame_struct = std::ffi::c_void;
-    pub type rb_iseq_t = std::ffi::c_void;
+
+    #[repr(C)]
+    pub struct rb_method_definition_t {
+        _data: [u8; 0],
+        _marker: std::marker::PhantomData<(*mut u8, std::marker::PhantomPinned)>,
+    }
+    pub type rb_method_definition_struct = rb_method_definition_t;
+
+    #[repr(C)]
+    pub struct rb_method_cfunc_t {
+        _data: [u8; 0],
+        _marker: std::marker::PhantomData<(*mut u8, std::marker::PhantomPinned)>,
+    }
+
+    #[repr(C)]
+    pub struct rb_callcache {
+        _data: [u8; 0],
+        _marker: std::marker::PhantomData<(*mut u8, std::marker::PhantomPinned)>,
+    }
+
+    #[repr(C)]
+    pub struct rb_cref_t {
+        _data: [u8; 0],
+        _marker: std::marker::PhantomData<(*mut u8, std::marker::PhantomPinned)>,
+    }
+
+    #[repr(C)]
+    pub struct rb_iseq_t {
+        _data: [u8; 0],
+        _marker: std::marker::PhantomData<(*mut u8, std::marker::PhantomPinned)>,
+    }
 
     include!("cruby_bindings.inc.rs");
 }
