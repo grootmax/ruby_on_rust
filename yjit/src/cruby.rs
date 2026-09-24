@@ -282,14 +282,8 @@ pub fn vm_stack_canary() -> u64 {
     0
 }
 
-/// Opaque execution-context type from vm_core.h
-#[repr(C)]
-pub struct rb_execution_context_struct {
-    _data: [u8; 0],
-    _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
-}
-/// Alias for rb_execution_context_struct used by CRuby sometimes
-pub type rb_execution_context_t = rb_execution_context_struct;
+/// Execution-context type imported from jit::cruby (vm_core.h)
+pub use jit::cruby::{rb_execution_context_struct, rb_execution_context_t};
 
 /// Pointer to an execution context (rb_execution_context_struct)
 pub type EcPtr = *const rb_execution_context_struct;
