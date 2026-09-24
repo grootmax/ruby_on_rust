@@ -36,11 +36,13 @@ The Rust integration in this repository uses a unified Cargo workspace structure
   ```
 - **Update Porting Ledger (`PORTING.md`)**:
   ```bash
-  python3 tool/update_porting_ledger.py
+  make update-porting-ledger
+  # or: python3 tool/update_porting_ledger.py
   ```
 - **Verify Porting Ledger in CI**:
   ```bash
-  python3 tool/update_porting_ledger.py --verify
+  make check-porting-ledger
+  # or: python3 tool/update_porting_ledger.py --verify
   ```
 
 ## Header Annotation Standard (`@porting-status`)
