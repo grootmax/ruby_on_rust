@@ -39,6 +39,13 @@ files_config = status_data["files"] || {}
 
 c_files = Dir.glob(File.join(repo_root, "*.c")).sort
 
+if system("git", "rev-parse", "--is-inside-work-tree", out: File::NULL, err: File::NULL, chdir: repo_root)
+  IO.popen(["git", "-C", repo_root, "check-ignore", *c_files]) do |io|
+    ignored_files = io.read.split("\n")
+    c_files -= ignored_files
+  end
+end
+
 file_entries = c_files.map do |file_path|
   basename = File.basename(file_path)
   loc = File.foreach(file_path).count
