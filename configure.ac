@@ -3942,9 +3942,6 @@ AC_SUBST(INSTALL_STATIC_LIBRARY)
 
 [begin]_group "JIT section" && {
 AC_CHECK_PROG(RUSTC, [rustc], [rustc], [no]) dnl no ac_tool_prefix
-AS_IF([test x"$RUSTC" = "xno"], [
-    AC_MSG_ERROR([rustc is required. Installation instructions available at https://www.rust-lang.org/tools/install])
-])
 
 AC_CHECK_TOOL(CARGO, [cargo], [no])
 
@@ -4103,7 +4100,11 @@ RLIB_DIR=
 AS_CASE(["${YJIT_SUPPORT}:${ZJIT_SUPPORT}"],
 [no:no], [
     JIT_CARGO_SUPPORT=no
-    RUST_LIB="target/release/libruby.a"
+    AS_IF([test x"$RUSTC" != "xno" && test "$cross_compiling" = "no" && test "$JIT_RUSTC_OK" = "yes"], [
+        RUST_LIB="target/release/libruby.a"
+    ], [
+        RUST_LIB=
+    ])
 ],
 [*], [ # JIT enabled -- cargo required
     AS_IF([test x"$CARGO" = "xno"],
