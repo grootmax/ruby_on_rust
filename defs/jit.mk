@@ -29,6 +29,8 @@ $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	    echo 'building ZJIT ($(JIT_CARGO_SUPPORT) mode)'; \
 	elif [ '$(YJIT_SUPPORT)' != no ]; then \
 	    echo 'building YJIT ($(JIT_CARGO_SUPPORT) mode)'; \
+	else \
+	    echo 'building core_rs ($(JIT_CARGO_SUPPORT) mode)'; \
 	fi
 	$(gnumake_recursive)$(Q)CARGO_TARGET_DIR='$(CARGO_TARGET_DIR)' \
 	    CARGO_TERM_PROGRESS_WHEN='never' \
