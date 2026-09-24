@@ -6,7 +6,7 @@ pub mod cruby;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::alloc::{GlobalAlloc, Layout, System};
 
-#[global_allocator]
+// #[global_allocator]
 pub static GLOBAL_ALLOCATOR: StatsAlloc = StatsAlloc { alloc_size: AtomicUsize::new(0) };
 
 pub struct StatsAlloc {

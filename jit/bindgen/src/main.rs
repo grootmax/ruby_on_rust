@@ -108,8 +108,6 @@ fn main() {
     bindings.write(Box::new(&mut bindings_string)).expect("Couldn't write bindings!");
     let mut bindings_string = String::from_utf8(bindings_string).expect("bindings should be UTF-8");
 
-    bindings_string = bindings_string.replace("extern \"C\" {", "unsafe extern \"C\" {");
-
     const TYPE_REPLACEMENTS: &[(&str, &str)] = &[
         ("pub type ruby_rstruct_flags = u32;", "pub type ruby_rstruct_flags = usize;"),
     ];
