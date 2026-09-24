@@ -101,9 +101,10 @@ def generate_ledger_markdown(records):
     return "\n".join(lines)
 
 def main():
+    repo_root = Path(__file__).resolve().parent.parent
     parser = argparse.ArgumentParser(description="Maintain C-to-Rust porting ledger.")
     parser.add_argument("--verify", action="store_true", help="Verify if PORTING.md is up to date without writing.")
-    parser.add_argument("--root", type=str, default=".", help="Root directory of repository.")
+    parser.add_argument("--root", type=str, default=str(repo_root), help="Root directory of repository.")
     parser.add_argument("--output", type=str, default="PORTING.md", help="Output ledger file path.")
 
     args = parser.parse_args()
