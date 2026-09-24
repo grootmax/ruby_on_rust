@@ -1271,7 +1271,7 @@ pub const RUBY_OFFSET_EC_RACTOR_ID: jit_bindgen_constants = 64;
 pub type jit_bindgen_constants = i32;
 pub type rb_iseq_param_keyword_struct =
     rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword;
-unsafe extern "C" {
+extern "C" {
     pub fn ruby_xfree(ptr: *mut ::std::os::raw::c_void);
     pub fn rb_class_attached_object(klass: VALUE) -> VALUE;
     pub fn rb_singleton_class(obj: VALUE) -> VALUE;

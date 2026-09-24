@@ -107,6 +107,7 @@ fn apply_common_builder_options(
     src_root: &Path,
     clang_args: &[String],
 ) -> bindgen::Builder {
+    let builder = builder.rust_target("1.64.0".parse::<bindgen::RustTarget>().unwrap());
     builder
         .clang_args(clang_args)
         .header("encindex.h")

@@ -2189,7 +2189,7 @@ pub struct rb_gc_zjit_mmtk_new_obj_fastpath {
 pub struct succ_index_table {
     pub _address: u8,
 }
-unsafe extern "C" {
+extern "C" {
     pub fn ruby_xfree(ptr: *mut ::std::os::raw::c_void);
     pub fn rb_class_attached_object(klass: VALUE) -> VALUE;
     pub fn rb_singleton_class(obj: VALUE) -> VALUE;
@@ -2205,16 +2205,6 @@ unsafe extern "C" {
     pub fn rb_gc_register_mark_object(object: VALUE);
     pub fn rb_gc_writebarrier(old: VALUE, young: VALUE);
     pub fn rb_class_get_superclass(klass: VALUE) -> VALUE;
-    pub fn ruby_init();
-    pub fn ruby_options(
-        argc: ::std::os::raw::c_int,
-        argv: *mut *mut ::std::os::raw::c_char,
-    ) -> *mut ::std::os::raw::c_void;
-    pub fn ruby_executable_node(
-        n: *mut ::std::os::raw::c_void,
-        status: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-    pub fn ruby_init_stack(addr: *mut ::std::os::raw::c_void);
     pub fn rb_funcall(recv: VALUE, mid: ID, n: ::std::os::raw::c_int, ...) -> VALUE;
     pub fn rb_funcallv(
         recv: VALUE,
@@ -2243,6 +2233,16 @@ unsafe extern "C" {
     pub static mut rb_cSymbol: VALUE;
     pub static mut rb_cThread: VALUE;
     pub static mut rb_cTrueClass: VALUE;
+    pub fn ruby_init();
+    pub fn ruby_options(
+        argc: ::std::os::raw::c_int,
+        argv: *mut *mut ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_void;
+    pub fn ruby_executable_node(
+        n: *mut ::std::os::raw::c_void,
+        status: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+    pub fn ruby_init_stack(addr: *mut ::std::os::raw::c_void);
     pub fn rb_define_class(name: *const ::std::os::raw::c_char, super_: VALUE) -> VALUE;
     pub fn rb_obj_class(obj: VALUE) -> VALUE;
     pub fn rb_ary_new_capa(capa: ::std::os::raw::c_long) -> VALUE;
