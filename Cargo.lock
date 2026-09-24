@@ -80,6 +80,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "core_rs"
+version = "0.0.0"
+
+[[package]]
 name = "cpufeatures"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -326,6 +330,7 @@ dependencies = [
 name = "ruby"
 version = "0.0.0"
 dependencies = [
+ "core_rs",
  "yjit",
  "zjit",
 ]
