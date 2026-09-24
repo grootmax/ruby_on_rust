@@ -100,10 +100,7 @@ pub type size_t = u64;
 /// shifted 1s but not explicitly an enum.
 pub type RedefinitionFlag = u32;
 
-#[allow(unsafe_op_in_unsafe_fn)]
-#[allow(dead_code)]
-#[allow(non_snake_case)] // bindgen names bitfield raw accessors like `type__raw`
-#[allow(clippy::all)] // warning meant to help with reading; not useful for generated code
+#[allow(dead_code, non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports, unsafe_op_in_unsafe_fn, clippy::all)]
 mod autogened {
     use super::*;
     // Textually include output from rust-bindgen as suggested by its user guide.
