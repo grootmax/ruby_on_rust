@@ -1,5 +1,6 @@
 //! Shared code between YJIT and ZJIT.
 #![warn(unsafe_op_in_unsafe_fn)] // Adopt 2024 edition default when targeting 2021 editions
+#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 #[repr(transparent)]
@@ -42,7 +43,7 @@ pub struct rb_cref_t {
     _private: [u8; 0],
 }
 
-#[allow(dead_code, non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports, clippy::all)]
+#[allow(dead_code, non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports, unsafe_op_in_unsafe_fn, clippy::all)]
 pub mod cruby {
     use super::*;
     include!("cruby_bindings.inc.rs");
