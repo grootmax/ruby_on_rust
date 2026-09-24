@@ -361,7 +361,7 @@ The YJIT source code is divided between:
 - `yjit/src/stats.rs`: gathering of run-time statistics
 - `yjit/src/options.rs`: handling of command-line options
 - `yjit/src/cruby.rs`: C bindings manually exposed to the Rust codebase
-- `yjit/bindgen/src/main.rs`: C bindings exposed to the Rust codebase through bindgen
+- `tool/rust-bindgen/src/main.rs`: C bindings exposed to the Rust codebase through bindgen
 
 The core of CRuby's interpreter logic is found in:
 
@@ -375,11 +375,11 @@ In order to expose C functions to the Rust codebase, you will need to generate C
 
 ```sh
 CC=clang ./configure --enable-yjit=dev
-make -j yjit-bindgen
+make -j rust-bindgen
 ```
 
 This uses the bindgen tools to generate/update `yjit/src/cruby_bindings.inc.rs` based on the
-bindings listed in `yjit/bindgen/src/main.rs`. Avoid manually editing this file
+bindings listed in `tool/rust-bindgen/src/main.rs`. Avoid manually editing this file
 as it could be automatically regenerated at a later time. If you need to manually add C bindings,
 add them to `yjit/cruby.rs` instead.
 
