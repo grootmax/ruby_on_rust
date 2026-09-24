@@ -12,7 +12,8 @@
 # optional dependencies are built (rust-lang/cargo#10352).
 
 [workspace]
-members = ["zjit", "yjit", "jit", "tool/rust-bindgen"]
+members = ["zjit", "yjit", "jit"]
+exclude = ["tool/rust-bindgen"]
 
 [package]
 name = "ruby"
