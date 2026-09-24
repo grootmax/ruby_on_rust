@@ -77,6 +77,15 @@ endif
 rust-libobj: $(RUST_LIBOBJ)
 rust-lib: $(RUST_LIB)
 
+CORE_BINDGEN_DIFF_OPTS =
+
+ifneq ($(strip $(CARGO)),) # if configure found Cargo
+.PHONY: core-bindgen
+core-bindgen:
+	JIT_SRC_ROOT_PATH='$(top_srcdir)' $(top_srcdir)/tool/rb_rust_bindgen.sh $(CFLAGS) $(XCFLAGS) $(CPPFLAGS)
+	$(Q) if [ 'x$(HAVE_GIT)' = xyes ]; then $(GIT) -C "$(top_srcdir)" diff $(CORE_BINDGEN_DIFF_OPTS) jit/src/cruby_bindings.inc.rs; fi
+endif
+
 rustc-version-check: target/.rustc-version
 
 target/.rustc-version: PHONY
