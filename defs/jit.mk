@@ -105,3 +105,13 @@ $(RUST_LIB_SYMBOLS): $(RUST_LIB)
 
 $(RUST_LIBOBJ): $(RUST_LIB_SYMBOLS)
 endif
+
+CORE_BINDGEN_DIFF_OPTS =
+
+ifneq ($(strip $(CARGO)),) # if configure found Cargo
+.PHONY: core-bindgen
+core-bindgen: jit.$(OBJEXT)
+	JIT_SRC_ROOT_PATH='$(top_srcdir)' $(top_srcdir)/tool/generate_core_bindings.sh $(CFLAGS) $(XCFLAGS) $(CPPFLAGS)
+	$(Q) if [ 'x$(HAVE_GIT)' = xyes ]; then $(GIT) -C "$(top_srcdir)" diff $(CORE_BINDGEN_DIFF_OPTS) jit/src/cruby_bindings.inc.rs; fi
+endif
+

@@ -7,6 +7,27 @@ use std::alloc::{GlobalAlloc, Layout, System};
 #[global_allocator]
 pub static GLOBAL_ALLOCATOR: StatsAlloc = StatsAlloc { alloc_size: AtomicUsize::new(0) };
 
+#[allow(unsafe_op_in_unsafe_fn)]
+#[allow(dead_code)]
+#[allow(non_snake_case)]
+#[allow(non_camel_case_types)]
+#[allow(non_upper_case_globals)]
+#[allow(clippy::all)]
+pub mod cruby {
+    pub type VALUE = usize;
+    pub type rb_cref_t = std::ffi::c_void;
+    pub type rb_callcache = std::ffi::c_void;
+    pub type rb_execution_context_struct = std::ffi::c_void;
+    pub type rb_execution_context_t = rb_execution_context_struct;
+    pub type rb_method_cfunc_t = std::ffi::c_void;
+    pub type rb_method_definition_struct = std::ffi::c_void;
+    pub type rb_method_definition_t = rb_method_definition_struct;
+    pub type rb_control_frame_struct = std::ffi::c_void;
+    pub type rb_iseq_t = std::ffi::c_void;
+
+    include!("cruby_bindings.inc.rs");
+}
+
 pub struct StatsAlloc {
     pub alloc_size: AtomicUsize,
 }
