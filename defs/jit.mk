@@ -77,6 +77,15 @@ endif
 rust-libobj: $(RUST_LIBOBJ)
 rust-lib: $(RUST_LIB)
 
+.PHONY: rust-bindgen
+rust-bindgen: jit.$(OBJEXT)
+ifneq ($(strip $(CARGO)),)
+	RUST_BINDGEN_SRC_ROOT_PATH='$(top_srcdir)' $(CARGO) run --manifest-path '$(top_srcdir)/tool/rust-bindgen/Cargo.toml' -- --target $(if $(TARGET),$(TARGET),all) $(CFLAGS) $(XCFLAGS) $(CPPFLAGS)
+	$(Q) if [ 'x$(HAVE_GIT)' = xyes ]; then \
+	    $(GIT) -C "$(top_srcdir)" diff jit/src/cruby_bindings.inc.rs yjit/src/cruby_bindings.inc.rs zjit/src/cruby_bindings.inc.rs; \
+	fi
+endif
+
 rustc-version-check: target/.rustc-version
 
 target/.rustc-version: PHONY

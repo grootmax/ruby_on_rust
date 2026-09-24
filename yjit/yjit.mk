@@ -51,10 +51,10 @@ YJIT_BINDGEN_DIFF_OPTS =
 # Needs `./configure --enable-yjit=dev` and Clang.
 ifneq ($(strip $(CARGO)),) # if configure found Cargo
 .PHONY: yjit-bindgen yjit-bindgen-show-unused
-yjit-bindgen: yjit.$(OBJEXT)
-	YJIT_SRC_ROOT_PATH='$(top_srcdir)' $(CARGO) run --manifest-path '$(top_srcdir)/yjit/bindgen/Cargo.toml' -- $(CFLAGS) $(XCFLAGS) $(CPPFLAGS)
+yjit-bindgen: jit.$(OBJEXT)
+	RUST_BINDGEN_SRC_ROOT_PATH='$(top_srcdir)' $(CARGO) run --manifest-path '$(top_srcdir)/tool/rust-bindgen/Cargo.toml' -- --target yjit $(CFLAGS) $(XCFLAGS) $(CPPFLAGS)
 	$(Q) if [ 'x$(HAVE_GIT)' = xyes ]; then $(GIT) -C "$(top_srcdir)" diff $(YJIT_BINDGEN_DIFF_OPTS) yjit/src/cruby_bindings.inc.rs; fi
 
-check-yjit-bindgen-unused: yjit.$(OBJEXT)
-	RUST_LOG=warn YJIT_SRC_ROOT_PATH='$(top_srcdir)' $(CARGO) run --manifest-path '$(top_srcdir)/yjit/bindgen/Cargo.toml' -- $(CFLAGS) $(XCFLAGS) $(CPPFLAGS) 2>&1 | (! grep "unused option: --allow")
+check-yjit-bindgen-unused: jit.$(OBJEXT)
+	RUST_LOG=warn RUST_BINDGEN_SRC_ROOT_PATH='$(top_srcdir)' $(CARGO) run --manifest-path '$(top_srcdir)/tool/rust-bindgen/Cargo.toml' -- --target yjit $(CFLAGS) $(XCFLAGS) $(CPPFLAGS) 2>&1 | (! grep "unused option: --allow")
 endif
