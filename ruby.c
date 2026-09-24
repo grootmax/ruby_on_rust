@@ -442,7 +442,7 @@ usage(const char *name, int help, int highlight, int columns)
 
 #define rubylib_path_new rb_str_new
 
-static void
+void
 ruby_push_include(const char *path, VALUE (*filter)(VALUE))
 {
     const char sep = PATH_SEP_CHAR;
@@ -500,18 +500,13 @@ identical_path(VALUE path)
     return path;
 }
 
-static VALUE
+VALUE
 locale_path(VALUE path)
 {
     rb_enc_associate(path, rb_locale_encoding());
     return path;
 }
 
-void
-ruby_incpush(const char *path)
-{
-    ruby_push_include(path, locale_path);
-}
 
 static VALUE
 expand_include_path(VALUE path)
