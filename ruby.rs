@@ -11,14 +11,14 @@ type VALUE = usize;
 #[cfg(not(test))]
 unsafe extern "C" {
     fn ruby_push_include(path: *const c_char, filter: unsafe extern "C" fn(VALUE) -> VALUE);
-    fn locale_path(path: VALUE) -> VALUE;
+    fn ruby_locale_path(path: VALUE) -> VALUE;
 }
 
 #[cfg(test)]
 unsafe fn ruby_push_include(_path: *const c_char, _filter: unsafe extern "C" fn(VALUE) -> VALUE) {}
 
 #[cfg(test)]
-unsafe extern "C" fn locale_path(path: VALUE) -> VALUE {
+unsafe extern "C" fn ruby_locale_path(path: VALUE) -> VALUE {
     path
 }
 
@@ -36,7 +36,7 @@ pub extern "C" fn ruby_incpush(path: *const c_char) {
     let c_str = unsafe { CStr::from_ptr(path) };
 
     unsafe {
-        ruby_push_include(c_str.as_ptr(), locale_path);
+        ruby_push_include(c_str.as_ptr(), ruby_locale_path);
     }
 }
 

@@ -501,7 +501,7 @@ identical_path(VALUE path)
 }
 
 VALUE
-locale_path(VALUE path)
+ruby_locale_path(VALUE path)
 {
     rb_enc_associate(path, rb_locale_encoding());
     return path;
