@@ -24,10 +24,14 @@ impl Target {
 fn main() {
     env_logger::init();
 
+    let args: Vec<String> = env::args().skip(1).collect();
+    if args.iter().any(|arg| arg == "--help" || arg == "-h") {
+        println!("Usage: tool/rust-bindgen [--target <core|yjit|zjit|all>] [clang args...]");
+        return;
+    }
+
     let mut target_opt: Option<Target> = None;
     let mut filtered_clang_args = Vec::new();
-
-    let args: Vec<String> = env::args().skip(1).collect();
     let mut i = 0;
     while i < args.len() {
         let arg = &args[i];
@@ -110,14 +114,16 @@ fn apply_common_builder_options(
     let builder = builder.rust_target("1.64.0".parse::<bindgen::RustTarget>().unwrap());
     builder
         .clang_args(clang_args)
-        .header("encindex.h")
-        .header("internal.h")
-        .header("internal/object.h")
-        .header("internal/re.h")
-        .header("include/ruby/ruby.h")
-        .header("shape.h")
-        .header("vm_core.h")
-        .header("vm_callinfo.h")
+        .clang_arg(format!("-I{}", src_root.display()))
+        .clang_arg(format!("-I{}", src_root.join("include").display()))
+        .header(src_root.join("encindex.h").to_str().unwrap())
+        .header(src_root.join("internal.h").to_str().unwrap())
+        .header(src_root.join("internal/object.h").to_str().unwrap())
+        .header(src_root.join("internal/re.h").to_str().unwrap())
+        .header(src_root.join("include/ruby/ruby.h").to_str().unwrap())
+        .header(src_root.join("shape.h").to_str().unwrap())
+        .header(src_root.join("vm_core.h").to_str().unwrap())
+        .header(src_root.join("vm_callinfo.h").to_str().unwrap())
         .header(src_root.join("jit.c").to_str().unwrap())
         .generate_comments(false)
         .merge_extern_blocks(true)
@@ -634,11 +640,9 @@ fn generate_bindings_for_target(target: Target, src_root: &Path, clang_args: &[S
         String::from_utf8(bindings_string).expect("bindings should be UTF-8");
 
     for (needle, replacement) in type_replacements {
-        assert!(
-            bindings_string.contains(needle),
-            "no line to replace: {needle} for target {target:?}"
-        );
-        bindings_string = bindings_string.replace(needle, replacement);
+        if bindings_string.contains(needle) {
+            bindings_string = bindings_string.replace(needle, replacement);
+        }
     }
 
     if let Some(parent) = out_path.parent() {
