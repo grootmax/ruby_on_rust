@@ -25,6 +25,7 @@ YJIT_RLIB = $(TOP_BUILD_DIR)/$(RLIB_DIR)/libyjit.rlib
 
 $(YJIT_RLIB): $(YJIT_SRC_FILES) target/.rustc-version
 	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
 	$(gnumake_recursive)$(Q) $(RUSTC) '-L$(@D)' --extern=jit $(YJIT_RUSTC_ARGS)
 
 $(RUST_LIB): $(YJIT_RLIB)

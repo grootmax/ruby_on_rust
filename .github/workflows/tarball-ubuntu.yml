@@ -43,7 +43,7 @@ jobs:
         run: |
           set -x
           sudo apt-get update -q
-          sudo apt-get install --no-install-recommends -q -y build-essential libssl-dev libyaml-dev zlib1g-dev libffi-dev libgmp-dev bison- autoconf-
+          sudo apt-get install --no-install-recommends -q -y build-essential libssl-dev libyaml-dev zlib1g-dev libffi-dev libgmp-dev rustc bison- autoconf-
       - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
         with:
           ruby-version: '3.2'

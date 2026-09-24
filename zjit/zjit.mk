@@ -29,6 +29,7 @@ ZJIT_RLIB = $(TOP_BUILD_DIR)/$(RLIB_DIR)/libzjit.rlib
 
 $(ZJIT_RLIB): $(ZJIT_SRC_FILES) target/.rustc-version
 	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
 	$(gnumake_recursive)$(Q) $(RUSTC) '-L$(@D)' --extern=jit $(ZJIT_RUSTC_ARGS)
 
 $(RUST_LIB): $(ZJIT_RLIB)
