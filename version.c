@@ -190,23 +190,6 @@ Init_version(void)
 
 int ruby_mn_threads_enabled;
 
-#ifndef RB_DEFAULT_PARSER
-#define RB_DEFAULT_PARSER RB_DEFAULT_PARSER_PRISM
-#endif
-static ruby_default_parser_enum default_parser = RB_DEFAULT_PARSER;
-
-ruby_default_parser_enum
-rb_ruby_default_parser(void)
-{
-    return default_parser;
-}
-
-void
-rb_ruby_default_parser_set(ruby_default_parser_enum parser)
-{
-    default_parser = parser;
-}
-
 static void
 define_ruby_description(const char *const jit_opt)
 {
