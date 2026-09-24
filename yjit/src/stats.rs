@@ -12,8 +12,7 @@ use crate::options::*;
 use crate::yjit::{yjit_enabled_p, YJIT_INIT_TIME};
 
 #[cfg(feature = "stats_allocator")]
-#[path = "../../jit/src/lib.rs"]
-mod jit;
+use jit;
 
 /// Running total of how many ISeqs are in the system.
 #[no_mangle]
