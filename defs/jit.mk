@@ -39,7 +39,7 @@ else ifneq ($(strip $(RLIB_DIR)),) # combo build
 
 $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	$(ECHO) 'building $(@F)'
-	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
+	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2021 \
 	    $(RUSTC_FLAGS) \
 	    '-L$(@D)' \
 	    --extern=yjit \
@@ -57,7 +57,7 @@ $(ZJIT_RLIB): $(JIT_RLIB)
 $(JIT_RLIB): target/.rustc-version
 	$(ECHO) 'building $(@F)'
 	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=jit \
-	    --edition=2024 \
+	    --edition=2021 \
 	    $(JIT_RUST_FLAGS) \
 	    $(RUSTC_FLAGS) \
 	    '--out-dir=$(@D)' \
@@ -105,3 +105,13 @@ $(RUST_LIB_SYMBOLS): $(RUST_LIB)
 
 $(RUST_LIBOBJ): $(RUST_LIB_SYMBOLS)
 endif
+
+CORE_BINDGEN_DIFF_OPTS =
+
+ifneq ($(strip $(CARGO)),) # if configure found Cargo
+.PHONY: core-bindgen
+core-bindgen: jit.$(OBJEXT)
+	JIT_SRC_ROOT_PATH='$(top_srcdir)' $(top_srcdir)/tool/generate_core_bindings.sh $(CFLAGS) $(XCFLAGS) $(CPPFLAGS)
+	$(Q) if [ 'x$(HAVE_GIT)' = xyes ]; then $(GIT) -C "$(top_srcdir)" diff $(CORE_BINDGEN_DIFF_OPTS) jit/src/cruby_bindings.inc.rs; fi
+endif
+

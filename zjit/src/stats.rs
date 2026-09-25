@@ -6,8 +6,7 @@ use crate::options::OPTIONS;
 
 // test binaries always bring it in as a cargo dependency
 #[cfg(all(feature = "stats_allocator", not(test)))]
-#[path = "../../jit/src/lib.rs"]
-mod jit;
+use jit;
 
 use crate::{cast::IntoUsize as _, cruby::*, hir::ParseError, options::get_option, state::{zjit_enabled_p, ZJITState}};
 
