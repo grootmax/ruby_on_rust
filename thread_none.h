@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_THREAD_NONE_H
 #define RUBY_THREAD_NONE_H
 

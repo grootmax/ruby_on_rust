@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_RUBYPARSER_H
 #define RUBY_RUBYPARSER_H 1
 /*

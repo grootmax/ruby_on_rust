@@ -1,3 +1,4 @@
+/* @porting-status: in-progress - Rust YJIT compiler bindings */
 // This part of YJIT helps interfacing with the rest of CRuby and with the OS.
 // Sometimes our FFI binding generation tool gives undesirable outputs when it
 // sees C features that Rust doesn't support well. We mitigate that by binding

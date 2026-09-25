@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_METHOD_H
 #define RUBY_METHOD_H 1
 /**********************************************************************

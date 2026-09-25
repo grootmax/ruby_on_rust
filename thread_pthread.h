@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_THREAD_PTHREAD_H
 #define RUBY_THREAD_PTHREAD_H
 /**********************************************************************

@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_THREAD_SCHED_H
 #define RUBY_THREAD_SCHED_H
 /**********************************************************************

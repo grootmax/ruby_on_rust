@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include "internal.h"
 #include "internal/gc.h"
 #include "internal/concurrent_set.h"

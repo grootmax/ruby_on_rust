@@ -1,3 +1,4 @@
+/* @porting-status: in-progress - Rust staticlib entry point integration */
 /**********************************************************************
 
   ruby.c -

@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef ONIGMO_REGENC_H
 #define ONIGMO_REGENC_H
 /**********************************************************************

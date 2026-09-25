@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /**********************************************************************
 
   vm_insnhelper.c - instruction helper functions. Included into vm.c.

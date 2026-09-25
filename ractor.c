@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 // Ractor implementation
 
 #include "ruby/ruby.h"

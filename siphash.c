@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include <string.h>
 #include <stdio.h>
 #include "siphash.h"

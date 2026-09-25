@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /* -*- c-file-style: "linux" -*- */
 
 /*

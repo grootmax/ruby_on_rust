@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef EXTERNAL_VALUE_H
 #define EXTERNAL_VALUE_H
 

@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include "prism/prism.h"
 #include "ruby/encoding.h"
 

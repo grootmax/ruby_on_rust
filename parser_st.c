@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include "parser_st.h"
 #include "parser_bits.h"
 

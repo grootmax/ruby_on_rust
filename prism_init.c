@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include "prism/extension.h"
 
 void ruby_init_ext(const char *name, void (*init)(void));

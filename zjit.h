@@ -1,3 +1,4 @@
+/* @porting-status: in-progress - Rust ZJIT experimental JIT headers */
 #ifndef ZJIT_H
 #define ZJIT_H 1
 //

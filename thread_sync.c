@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /* included by thread.c */
 #include "ccan/list/list.h"
 #include "builtin.h"

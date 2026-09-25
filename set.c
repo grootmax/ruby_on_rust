@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /* This implements sets using the same hash table implementation as in
    st.c, but without a value for each hash entry.  This results in the
    same basic performance characteristics as when using an st table,

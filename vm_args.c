@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /**********************************************************************
 
   vm_args.c - process method call arguments. Included into vm.c.

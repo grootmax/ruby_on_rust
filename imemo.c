@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 
 #include "constant.h"
 #include "id_table.h"

@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_VM_EXEC_H
 #define RUBY_VM_EXEC_H
 /**********************************************************************

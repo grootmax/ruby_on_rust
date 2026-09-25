@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef INTERNAL_ATOMIC_H
 #define INTERNAL_ATOMIC_H
 

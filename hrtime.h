@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RB_HRTIME_H
 #define RB_HRTIME_H
 #include "ruby/ruby.h"

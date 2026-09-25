@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_VM_CALLINFO_H                               /*-*-C-*-vi:se ft=c:*/
 #define RUBY_VM_CALLINFO_H
 /**

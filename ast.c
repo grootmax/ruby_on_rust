@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /* indent-tabs-mode: nil */
 #include "internal.h"
 #include "internal/ruby_parser.h"

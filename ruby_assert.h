@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_TOPLEVEL_ASSERT_H                           /*-*-C-*-vi:se ft=c:*/
 #define RUBY_TOPLEVEL_ASSERT_H
 /**

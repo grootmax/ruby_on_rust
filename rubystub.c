@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include "internal.h"
 #include "internal/missing.h"
 #if defined HAVE_DLADDR

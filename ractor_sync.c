@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 // this file is included by ractor.c
 
 struct ractor_port {

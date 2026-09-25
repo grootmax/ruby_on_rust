@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 // This file is used by dynamically-linked ruby, which has no
 // statically-linked encodings other than the builtin encodings.
 //

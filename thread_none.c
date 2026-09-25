@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 /*
  A thread interface implementation without any system thread.
 

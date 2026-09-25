@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include "prism.h"
 #include "ruby/version.h"
 

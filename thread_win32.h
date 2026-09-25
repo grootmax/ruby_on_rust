@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_THREAD_WIN32_H
 #define RUBY_THREAD_WIN32_H
 /**********************************************************************

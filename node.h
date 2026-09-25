@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_NODE_H
 #define RUBY_NODE_H 1
 /**********************************************************************

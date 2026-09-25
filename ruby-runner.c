@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #define _POSIX_C_SOURCE 200809L
 #include "ruby/internal/config.h"
 #include <stdio.h>

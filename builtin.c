@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #include "internal.h"
 #include "internal/box.h"
 #include "internal/string.h"

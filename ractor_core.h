@@ -1,3 +1,4 @@
+/* @porting-status: unported */
 #ifndef RUBY_RACTOR_CORE_H
 #define RUBY_RACTOR_CORE_H
 #include "internal/gc.h"
