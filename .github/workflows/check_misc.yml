@@ -42,6 +42,11 @@ jobs:
             sed -f tool/prereq.status template/$mk.in > $mk
           done
 
+      - name: Check porting ledger drift
+        run: |
+          ruby tool/generate_porting_ledger.rb --check
+        if: always()
+
       - name: Check for code styles
         run: |
           set -x
