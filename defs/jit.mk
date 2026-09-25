@@ -35,33 +35,39 @@ $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	    MACOSX_DEPLOYMENT_TARGET=11.0 \
 	    $(CARGO) $(CARGO_VERBOSE) build --manifest-path '$(top_srcdir)/Cargo.toml' $(CARGO_BUILD_ARGS)
 	$(RUST_LIB_TOUCH)
-else ifneq ($(strip $(RLIB_DIR)),) # combo build
+else # ifneq ($(JIT_CARGO_SUPPORT),no)
+
+JIT_RLIB = $(if $(RLIB_DIR),$(TOP_BUILD_DIR)/$(RLIB_DIR)/libjit.rlib,$(CARGO_TARGET_DIR)/release/libjit.rlib)
+
+$(JIT_RLIB): target/.rustc-version
+	$(ECHO) 'building $(@F)'
+	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=jit \
+	    --crate-type=rlib \
+	    --edition=2021 \
+	    $(JIT_RUST_FLAGS) \
+	    $(RUSTC_FLAGS) -C lto=off \
+	    '--out-dir=$(@D)' \
+	    '$(top_srcdir)/jit/src/lib.rs'
+
+ifneq ($(strip $(RLIB_DIR)),) # combo build
 
 $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	$(ECHO) 'building $(@F)'
-	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
+	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2021 \
 	    $(RUSTC_FLAGS) \
 	    '-L$(@D)' \
 	    --extern=yjit \
 	    --extern=zjit \
+	    --extern=jit \
 	    --crate-type=staticlib \
 	    --cfg 'feature="yjit"' \
 	    --cfg 'feature="zjit"' \
 	    '--out-dir=$(@D)' \
 	    '$(top_srcdir)/ruby.rs'
 
-# Absolute path to avoid VPATH ambiguity
-JIT_RLIB = $(TOP_BUILD_DIR)/$(RLIB_DIR)/libjit.rlib
 $(YJIT_RLIB): $(JIT_RLIB)
 $(ZJIT_RLIB): $(JIT_RLIB)
-$(JIT_RLIB): target/.rustc-version
-	$(ECHO) 'building $(@F)'
-	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=jit \
-	    --edition=2024 \
-	    $(JIT_RUST_FLAGS) \
-	    $(RUSTC_FLAGS) \
-	    '--out-dir=$(@D)' \
-	    '$(top_srcdir)/jit/src/lib.rs'
+endif # ifneq ($(strip $(RLIB_DIR)),)
 endif # ifneq ($(JIT_CARGO_SUPPORT),no)
 
 RUST_LIB_SYMBOLS = $(RUST_LIB:.a=).symbols
@@ -76,6 +82,15 @@ endif
 
 rust-libobj: $(RUST_LIBOBJ)
 rust-lib: $(RUST_LIB)
+
+CORE_BINDGEN_DIFF_OPTS =
+
+ifneq ($(strip $(CARGO)),) # if configure found Cargo
+.PHONY: core-bindgen
+core-bindgen:
+	JIT_SRC_ROOT_PATH='$(top_srcdir)' $(top_srcdir)/tool/rb_rust_bindgen.sh $(CFLAGS) $(XCFLAGS) $(CPPFLAGS)
+	$(Q) if [ 'x$(HAVE_GIT)' = xyes ]; then $(GIT) -C "$(top_srcdir)" diff $(CORE_BINDGEN_DIFF_OPTS) jit/src/cruby_bindings.inc.rs; fi
+endif
 
 rustc-version-check: target/.rustc-version
 
