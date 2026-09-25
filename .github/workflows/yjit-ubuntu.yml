@@ -96,9 +96,9 @@ jobs:
 
           - test_task: 'check'
             # YJIT should be automatically built in release mode on x86-64 Linux with rustc present
-            #configure: "--enable-yjit RUSTC='rustc +1.58.0'"
-            configure: "RUSTC='rustc +1.58.0'"
-            rust_version: '1.58.0'
+            #configure: "--enable-yjit RUSTC='rustc +1.85.0'"
+            configure: "RUSTC='rustc +1.85.0'"
+            rust_version: '1.85.0'
 
           - test_task: 'check'
             configure: '--enable-yjit=dev'
@@ -158,9 +158,8 @@ jobs:
         run: rustup install ${{ matrix.rust_version }} --profile minimal
 
       - name: Remove cargo
-        # Since this tests a `rustc` build for release, remove `cargo` to ensure
-        # that only `rustc` is used.
-        if: ${{ contains(matrix.configure, 'rustc') }}
+        # Cargo is required for core_rs workspace build
+        if: false
         run: sudo rm $(which -a cargo | uniq)
 
       - name: Run configure

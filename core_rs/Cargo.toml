@@ -1,0 +1,8 @@
+[package]
+name = "core_rs"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.85.0"
+publish = false # Don't publish to crates.io
+
+[dependencies]

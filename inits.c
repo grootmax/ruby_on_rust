@@ -20,6 +20,9 @@ static void Init_builtin_prelude(void);
 void
 rb_call_inits(void)
 {
+    void rb_core_rs_init(void);
+    rb_core_rs_init();
+
     CALL(Thread_Mutex);
     CALL(RandomSeedCore);
     CALL(encodings);

@@ -12,7 +12,7 @@
 # optional dependencies are built (rust-lang/cargo#10352).
 
 [workspace]
-members = ["zjit", "yjit", "jit"]
+members = ["core_rs", "zjit", "yjit", "jit"]
 
 [package]
 name = "ruby"
@@ -22,6 +22,7 @@ rust-version = "1.85.0"
 publish = false # Don't publish to crates.io
 
 [dependencies]
+core_rs = { path = "core_rs" }
 yjit = { path = "yjit", optional = true }
 zjit = { path = "zjit", optional = true }
 

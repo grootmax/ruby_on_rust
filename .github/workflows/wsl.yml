@@ -42,7 +42,11 @@ jobs:
          working-dir: /tmp/github/
          exec: |
             DEBIAN_FRONTEND=noninteractive sudo apt update
-            DEBIAN_FRONTEND=noninteractive sudo apt install -y ruby build-essential autoconf libssl-dev libyaml-dev zlib1g-dev libgmp-dev libffi-dev
+            DEBIAN_FRONTEND=noninteractive sudo apt install -y ruby build-essential autoconf libssl-dev libyaml-dev zlib1g-dev libgmp-dev libffi-dev cargo rustc curl
+            if ! rustc --edition=2024 -V >/dev/null 2>&1; then
+              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.85.0
+              sudo cp ~/.cargo/bin/* /usr/local/bin/
+            fi
 
       - name: Check out the repository
         uses: Ubuntu/WSL/.github/actions/wsl-checkout@main
