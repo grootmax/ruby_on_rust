@@ -1346,6 +1346,7 @@ mod tests {
         }
     }
 
+    #[cfg(feature = "disasm")]
     fn split_binop_disasm_lines(kind: BinOpKind, left: Opnd, right: Opnd, out: Opnd) -> Vec<String> {
         let mut asm = split_binop(kind, left, right, out);
         let mut cb = CodeBlock::new_dummy();
@@ -1366,6 +1367,7 @@ mod tests {
             .collect()
     }
 
+    #[cfg(feature = "disasm")]
     fn assert_split_binop_case(kind: BinOpKind, left: Opnd, right: Opnd, out: Opnd, case: &str) {
         fn reg_names(reg: Reg) -> (&'static str, &'static str) {
             const RAX_NO: u8 = RAX_REG.reg_no;
@@ -2376,6 +2378,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "disasm")]
     fn test_add_split_direct_mem() {
         // RAX is safe to be clobbered because it's an output
         // c_ret <- add stack[0], stack[1]
@@ -2391,6 +2394,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "disasm")]
     fn test_add_split_stack_indirect_left_uses_scratch0_for_base_and_result() {
         // stack[1] <- add stack[mem[0]], cfp
         let lines = split_binop_disasm_lines(BinOpKind::Add, stack_indirect_mem(0), CFP, stack_mem(1));
@@ -2407,6 +2411,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "disasm")]
     fn test_add_split_stack_indirect_right_uses_separate_base_scratch() {
         // mem[1] <- add cfp, mem[stack[0]]
         let lines = split_binop_disasm_lines(BinOpKind::Add, CFP, stack_indirect_mem(0), stack_mem(1));
@@ -2423,6 +2428,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "disasm")]
     fn test_add_split_two_stack_indirect_inputs_need_two_scratch_regs() {
         // stack[2] <- add [stack[0]], [stack[1]]
         let lines = split_binop_disasm_lines(BinOpKind::Add,
@@ -2444,6 +2450,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "disasm")]
     fn test_add_split_memory_output_can_compute_in_place() {
         // stack[1] <- add cfp, stack[0]
         let lines = split_binop_disasm_lines(BinOpKind::Add, CFP, stack_mem(0), stack_mem(1));
@@ -2457,6 +2464,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "disasm")]
     fn test_add_split_reg_mem_mem_when_right_equals_out() {
         // stack[1] <- add cfp, stack[1]
         //
@@ -2551,6 +2559,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "disasm")]
     fn test_add_split_output_reg_reused_as_input_memory_base_with_imm() {
         // cfp <- add 7, [cfp + 16]
         //
@@ -2572,6 +2581,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "disasm")]
     fn test_binop_split_matrix() {
         let left_cases = [
             ("reg", CFP),

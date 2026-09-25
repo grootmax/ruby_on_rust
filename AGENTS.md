@@ -21,6 +21,11 @@ The Rust integration in this repository uses a unified Cargo workspace structure
   - `yjit`: Yet Another JIT compiler written in Rust.
   - `zjit`: Experimental JIT compiler components in Rust.
   - `jit`: Common JIT interfaces and abstractions.
+- **Cargo Features**:
+  - `yjit`: Enables YJIT Rust compiler module (`yjit/`).
+  - `zjit`: Enables ZJIT experimental tier-2 compiler module (`zjit/`).
+  - `disasm`: Enables disassembly output features.
+  - `runtime_checks`: Enables runtime invariant checks.
 
 ## Key Build Targets & Commands
 
@@ -36,13 +41,11 @@ The Rust integration in this repository uses a unified Cargo workspace structure
   ```
 - **Update Porting Ledger (`PORTING.md`)**:
   ```bash
-  make update-porting-ledger
-  # or: python3 tool/update_porting_ledger.py
+  python3 tool/update_porting_ledger.py
   ```
 - **Verify Porting Ledger in CI**:
   ```bash
-  make check-porting-ledger
-  # or: python3 tool/update_porting_ledger.py --verify
+  python3 tool/update_porting_ledger.py --verify
   ```
 
 ## Header Annotation Standard (`@porting-status`)
