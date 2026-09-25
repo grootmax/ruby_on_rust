@@ -121,10 +121,10 @@ The valid values for `--enable-zjit` are, from fastest to slowest:
 
 ### Regenerate bindings
 
-When modifying `zjit/bindgen/src/main.rs` you need to regenerate bindings in `zjit/src/cruby_bindings.inc.rs` with:
+When modifying `tool/rust-bindgen/src/main.rs` you need to regenerate bindings in `zjit/src/cruby_bindings.inc.rs` with:
 
 ```bash
-make zjit-bindgen
+make rust-bindgen TARGET=zjit
 ```
 
 ## Documentation

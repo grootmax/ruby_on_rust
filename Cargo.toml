@@ -13,6 +13,7 @@
 
 [workspace]
 members = ["zjit", "yjit", "jit"]
+exclude = ["tool/rust-bindgen"]
 
 [package]
 name = "ruby"

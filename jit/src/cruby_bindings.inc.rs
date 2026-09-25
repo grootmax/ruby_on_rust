@@ -1268,12 +1268,8 @@ pub const RUBY_OFFSET_EC_INTERRUPT_FLAG: jit_bindgen_constants = 32;
 pub const RUBY_OFFSET_EC_INTERRUPT_MASK: jit_bindgen_constants = 36;
 pub const RUBY_OFFSET_EC_THREAD_PTR: jit_bindgen_constants = 48;
 pub const RUBY_OFFSET_EC_RACTOR_ID: jit_bindgen_constants = 64;
-pub type jit_bindgen_constants = u32;
+pub type jit_bindgen_constants = i32;
 pub type rb_iseq_param_keyword_struct =
-    rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword;
-pub const YJIT_ISEQ_TRANSLATED: yjit_bindgen_constants = 1048576;
-pub type yjit_bindgen_constants = u32;
-pub type rb_seq_param_keyword_struct =
     rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword;
 extern "C" {
     pub fn ruby_xfree(ptr: *mut ::std::os::raw::c_void);
@@ -1554,64 +1550,4 @@ extern "C" {
     pub fn rb_yarv_str_eql_internal(str1: VALUE, str2: VALUE) -> VALUE;
     pub fn rb_jit_str_simple_append(str1: VALUE, str2: VALUE) -> VALUE;
     pub fn rb_jit_str_concat_codepoint(str_: VALUE, codepoint: VALUE);
-    pub fn rb_float_plus(x: VALUE, y: VALUE) -> VALUE;
-    pub fn rb_float_minus(x: VALUE, y: VALUE) -> VALUE;
-    pub fn rb_float_mul(x: VALUE, y: VALUE) -> VALUE;
-    pub fn rb_float_div(x: VALUE, y: VALUE) -> VALUE;
-    pub fn rb_fix_aref(fix: VALUE, idx: VALUE) -> VALUE;
-    pub fn rb_profile_frames(
-        start: ::std::os::raw::c_int,
-        limit: ::std::os::raw::c_int,
-        buff: *mut VALUE,
-        lines: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-    pub fn rb_yjit_exit_locations_dict(
-        yjit_raw_samples: *mut VALUE,
-        yjit_line_samples: *mut ::std::os::raw::c_int,
-        samples_len: ::std::os::raw::c_int,
-    ) -> VALUE;
-    pub fn rb_c_method_tracing_currently_enabled(ec: *const rb_execution_context_t) -> bool;
-    pub fn rb_full_cfunc_return(ec: *mut rb_execution_context_t, return_value: VALUE);
-    pub fn rb_get_symbol_id(namep: VALUE) -> ID;
-    pub fn rb_yjit_builtin_function(iseq: *const rb_iseq_t) -> *const rb_builtin_function;
-    pub fn rb_vm_base_ptr(cfp: *mut rb_control_frame_struct) -> *mut VALUE;
-    pub fn rb_str_neq_internal(str1: VALUE, str2: VALUE) -> VALUE;
-    pub fn rb_ary_unshift_m(argc: ::std::os::raw::c_int, argv: *mut VALUE, ary: VALUE) -> VALUE;
-    pub fn rb_yjit_rb_ary_subseq_length(ary: VALUE, beg: ::std::os::raw::c_long) -> VALUE;
-    pub fn rb_yjit_splat_varg_checks(
-        sp: *mut VALUE,
-        splat_array: VALUE,
-        cfp: *mut rb_control_frame_t,
-    ) -> VALUE;
-    pub fn rb_yjit_splat_varg_cfunc(stack_splat_array: *mut VALUE) -> ::std::os::raw::c_int;
-    pub fn rb_yjit_dump_iseq_loc(iseq: *const rb_iseq_t, insn_idx: u32);
-    pub fn rb_yjit_iseq_inspect(iseq: *const rb_iseq_t) -> *mut ::std::os::raw::c_char;
-    pub fn rb_RSTRUCT_SET(st: VALUE, k: ::std::os::raw::c_int, v: VALUE);
-    pub fn rb_ENCODING_GET(obj: VALUE) -> ::std::os::raw::c_int;
-    pub fn rb_yjit_obj_written(
-        old: VALUE,
-        young: VALUE,
-        file: *const ::std::os::raw::c_char,
-        line: ::std::os::raw::c_int,
-    );
-    pub fn rb_object_shape_count() -> VALUE;
-    pub fn rb_yjit_shape_obj_complex_p(obj: VALUE) -> bool;
-    pub fn rb_yjit_shape_obj_embedded_p(obj: VALUE) -> bool;
-    pub fn rb_yjit_shape_capacity(shape_id: shape_id_t) -> attr_index_t;
-    pub fn rb_yjit_shape_index(shape_id: shape_id_t) -> attr_index_t;
-    pub fn rb_yjit_sendish_sp_pops(ci: *const rb_callinfo) -> usize;
-    pub fn rb_yjit_invokeblock_sp_pops(ci: *const rb_callinfo) -> usize;
-    pub fn rb_yjit_cme_ractor_serial(cme: *const rb_callable_method_entry_t) -> rb_serial_t;
-    pub fn rb_yjit_set_exception_return(
-        cfp: *mut rb_control_frame_t,
-        leave_exit: *mut ::std::os::raw::c_void,
-        leave_exception: *mut ::std::os::raw::c_void,
-    );
-    pub fn rb_vm_instruction_size() -> u32;
-    pub fn rb_yjit_cdhash_all_fixnum_p(cdhash: VALUE) -> bool;
-    pub fn rb_yjit_cdhash_lookup(
-        cdhash: VALUE,
-        key: st_data_t,
-        val: *mut st_data_t,
-    ) -> ::std::os::raw::c_int;
 }

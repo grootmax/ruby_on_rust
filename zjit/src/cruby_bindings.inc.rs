@@ -459,6 +459,8 @@ pub const SHAPE_ID_FL_NON_CANONICAL_MASK: shape_id_fl_type = 402653184;
 pub const SHAPE_ID_FLAGS_MASK: shape_id_fl_type = 2146959360;
 pub const SHAPE_ID_FL_PRIVATE_MASK: shape_id_fl_type = 1677197312;
 pub type shape_id_fl_type = u32;
+pub const SHAPE_ID_HAS_IVAR_MASK: shape_id_mask = 67633150;
+pub type shape_id_mask = u32;
 pub const BOP_PLUS: ruby_basic_operators = 0;
 pub const BOP_MINUS: ruby_basic_operators = 1;
 pub const BOP_MULT: ruby_basic_operators = 2;
@@ -1733,19 +1735,6 @@ pub struct rb_call_data {
     pub ci: *const rb_callinfo,
     pub cc: *const rb_callcache,
 }
-pub const RSTRING_CHILLED: ruby_rstring_private_flags = 16384;
-pub type ruby_rstring_private_flags = u32;
-pub const RHASH_PASS_AS_KEYWORDS: ruby_rhash_flags = 8192;
-pub const RHASH_PROC_DEFAULT: ruby_rhash_flags = 16384;
-pub const RHASH_ST_TABLE_FLAG: ruby_rhash_flags = 32768;
-pub const RHASH_AR_TABLE_SIZE_MASK: ruby_rhash_flags = 983040;
-pub const RHASH_AR_TABLE_SIZE_SHIFT: ruby_rhash_flags = 16;
-pub const RHASH_AR_TABLE_BOUND_MASK: ruby_rhash_flags = 15728640;
-pub const RHASH_AR_TABLE_BOUND_SHIFT: ruby_rhash_flags = 20;
-pub const RHASH_COMPARE_BY_IDENTITY: ruby_rhash_flags = 16777216;
-pub const RHASH_LEV_SHIFT: ruby_rhash_flags = 25;
-pub const RHASH_LEV_MAX: ruby_rhash_flags = 127;
-pub type ruby_rhash_flags = u32;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rb_builtin_function {
@@ -2094,6 +2083,25 @@ pub const DEFINED_REF: defined_type = 15;
 pub const DEFINED_FUNC: defined_type = 16;
 pub const DEFINED_CONST_FROM: defined_type = 17;
 pub type defined_type = u32;
+pub type rb_iseq_callback = ::std::option::Option<
+    unsafe extern "C" fn(arg1: *const rb_iseq_t, arg2: *mut ::std::os::raw::c_void),
+>;
+pub const RHASH_PASS_AS_KEYWORDS: ruby_rhash_flags = 8192;
+pub const RHASH_PROC_DEFAULT: ruby_rhash_flags = 16384;
+pub const RHASH_ST_TABLE_FLAG: ruby_rhash_flags = 32768;
+pub const RHASH_AR_TABLE_SIZE_MASK: ruby_rhash_flags = 983040;
+pub const RHASH_AR_TABLE_SIZE_SHIFT: ruby_rhash_flags = 16;
+pub const RHASH_AR_TABLE_BOUND_MASK: ruby_rhash_flags = 15728640;
+pub const RHASH_AR_TABLE_BOUND_SHIFT: ruby_rhash_flags = 20;
+pub const RHASH_COMPARE_BY_IDENTITY: ruby_rhash_flags = 16777216;
+pub const RHASH_LEV_SHIFT: ruby_rhash_flags = 25;
+pub const RHASH_LEV_MAX: ruby_rhash_flags = 127;
+pub type ruby_rhash_flags = u32;
+pub const RSTRING_CHILLED: ruby_rstring_private_flags = 16384;
+pub type ruby_rstring_private_flags = u32;
+pub const RSTRUCT_EMBED_LEN_MASK: ruby_rstruct_flags = 1040384;
+pub const RSTRUCT_EMBED_LEN_SHIFT: ruby_rstruct_flags = 13;
+pub type ruby_rstruct_flags = usize;
 #[repr(C)]
 pub struct zjit_jit_frame {
     pub pc: *const VALUE,
@@ -2102,22 +2110,6 @@ pub struct zjit_jit_frame {
     pub stack_size: u32,
     pub stack: __IncompleteArrayField<VALUE>,
 }
-pub type rb_iseq_callback = ::std::option::Option<
-    unsafe extern "C" fn(arg1: *const rb_iseq_t, arg2: *mut ::std::os::raw::c_void),
->;
-pub const ISEQ_BODY_OFFSET_PARAM: zjit_struct_offsets = 16;
-pub const ISEQ_BODY_OFFSET_OUTER_VARIABLES: zjit_struct_offsets = 240;
-pub const RUBY_OFFSET_THREAD_RACTOR: zjit_struct_offsets = 24;
-pub type zjit_struct_offsets = u32;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct rb_zjit_runtime_offsets {
-    pub ractor_newobj_cache: i32,
-    pub ractor_objspace: i32,
-}
-pub const RSTRUCT_EMBED_LEN_MASK: ruby_rstruct_flags = 1040384;
-pub const RSTRUCT_EMBED_LEN_SHIFT: ruby_rstruct_flags = 13;
-pub type ruby_rstruct_flags = usize;
 pub const ROBJECT_OFFSET_AS_HEAP_FIELDS: jit_bindgen_constants = 16;
 pub const ROBJECT_OFFSET_AS_ARY: jit_bindgen_constants = 16;
 pub const RCLASS_OFFSET_PRIME_FIELDS_OBJ: jit_bindgen_constants = 40;
@@ -2137,6 +2129,16 @@ pub type jit_bindgen_constants = i32;
 pub const rb_invalid_shape_id: shape_id_t = 524287;
 pub type rb_iseq_param_keyword_struct =
     rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword;
+pub const ISEQ_BODY_OFFSET_PARAM: zjit_struct_offsets = 16;
+pub const ISEQ_BODY_OFFSET_OUTER_VARIABLES: zjit_struct_offsets = 240;
+pub const RUBY_OFFSET_THREAD_RACTOR: zjit_struct_offsets = 24;
+pub type zjit_struct_offsets = u32;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct rb_zjit_runtime_offsets {
+    pub ractor_newobj_cache: i32,
+    pub ractor_objspace: i32,
+}
 pub const RB_GC_ZJIT_FASTPATH_DEFAULT: rb_gc_zjit_fastpath_kind = 1;
 pub const RB_GC_ZJIT_FASTPATH_MMTK: rb_gc_zjit_fastpath_kind = 2;
 pub type rb_gc_zjit_fastpath_kind = u32;
@@ -2187,7 +2189,7 @@ pub struct rb_gc_zjit_mmtk_new_obj_fastpath {
 pub struct succ_index_table {
     pub _address: u8,
 }
-unsafe extern "C" {
+extern "C" {
     pub fn ruby_xfree(ptr: *mut ::std::os::raw::c_void);
     pub fn rb_class_attached_object(klass: VALUE) -> VALUE;
     pub fn rb_singleton_class(obj: VALUE) -> VALUE;
@@ -2203,6 +2205,7 @@ unsafe extern "C" {
     pub fn rb_gc_register_mark_object(object: VALUE);
     pub fn rb_gc_writebarrier(old: VALUE, young: VALUE);
     pub fn rb_class_get_superclass(klass: VALUE) -> VALUE;
+    pub fn rb_funcall(recv: VALUE, mid: ID, n: ::std::os::raw::c_int, ...) -> VALUE;
     pub fn rb_funcallv(
         recv: VALUE,
         mid: ID,
@@ -2301,6 +2304,7 @@ unsafe extern "C" {
     pub fn rb_ivar_defined(obj: VALUE, name: ID) -> VALUE;
     pub fn rb_attr_get(obj: VALUE, name: ID) -> VALUE;
     pub fn rb_const_get(space: VALUE, name: ID) -> VALUE;
+    pub fn rb_obj_info_dump(obj: VALUE);
     pub fn rb_class_allocate_instance(klass: VALUE) -> VALUE;
     pub fn rb_obj_equal(obj1: VALUE, obj2: VALUE) -> VALUE;
     pub fn rb_reg_new_from_values(
@@ -2363,19 +2367,15 @@ unsafe extern "C" {
     pub fn rb_gvar_get(arg1: ID) -> VALUE;
     pub fn rb_gvar_set(arg1: ID, arg2: VALUE) -> VALUE;
     pub fn rb_vm_barrier();
-    pub fn rb_str_byte_substr(str_: VALUE, beg: VALUE, len: VALUE) -> VALUE;
-    pub fn rb_str_substr_two_fixnums(
-        str_: VALUE,
-        beg: VALUE,
-        len: VALUE,
-        empty: ::std::os::raw::c_int,
-    ) -> VALUE;
-    pub fn rb_str_concat_literals(num: usize, strary: *const VALUE) -> VALUE;
-    pub fn rb_ec_str_resurrect(
-        ec: *mut rb_execution_context_struct,
-        str_: VALUE,
-        chilled: bool,
-    ) -> VALUE;
+    pub fn rb_vm_insn_addr2opcode(addr: *const ::std::os::raw::c_void) -> ::std::os::raw::c_int;
+    pub fn rb_iseq_line_no(iseq: *const rb_iseq_t, pos: usize) -> ::std::os::raw::c_uint;
+    pub fn rb_iseqw_to_iseq(iseqw: VALUE) -> *const rb_iseq_t;
+    pub fn rb_iseq_label(iseq: *const rb_iseq_t) -> VALUE;
+    pub fn rb_iseq_defined_string(type_: defined_type) -> VALUE;
+    pub fn rb_insn_len(insn: VALUE) -> ::std::os::raw::c_int;
+    pub fn rb_vm_insn_decode(encoded: VALUE) -> ::std::os::raw::c_int;
+    pub fn rb_jit_cont_each_iseq(callback: rb_iseq_callback, data: *mut ::std::os::raw::c_void);
+    pub fn rb_jit_for_each_iseq(callback: rb_iseq_callback, data: *mut ::std::os::raw::c_void);
     pub fn rb_to_hash_type(obj: VALUE) -> VALUE;
     pub fn rb_hash_stlike_foreach(
         hash: VALUE,
@@ -2389,19 +2389,19 @@ unsafe extern "C" {
         key: st_data_t,
         pval: *mut st_data_t,
     ) -> ::std::os::raw::c_int;
-    pub fn rb_insn_len(insn: VALUE) -> ::std::os::raw::c_int;
-    pub fn rb_vm_insn_decode(encoded: VALUE) -> ::std::os::raw::c_int;
-    pub fn rb_float_plus(x: VALUE, y: VALUE) -> VALUE;
-    pub fn rb_float_minus(x: VALUE, y: VALUE) -> VALUE;
-    pub fn rb_float_mul(x: VALUE, y: VALUE) -> VALUE;
-    pub fn rb_float_div(x: VALUE, y: VALUE) -> VALUE;
-    pub fn rb_flo_to_i(num: VALUE) -> VALUE;
-    pub fn rb_fix_aref(fix: VALUE, idx: VALUE) -> VALUE;
-    pub fn rb_vm_insn_addr2opcode(addr: *const ::std::os::raw::c_void) -> ::std::os::raw::c_int;
-    pub fn rb_iseq_line_no(iseq: *const rb_iseq_t, pos: usize) -> ::std::os::raw::c_uint;
-    pub fn rb_iseqw_to_iseq(iseqw: VALUE) -> *const rb_iseq_t;
-    pub fn rb_iseq_label(iseq: *const rb_iseq_t) -> VALUE;
-    pub fn rb_iseq_defined_string(type_: defined_type) -> VALUE;
+    pub fn rb_str_byte_substr(str_: VALUE, beg: VALUE, len: VALUE) -> VALUE;
+    pub fn rb_str_substr_two_fixnums(
+        str_: VALUE,
+        beg: VALUE,
+        len: VALUE,
+        empty: ::std::os::raw::c_int,
+    ) -> VALUE;
+    pub fn rb_str_concat_literals(num: usize, strary: *const VALUE) -> VALUE;
+    pub fn rb_ec_str_resurrect(
+        ec: *mut rb_execution_context_struct,
+        str_: VALUE,
+        chilled: bool,
+    ) -> VALUE;
     pub fn rb_zjit_profile_enable(iseq: *const rb_iseq_t);
     pub fn rb_zjit_hash_new_size(flags_out: *mut VALUE, size: usize) -> usize;
     pub fn rb_zjit_new_obj_shape(flags: VALUE, alloc_size: usize) -> VALUE;
@@ -2441,55 +2441,6 @@ unsafe extern "C" {
         alloc_size_out: *mut usize,
         flags_out: *mut VALUE,
     );
-    pub fn rb_profile_frames(
-        start: ::std::os::raw::c_int,
-        limit: ::std::os::raw::c_int,
-        buff: *mut VALUE,
-        lines: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-    pub fn rb_profile_frame_path(frame: VALUE) -> VALUE;
-    pub fn rb_profile_frame_absolute_path(frame: VALUE) -> VALUE;
-    pub fn rb_profile_frame_full_label(frame: VALUE) -> VALUE;
-    pub fn rb_jit_cont_each_iseq(callback: rb_iseq_callback, data: *mut ::std::os::raw::c_void);
-    pub fn rb_jit_for_each_iseq(callback: rb_iseq_callback, data: *mut ::std::os::raw::c_void);
-    pub static rb_zjit_runtime_offsets: rb_zjit_runtime_offsets;
-    pub fn rb_zjit_reserve_low_addr_space(size: usize) -> *mut ::std::os::raw::c_void;
-    pub fn rb_zjit_profile_disable(iseq: *const rb_iseq_t);
-    pub fn rb_zjit_insn_to_bare_insn(insn: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
-    pub fn rb_zjit_iseq_set_jit_entry(
-        iseq: *const rb_iseq_t,
-        code_ptr: *mut ::std::os::raw::c_void,
-    );
-    pub fn rb_vm_base_ptr(cfp: *mut rb_control_frame_struct) -> *mut VALUE;
-    pub fn rb_zjit_iseq_has_profiled_enough(iseq: *const rb_iseq_t) -> bool;
-    pub fn rb_zjit_iseq_insn_set(
-        iseq: *const rb_iseq_t,
-        insn_idx: ::std::os::raw::c_uint,
-        bare_insn: ruby_vminsn_type,
-    );
-    pub fn rb_zjit_print_exception();
-    pub fn rb_zjit_singleton_class_p(klass: VALUE) -> bool;
-    pub fn rb_zjit_defined_ivar(obj: VALUE, id: ID, pushval: VALUE) -> VALUE;
-    pub fn rb_zjit_method_tracing_currently_enabled() -> bool;
-    pub fn rb_zjit_iseq_tracing_currently_enabled() -> bool;
-    pub fn rb_zjit_insn_leaf(insn: ::std::os::raw::c_int, opes: *const VALUE) -> bool;
-    pub fn rb_zjit_local_id(iseq: *const rb_iseq_t, idx: ::std::os::raw::c_uint) -> ID;
-    pub fn rb_zjit_cme_is_cfunc(
-        me: *const rb_callable_method_entry_t,
-        func: *const ::std::os::raw::c_void,
-    ) -> bool;
-    pub fn rb_zjit_vm_search_method(
-        cd_owner: VALUE,
-        cd: *mut rb_call_data,
-        recv: VALUE,
-    ) -> *const rb_callable_method_entry_struct;
-    pub fn rb_zjit_class_initialized_p(klass: VALUE) -> bool;
-    pub fn rb_zjit_can_load_superclass_p(klass: VALUE) -> bool;
-    pub fn rb_zjit_class_get_alloc_func(klass: VALUE) -> rb_alloc_func_t;
-    pub fn rb_zjit_class_has_struct_allocator(klass: VALUE) -> bool;
-    pub fn rb_zjit_class_has_default_allocator(klass: VALUE) -> bool;
-    pub fn rb_vm_get_untagged_block_handler(reg_cfp: *mut rb_control_frame_t) -> VALUE;
-    pub fn rb_vm_once_done_value(is: ISE, result: *mut VALUE) -> bool;
     pub fn rb_iseq_encoded_size(iseq: *const rb_iseq_t) -> ::std::os::raw::c_uint;
     pub fn rb_iseq_pc_at_idx(iseq: *const rb_iseq_t, insn_idx: u32) -> *mut VALUE;
     pub fn rb_iseq_opcode_at_pc(iseq: *const rb_iseq_t, pc: *const VALUE) -> ::std::os::raw::c_int;
@@ -2614,4 +2565,57 @@ unsafe extern "C" {
     pub fn rb_jit_str_simple_append(str1: VALUE, str2: VALUE) -> VALUE;
     pub fn rb_jit_str_concat_codepoint(str_: VALUE, codepoint: VALUE);
     pub fn rb_jit_shape_capacity(shape_id: shape_id_t) -> attr_index_t;
+    pub fn rb_float_plus(x: VALUE, y: VALUE) -> VALUE;
+    pub fn rb_float_minus(x: VALUE, y: VALUE) -> VALUE;
+    pub fn rb_float_mul(x: VALUE, y: VALUE) -> VALUE;
+    pub fn rb_float_div(x: VALUE, y: VALUE) -> VALUE;
+    pub fn rb_flo_to_i(num: VALUE) -> VALUE;
+    pub fn rb_fix_aref(fix: VALUE, idx: VALUE) -> VALUE;
+    pub fn rb_profile_frames(
+        start: ::std::os::raw::c_int,
+        limit: ::std::os::raw::c_int,
+        buff: *mut VALUE,
+        lines: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+    pub fn rb_profile_frame_path(frame: VALUE) -> VALUE;
+    pub fn rb_profile_frame_absolute_path(frame: VALUE) -> VALUE;
+    pub fn rb_profile_frame_full_label(frame: VALUE) -> VALUE;
+    pub static rb_zjit_runtime_offsets: rb_zjit_runtime_offsets;
+    pub fn rb_zjit_reserve_low_addr_space(size: usize) -> *mut ::std::os::raw::c_void;
+    pub fn rb_zjit_profile_disable(iseq: *const rb_iseq_t);
+    pub fn rb_zjit_insn_to_bare_insn(insn: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+    pub fn rb_zjit_iseq_set_jit_entry(
+        iseq: *const rb_iseq_t,
+        code_ptr: *mut ::std::os::raw::c_void,
+    );
+    pub fn rb_vm_base_ptr(cfp: *mut rb_control_frame_struct) -> *mut VALUE;
+    pub fn rb_zjit_iseq_has_profiled_enough(iseq: *const rb_iseq_t) -> bool;
+    pub fn rb_zjit_iseq_insn_set(
+        iseq: *const rb_iseq_t,
+        insn_idx: ::std::os::raw::c_uint,
+        bare_insn: ruby_vminsn_type,
+    );
+    pub fn rb_zjit_print_exception();
+    pub fn rb_zjit_singleton_class_p(klass: VALUE) -> bool;
+    pub fn rb_zjit_defined_ivar(obj: VALUE, id: ID, pushval: VALUE) -> VALUE;
+    pub fn rb_zjit_method_tracing_currently_enabled() -> bool;
+    pub fn rb_zjit_iseq_tracing_currently_enabled() -> bool;
+    pub fn rb_zjit_insn_leaf(insn: ::std::os::raw::c_int, opes: *const VALUE) -> bool;
+    pub fn rb_zjit_local_id(iseq: *const rb_iseq_t, idx: ::std::os::raw::c_uint) -> ID;
+    pub fn rb_zjit_cme_is_cfunc(
+        me: *const rb_callable_method_entry_t,
+        func: *const ::std::os::raw::c_void,
+    ) -> bool;
+    pub fn rb_zjit_vm_search_method(
+        cd_owner: VALUE,
+        cd: *mut rb_call_data,
+        recv: VALUE,
+    ) -> *const rb_callable_method_entry_struct;
+    pub fn rb_zjit_class_initialized_p(klass: VALUE) -> bool;
+    pub fn rb_zjit_can_load_superclass_p(klass: VALUE) -> bool;
+    pub fn rb_zjit_class_get_alloc_func(klass: VALUE) -> rb_alloc_func_t;
+    pub fn rb_zjit_class_has_struct_allocator(klass: VALUE) -> bool;
+    pub fn rb_zjit_class_has_default_allocator(klass: VALUE) -> bool;
+    pub fn rb_vm_get_untagged_block_handler(reg_cfp: *mut rb_control_frame_t) -> VALUE;
+    pub fn rb_vm_once_done_value(is: ISE, result: *mut VALUE) -> bool;
 }

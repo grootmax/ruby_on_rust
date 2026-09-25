@@ -1,5 +1,53 @@
 //! Shared code between YJIT and ZJIT.
 #![warn(unsafe_op_in_unsafe_fn)] // Adopt 2024 edition default when targeting 2021 editions
+#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+#[repr(transparent)]
+pub struct VALUE(pub usize);
+
+#[repr(C)]
+pub struct rb_iseq_t {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+pub struct rb_execution_context_struct {
+    _private: [u8; 0],
+}
+pub type rb_execution_context_t = rb_execution_context_struct;
+
+#[repr(C)]
+pub struct rb_method_definition_struct {
+    _private: [u8; 0],
+}
+pub type rb_method_definition_t = rb_method_definition_struct;
+
+#[repr(C)]
+pub struct rb_method_cfunc_t {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+pub struct rb_callcache {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+pub struct rb_control_frame_struct {
+    _private: [u8; 0],
+}
+
+#[repr(C)]
+pub struct rb_cref_t {
+    _private: [u8; 0],
+}
+
+#[allow(dead_code, non_snake_case, non_camel_case_types, non_upper_case_globals, unused_imports, unsafe_op_in_unsafe_fn, clippy::all)]
+pub mod cruby {
+    use super::*;
+    include!("cruby_bindings.inc.rs");
+}
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::alloc::{GlobalAlloc, Layout, System};
