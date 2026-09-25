@@ -15,4 +15,4 @@ yjit-static-lib:
 $(RUST_LIBOBJ): $(YJIT_LIBS)
 	$(ECHO) 'partial linking $(YJIT_LIBS) into $@'
 	$(Q) $(LD) -r -o $@ --whole-archive $(YJIT_LIBS)
-	-$(Q) $(OBJCOPY) --wildcard --keep-global-symbol='$(SYMBOL_PREFIX)rb_*' $(@)
+	-$(Q) $(OBJCOPY) --wildcard --keep-global-symbol='$(SYMBOL_PREFIX)rb_*' --keep-global-symbol='$(SYMBOL_PREFIX)ruby_*' $(@)

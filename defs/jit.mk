@@ -56,12 +56,23 @@ $(YJIT_RLIB): $(JIT_RLIB)
 $(ZJIT_RLIB): $(JIT_RLIB)
 $(JIT_RLIB): target/.rustc-version
 	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
 	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=jit \
 	    --edition=2024 \
 	    $(JIT_RUST_FLAGS) \
 	    $(RUSTC_FLAGS) \
 	    '--out-dir=$(@D)' \
 	    '$(top_srcdir)/jit/src/lib.rs'
+else ifneq ($(strip $(RUST_LIB)),)
+
+$(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
+	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
+	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
+	    $(RUSTC_FLAGS) \
+	    --crate-type=staticlib \
+	    '--out-dir=$(@D)' \
+	    '$(top_srcdir)/ruby.rs'
 endif # ifneq ($(JIT_CARGO_SUPPORT),no)
 
 RUST_LIB_SYMBOLS = $(RUST_LIB:.a=).symbols
@@ -71,7 +82,7 @@ ifneq ($(findstring darwin,$(target_os)),)
 	$(Q) $(CC) -nodefaultlibs -r -o $@ -exported_symbols_list $(RUST_LIB_SYMBOLS) $(RUST_LIB)
 else
 	$(Q) $(LD) -r -o $@ --whole-archive $(RUST_LIB)
-	-$(Q) $(OBJCOPY) --wildcard --keep-global-symbol='$(SYMBOL_PREFIX)rb_*' $(@)
+	-$(Q) $(OBJCOPY) --wildcard --keep-global-symbol='$(SYMBOL_PREFIX)rb_*' --keep-global-symbol='$(SYMBOL_PREFIX)ruby_*' $(@)
 endif
 
 rust-libobj: $(RUST_LIBOBJ)
@@ -100,6 +111,7 @@ ifneq ($(findstring darwin,$(target_os)),)
 $(RUST_LIB_SYMBOLS): $(RUST_LIB)
 	$(Q) $(tooldir)/darwin-ar $(NM) --defined-only --extern-only $(RUST_LIB) | \
 	sed -n -e 's/.* //' -e '/^$(SYMBOL_PREFIX)rb_/p' \
+	-e '/^$(SYMBOL_PREFIX)ruby_/p' \
 	-e '/^$(SYMBOL_PREFIX)rust_eh_personality/p' \
 	> $@
 

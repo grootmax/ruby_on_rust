@@ -297,10 +297,3 @@ ruby_show_version(void)
 #endif
     fflush(stdout);
 }
-
-void
-ruby_show_copyright(void)
-{
-    PRINT(copyright);
-    fflush(stdout);
-}

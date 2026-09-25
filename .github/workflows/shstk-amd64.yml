@@ -55,7 +55,7 @@ jobs:
           dnf install -y
           autoconf automake binutils gcc gcc-c++ git libffi-devel libtool
           libyaml-devel make ncurses-devel openssl-devel procps-ng
-          readline-devel ruby ruby-devel shadow-utils zlib-devel
+          readline-devel ruby ruby-devel rustc shadow-utils zlib-devel
         working-directory:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

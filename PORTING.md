@@ -7,8 +7,8 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 315,624 | 100.0% |
-| **Not Started** | 101 | 303,485 | 96.2% |
+| **Total C Source Files** | 113 | 315,617 | 100.0% |
+| **Not Started** | 101 | 303,478 | 96.2% |
 | **In Progress** | 4 | 11,267 | 3.6% |
 | **Ported** | 1 | 526 | 0.2% |
 | **Blocked** | 0 | 0 | 0.0% |
@@ -172,7 +172,7 @@ _Internal utility functions, tables, and system helpers_
 | `strftime.c` | 1,285 | Not Started | `crate::strftime` | Date/time formatting |
 | `util.c` | 616 | Not Started | `crate::util` | Core utility functions |
 | `variable.c` | 4,710 | Not Started | `crate::variable` | Global and instance variable access |
-| `version.c` | 306 | Not Started | `crate::version` | Ruby version constants |
+| `version.c` | 299 | Not Started | `crate::version` | Ruby version constants |
 | `vsnprintf.c` | 1,303 | Not Started | `crate::vsnprintf` | Portable vsnprintf |
 
 ### Platform & Miscellaneous
@@ -291,7 +291,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `universal_parser.c` | Parser & AST | 215 | Not Started | `crate::parser::universal_parser` | Universal parser interface |
 | `util.c` | Utilities & Support | 616 | Not Started | `crate::util` | Core utility functions |
 | `variable.c` | Utilities & Support | 4,710 | Not Started | `crate::variable` | Global and instance variable access |
-| `version.c` | Utilities & Support | 306 | Not Started | `crate::version` | Ruby version constants |
+| `version.c` | Utilities & Support | 299 | Not Started | `crate::version` | Ruby version constants |
 | `vm.c` | Virtual Machine & Execution | 5,408 | Not Started | `crate::vm` | Core virtual machine engine |
 | `vm_args.c` | Virtual Machine & Execution | 1,219 | Not Started | `crate::vm::args` | Method argument passing |
 | `vm_backtrace.c` | Virtual Machine & Execution | 2,406 | Not Started | `crate::vm::backtrace` | Backtrace generation |
