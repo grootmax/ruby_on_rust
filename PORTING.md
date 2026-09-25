@@ -7,9 +7,9 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 315,624 | 100.0% |
+| **Total C Source Files** | 113 | 315,619 | 100.0% |
 | **Not Started** | 101 | 303,485 | 96.2% |
-| **In Progress** | 4 | 11,267 | 3.6% |
+| **In Progress** | 4 | 11,262 | 3.6% |
 | **Ported** | 1 | 526 | 0.2% |
 | **Blocked** | 0 | 0 | 0.0% |
 | **N/A** | 7 | 346 | 0.1% |
@@ -185,7 +185,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `dmyext.c` | 18 | N/A | `N/A` | Dummy extension stub |
 | `goruby.c` | 68 | N/A | `N/A` | Golf Ruby executable wrapper |
 | `ruby-runner.c` | 104 | N/A | `N/A` | Development runner binary |
-| `ruby.c` | 3,315 | In Progress | `crate::ruby_cli` | Main Ruby CLI argument handling |
+| `ruby.c` | 3,310 | In Progress | `crate::ruby_cli` | Main Ruby CLI argument handling |
 | `rubystub.c` | 61 | N/A | `N/A` | Embedded stub |
 | `sparc.c` | 40 | N/A | `N/A` | SPARC architecture assembly helper |
 
@@ -264,7 +264,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `regparse.c` | Encoding & Regex | 6,853 | Not Started | `crate::regparse` | Onigmo regex parser |
 | `regsyntax.c` | Encoding & Regex | 388 | Not Started | `crate::regsyntax` | Onigmo syntax options |
 | `ruby-runner.c` | Platform & Miscellaneous | 104 | N/A | `N/A` | Development runner binary |
-| `ruby.c` | Platform & Miscellaneous | 3,315 | In Progress | `crate::ruby_cli` | Main Ruby CLI argument handling |
+| `ruby.c` | Platform & Miscellaneous | 3,310 | In Progress | `crate::ruby_cli` | Main Ruby CLI argument handling |
 | `ruby_parser.c` | Parser & AST | 1,151 | Not Started | `crate::parser::ruby_parser` | Ruby parser driver |
 | `rubystub.c` | Platform & Miscellaneous | 61 | N/A | `N/A` | Embedded stub |
 | `scheduler.c` | Concurrency & Threads | 1,395 | Not Started | `crate::scheduler` | Fiber scheduler interface |
