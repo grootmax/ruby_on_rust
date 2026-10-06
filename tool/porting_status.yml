@@ -443,10 +443,10 @@ files:
     subsystem: "Utilities & Support"
     notes: "Symbol table / hash table internal implementation"
   util.c:
-    status: Not Started
-    target: "crate::util"
+    status: In Progress
+    target: "core_rs::util"
     subsystem: "Utilities & Support"
-    notes: "Core utility functions"
+    notes: "Ported: ruby_scan_digits, ruby_scan_oct, ruby_scan_hex, ruby_strtoul, ruby_each_words. Remaining: qsort, getcwd, dtoa/strtod"
   variable.c:
     status: Not Started
     target: "crate::variable"

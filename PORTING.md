@@ -7,9 +7,9 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 317,186 | 100.0% |
-| **Not Started** | 106 | 316,840 | 99.9% |
-| **In Progress** | 0 | 0 | 0.0% |
+| **Total C Source Files** | 113 | 317,196 | 100.0% |
+| **Not Started** | 105 | 316,228 | 99.7% |
+| **In Progress** | 1 | 622 | 0.2% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
 | **N/A** | 7 | 346 | 0.1% |
@@ -170,7 +170,7 @@ _Internal utility functions, tables, and system helpers_
 | `sprintf.c` | 1,283 | Not Started | `crate::sprintf` | Kernel#sprintf formatting |
 | `st.c` | 3,396 | Not Started | `crate::st` | Symbol table / hash table internal implementation |
 | `strftime.c` | 1,286 | Not Started | `crate::strftime` | Date/time formatting |
-| `util.c` | 612 | Not Started | `crate::util` | Core utility functions |
+| `util.c` | 622 | In Progress | `core_rs::util` | Ported: ruby_scan_digits, ruby_scan_oct, ruby_scan_hex, ruby_strtoul, ruby_each_words. Remaining: qsort, getcwd, dtoa/strtod |
 | `variable.c` | 4,725 | Not Started | `crate::variable` | Global and instance variable access |
 | `version.c` | 306 | Not Started | `crate::version` | Ruby version constants |
 | `vsnprintf.c` | 1,298 | Not Started | `crate::vsnprintf` | Portable vsnprintf |
@@ -289,7 +289,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `time.c` | Core Data Structures | 6,101 | Not Started | `crate::time` | Time class and operations |
 | `transcode.c` | Encoding & Regex | 4,709 | Not Started | `crate::transcode` | Character transcoding |
 | `universal_parser.c` | Parser & AST | 215 | Not Started | `crate::parser::universal_parser` | Universal parser interface |
-| `util.c` | Utilities & Support | 612 | Not Started | `crate::util` | Core utility functions |
+| `util.c` | Utilities & Support | 622 | In Progress | `core_rs::util` | Ported: ruby_scan_digits, ruby_scan_oct, ruby_scan_hex, ruby_strtoul, ruby_each_words. Remaining: qsort, getcwd, dtoa/strtod |
 | `variable.c` | Utilities & Support | 4,725 | Not Started | `crate::variable` | Global and instance variable access |
 | `version.c` | Utilities & Support | 306 | Not Started | `crate::version` | Ruby version constants |
 | `vm.c` | Virtual Machine & Execution | 5,420 | Not Started | `crate::vm` | Core virtual machine engine |

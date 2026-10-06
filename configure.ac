@@ -4124,6 +4124,103 @@ AC_SUBST(X_RLIB_DIR, [$RLIB_DIR])dnl subpath of build directory for .rlib files
 AC_SUBST(JIT_CARGO_SUPPORT)dnl "no" or the cargo profile of the rust code
 }
 
+[begin]_group "Ruby on Rust core section" && {
+dnl Core C-to-Rust ports live in core_rs/ (edition 2024, no external crates,
+dnl no_std).  They are compiled with rustc only -- cargo is never required --
+dnl and partially linked into a single object that joins COMMONOBJS.  The
+dnl original C implementations stay in place behind `#if !USE_RUST_PORTS`.
+dnl
+dnl   --with-rust-ports        require the ports; fail if they cannot be built
+dnl   --without-rust-ports     build the original C implementations only
+dnl   (default: auto)          build the ports when a usable rustc is found
+AC_ARG_WITH(rust-ports,
+    AS_HELP_STRING([--with-rust-ports],
+    [build core C functions from their Rust ports in core_rs/ (requires rustc 1.85.0+; default: auto)]),
+    [rb_rust_ports=$withval], [rb_rust_ports=auto])
+
+rb_rust_ports_ok=no
+rb_rust_ports_why=
+AS_CASE(["$rb_rust_ports"], [no], [], [
+    AS_IF([test "$RUSTC" = "no"], [
+        rb_rust_ports_why="rustc not found"
+    ], [test "$cross_compiling" != no], [
+        rb_rust_ports_why="cross-compiling is not supported yet"
+    ], [
+        AS_CASE(["$target_os"],
+        [linux*|darwin*|freebsd*], [
+            AC_MSG_CHECKING([whether ${RUSTC} can build core_rs (edition 2024, no_std staticlib)])
+            rb_rust_ports_conftest=conftest_core_rs.$$
+            mkdir "$rb_rust_ports_conftest"
+            AS_IF([echo '#![no_std]
+#[panic_handler] fn panic(_: &core::panic::PanicInfo) -> ! { loop {} }
+#[unsafe(no_mangle)] pub extern "C" fn rb_conftest_core_rs() -> i32 { 42 }' |
+                    $RUSTC - --crate-name=conftest --crate-type=staticlib --edition=2024 \
+                        -C opt-level=3 -C lto -C codegen-units=1 -C panic=abort \
+                        "--out-dir=$rb_rust_ports_conftest" >&AS_MESSAGE_LOG_FD 2>&1],
+                [rb_rust_ports_ok=yes],
+                [rb_rust_ports_why="${RUSTC} cannot build an edition 2024 no_std staticlib (rustc 1.85.0+ required)"])
+            AC_MSG_RESULT($rb_rust_ports_ok)
+            dnl rustc builds for its own host by default; make sure the result
+            dnl links with the configured C compiler (e.g. an i686 build on an
+            dnl x86_64 machine, or Rosetta).
+            AS_IF([test "$rb_rust_ports_ok" = yes], [
+                AC_MSG_CHECKING([whether the core_rs staticlib links with ${CC}])
+                rb_rust_ports_save_LIBS="$LIBS"
+                LIBS="$rb_rust_ports_conftest/libconftest.a $LIBS"
+                AC_LINK_IFELSE([AC_LANG_PROGRAM([[int rb_conftest_core_rs(void);]],
+                                                [[return rb_conftest_core_rs() != 42;]])],
+                    [],
+                    [rb_rust_ports_ok=no
+                     rb_rust_ports_why="${RUSTC} output does not link for target $target"])
+                LIBS="$rb_rust_ports_save_LIBS"
+                AC_MSG_RESULT($rb_rust_ports_ok)
+            ])
+            rm -rf "$rb_rust_ports_conftest"
+        ],
+        [rb_rust_ports_why="target OS $target_os is not supported yet"])
+    ])
+])
+
+AS_CASE(["$rb_rust_ports:$rb_rust_ports_ok"],
+[yes:no], [
+    AC_MSG_ERROR([--with-rust-ports was given but the Rust ports cannot be built: $rb_rust_ports_why. Install rustc 1.85.0+ (https://www.rust-lang.org/tools/install) or configure with --without-rust-ports])
+],
+[auto:no], [
+    AC_MSG_WARN([building WITHOUT the Rust ports: $rb_rust_ports_why])
+])
+
+USE_RUST_PORTS=0
+CORE_RS_LIB=
+CORE_RS_OBJ=
+CORE_RS_PARTIAL_LINK=
+AS_IF([test "$rb_rust_ports_ok" = yes && test "$rb_rust_ports" != no], [
+    USE_RUST_PORTS=1
+    # absolute paths to stop the "target" dir in the source dir from
+    # interfering through VPATH
+    CORE_RS_LIB='$(TOP_BUILD_DIR)/target/core_rs/libcore_rs.a'
+    CORE_RS_OBJ='$(TOP_BUILD_DIR)/target/core_rs/core_rs.$(OBJEXT)'
+    # Partially link the staticlib into one object, keeping only the C ABI
+    # entry points global so that core/compiler_builtins symbols never clash
+    # with the JIT staticlib or the C runtime.  Only archive members reachable
+    # from the exported rb_*/ruby_* functions are pulled in (-u), never the
+    # whole archive: unused compiler_builtins members reference the unwinding
+    # personality, which a panic=abort no_std crate does not define.
+    AS_CASE(["$target_os"],
+    [darwin*], [
+        CORE_RS_PARTIAL_LINK='$(tooldir)/darwin-ar $(NM) --defined-only --extern-only $(CORE_RS_LIB) | sed -n -e "s/.* //" -e "/^$(SYMBOL_PREFIX)rb_/p" -e "/^$(SYMBOL_PREFIX)ruby_/p" > $(CORE_RS_LIB:.a=.symbols) && $(CC) -nodefaultlibs -r -o $@ -exported_symbols_list $(CORE_RS_LIB:.a=.symbols) $(CORE_RS_LIB)'
+    ], [
+        CORE_RS_PARTIAL_LINK='$(LD) -r -o $@ $$($(NM) --defined-only --extern-only $(CORE_RS_LIB) 2>/dev/null | sed -n -e "s/.* T \\($(SYMBOL_PREFIX)rb_.*\\)/-u \\1/p" -e "s/.* T \\($(SYMBOL_PREFIX)ruby_.*\\)/-u \\1/p") $(CORE_RS_LIB) && $(OBJCOPY) --wildcard --keep-global-symbol="$(SYMBOL_PREFIX)rb_*" --keep-global-symbol="$(SYMBOL_PREFIX)ruby_*" $@'
+    ])
+])
+AC_DEFINE_UNQUOTED(USE_RUST_PORTS, $USE_RUST_PORTS)
+CORE_RS_RUSTC_FLAGS='-g -C opt-level=3 -C lto -C codegen-units=1 -C panic=abort -C overflow-checks=on'
+AC_SUBST(USE_RUST_PORTS)dnl 1 when core functions are built from their Rust ports
+AC_SUBST(CORE_RS_RUSTC_FLAGS)dnl rustc flags for the core_rs crate
+AC_SUBST(X_CORE_RS_LIB, [$CORE_RS_LIB])dnl the core_rs staticlib
+AC_SUBST(X_CORE_RS_OBJ, [$CORE_RS_OBJ])dnl the partially linked core_rs object
+AC_SUBST(CORE_RS_PARTIAL_LINK)dnl command that turns CORE_RS_LIB into CORE_RS_OBJ
+}
+
 [begin]_group "build section" && {
 AC_CACHE_CHECK([for prefix of external symbols], rb_cv_symbol_prefix, [
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[extern void conftest_external(void) {}]], [[]])],[
@@ -4767,6 +4864,10 @@ AC_CONFIG_FILES(Makefile:template/Makefile.in, [
                 cat ${srcdir}/yjit/not_gmake.mk
                 echo ['$(MKFILES): ${srcdir}/yjit/not_gmake.mk']
             ])
+            AS_IF([test "$USE_RUST_PORTS" = 1], [
+                cat ${srcdir}/core_rs/core_rs.mk
+                echo ['$(MKFILES): ${srcdir}/core_rs/core_rs.mk']
+            ])
 	], [
 	    echo 'distclean-local::; @$(RM) GNUmakefile uncommon.mk'
 	])
@@ -4774,7 +4875,7 @@ AC_CONFIG_FILES(Makefile:template/Makefile.in, [
 	echo; echo '$(srcdir)/$(CONFIGURE):RUBY_M4_INCLUDED \
 	$(empty)'
     } > $tmpmk && mv -f $tmpmk Makefile],
-[EXEEXT='$EXEEXT' MAKE='${MAKE-make}' gnumake='$gnumake' GIT='$GIT' YJIT_SUPPORT='$YJIT_SUPPORT'
+[EXEEXT='$EXEEXT' MAKE='${MAKE-make}' gnumake='$gnumake' GIT='$GIT' YJIT_SUPPORT='$YJIT_SUPPORT' USE_RUST_PORTS='$USE_RUST_PORTS'
  X_DEPENDENCIES_DIR='$X_DEPENDENCIES_DIR' BASERUBY='$BASERUBY' HAVE_BASERUBY='$HAVE_BASERUBY'])
 
 AC_ARG_WITH([ruby-pc],

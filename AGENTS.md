@@ -107,9 +107,14 @@ When porting or updating a C source file:
 
 These decisions are fixed. A PR that deviates from them will be sent back. If you think one is wrong, say so in a PR comment. Do not work around it.
 
-1. **New Rust code lives in `core_rs/`.** It uses edition 2024, `rust-version = "1.85.0"`, and **no external crates**. `ruby.rs` only re-exports `core_rs` and must not contain ported functions.
-2. **Release builds compile core Rust with `rustc` only.** Cargo is optional: it is used only for `--enable-yjit=dev` / `--enable-zjit=dev` and developer tools. Builds must work offline. Do not make cargo required, and do not add `--offline` hacks.
-3. **One switch controls core Rust: `--with-rust-ports` (default) / `--without-rust-ports`.** It sets `USE_RUST_PORTS` (0/1) in `config.h`. If core Rust cannot be built, configure must fail with a clear message. Never silently fall back to an all-C build.
+1. **New Rust code lives in `core_rs/`.** It is a `no_std` crate with edition 2024, rustc 1.85.0+, **no external crates** and no allocation. It is independent of the JIT crates and of `ruby.rs`: build rules are in `core_rs/core_rs.mk`, and the crate is partially linked into its own object (`target/core_rs/core_rs.o`) that joins `COMMONOBJS`. Add every new source file to `CORE_RS_SRCS` in `core_rs/core_rs.mk`.
+2. **core_rs is compiled with `rustc` only.** Cargo is never required for it, and builds must work offline. Unit tests run with `make core-rs-test`, which also needs only rustc.
+3. **One switch controls core Rust**, and it sets `USE_RUST_PORTS` (0/1) in `config.h` and `RbConfig::CONFIG["USE_RUST_PORTS"]`:
+   - `--with-rust-ports`: the ports are required, and configure fails if they cannot be built.
+   - `--without-rust-ports`: the original C only.
+   - Default `auto`: the ports are used when rustc 1.85.0+ works for the target (Linux, macOS and FreeBSD, not cross-compiling). Otherwise configure prints a warning naming the reason.
+
+   CI asserts that the main Linux and macOS jobs really build with the ports, so an `auto` fallback can never go unnoticed there.
 4. **Keep the original C behind the switch.** A ported function's C body stays in place, wrapped in `#if !USE_RUST_PORTS` ... `#endif`. Do not delete the C, and never select the implementation with `USE_YJIT` / `USE_ZJIT`.
 5. **Faithful first.** The Rust version must behave byte-for-byte like the C version: same output, same flushing, same encoding handling, and the same build-time macros honoured (e.g. `RB_DEFAULT_PARSER` / `--with-parser`). Do not add "safety" behaviour such as silently ignoring `NULL` in a port. Document the precondition instead.
 6. **Do not modify upstream-owned code.** `yjit/`, `zjit/`, `jit/`, their `Cargo.toml` editions/MSRV and their `bindgen/` crates are synced from upstream CRuby. If you find a bug there, report it in the PR description.

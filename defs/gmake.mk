@@ -453,6 +453,9 @@ endif
 include $(top_srcdir)/yjit/yjit.mk
 include $(top_srcdir)/zjit/zjit.mk
 include $(top_srcdir)/defs/jit.mk
+ifneq ($(CORE_RS_OBJ),)
+include $(top_srcdir)/core_rs/core_rs.mk
+endif
 
 # Query on the generated rdoc
 #
