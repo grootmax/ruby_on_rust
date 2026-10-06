@@ -165,12 +165,20 @@ goto :loopend ;
   ::- them here too would duplicate them at each reconfiguration.
   if "%opt%" == "--without-ext" goto :witharg
   if "%opt%" == "--without-extensions" goto :witharg
+  if "%opt%" == "--without-rust-ports" (
+    echo>> %config_make% USE_RUST_PORTS = 0
+    goto :loop
+  )
   echo>>%confargs%  "%opt%" \
   if "%opt%" == "--without-baseruby" goto :nobaseruby
   if "%opt%" == "--without-git" goto :nogit
 goto :loop ;
 :witharg
   if "%opt%" == "--with-static-linked-ext" goto :extstatic
+  if "%opt%" == "--with-rust-ports" (
+    echo>> %config_make% USE_RUST_PORTS = 1
+    goto :loop
+  )
   if "%eq%" == "" call :take_arg
   if not "%arg%" == "" (
     echo>>%confargs%  "%opt%=%arg:$=$$%" \

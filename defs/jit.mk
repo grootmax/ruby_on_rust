@@ -37,6 +37,10 @@ $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	$(RUST_LIB_TOUCH)
 else ifneq ($(RUST_LIB),)
 
+ifneq ($(strip $(RUST_TARGET)),)
+RUST_TARGET_FLAG = --target=$(RUST_TARGET)
+endif
+
 CORE_RS_SRC_FILES = $(wildcard \
 	$(top_srcdir)/core_rs/Cargo.* \
 	$(top_srcdir)/core_rs/src/*.rs \
@@ -51,22 +55,35 @@ $(CORE_RS_RLIB): $(CORE_RS_SRC_FILES) target/.rustc-version
 	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=core_rs \
 	    --edition=2024 \
 	    --crate-type=rlib \
+	    $(RUST_TARGET_FLAG) \
 	    $(RUSTC_FLAGS) \
 	    '--out-dir=$(@D)' \
 	    '$(top_srcdir)/core_rs/src/lib.rs'
 
+ifeq ($(USE_RUST_PORTS),1)
+CORE_RS_DEP = $(CORE_RS_RLIB)
+CORE_RS_EXTERN = --extern=core_rs
+CORE_RS_CFG = --cfg 'feature="core_rs"'
+else
+CORE_RS_DEP =
+CORE_RS_EXTERN =
+CORE_RS_CFG =
+endif
+
 ifneq ($(strip $(RLIB_DIR)),) # combo build
 
-$(RUST_LIB): $(srcdir)/ruby.rs $(CORE_RS_RLIB) target/.rustc-version
+$(RUST_LIB): $(srcdir)/ruby.rs $(CORE_RS_DEP) target/.rustc-version
 	$(ECHO) 'building $(@F)'
 	$(Q)$(MAKEDIRS) $(@D)
 	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
+	    $(RUST_TARGET_FLAG) \
 	    $(RUSTC_FLAGS) \
 	    '-L$(@D)' \
-	    --extern=core_rs \
+	    $(CORE_RS_EXTERN) \
 	    --extern=yjit \
 	    --extern=zjit \
 	    --crate-type=staticlib \
+	    $(CORE_RS_CFG) \
 	    --cfg 'feature="yjit"' \
 	    --cfg 'feature="zjit"' \
 	    '--out-dir=$(@D)' \
@@ -81,19 +98,53 @@ $(JIT_RLIB): $(top_srcdir)/jit/src/lib.rs target/.rustc-version
 	$(Q)$(MAKEDIRS) $(@D)
 	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=jit \
 	    --edition=2024 \
+	    $(RUST_TARGET_FLAG) \
 	    $(JIT_RUST_FLAGS) \
 	    $(RUSTC_FLAGS) \
 	    '--out-dir=$(@D)' \
 	    '$(top_srcdir)/jit/src/lib.rs'
+else ifeq ($(YJIT_SUPPORT),yes) # YJIT direct rustc build
+YJIT_SRC_FILES = $(wildcard \
+	$(top_srcdir)/yjit/Cargo.* \
+	$(top_srcdir)/yjit/src/*.rs \
+	$(top_srcdir)/yjit/src/*/*.rs \
+	)
+YJIT_RLIB = $(TOP_BUILD_DIR)/target/release/libyjit.rlib
+$(YJIT_RLIB): $(YJIT_SRC_FILES) target/.rustc-version
+	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
+	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=yjit \
+	    --edition=2021 \
+	    $(RUST_TARGET_FLAG) \
+	    $(RUSTC_FLAGS) \
+	    '--out-dir=$(@D)' \
+	    '$(top_srcdir)/yjit/src/lib.rs'
+
+$(RUST_LIB): $(srcdir)/ruby.rs $(CORE_RS_DEP) $(YJIT_RLIB) target/.rustc-version
+	$(ECHO) 'building $(@F)'
+	$(Q)$(MAKEDIRS) $(@D)
+	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2021 \
+	    $(RUST_TARGET_FLAG) \
+	    $(RUSTC_FLAGS) \
+	    '-L$(@D)' \
+	    $(CORE_RS_EXTERN) \
+	    --extern=yjit \
+	    --crate-type=staticlib \
+	    $(CORE_RS_CFG) \
+	    --cfg 'feature="yjit"' \
+	    '--out-dir=$(@D)' \
+	    '$(top_srcdir)/ruby.rs'
 else # standard direct rustc build
-$(RUST_LIB): $(srcdir)/ruby.rs $(CORE_RS_RLIB) target/.rustc-version
+$(RUST_LIB): $(srcdir)/ruby.rs $(CORE_RS_DEP) target/.rustc-version
 	$(ECHO) 'building $(@F)'
 	$(Q)$(MAKEDIRS) $(@D)
 	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
+	    $(RUST_TARGET_FLAG) \
 	    $(RUSTC_FLAGS) \
 	    '-L$(@D)' \
-	    --extern=core_rs \
+	    $(CORE_RS_EXTERN) \
 	    --crate-type=staticlib \
+	    $(CORE_RS_CFG) \
 	    '--out-dir=$(@D)' \
 	    '$(top_srcdir)/ruby.rs'
 endif # ifneq ($(strip $(RLIB_DIR)),)

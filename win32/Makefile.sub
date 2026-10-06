@@ -431,6 +431,15 @@ ORGLIBPATH = $(LIB)
 
 #### End of system configuration section. ####
 
+!ifndef USE_RUST_PORTS
+USE_RUST_PORTS = 1
+!endif
+
+!if "$(USE_RUST_PORTS)" == "1"
+RUST_LIB = target\release\ruby_core.lib
+RUST_LIBOBJ = target\release\ruby_core.lib
+!endif
+
 LIBRUBY_A     = $(RUBY_SO_NAME)-static.lib
 LIBRUBY_SO    = $(RUBY_SO_NAME).dll
 LIBRUBY_SONAME= $(RUBY_SO_NAME).dll
@@ -942,6 +951,7 @@ $(CONFIG_H): $(MKFILES) $(srcdir)/win32/Makefile.sub $(win_srcdir)/Makefile.sub 
 #define RUBY_COREDLL "$(RT)"
 #define RUBY_PLATFORM "$(arch)"
 #define RUBY_SITEARCH "$(sitearch)"
+#define USE_RUST_PORTS $(USE_RUST_PORTS)
 #endif /* $(guard) */
 <<
 
@@ -1219,6 +1229,18 @@ $(RUBYDEF):	$(LIBRUBY_A) $(DLDOBJS) $(RBCONFIG)
 
 {$(win_srcdir)}.def.lib:
 		$(Q) $(AR) $(ARFLAGS)$@ -def:$<
+
+!if "$(USE_RUST_PORTS)" == "1"
+CORE_RS_RLIB = target\release\libcore_rs.rlib
+
+$(CORE_RS_RLIB): $(srcdir)\core_rs\src\lib.rs
+	@if not exist target\release md target\release
+	rustc --crate-name=core_rs --edition=2024 --crate-type=rlib --out-dir target\release $(srcdir:/=\)\core_rs\src\lib.rs
+
+$(RUST_LIB): $(srcdir)\ruby.rs $(CORE_RS_RLIB)
+	@if not exist target\release md target\release
+	rustc --edition=2024 -L target\release --extern core_rs --crate-type=staticlib --cfg "feature=\"core_rs\"" --out-dir target\release -o $@ $(srcdir:/=\)\ruby.rs
+!endif
 
 clean-local::
 		$(Q)$(RM) $(WINMAINOBJ) ext\extinit.c ext\extinit.$(OBJEXT) ext\vc*.pdb miniruby.lib

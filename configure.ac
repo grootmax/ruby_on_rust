@@ -3896,8 +3896,6 @@ AC_SUBST(INSTALL_STATIC_LIBRARY)
 [begin]_group "JIT section" && {
 AC_CHECK_PROG(RUSTC, [rustc], [rustc], [no]) dnl no ac_tool_prefix
 
-AC_CHECK_TOOL(CARGO, [cargo], [no])
-
 dnl check if rustc is recent enough to build YJIT (rustc >= 1.58.0)
 JIT_RUSTC_OK=no
 JIT_TARGET_ARCH=
@@ -3910,7 +3908,7 @@ AS_IF([test "$RUSTC" != "no"],
     dnl Fails in case rustc target doesn't match ruby target.
     dnl Can happen on Rosetta, for example.
     AS_IF([echo "#[cfg(target_arch = \"$JIT_TARGET_ARCH\")] fn main() { let x = 1; format!(\"{x}\"); }" |
-            $RUSTC - --edition=2024 --emit asm=/dev/null 2>/dev/null],
+            $RUSTC - --emit asm=/dev/null 2>/dev/null],
         [JIT_RUSTC_OK=yes]
     )
     AC_MSG_RESULT($JIT_RUSTC_OK)
@@ -3936,24 +3934,24 @@ AS_IF([test "$cross_compiling" = no],
     )
 )
 
-dnl build YJIT in release mode if cargo and rustc >= 1.58.0 are present and we are on a supported platform
+dnl build YJIT in release mode if rustc >= 1.58.0 is present and we are on a supported platform
 AC_ARG_ENABLE(yjit,
     AS_HELP_STRING([--enable-yjit],
-    [enable in-process JIT compiler that requires Rust build tools. enabled by default on supported platforms if rustc 1.58.0+ and cargo are available]),
+    [enable in-process JIT compiler that requires Rust build tools. enabled by default on supported platforms if rustc 1.58.0+ is available]),
     [YJIT_SUPPORT=$enableval],
-    [AS_CASE(["$JIT_TARGET_OK:$JIT_RUSTC_OK:$CARGO"],
-        [yes:yes:cargo*|yes:yes:/*], [
+    [AS_CASE(["$JIT_TARGET_OK:$JIT_RUSTC_OK"],
+        [yes:yes], [
             YJIT_SUPPORT=yes
         ],
         [YJIT_SUPPORT=no]
     )]
 )
 
-dnl build ZJIT in release mode if cargo and rustc >= 1.85.0 are present and we are on a supported platform
+dnl build ZJIT in release mode if rustc >= 1.85.0 is present and we are on a supported platform
 ZJIT_SUPPORT=no
 AC_ARG_ENABLE(zjit,
     AS_HELP_STRING([--enable-zjit],
-    [enable experimental JIT compiler that requires Rust build tools. enabled by default on supported platforms if rustc 1.85.0+ and cargo are available]),
+    [enable experimental JIT compiler that requires Rust build tools. enabled by default on supported platforms if rustc 1.85.0+ is available]),
     [ZJIT_SUPPORT=$enableval],
     [AS_CASE(["$JIT_TARGET_OK"],
         [yes], [
@@ -3961,7 +3959,7 @@ AC_ARG_ENABLE(zjit,
             AC_MSG_CHECKING([prerequisites for ZJIT])dnl only checked when --enable-zjit is not specified
             # Fails in case rustc target doesn't match ruby target. Can happen on Rosetta, for example.
             # 1.85.0 is the first stable version that supports the 2024 edition.
-            AS_IF([test "$RUSTC" != "no" && test "$CARGO" != "no" && echo "#[cfg(target_arch = \"$JIT_TARGET_ARCH\")] fn main() {}" |
+            AS_IF([test "$RUSTC" != "no" && echo "#[cfg(target_arch = \"$JIT_TARGET_ARCH\")] fn main() {}" |
                     $RUSTC - --edition=2024 --emit asm=/dev/null 2>/dev/null],
                 AS_IF([test "$gnumake" = "yes"], [
                     rb_zjit_build_possible=yes
@@ -3978,9 +3976,12 @@ YJIT_LIBS=
 JIT_CARGO_SUPPORT=no
 AS_CASE(["${YJIT_SUPPORT}"],
 [yes|dev|stats|dev_nodebug], [
+    AS_IF([test x"$RUSTC" = "xno"],
+        AC_MSG_ERROR([rustc is required. Installation instructions available at https://www.rust-lang.org/tools/install])
+    )
+
     AS_CASE(["${YJIT_SUPPORT}"],
     [yes], [
-        JIT_CARGO_SUPPORT=release
     ],
     [dev], [
         rb_cargo_features='disasm,runtime_checks'
@@ -4012,9 +4013,12 @@ AS_CASE(["${YJIT_SUPPORT}"],
 ZJIT_LIBS=
 AS_CASE(["${ZJIT_SUPPORT}"],
 [yes|dev|dev_nodebug|stats], [
+    AS_IF([test x"$RUSTC" = "xno"],
+        AC_MSG_ERROR([rustc is required. Installation instructions available at https://www.rust-lang.org/tools/install])
+    )
+
     AS_CASE(["${ZJIT_SUPPORT}"],
     [yes], [
-        AS_IF([test "$JIT_CARGO_SUPPORT" = "no"], [JIT_CARGO_SUPPORT=release])
     ],
     [dev], [
         rb_cargo_features="$rb_cargo_features,disasm,runtime_checks"
@@ -4050,22 +4054,26 @@ AS_IF([test -n "${rustc_flags}"], [
 
 JIT_RUST_FLAGS='--crate-type=staticlib --cfg feature=\"stats_allocator\"'
 RLIB_DIR=
-AS_CASE(["${YJIT_SUPPORT}:${ZJIT_SUPPORT}"],
-[no:no], [
-    JIT_CARGO_SUPPORT=no
-    AS_IF([test x"$RUSTC" != "xno" && test "$cross_compiling" = "no" && test "$JIT_RUSTC_OK" = "yes"], [
-        RUST_LIB="target/release/libruby.a"
-    ], [
-        RUST_LIB=
-    ])
+AS_CASE(["$JIT_CARGO_SUPPORT:$YJIT_SUPPORT:$ZJIT_SUPPORT"],
+[no:yes:yes], [ # release build of YJIT+ZJIT
+    YJIT_LIBS=
+    ZJIT_LIBS=
+    JIT_RUST_FLAGS="--crate-type=rlib"
+    RLIB_DIR="target/release"
+    RUST_LIB="target/release/libruby.a"
 ],
-[*], [ # JIT enabled -- cargo required
+[no:*], [],
+[ # JIT_CARGO_SUPPORT not "no" -- cargo required.
+    AC_CHECK_TOOL(CARGO, [cargo], [no])
     AS_IF([test x"$CARGO" = "xno"],
         AC_MSG_ERROR([this build configuration requires cargo. Installation instructions available at https://www.rust-lang.org/tools/install]))
 
     YJIT_LIBS=
     ZJIT_LIBS=
 
+    # There's more processing below to get the feature set for the
+    # top-level crate, so capture at this point for feature set of
+    # just the zjit crate.
     ZJIT_TEST_FEATURES="${rb_cargo_features}"
 
     AS_IF([test x"${YJIT_SUPPORT}" != x"no"], [
@@ -4075,6 +4083,7 @@ AS_CASE(["${YJIT_SUPPORT}:${ZJIT_SUPPORT}"],
         AC_SUBST(ZJIT_TEST_FEATURES)
         AS_IF([test -n "$rb_cargo_features"], [rb_cargo_features="$rb_cargo_features,zjit"], [rb_cargo_features="zjit"])
     ])
+    # if YJIT and ZJIT release mode
     AS_IF([test "${YJIT_SUPPORT}:${ZJIT_SUPPORT}" = "yes:yes"], [
         JIT_CARGO_SUPPORT=release
     ])
@@ -4085,6 +4094,98 @@ AS_CASE(["${YJIT_SUPPORT}:${ZJIT_SUPPORT}"],
         RUST_LIB="target/${JIT_CARGO_SUPPORT}/libruby.a"
     ])
 ])
+
+dnl core Rust section
+AC_ARG_WITH(rust-ports,
+    AS_HELP_STRING([--with-rust-ports], [build core Rust components (default: yes)]),
+    [with_rust_ports=$withval],
+    [with_rust_ports=yes]
+)
+
+CORE_RUSTC_OK=no
+RUST_TARGET=
+USE_RUST_PORTS=0
+
+AS_IF([test "$with_rust_ports" != "no"], [
+    AS_IF([test "$RUSTC" = "no"], [
+        AC_MSG_ERROR([rustc >= 1.85.0 is required for core Rust ports, or pass --without-rust-ports to build without core Rust])
+    ])
+
+    dnl Map $target to Rust target triple
+    AS_CASE(["$target"],
+        [x86_64-*-linux-musl*], [RUST_TARGET=x86_64-unknown-linux-musl],
+        [aarch64-*-linux-musl*], [RUST_TARGET=aarch64-unknown-linux-musl],
+        [x86_64-*-linux-gnu*], [RUST_TARGET=x86_64-unknown-linux-gnu],
+        [aarch64-*-linux-gnu*], [RUST_TARGET=aarch64-unknown-linux-gnu],
+        [i[[34567]]86-*-linux-musl*], [RUST_TARGET=i686-unknown-linux-musl],
+        [i[[34567]]86-*-linux-gnu*], [RUST_TARGET=i686-unknown-linux-gnu],
+        [powerpc64le-*-linux-gnu*], [RUST_TARGET=powerpc64le-unknown-linux-gnu],
+        [s390x-*-linux-gnu*], [RUST_TARGET=s390x-unknown-linux-gnu],
+        [riscv64-*-linux-gnu*], [RUST_TARGET=riscv64gc-unknown-linux-gnu],
+        [x86_64-*-darwin*], [RUST_TARGET=x86_64-apple-darwin],
+        [aarch64-*-darwin*|arm64-*-darwin*], [RUST_TARGET=aarch64-apple-darwin],
+        [x86_64-*-mingw*|x86_64-w64-mingw32*], [RUST_TARGET=x86_64-pc-windows-gnu],
+        [i[[34567]]86-*-mingw*|i[[34567]]86-w64-mingw32*], [RUST_TARGET=i686-pc-windows-gnu],
+        [aarch64-*-mingw*|aarch64-w64-mingw32*], [RUST_TARGET=aarch64-pc-windows-gnullvm],
+        [x86_64-*-msvc*|x86_64-*-windows-msvc*], [RUST_TARGET=x86_64-pc-windows-msvc],
+        [i[[34567]]86-*-msvc*|i[[34567]]86-*-windows-msvc*], [RUST_TARGET=i686-pc-windows-msvc],
+        [aarch64-*-msvc*|aarch64-*-windows-msvc*], [RUST_TARGET=aarch64-pc-windows-msvc],
+        [wasm32-*-wasi*|wasm32-wasi*], [RUST_TARGET=wasm32-wasip1],
+        [x86_64-*-freebsd*], [RUST_TARGET=x86_64-unknown-freebsd],
+        [aarch64-*-freebsd*], [RUST_TARGET=aarch64-unknown-freebsd],
+        [
+            AS_CASE(["$target_cpu:$target_os"],
+                [x86_64:linux-gnu*], [RUST_TARGET=x86_64-unknown-linux-gnu],
+                [aarch64:linux-gnu*], [RUST_TARGET=aarch64-unknown-linux-gnu],
+                [x86_64:linux-musl*], [RUST_TARGET=x86_64-unknown-linux-musl],
+                [aarch64:linux-musl*], [RUST_TARGET=aarch64-unknown-linux-musl],
+                [x86_64:darwin*], [RUST_TARGET=x86_64-apple-darwin],
+                [aarch64:darwin*|arm64:darwin*], [RUST_TARGET=aarch64-apple-darwin],
+                [x86_64:mingw*], [RUST_TARGET=x86_64-pc-windows-gnu],
+                [aarch64:mingw*], [RUST_TARGET=aarch64-pc-windows-gnullvm],
+                [wasm32:wasi*], [RUST_TARGET=wasm32-wasip1],
+                [RUST_TARGET=]
+            )
+        ]
+    )
+
+    AS_IF([test -z "$RUST_TARGET"], [
+        AC_MSG_ERROR([no known Rust target mapping for $target. Pass --without-rust-ports to build without core Rust])
+    ])
+
+    AC_MSG_CHECKING([whether $RUSTC works for core Rust ($RUST_TARGET, edition 2024)])
+    AS_IF([echo "pub fn check() {}" | $RUSTC - --target="$RUST_TARGET" --edition=2024 --crate-type=rlib --emit asm=/dev/null 2>/dev/null],
+        [CORE_RUSTC_OK=yes],
+        [CORE_RUSTC_OK=no]
+    )
+    AC_MSG_RESULT($CORE_RUSTC_OK)
+
+    AS_IF([test "$CORE_RUSTC_OK" = "no"], [
+        AC_MSG_ERROR([rustc >= 1.85.0 with support for target $RUST_TARGET is required for core Rust ports, or pass --without-rust-ports to build without core Rust])
+    ])
+
+    USE_RUST_PORTS=1
+
+    AS_IF([test "$JIT_CARGO_SUPPORT" != "no"], [
+        AS_IF([test -n "$rb_cargo_features"], [
+            rb_cargo_features="core_rs,$rb_cargo_features"
+        ], [
+            rb_cargo_features="core_rs"
+        ])
+        CARGO_BUILD_ARGS="--profile ${JIT_CARGO_SUPPORT} --features ${rb_cargo_features}"
+    ], [
+        AS_IF([test "$YJIT_SUPPORT" = "yes" || test "$ZJIT_SUPPORT" = "yes"], [
+            YJIT_LIBS=
+            ZJIT_LIBS=
+            RLIB_DIR="target/release"
+        ])
+        RUST_LIB="target/release/libruby.a"
+    ])
+])
+
+AC_DEFINE_UNQUOTED(USE_RUST_PORTS, $USE_RUST_PORTS, [Define as 1 to enable core Rust ports, 0 otherwise])
+AC_SUBST(USE_RUST_PORTS)
+AC_SUBST(RUST_TARGET)
 
 # In case either we're linking rust code
 AS_IF([test -n "$RUST_LIB"], [

@@ -1,3 +1,4 @@
+#[cfg(feature = "core_rs")]
 pub use core_rs::*;
 
 #[cfg(feature = "yjit")]

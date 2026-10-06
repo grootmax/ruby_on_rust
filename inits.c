@@ -82,6 +82,13 @@ rb_call_inits(void)
 
     // enable builtin loading
     CALL(builtin);
+
+#if USE_RUST_PORTS
+    {
+        void rb_core_rs_init(void);
+        rb_core_rs_init();
+    }
+#endif
 }
 
 void

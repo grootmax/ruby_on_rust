@@ -97,7 +97,7 @@ jobs:
           - test_task: 'check'
             # YJIT should be automatically built in release mode on x86-64 Linux with rustc present
             #configure: "--enable-yjit RUSTC='rustc +1.58.0'"
-            configure: "RUSTC='rustc +1.58.0'"
+            configure: "RUSTC='rustc +1.58.0' --without-rust-ports"
             rust_version: '1.58.0'
 
           - test_task: 'check'

@@ -119,6 +119,7 @@ jobs:
         run: >-
           ../src/configure
           --host wasm32-unknown-wasi
+          --without-rust-ports
           --with-baseruby="${{ steps.baseruby.outputs.ruby }}"
           --with-dump-ast="${{ steps.baseruby.outputs.dump_ast }}"
           --with-static-linked-ext

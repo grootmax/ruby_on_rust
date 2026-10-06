@@ -100,6 +100,7 @@ jobs:
           --build=${{ matrix.build }}
           --host=${{ matrix.host }}
           --with-baseruby="$baseruby"
+          --without-rust-ports
         env:
           baseruby: ${{ steps.baseruby.outputs.ruby }}
 

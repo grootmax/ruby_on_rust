@@ -83,6 +83,7 @@ jobs:
           --enable-debug-env
           --disable-install-doc
           --with-gcc="gcc -fcf-protection=return"
+          --without-rust-ports
 
       - run: runuser -u ruby -- make
 

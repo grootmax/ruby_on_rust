@@ -58,7 +58,7 @@ jobs:
          working-dir: /tmp/github/
          exec: |
             ./autogen.sh
-            ./configure --disable-install-doc
+            ./configure --disable-install-doc --without-rust-ports
             make ruby -j4
             make extract-gems
             make -j4
