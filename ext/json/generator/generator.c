@@ -27,14 +27,16 @@ typedef struct JSON_Generator_StateStruct {
     bool ascii_only;
     bool script_safe;
     bool strict;
+    bool rfc8785;
     VALUE sort_keys;
 } JSON_Generator_State;
 
-static VALUE mJSON, cState, cFragment, eGeneratorError, eNestingError, Encoding_UTF_8, default_sort_keys_proc;
+static VALUE mJSON, cState, cFragment, eGeneratorError, eNestingError, Encoding_UTF_8, default_sort_keys_proc,
+             rfc8785_number_formater_proc, rfc8785_sort_keys_proc;
 
 static ID i_to_s, i_to_json, i_new, i_encode;
 static VALUE sym_indent, sym_space, sym_space_before, sym_object_nl, sym_array_nl, sym_max_nesting, sym_allow_nan, sym_allow_duplicate_key,
-             sym_ascii_only, sym_depth, sym_buffer_initial_length, sym_script_safe, sym_strict, sym_as_json, sym_sort_keys;
+             sym_ascii_only, sym_depth, sym_buffer_initial_length, sym_script_safe, sym_strict, sym_as_json, sym_sort_keys, sym_rfc8785;
 
 
 #define GET_STATE_TO(self, state) \
@@ -73,7 +75,7 @@ static void generate_json_bignum(FBuffer *buffer, struct generate_json_data *dat
 static void generate_json_float(FBuffer *buffer, struct generate_json_data *data, VALUE obj);
 static void generate_json_fragment(FBuffer *buffer, struct generate_json_data *data, VALUE obj);
 
-static int usascii_encindex, utf8_encindex, binary_encindex;
+static int usascii_encindex, utf8_encindex;
 
 NORETURN(static void) raise_generator_error_str(VALUE invalid_object, VALUE str)
 {
@@ -863,20 +865,6 @@ NOINLINE(static) VALUE convert_invalid_encoding(struct generate_json_data *data,
         }
     }
 
-    if (RB_ENCODING_GET_INLINED(str) == binary_encindex) {
-        VALUE utf8_string = rb_enc_associate_index(rb_str_dup(str), utf8_encindex);
-        switch (rb_enc_str_coderange(utf8_string)) {
-            case ENC_CODERANGE_7BIT:
-                return utf8_string;
-            case ENC_CODERANGE_VALID:
-                // For historical reason, we silently reinterpret binary strings as UTF-8 if it would work.
-                // TODO: Raise in 3.0.0
-                rb_warn("JSON.generate: UTF-8 string passed as BINARY, this will raise an encoding error in json 3.0");
-                return utf8_string;
-                break;
-        }
-    }
-
     return rb_rescue(encode_json_string_try, str, encode_json_string_rescue, str);
 }
 
@@ -892,12 +880,17 @@ ALWAYS_INLINE(static) VALUE ensure_valid_encoding(struct generate_json_data *dat
 
 static void raw_generate_json_string(FBuffer *buffer, struct generate_json_data *data, VALUE obj)
 {
+    VALUE str = obj;
+    if (RB_UNLIKELY(buffer->io)) {
+        // IO writes can mutate the original string while we are reading it.
+        str = rb_str_new_frozen(str);
+    }
     fbuffer_append_char(buffer, '"');
 
     long len;
     search_state search;
     search.buffer = buffer;
-    RSTRING_GETMEM(obj, search.ptr, len);
+    RSTRING_GETMEM(str, search.ptr, len);
     search.cursor = search.ptr;
     search.end = search.ptr + len;
 
@@ -908,7 +901,7 @@ static void raw_generate_json_string(FBuffer *buffer, struct generate_json_data 
     search.chunk_end = NULL;
 #endif /* HAVE_SIMD */
 
-    switch (json_str_coderange(obj)) {
+    switch (json_str_coderange(str)) {
         case ENC_CODERANGE_7BIT:
         case ENC_CODERANGE_VALID:
             if (RB_UNLIKELY(data->state->ascii_only)) {
@@ -924,6 +917,7 @@ static void raw_generate_json_string(FBuffer *buffer, struct generate_json_data 
             break;
     }
     fbuffer_append_char(buffer, '"');
+    RB_GC_GUARD(str);
 }
 
 static void generate_json_string(FBuffer *buffer, struct generate_json_data *data, VALUE obj)
@@ -1037,16 +1031,18 @@ json_object_i(VALUE key, VALUE val, VALUE _arg)
 static inline long increase_depth(struct generate_json_data *data)
 {
     JSON_Generator_State *state = data->state;
-    long depth = ++data->depth;
-    if (RB_UNLIKELY(depth > state->max_nesting && state->max_nesting)) {
-        rb_raise(eNestingError, "nesting of %ld is too deep. Did you try to serialize objects with circular references?", --data->depth);
+    if (RB_UNLIKELY(data->depth >= state->max_nesting && state->max_nesting)) {
+        rb_raise(eNestingError, "nesting of %ld is too deep. Did you try to serialize objects with circular references?", data->depth + 1);
     }
-    return depth;
+    return ++data->depth;
 }
 
 static void generate_json_object(FBuffer *buffer, struct generate_json_data *data, VALUE obj)
 {
-    if (RB_UNLIKELY(data->state->sort_keys)) {
+    if (RB_UNLIKELY(data->state->rfc8785)) {
+        obj = rb_proc_call_with_block(rfc8785_sort_keys_proc, 1, &obj, Qnil);
+        Check_Type(obj, T_HASH);
+    } else if (RB_UNLIKELY(data->state->sort_keys)) {
         obj = rb_proc_call_with_block(data->state->sort_keys, 1, &obj, Qnil);
         Check_Type(obj, T_HASH);
     }
@@ -1171,6 +1167,13 @@ static void generate_json_float(FBuffer *buffer, struct generate_json_data *data
 
         VALUE tmp = rb_funcall(obj, i_to_s, 0);
         fbuffer_append_str(buffer, tmp);
+        return;
+    }
+
+    if (RB_UNLIKELY(data->state->rfc8785)) {
+        VALUE str = rb_proc_call_with_block(rfc8785_number_formater_proc, 1, &obj, Qnil);
+        Check_Type(str, T_STRING);
+        fbuffer_append_str(buffer, str);
         return;
     }
 
@@ -1542,7 +1545,7 @@ static VALUE cState_array_nl_set(VALUE self, VALUE array_nl)
 /*
  * call-seq: as_json()
  *
- * This string is put at the end of a line that holds a JSON array.
+ * Returns the callback used to convert unsupported objects in strict mode.
  */
 static VALUE cState_as_json(VALUE self)
 {
@@ -1550,16 +1553,28 @@ static VALUE cState_as_json(VALUE self)
     return state->as_json;
 }
 
+static VALUE as_json_config(VALUE value)
+{
+    if (rb_obj_is_proc(value)) {
+        return value;
+    }
+    VALUE proc = rb_check_funcall(value, rb_intern("to_proc"), 0, NULL);
+    if (proc == Qundef || !rb_obj_is_proc(proc)) {
+        rb_raise(rb_eTypeError, "as_json must be a Proc");
+    }
+    return proc;
+}
+
 /*
  * call-seq: as_json=(as_json)
  *
- * This string is put at the end of a line that holds a JSON array.
+ * Sets the Proc used to convert unsupported objects in strict mode.
  */
 static VALUE cState_as_json_set(VALUE self, VALUE as_json)
 {
     rb_check_frozen(self);
     GET_STATE(self);
-    RB_OBJ_WRITE(self, &state->as_json, rb_convert_type(as_json, T_DATA, "Proc", "to_proc"));
+    RB_OBJ_WRITE(self, &state->as_json, as_json_config(as_json));
     return Qnil;
 }
 
@@ -1733,7 +1748,32 @@ static VALUE cState_set_default_sort_keys_proc(VALUE self, VALUE proc)
     if (!rb_obj_is_proc(proc)) {
         rb_raise(rb_eTypeError, "sort_key_proc must be a Proc");
     }
+    if (default_sort_keys_proc) {
+        rb_raise(rb_eArgError, "sort_key_proc can only be set once");
+    }
     return default_sort_keys_proc = proc;
+}
+
+static VALUE cState_set_rfc8785_number_formater_proc(VALUE self, VALUE proc)
+{
+    if (!rb_obj_is_proc(proc)) {
+        rb_raise(rb_eTypeError, "rfc8785_number_formater_proc must be a Proc");
+    }
+    if (rfc8785_number_formater_proc) {
+        rb_raise(rb_eArgError, "rfc8785_number_formater_proc can only be set once");
+    }
+    return rfc8785_number_formater_proc = proc;
+}
+
+static VALUE cState_set_rfc8785_sort_keys_proc(VALUE self, VALUE proc)
+{
+    if (!rb_obj_is_proc(proc)) {
+        rb_raise(rb_eTypeError, "rfc8785_sort_keys_proc must be a Proc");
+    }
+    if (rfc8785_sort_keys_proc) {
+        rb_raise(rb_eArgError, "rfc8785_sort_keys_proc can only be set once");
+    }
+    return rfc8785_sort_keys_proc = proc;
 }
 
 static VALUE normalize_sort_keys(VALUE value)
@@ -1754,7 +1794,7 @@ static VALUE normalize_sort_keys(VALUE value)
  *
  * Get the value of sort_keys.
  */
-static VALUE cState_sort_keys_p(VALUE self)
+static VALUE cState_sort_keys(VALUE self)
 {
     GET_STATE(self);
     return state->sort_keys;
@@ -1774,7 +1814,33 @@ static VALUE cState_sort_keys_set(VALUE self, VALUE value)
     rb_check_frozen(self);
     GET_STATE(self);
     RB_OBJ_WRITE(self, &state->sort_keys, normalize_sort_keys(value));
-    return Qnil;
+    return state->sort_keys;
+}
+
+
+/*
+ * call-seq: rfc8785?
+ *
+ * Get whether RFC8785 (canonicalization) is enabled.
+ */
+static VALUE cState_rfc8785_p(VALUE self)
+{
+    GET_STATE(self);
+    return state->rfc8785 ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq: rfc8785=
+ *
+ * Sets whether RFC8785 (canonicalization) is enabled.
+ */
+
+static VALUE cState_rfc8785_set(VALUE self, VALUE value)
+{
+    rb_check_frozen(self);
+    GET_STATE(self);
+    state->rfc8785 = RTEST(value);
+    return state->rfc8785 ? Qtrue : Qfalse;
 }
 
 static VALUE cState_allow_duplicate_key_p(VALUE self)
@@ -1797,8 +1863,7 @@ static VALUE cState_depth(VALUE self)
 /*
  * call-seq: depth=(depth)
  *
- * This sets the maximum level of data structure nesting in the generated JSON
- * to the integer depth, max_nesting = 0 if no maximum should be checked.
+ * Sets the current depth of data structure nesting to the integer +depth+.
  */
 static VALUE cState_depth_set(VALUE self, VALUE depth)
 {
@@ -1875,8 +1940,9 @@ static int configure_state_i(VALUE key, VALUE val, VALUE _arg)
     else if (key == sym_script_safe)           { state->script_safe = RTEST(val); }
     else if (key == sym_strict)                { state->strict = RTEST(val); }
     else if (key == sym_allow_duplicate_key)   { state->allow_duplicate_key = RTEST(val); }
+    else if (key == sym_rfc8785)               { state->rfc8785 = RTEST(val); }
     else if (key == sym_as_json)               {
-        VALUE proc = RTEST(val) ? rb_convert_type(val, T_DATA, "Proc", "to_proc") : Qfalse;
+        VALUE proc = RTEST(val) ? as_json_config(val) : Qfalse;
         state->as_json_single_arg = proc && rb_proc_arity(proc) == 1;
         state_write_value(data, &state->as_json, proc);
     }
@@ -1970,6 +2036,8 @@ void Init_generator(void)
     VALUE mGenerator = rb_define_module_under(mExt, "Generator");
 
     rb_global_variable(&default_sort_keys_proc);
+    rb_global_variable(&rfc8785_number_formater_proc);
+    rb_global_variable(&rfc8785_sort_keys_proc);
 
     rb_global_variable(&eGeneratorError);
     eGeneratorError = rb_path2class("JSON::GeneratorError");
@@ -1981,6 +2049,8 @@ void Init_generator(void)
     rb_define_alloc_func(cState, cState_s_allocate);
     rb_define_singleton_method(cState, "from_state", cState_from_state_s, 1);
     rb_define_singleton_method(cState, "default_sort_keys_proc=", cState_set_default_sort_keys_proc, 1);
+    rb_define_singleton_method(cState, "rfc8785_number_formater_proc=", cState_set_rfc8785_number_formater_proc, 1);
+    rb_define_singleton_method(cState, "rfc8785_sort_keys_proc=", cState_set_rfc8785_sort_keys_proc, 1);
 
     rb_define_method(cState, "initialize", cState_initialize, -1);
     rb_define_alias(cState, "initialize", "initialize"); // avoid method redefinition warnings
@@ -2018,8 +2088,10 @@ void Init_generator(void)
     rb_define_method(cState, "buffer_initial_length=", cState_buffer_initial_length_set, 1);
     rb_define_method(cState, "generate", cState_generate, -1);
     rb_define_method(cState, "_generate_no_fallback", cState_generate_no_fallback, -1);
-    rb_define_method(cState, "sort_keys", cState_sort_keys_p, 0);
+    rb_define_method(cState, "sort_keys", cState_sort_keys, 0);
     rb_define_method(cState, "sort_keys=", cState_sort_keys_set, 1);
+    rb_define_method(cState, "rfc8785?", cState_rfc8785_p, 0);
+    rb_define_method(cState, "rfc8785=", cState_rfc8785_set, 1);
 
     rb_define_private_method(cState, "allow_duplicate_key?", cState_allow_duplicate_key_p, 0);
 
@@ -2049,10 +2121,10 @@ void Init_generator(void)
     sym_as_json = ID2SYM(rb_intern("as_json"));
     sym_allow_duplicate_key = ID2SYM(rb_intern("allow_duplicate_key"));
     sym_sort_keys = ID2SYM(rb_intern("sort_keys"));
+    sym_rfc8785 = ID2SYM(rb_intern("rfc8785"));
 
     usascii_encindex = rb_usascii_encindex();
     utf8_encindex = rb_utf8_encindex();
-    binary_encindex = rb_ascii8bit_encindex();
 
     rb_require("json/ext/generator/state");
 

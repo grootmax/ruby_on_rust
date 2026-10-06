@@ -68,12 +68,18 @@ bool ruby_free_at_exit_p(void);
 void rb_objspace_reachable_objects_from_root(void (func)(const char *category, VALUE, void *), void *passing_data);
 void rb_gc_verify_shareable(VALUE);
 
+typedef void (*rb_gc_registered_addr_cb)(VALUE *slot, VALUE initial_value, void *owner_objspace, void *data);
+
 MODULAR_GC_FN unsigned int rb_gc_vm_lock(const char *file, int line);
 MODULAR_GC_FN void rb_gc_vm_unlock(unsigned int lev, const char *file, int line);
 MODULAR_GC_FN unsigned int rb_gc_vm_lock_no_barrier(const char *file, int line);
 MODULAR_GC_FN void rb_gc_vm_unlock_no_barrier(unsigned int lev, const char *file, int line);
 MODULAR_GC_FN void rb_gc_vm_barrier(void);
 MODULAR_GC_FN void rb_gc_vm_each_objspace(void (*func)(void *objspace, void *data), void *data);
+MODULAR_GC_FN void rb_gc_each_registered_addr(rb_gc_registered_addr_cb func, void *data);
+/* Verifier support, valid only with the world stopped (no extra locking inside). */
+MODULAR_GC_FN bool rb_gc_registered_addr_owned_by_registrant_p(VALUE *addr, void *objspace);
+MODULAR_GC_FN bool rb_gc_vm_zombie_objspace_p(void *objspace);
 MODULAR_GC_FN size_t rb_gc_vm_zombie_total_pages(void);
 MODULAR_GC_FN unsigned int rb_gc_vm_ractor_count(void);
 MODULAR_GC_FN void rb_gc_vm_refresh_zombie_pages(void);
@@ -196,22 +202,6 @@ gc_ref_update_table_values_only(st_table *tbl)
     if (st_foreach_with_replace(tbl, hash_foreach_replace_value, hash_replace_ref_value, 0)) {
         rb_raise(rb_eRuntimeError, "hash modified during iteration");
     }
-}
-
-static int
-gc_mark_tbl_no_pin_i(st_data_t key, st_data_t value, st_data_t data)
-{
-    rb_gc_mark_movable((VALUE)value);
-
-    return ST_CONTINUE;
-}
-
-static int
-gc_mark_set_no_pin_i(st_data_t key, st_data_t value, st_data_t data)
-{
-    rb_gc_mark_movable((VALUE)key);
-
-    return ST_CONTINUE;
 }
 
 static int

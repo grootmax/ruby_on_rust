@@ -1207,6 +1207,20 @@ fn test_yield_inlined_caller_block_dispatches_without_guards() {
 }
 
 #[test]
+fn test_yield_block_iseq_guard_survives_compaction() {
+    with_inlining_threshold(0, || {
+        eval("
+            def foo = yield
+            def test = foo { 42 }
+            # Call it enough times to compile both test and foo (through test's JIT-to-JIT stub)
+            4.times { test }
+            GC.verify_compaction_references(expand_heap: true, toward: :empty) if GC.respond_to?(:compact)
+        ");
+        assert_snapshot!(assert_compiles("test"), @"42");
+    });
+}
+
+#[test]
 fn test_yield_with_lambda_arg() {
     // A lambda passed via &l is a proc handler (not imemo_iseq): yield falls back but runs.
     set_call_threshold(2);
@@ -6098,6 +6112,30 @@ fn test_getivar_t_class_then_string() {
     assert_snapshot!(assert_compiles_allowing_exits("[STR.test, STR.test]"), @"[1000, 1000]");
 }
 
+#[test]
+fn test_getivar_frozen_constant_with_other_shape() {
+    // This is a regression test for an internal compiler error where LoadField
+    // for an embedded ivar was constant-folded by reading a frozen constant
+    // receiver at that offset, even though the constant stores its ivars
+    // out-of-line and therefore has a different shape than the profiled one.
+    set_call_threshold(2);
+    eval(r#"
+      class Box
+        def initialize(n)
+          n.times { |i| instance_variable_set(:"@a#{i}", i) }
+          @v = :v
+          freeze
+        end
+
+        def v = @v
+      end
+      EMBEDDED = Box.new(0)
+      EXTENDED = Box.new(20)
+      EMBEDDED.v; EMBEDDED.v # profile and compile Box#v for embedded ivars
+      def test = EXTENDED.v
+    "#);
+    assert_snapshot!(assert_compiles_allowing_exits("[test, test]"), @"[:v, :v]");
+}
 
 #[test]
 fn test_attr_accessor_setivar() {
@@ -6821,6 +6859,33 @@ fn test_profile_frames_during_direct_block_entry() {
 }
 
 #[test]
+fn test_profiled_proc_block_handler_does_not_retain_proc() {
+    // Profile more than one call so that the profile can hold several Procs
+    rb_zjit_prepare_options();
+    let num_profiles = get_option!(num_profiles);
+    set_call_threshold(CallThreshold::from(num_profiles) + 2);
+
+    assert_snapshot!(inspect("
+        def profiled_proc_take = yield
+        def profiled_proc_forward(&blk) = profiled_proc_take(&blk)
+
+        PROFILED_PROC_OBJECTS = ObjectSpace::WeakMap.new
+        def profiled_proc_make(i)
+          obj = Object.new
+          PROFILED_PROC_OBJECTS[i] = obj
+          pr = proc { obj }
+          profiled_proc_forward(&pr)
+          nil
+        end
+
+        100.times { |i| profiled_proc_make(i) }
+        4.times { GC.start(full_mark: true, immediate_sweep: true) }
+        # Allow one object kept alive by conservative stack scanning
+        PROFILED_PROC_OBJECTS.keys.size <= 1
+    "), @"true");
+}
+
+#[test]
 fn test_profile_under_nested_jit_call() {
     assert_snapshot!(inspect("
         def profile
@@ -7314,6 +7379,31 @@ fn test_struct_set() {
           :frozen_error
         end
     "), @"[42, 42, :frozen_error]");
+}
+
+#[test]
+fn test_struct_new() {
+    assert_snapshot!(inspect("
+        C = Struct.new(:a, :b, :c)
+        def test(x) = [C.new(x, x, x).to_a, C.new(x).to_a, C.new.to_a]
+        test 1
+        test 2
+    "), @"[[2, 2, 2], [2, nil, nil], [nil, nil, nil]]");
+}
+
+#[test]
+fn test_struct_initialize_on_frozen_receiver() {
+    assert_snapshot!(inspect("
+        C = Struct.new(:a)
+        def test(o)
+          o.send(:initialize, 1)
+          o.a
+        rescue FrozenError
+          :frozen_error
+        end
+        r = [test(C.new), test(C.new)]
+        r << test(C.new.freeze)
+    "), @"[1, 1, :frozen_error]");
 }
 
 #[test]
@@ -7853,6 +7943,61 @@ fn test_send_caller_splat_arguments_with_block_literal() {
         entry([1, 2, 3])
     ");
     assert_snapshot!(assert_compiles("entry([1, 2, 3])"), @"7");
+}
+
+#[test]
+fn test_send_polymorphic_caller_splat_arguments() {
+    set_call_threshold(3);
+    eval("
+        def test(*args) = args
+        def entry(args) = test(*args)
+        entry([1])
+        entry([2, 3])
+    ");
+    // Unprofiled lengths use the original Send without leaving compiled code.
+    assert_snapshot!(assert_compiles("[entry([4]), entry([5, 6]), entry([]), entry([7, 8, 9])]"), @"[[4], [5, 6], [], [7, 8, 9]]");
+}
+
+#[test]
+fn test_send_polymorphic_receiver_with_polymorphic_caller_splat() {
+    set_call_threshold(5);
+    eval("
+        class CallerSplatA
+          def target(*args) = args
+        end
+        class CallerSplatB
+          def target(*args) = args
+        end
+        class CallerSplatC
+          def target(*args) = args
+        end
+        def entry(recv, args) = recv.target(*args)
+        entry(CallerSplatA.new, [1])
+        entry(CallerSplatB.new, [2, 3])
+        entry(CallerSplatA.new, [4, 5])
+        entry(CallerSplatB.new, [6])
+    ");
+    // Both a new length and an unprofiled receiver use the shared original Send.
+    assert_snapshot!(assert_compiles("
+        [entry(CallerSplatA.new, [7]), entry(CallerSplatB.new, [8, 9]),
+         entry(CallerSplatA.new, [1, 2, 3]), entry(CallerSplatC.new, [10, 11, 12])]
+    "), @"[[7], [8, 9], [1, 2, 3], [10, 11, 12]]");
+}
+
+#[test]
+fn test_send_polymorphic_caller_splat_with_cfunc_receiver() {
+    set_call_threshold(5);
+    eval("
+        class CallerSplatFetch
+          def fetch(*args) = args
+        end
+        def entry(recv, args) = recv.fetch(*args)
+        entry(CallerSplatFetch.new, [1])
+        entry([10], [0])
+        entry(CallerSplatFetch.new, [2, 3])
+        entry([], [0, 20])
+    ");
+    assert_snapshot!(assert_compiles("[entry(CallerSplatFetch.new, [4]), entry([10], [0]), entry([], [0, 20])]"), @"[[4], 10, 20]");
 }
 
 #[test]

@@ -750,14 +750,19 @@ st_free_table(st_table *tab)
     free_fixed_ptr(tab);
 }
 
+size_t
+st_allocated_memsize(const st_table *tab)
+{
+    RUBY_ASSERT(tab != NULL);
+    return bins_size(tab) + st_entries_memsize(tab);
+}
+
 /* Return byte size of memory allocated for table TAB.  */
 size_t
 st_memsize(const st_table *tab)
 {
     RUBY_ASSERT(tab != NULL);
-    return(sizeof(st_table)
-           + bins_size(tab)
-           + st_entries_memsize(tab));
+    return sizeof(st_table) + st_allocated_memsize(tab);
 }
 
 static st_index_t
@@ -2451,7 +2456,7 @@ rb_hash_bulk_insert_into_st_table(long argc, const VALUE *argv, VALUE hash)
     st_index_t n, size = argc / 2;
     st_table *tab = RHASH_ST_TABLE(hash);
 
-    tab = RHASH_TBL_RAW(hash);
+    tab = rb_hash_tbl_raw(hash);
     n = tab->entries_bound + size;
     st_expand_table(tab, n);
     if (UNLIKELY(tab->num_entries))

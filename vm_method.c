@@ -826,7 +826,8 @@ rb_vm_insert_cc_refinement(const struct rb_callcache *cc)
     rb_vm_t *vm = GET_VM();
     RB_VM_LOCK_ENTER();
     {
-        struct cc_refinement_entries *e = RTYPEDDATA_GET_DATA(vm->cc_refinement_set);
+        VALUE set = vm->cc_refinement_set;
+        struct cc_refinement_entries *e = RTYPEDDATA_GET_DATA(set);
         if (e->len == e->capa) {
             size_t new_capa = e->capa == 0 ? 16 : e->capa * 2;
             SIZED_REALLOC_N(e->entries, VALUE, new_capa, e->capa);
@@ -836,7 +837,9 @@ rb_vm_insert_cc_refinement(const struct rb_callcache *cc)
 
         // We never mark the cc, but we need to issue a writebarrier so that
         // the refinement set can be added to the remembered set
-        RB_OBJ_WRITTEN(vm->cc_refinement_set, Qundef, (VALUE)cc);
+        RB_OBJ_WRITTEN(set, Qundef, (VALUE)cc);
+        /* The entries are embedded in set, so keep it pinned while e is in use. */
+        RB_GC_GUARD(set);
     }
     RB_VM_LOCK_LEAVE();
 }
@@ -2874,7 +2877,7 @@ rb_method_definition_eq(const rb_method_definition_t *d1, const rb_method_defini
       case VM_METHOD_TYPE_IVAR:
         return d1->body.attr.id == d2->body.attr.id;
       case VM_METHOD_TYPE_BMETHOD:
-        return RTEST(rb_equal(d1->body.bmethod.proc, d2->body.bmethod.proc));
+        return RTEST(rb_proc_eq(d1->body.bmethod.proc, d2->body.bmethod.proc));
       case VM_METHOD_TYPE_MISSING:
         return d1->original_id == d2->original_id;
       case VM_METHOD_TYPE_ZSUPER:
@@ -2933,7 +2936,7 @@ rb_hash_method_entry(st_index_t hash, const rb_method_entry_t *me)
 }
 
 void
-rb_alias(VALUE klass, ID alias_name, ID original_name)
+rb_add_alias(VALUE klass, ID alias_name, ID original_name, rb_method_visibility_t visi_alias)
 {
     const VALUE target_klass = klass;
     VALUE defined_class;
@@ -2960,9 +2963,9 @@ rb_alias(VALUE klass, ID alias_name, ID original_name)
              UNDEFINED_METHOD_ENTRY_P(orig_me))) {
             rb_print_undef(target_klass, original_name, METHOD_VISI_UNDEF);
         }
-        rb_warn_deprecated_to_remove_at(4.3,
-                                        "the fallback to Object for alias of '%"PRIsVALUE"' in module '%"PRIsVALUE"'",
-                                        NULL, QUOTE_ID(original_name), rb_class_path(target_klass));
+        rb_warn_scheduled_deprecation(4.2, 4.3,
+                                      "the fallback to Object for alias of '%"PRIsVALUE"' in module '%"PRIsVALUE"'",
+                                      NULL, QUOTE_ID(original_name), rb_class_path(target_klass));
     }
 
     switch (orig_me->def->type) {
@@ -2980,6 +2983,7 @@ rb_alias(VALUE klass, ID alias_name, ID original_name)
     }
 
     if (visi == METHOD_VISI_UNDEF) visi = METHOD_ENTRY_VISI(orig_me);
+    if (visi_alias != METHOD_VISI_UNDEF) visi = visi_alias;
 
     if (!NIL_P(ruby_verbose) && rb_warning_category_enabled_p(RB_WARN_CATEGORY_DEPRECATED)) {
         VALUE owner_class = orig_me->defined_class ? orig_me->defined_class : defined_class;
@@ -2995,7 +2999,7 @@ rb_alias(VALUE klass, ID alias_name, ID original_name)
         }
 
         if (in_prepended_module) {
-            rb_warn_deprecated_to_remove_at(4.3,
+            rb_warn_scheduled_deprecation(4.2, 4.3,
                 "aliasing %"PRIsVALUE"#%"PRIsVALUE" defined in a prepended module %"PRIsVALUE,
                 NULL,
                 rb_class_path(target_klass), QUOTE_ID(original_name),
@@ -3027,6 +3031,12 @@ rb_alias(VALUE klass, ID alias_name, ID original_name)
             RB_OBJ_WRITE(alias_me, &alias_me->defined_class, orig_me->defined_class);
         }
     }
+}
+
+void
+rb_alias(VALUE klass, ID alias_name, ID original_name)
+{
+    rb_add_alias(klass, alias_name, original_name, METHOD_VISI_UNDEF);
 }
 
 /*
