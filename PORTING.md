@@ -7,8 +7,8 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 317,186 | 100.0% |
-| **Not Started** | 106 | 316,840 | 99.9% |
+| **Total C Source Files** | 113 | 317,190 | 100.0% |
+| **Not Started** | 106 | 316,844 | 99.9% |
 | **In Progress** | 0 | 0 | 0.0% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
@@ -157,7 +157,7 @@ _Internal utility functions, tables, and system helpers_
 | `dln_find.c` | 294 | Not Started | `crate::dln_find` | Dynamic loading path search |
 | `error.c` | 4,422 | Not Started | `crate::error` | Exception and error handling |
 | `id_table.c` | 573 | Not Started | `crate::id_table` | ID lookup table |
-| `inits.c` | 116 | Not Started | `crate::inits` | Subsystem initializers |
+| `inits.c` | 120 | Not Started | `crate::inits` | Subsystem initializers |
 | `load.c` | 1,828 | Not Started | `crate::load` | Require and load mechanism |
 | `loadpath.c` | 91 | Not Started | `crate::loadpath` | LOAD_PATH initialization |
 | `localeinit.c` | 137 | Not Started | `crate::localeinit` | Locale initialization |
@@ -226,7 +226,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `hash.c` | Core Data Structures | 7,993 | Not Started | `crate::hash` | Hash map implementation |
 | `id_table.c` | Utilities & Support | 573 | Not Started | `crate::id_table` | ID lookup table |
 | `imemo.c` | Memory & Garbage Collection | 726 | Not Started | `crate::imemo` | Internal memo objects |
-| `inits.c` | Utilities & Support | 116 | Not Started | `crate::inits` | Subsystem initializers |
+| `inits.c` | Utilities & Support | 120 | Not Started | `crate::inits` | Subsystem initializers |
 | `io.c` | IO & Filesystem | 16,334 | Not Started | `crate::io` | IO class operations |
 | `io_buffer.c` | IO & Filesystem | 5,060 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
 | `iseq.c` | JIT Compiler | 4,735 | Not Started | `crate::iseq` | Instruction sequences |

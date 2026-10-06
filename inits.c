@@ -20,6 +20,10 @@ static void Init_builtin_prelude(void);
 void
 rb_call_inits(void)
 {
+#if USE_RUST_PORTS
+    void rb_core_rs_init(void);
+    rb_core_rs_init();
+#endif
     CALL(Thread_Mutex);
     CALL(RandomSeedCore);
     CALL(encodings);

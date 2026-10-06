@@ -42,7 +42,8 @@ jobs:
          working-dir: /tmp/github/
          exec: |
             DEBIAN_FRONTEND=noninteractive sudo apt update
-            DEBIAN_FRONTEND=noninteractive sudo apt install -y ruby build-essential autoconf libssl-dev libyaml-dev zlib1g-dev libgmp-dev libffi-dev
+            DEBIAN_FRONTEND=noninteractive sudo apt install -y ruby build-essential autoconf libssl-dev libyaml-dev zlib1g-dev libgmp-dev libffi-dev curl
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
 
       - name: Check out the repository
         uses: Ubuntu/WSL/.github/actions/wsl-checkout@main
@@ -57,6 +58,7 @@ jobs:
          distro: Ubuntu-24.04
          working-dir: /tmp/github/
          exec: |
+            export PATH="$HOME/.cargo/bin:$PATH"
             ./autogen.sh
             ./configure --disable-install-doc
             make ruby -j4

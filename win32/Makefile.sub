@@ -358,6 +358,26 @@ CPPFLAGS = $(DEFS) $(ARCHDEFS) $(CPPFLAGS)
 CPPFLAGS = -DDISABLE_RUBYGEMS $(CPPFLAGS)
 !endif
 
+!if "$(USE_RUST_PORTS)" == ""
+USE_RUST_PORTS = 1
+!endif
+
+!if "$(USE_RUST_PORTS)" == "1"
+RUST_LIB = target\release\ruby.lib
+RUST_LIBOBJ = target\release\ruby.obj
+
+$(RUST_LIBOBJ): $(RUST_LIB)
+	$(ECHO) converting $(RUST_LIB) to $@
+	copy /y $(RUST_LIB) $@
+
+$(RUST_LIB): $(srcdir)\ruby.rs
+	@if not exist target\release mkdir target\release
+	rustc --crate-name=core_rs --edition=2024 --crate-type=rlib --out-dir=target\release $(srcdir)\core_rs\src\lib.rs
+	rustc --edition=2024 -Ltarget\release --extern=core_rs=target\release\libcore_rs.rlib --crate-type=staticlib --out-dir=target\release $(srcdir)\ruby.rs
+
+OBJS = $(OBJS) $(RUST_LIBOBJ)
+!endif
+
 # https://learn.microsoft.com/en-us/cpp/build/reference/zc-preprocessor?view=msvc-170
 !if $(MSC_VER) >= 1925
 # maybe >= 1926?

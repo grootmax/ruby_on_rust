@@ -4087,12 +4087,70 @@ AS_CASE(["$JIT_CARGO_SUPPORT:$YJIT_SUPPORT:$ZJIT_SUPPORT"],
     AS_IF([test "${YJIT_SUPPORT}:${ZJIT_SUPPORT}" = "yes:yes"], [
         JIT_CARGO_SUPPORT=release
     ])
+    AS_IF([test "$USE_RUST_PORTS" = 1], [
+        AS_IF([test -n "$rb_cargo_features"], [
+            rb_cargo_features="core_rs,$rb_cargo_features"
+        ], [
+            rb_cargo_features="core_rs"
+        ])
+    ])
     CARGO_BUILD_ARGS="--profile ${JIT_CARGO_SUPPORT} --features ${rb_cargo_features}"
     AS_IF([test "${JIT_CARGO_SUPPORT}" = "dev"], [
         RUST_LIB="target/debug/libruby.a"
     ], [
         RUST_LIB="target/${JIT_CARGO_SUPPORT}/libruby.a"
     ])
+])
+
+AC_ARG_WITH(rust-ports,
+    AS_HELP_STRING([--with-rust-ports],
+    [build core Rust ported components (default: yes)]),
+    [with_rust_ports=$withval],
+    [with_rust_ports=yes]
+)
+
+RUST_TARGET=
+AS_IF([test "x$with_rust_ports" = "xyes"], [
+    AS_CASE(["$target"],
+        [x86_64-*-linux-musl*|x86_64-linux-musl*], [RUST_TARGET="x86_64-unknown-linux-musl"],
+        [x86_64-*-linux*|x86_64-linux*],           [RUST_TARGET="x86_64-unknown-linux-gnu"],
+        [aarch64-*-linux-musl*|aarch64-linux-musl*],[RUST_TARGET="aarch64-unknown-linux-musl"],
+        [aarch64-*-linux*|aarch64-linux*|arm64-*-linux*],[RUST_TARGET="aarch64-unknown-linux-gnu"],
+        [arm64-*-darwin*|aarch64-*-darwin*|arm64-darwin*|aarch64-darwin*], [RUST_TARGET="aarch64-apple-darwin"],
+        [x86_64-*-darwin*|x86_64-darwin*],     [RUST_TARGET="x86_64-apple-darwin"],
+        [x86_64-*-mingw*|x86_64-mingw*],        [RUST_TARGET="x86_64-pc-windows-gnu"],
+        [i[[3456]]86-*-mingw*|i[[3456]]86-mingw*],[RUST_TARGET="i686-pc-windows-gnu"],
+        [aarch64-*-mingw*|arm64-*-mingw*],      [RUST_TARGET="aarch64-pc-windows-gnu"],
+        [x86_64-*-msvc*|x86_64-*-mswin*|x86_64-mswin*], [RUST_TARGET="x86_64-pc-windows-msvc"],
+        [wasm32-*-wasi*|wasm32-wasi*],          [RUST_TARGET="wasm32-wasip1"],
+        [RUST_TARGET=""]
+    )
+
+    CORE_RUSTC_OK=no
+    AS_IF([test "$RUSTC" != "no"], [
+        RUSTC_TARGET_ARG=
+        AS_IF([test -n "$RUST_TARGET"], [
+            RUSTC_TARGET_ARG="--target=$RUST_TARGET"
+        ])
+        AS_IF([echo "pub extern \"C\" fn conftest() {}" | $RUSTC - $RUSTC_TARGET_ARG --edition=2024 --crate-type=staticlib --emit asm=/dev/null 2>/dev/null], [
+            CORE_RUSTC_OK=yes
+        ])
+    ])
+
+    AS_IF([test "x$CORE_RUSTC_OK" != "xyes"], [
+        AC_MSG_ERROR([rustc >= 1.85.0 is required for core Rust ports. Installation instructions available at https://www.rust-lang.org/tools/install. Alternatively, use --without-rust-ports to build without core Rust.])
+    ])
+    USE_RUST_PORTS=1
+], [
+    USE_RUST_PORTS=0
+])
+
+AC_DEFINE_UNQUOTED(USE_RUST_PORTS, $USE_RUST_PORTS, [Define to 1 if core Rust ports are enabled])
+AC_SUBST(USE_RUST_PORTS)
+AC_SUBST(RUST_TARGET)
+
+AS_IF([test "$USE_RUST_PORTS" = 1 && test -z "$RUST_LIB"], [
+    RUST_LIB="target/release/libruby.a"
 ])
 
 # In case either we're linking rust code

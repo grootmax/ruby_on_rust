@@ -93,6 +93,9 @@ jobs:
         with:
           srcdir: src
 
+      - name: Add Rust target
+        run: rustup target add ${{ matrix.arch == 'arm64' && 'aarch64-unknown-linux-gnu' || 'x86_64-unknown-linux-gnu' }}
+
       - name: Run configure
         run: >-
           ../src/configure -C --disable-install-doc

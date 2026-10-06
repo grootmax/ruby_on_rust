@@ -85,6 +85,8 @@ for /f "delims== tokens=1,*" %%I in (" %argv1% ") do ((set "opt=%%I") && (set "a
   if "%opt%" == "--path" goto :path
   if "%opt:~0,9%" == "--enable-" (set "enable=yes" & goto :enable)
   if "%opt:~0,10%" == "--disable-" (set "enable=no" & goto :enable)
+  if "%opt%" == "--with-rust-ports" goto :rust_ports_yes
+  if "%opt%" == "--without-rust-ports" goto :rust_ports_no
   if "%opt:~0,10%" == "--without-" goto :withoutarg
   if "%opt:~0,7%" == "--with-" goto :witharg
   if "%opt%" == "-h" goto :help
@@ -237,6 +239,12 @@ goto :loop ;
 goto :loop ;
 :dump-ast
   echo>> %config_make% DUMP_AST = %arg%
+goto :loop ;
+:rust_ports_yes
+  echo>> %config_make% USE_RUST_PORTS = 1
+goto :loop ;
+:rust_ports_no
+  echo>> %config_make% USE_RUST_PORTS = 0
 goto :loop ;
 :opt-dir
   if "%arg%" == "" (
