@@ -4109,9 +4109,9 @@ AS_IF([test "${YJIT_SUPPORT}:${ZJIT_SUPPORT}" = "yes:yes"], [
     JIT_CARGO_SUPPORT=release
 ])
 AS_IF([test -n "${rb_cargo_features}"], [
-    CARGO_BUILD_ARGS="--profile ${JIT_CARGO_SUPPORT} --offline --features ${rb_cargo_features}"
+    CARGO_BUILD_ARGS="--profile ${JIT_CARGO_SUPPORT} --features ${rb_cargo_features}"
 ], [
-    CARGO_BUILD_ARGS="--profile ${JIT_CARGO_SUPPORT} --offline"
+    CARGO_BUILD_ARGS="--profile ${JIT_CARGO_SUPPORT}"
 ])
 AS_IF([test "${JIT_CARGO_SUPPORT}" = "dev"], [
     RUST_LIB="target/debug/libruby.a"

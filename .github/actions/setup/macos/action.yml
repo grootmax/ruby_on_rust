@@ -29,3 +29,11 @@ runs:
         }
         dir_config ruby_configure_args gmp
         dir_config CONFIGURE_ARGS openssl@3
+
+    - name: Ensure Rust 1.85.0+
+      shell: bash
+      run: |
+        if ! rustc --edition=2024 -V >/dev/null 2>&1; then
+          rustup toolchain install 1.85.0 --profile minimal || true
+          rustup default 1.85.0 || true
+        fi

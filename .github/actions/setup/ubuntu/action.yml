@@ -70,3 +70,11 @@ runs:
         zlib1g-dev${arch} libncurses5-dev${arch} libffi-dev${arch} \
         autoconf ruby
         sudo apt-get install -qq -y pkg-config${arch} || :
+
+    - name: Ensure Rust 1.85.0+
+      shell: bash
+      run: |
+        if ! rustc --edition=2024 -V >/dev/null 2>&1; then
+          rustup toolchain install 1.85.0 --profile minimal || true
+          rustup default 1.85.0 || true
+        fi
