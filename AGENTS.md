@@ -100,3 +100,78 @@ When porting or updating a C source file:
 - **Do Not Mask Test Failures**: Do not modify test assertions or delete test cases to pass CI unless explicitly intended.
 - **Standard Ruby Tooling**: Scripts placed in `tool/` must rely strictly on standard Ruby libraries (`yaml`, `optparse`, etc.) without external gem dependencies.
 - **Path Resolution**: Tools and scripts should resolve repository paths relative to `__dir__` to work reliably across environments.
+
+---
+
+## 6. Core Rust Architecture (standing decisions)
+
+These decisions are fixed. A PR that deviates from them will be sent back. If you think one is wrong, say so in a PR comment. Do not work around it.
+
+1. **New Rust code lives in `core_rs/`.** It uses edition 2024, `rust-version = "1.85.0"`, and **no external crates**. `ruby.rs` only re-exports `core_rs` and must not contain ported functions.
+2. **Release builds compile core Rust with `rustc` only.** Cargo is optional: it is used only for `--enable-yjit=dev` / `--enable-zjit=dev` and developer tools. Builds must work offline. Do not make cargo required, and do not add `--offline` hacks.
+3. **One switch controls core Rust: `--with-rust-ports` (default) / `--without-rust-ports`.** It sets `USE_RUST_PORTS` (0/1) in `config.h`. If core Rust cannot be built, configure must fail with a clear message. Never silently fall back to an all-C build.
+4. **Keep the original C behind the switch.** A ported function's C body stays in place, wrapped in `#if !USE_RUST_PORTS` ... `#endif`. Do not delete the C, and never select the implementation with `USE_YJIT` / `USE_ZJIT`.
+5. **Faithful first.** The Rust version must behave byte-for-byte like the C version: same output, same flushing, same encoding handling, and the same build-time macros honoured (e.g. `RB_DEFAULT_PARSER` / `--with-parser`). Do not add "safety" behaviour such as silently ignoring `NULL` in a port. Document the precondition instead.
+6. **Do not modify upstream-owned code.** `yjit/`, `zjit/`, `jit/`, their `Cargo.toml` editions/MSRV and their `bindgen/` crates are synced from upstream CRuby. If you find a bug there, report it in the PR description.
+7. **No new exported symbols.** `nm -D --defined-only libruby.so` (from an `--enable-shared` build) must match `master`, unless the task explicitly adds public API. Symbols that cross the C↔Rust boundary use the internal `rb_` prefix and are declared in `internal/*.h`. `ruby_` is the public embedding-API namespace. Do not rename a symbol into it to get past `test-leaked-globals`.
+8. **Ledger.** Change statuses only through `tool/porting_status.yml`, then regenerate. A file is `In Progress` only once a port from this project has merged, and `Ported` only when no C implementation of it remains in use.
+
+---
+
+## 7. Scope Discipline
+
+- **One PR = one outcome.** Touch only the files the task names. If you believe another file must change, stop and explain why in a PR comment.
+- **Respect dependencies.** If the task says "blocked on #N", do not push until #N is merged. Then rebase onto `master`.
+- **Never fix a problem owned by another PR inside yours.** For example, build plumbing belongs to the build-foundation PR, not to a function port.
+
+---
+
+## 8. CI Integrity (non-negotiable)
+
+- **Never remove, skip, `if: false`, comment out, loosen or re-version a CI step or test** to make a PR pass. This includes the "Remove cargo" step and the `RUSTC='rustc +1.58.0'` job, which exist to prove rustc-only and MSRV builds.
+- **Never edit existing tests or expectations.** New tests may be added in new files.
+- **Unit tests must exercise real code.** A `#[cfg(test)]` stub that replaces the function under test makes the test meaningless. Do not write them.
+- **Allowed CI workflow edits** are only those your task explicitly allows. List each one and its reason in the PR description.
+
+---
+
+## 9. Definition of Done and Required Evidence
+
+A PR is **done** only when **every required check on the final commit is green** and the acceptance criteria in the task or review comment are met. Do **not** write "verified", "ready to merge" or "all tests pass" while any check is red, queued or in progress. Report the actual state instead.
+
+Every PR description must end with an **Evidence** section containing:
+- the exact commands you ran and the last lines of their output;
+- for each acceptance criterion, the command that demonstrates it;
+- the `git diff master --stat` file list;
+- for ports, test results in **both** `./configure` and `./configure --without-rust-ports` builds.
+
+---
+
+## 10. Reproducing CI Failures Locally
+
+Before pushing a fix, reproduce the **exact failing job**. Passing `make btest` is not evidence that a different job is fixed. Job names encode their configuration:
+
+| Failing job | Reproduce with |
+| :--- | :--- |
+| `make (check, --disable-yjit)` | `./configure --disable-yjit && make check` |
+| `make (check, RUSTC='rustc +1.58.0', 1.58.0)` | `rustup install 1.58.0` and remove `cargo` from PATH, then `./configure RUSTC='rustc +1.58.0' && make check` |
+| `make (zjit-check, ..., 1.85.0)` / ZJIT jobs | `./configure --enable-zjit=dev` plus the flags in the job name, then the named make target |
+| parse.y workflow (`EnvUtil.current_parser == %[parse.y]`) | `./configure --with-parser=parse.y && make && make TESTRUN_SCRIPT='-renvutil -v -e "exit EnvUtil.current_parser == %[parse.y]"' run` |
+| `omnibus compilations, #NN` | Matrix entry NN in `.github/workflows/compilers.yml` (compiler and flags), built **out of tree** |
+| `Windows ...` | `win32/Makefile.sub` (nmake). Unix-only Makefile rules do not apply |
+| `Cross compile` / `WebAssembly` | Host ≠ target. rustc needs `--target=<triple>` |
+| `Miscellaneous checks` | `ruby tool/generate_porting_ledger.rb --check` and the other steps in `.github/workflows/check_misc.yml` |
+
+Out-of-tree builds (`mkdir build && cd build && ../configure && make`) catch path bugs that in-tree builds hide.
+
+---
+
+## 11. When You Are Stuck
+
+If the same check fails after **two** fix attempts, stop changing code. Post a PR comment starting with `BLOCKED:` that names the check, the hypotheses you tested, the evidence for each, and what you need. Do not alternate between two settings, for example edition 2021 ↔ 2024.
+
+---
+
+## 12. Syncing From Upstream
+
+After merging `ruby/ruby` `master` into this fork, run `ruby tool/generate_porting_ledger.rb` and commit the updated `PORTING.md`. C line counts change on every sync, and the `Miscellaneous checks` workflow will fail until the ledger is regenerated.

@@ -27,20 +27,20 @@ subsystems:
 files:
   # JIT Compiler
   yjit.c:
-    status: Ported
+    status: Not Started
     target: "yjit"
     subsystem: "JIT Compiler"
-    notes: "YJIT engine implemented in Rust"
+    notes: "yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project"
   zjit.c:
-    status: In Progress
+    status: Not Started
     target: "zjit"
     subsystem: "JIT Compiler"
-    notes: "ZJIT compiler framework in Rust"
+    notes: "zjit.c is the C side of upstream ZJIT; ZJIT itself is upstream Rust, not a port by this project"
   jit.c:
-    status: In Progress
+    status: Not Started
     target: "jit"
     subsystem: "JIT Compiler"
-    notes: "JIT common interface layer"
+    notes: "C helpers shared by upstream YJIT/ZJIT"
   compile.c:
     status: Not Started
     target: "crate::compile"
@@ -228,10 +228,10 @@ files:
 
   # Memory & Garbage Collection
   gc.c:
-    status: In Progress
+    status: Not Started
     target: "gc::mmtk"
     subsystem: "Memory & Garbage Collection"
-    notes: "MMTk and GC integration"
+    notes: "MMTk support is upstream modular GC, not a port by this project"
   imemo.c:
     status: Not Started
     target: "crate::imemo"
@@ -595,7 +595,7 @@ files:
     subsystem: "Platform & Miscellaneous"
     notes: "Development runner binary"
   ruby.c:
-    status: In Progress
+    status: Not Started
     target: "crate::ruby_cli"
     subsystem: "Platform & Miscellaneous"
     notes: "Main Ruby CLI argument handling"
