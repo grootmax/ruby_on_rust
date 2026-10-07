@@ -74,10 +74,10 @@ files:
     subsystem: "Core Data Structures"
     notes: "Comparable mixin module"
   complex.c:
-    status: Not Started
-    target: "crate::complex"
+    status: In Progress
+    target: "core_rs::complex"
     subsystem: "Core Data Structures"
-    notes: "Complex number class"
+    notes: "Ported (complex-A-01, string scanner statics): issign, read_sign, isdecimal, read_rat_nos, read_rat, isimagunit, skip_ws and helpers. Remaining: Complex class methods"
   enum.c:
     status: Not Started
     target: "crate::enum"

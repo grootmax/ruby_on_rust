@@ -7,9 +7,9 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 317,448 | 100.0% |
-| **Not Started** | 104 | 311,285 | 98.1% |
-| **In Progress** | 2 | 5,817 | 1.8% |
+| **Total C Source Files** | 113 | 317,465 | 100.0% |
+| **Not Started** | 103 | 308,463 | 97.2% |
+| **In Progress** | 3 | 8,656 | 2.7% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
 | **N/A** | 7 | 346 | 0.1% |
@@ -36,7 +36,7 @@ _Built-in data types, objects, and core classes_
 | `bignum.c` | 7,350 | Not Started | `crate::bignum` | Big integer support |
 | `class.c` | 3,412 | Not Started | `crate::class` | Class and module hierarchy |
 | `compar.c` | 355 | Not Started | `crate::compar` | Comparable mixin module |
-| `complex.c` | 2,822 | Not Started | `crate::complex` | Complex number class |
+| `complex.c` | 2,839 | In Progress | `core_rs::complex` | Ported (complex-A-01, string scanner statics): issign, read_sign, isdecimal, read_rat_nos, read_rat, isimagunit, skip_ws and helpers. Remaining: Complex class methods |
 | `enum.c` | 5,310 | Not Started | `crate::enum` | Enumerable module |
 | `enumerator.c` | 4,794 | Not Started | `crate::enumerator` | Enumerator class |
 | `hash.c` | 7,993 | Not Started | `crate::hash` | Hash map implementation |
@@ -202,7 +202,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `class.c` | Core Data Structures | 3,412 | Not Started | `crate::class` | Class and module hierarchy |
 | `compar.c` | Core Data Structures | 355 | Not Started | `crate::compar` | Comparable mixin module |
 | `compile.c` | JIT Compiler | 15,441 | Not Started | `crate::compile` | Bytecode compiler |
-| `complex.c` | Core Data Structures | 2,822 | Not Started | `crate::complex` | Complex number class |
+| `complex.c` | Core Data Structures | 2,839 | In Progress | `core_rs::complex` | Ported (complex-A-01, string scanner statics): issign, read_sign, isdecimal, read_rat_nos, read_rat, isimagunit, skip_ws and helpers. Remaining: Complex class methods |
 | `concurrent_set.c` | Concurrency & Threads | 522 | Not Started | `crate::concurrent_set` | Lock-free concurrent set |
 | `cont.c` | Virtual Machine & Execution | 3,908 | Not Started | `crate::cont` | Continuation and Fiber core |
 | `debug.c` | Utilities & Support | 731 | Not Started | `crate::debug` | Debugging helpers |
