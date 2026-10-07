@@ -673,13 +673,18 @@ rb_stat_cmp(VALUE self, VALUE other)
 #endif
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     stat.dev    -> integer
+ *    dev -> integer
  *
- *  Returns an integer representing the device on which <i>stat</i>
- *  resides.
+ *  Returns the device number for the [snapshot](rdoc-ref:File::Stat@Snapshot) in `self`:
  *
- *     File.stat("testfile").dev   #=> 774
+ *  ```ruby
+ *  File.stat('/etc').dev # => 66306
+ *  File.stat('/dev').dev # => 5
+ *  ```
+ *
  */
 
 static VALUE
@@ -699,13 +704,21 @@ rb_stat_dev(VALUE self)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     stat.dev_major   -> integer
+ *    dev_major -> integer
  *
- *  Returns the major part of File::Stat#dev or +nil+.
+ *  Returns `nil` on Windows.
  *
- *     File.stat("/dev/fd1").dev_major   #=> 2
- *     File.stat("/dev/tty").dev_major   #=> 5
+ *  On other systems, returns the major part of the device number
+ *  for the [snapshot](rdoc-ref:File::Stat@Snapshot) in `self`:
+ *
+ *  ```ruby
+ *  File.stat('/etc').dev_major # => 259
+ *  File.stat('/dev').dev_major # => 0
+ *  ```
+ *
  */
 
 static VALUE
@@ -721,13 +734,21 @@ rb_stat_dev_major(VALUE self)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     stat.dev_minor   -> integer
+ *    dev_minor -> integer
  *
- *  Returns the minor part of File::Stat#dev or +nil+.
+ *  Returns `nil` on Windows.
  *
- *     File.stat("/dev/fd1").dev_minor   #=> 1
- *     File.stat("/dev/tty").dev_minor   #=> 0
+ *  On other systems, returns the minor part of the device number
+ *  for the [snapshot](rdoc-ref:File::Stat@Snapshot) in `self`:
+ *
+ *  ```ruby
+ *  File.stat('/etc').dev_minor # => 2
+ *  File.stat('/dev').dev_minor # => 5
+ *  ```
+ *
  */
 
 static VALUE
@@ -824,12 +845,23 @@ rb_stat_uid(VALUE self)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     stat.gid   -> integer
+ *    gid -> integer
  *
- *  Returns the numeric group id of the owner of <i>stat</i>.
+ *  On Windows, returns `0`.
  *
- *     File.stat("testfile").gid   #=> 500
+ *  On other systems, returns the group identifier of the owner of the entry
+ *  in the [snapshot](rdoc-ref:File::Stat@Snapshot) in `self`:
+ *
+ *  ```ruby
+ *  File.stat('/etc').gid   # => 0
+ *  filepath = '/tmp/t.tmp'
+ *  File.write(filepath, 'foo')
+ *  File.stat(filepath).gid # => 1000
+ *  File.delete(filepath)   # Clean up.
+ *  ```
  *
  */
 
@@ -1868,28 +1900,20 @@ rb_access(VALUE fname, int mode)
  */
 
 /*
+ * :markup: markdown
+ *
  * call-seq:
  *   File.directory?(object) -> true or false
  *
- * Returns whether the given +object+ represents a directory;
- * +object+ may be a string path or an IO object:
+ * Returns whether the given `object` represents a directory;
+ * `object` may be a string path or an IO object:
  *
- *   File.directory?('/etc')      # => true
- *   File.directory?('lib')       # => true
- *   File.directory?('README.md') # => false
- *   File.directory?('nosuch')    # => false
- *   File.directory?($stdin)      # => false
- *
- * Follows symbolic links:
- *
- *   dirpath = 'doc/dirname'
- *   File.symlink('.', dirpath)
- *   File.directory?(dirpath)     # => true
- *   File.unlink(dirpath)
- *   filepath = 't.tmp'
- *   File.symlink('README.md', filepath)
- *   File.directory?(filepath)    # => false
- *   File.unlink(filepath)
+ * ```ruby
+ * File.directory?('/etc')        # => true
+ * File.directory?('/etc/passwd') # => false
+ * File.directory?($stdin)        # => false
+ * File.directory?('nosuch')      # => false
+ * ```
  *
  */
 
@@ -2398,25 +2422,21 @@ rb_file_executable_real_p(VALUE obj, VALUE fname)
 #endif
 
 /*
+ * :markup: markdown
+ *
  * call-seq:
  *   File.file?(object) -> true or false
  *
- * Returns whether the given +object+, a string path or IO object,
+ * Returns whether the given `object`, a string path or IO object,
  * represents a filesystem entry that exists and is a regular file;
  * see File.ftype:
  *
- *   # Paths.
- *   File.file?('README.md')     # => true
- *   File.file?('doc/')     # => false
- *   File.file?('nosuch')     # => false
- *   # IO objects.
- *   file = File.new('README.md')
- *   File.file?(file)     # => true
- *   dir = Dir.new('doc/')
- *   File.file?(dir)     # => false
- *   # Clean up.
- *   file.close
- *   dir.close
+ * ```ruby
+ * File.file?('/etc/passwd') # => true
+ * File.file?('/etc')        # => false
+ * File.file?($stdin)        # => false
+ * File.file?('nosuch')      # => false
+ * ```
  *
  */
 
@@ -2571,25 +2591,29 @@ rb_file_rowned_p(VALUE obj, VALUE fname)
 }
 
 /*
+ * :markup: markdown
+
  * call-seq:
  *   File.grpowned?(object) -> true or false
  *
- * Returns whether the filesystem entry for the given +object+ exists,
- * and the effective group id of the calling process is the owner of the entry.
+ * Returns `false` on Windows.
  *
- * The given +object+ may be the string path to a file or directory entry:
+ * On other systems returns whether the effective group id of the calling process
+ * is the owner of the given `object`.
  *
- *   File.grpowned?('lib')         # => true
- *   File.grpowned?('README.md')   # => true
- *   File.grpowned?('/etc/passwd') # => false
- *   File.grpowned?('nosuch')      # => false
+ * The given +object+ may be the string path or an IO object:
  *
- * Or an open IO stream:
+ * ```ruby
+ * filepath = '/tmp/t.tmp'
+ * File.write(filepath, 'foo')
+ * File.grpowned?(filepath)       # => true
+ * File.grpowned?('/etc')         # => false
+ * File.grpowned?('/etc/passwd')  # => false
+ * File.grpowned?($stdin)         # => false
+ * File.grpowned?('nosuch')       # => false
+ * File.delete(filepath)          # Clean up.
+ * ```
  *
- *   File.open('README.md', 'r') {|file| File.grpowned?(file) }   # => true
- *   File.open('/etc/passwd', 'r') {|file| File.grpowned?(file) } # => false
- *
- * Returns +false+ on Windows.
  */
 
 static VALUE
@@ -2837,36 +2861,43 @@ rb_file_ftype(mode_t mode)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
  *    File.ftype(path) -> string
  *
- *  Returns the string type of the object at +path+, one of:
+ *  Returns the string type of the object at `path`, one of:
  *
- *  - <tt>'file'</tt>.
- *  - <tt>'directory'</tt>.
- *  - <tt>'characterSpecial'</tt>.
- *  - <tt>'blockSpecial'</tt>.
- *  - <tt>'fifo'</tt>.
- *  - <tt>'link'</tt>.
- *  - <tt>'socket'</tt>.
+ *  - `'file'`.
+ *  - `'directory'`.
+ *  - `'characterSpecial'`.
+ *  - `'blockSpecial'`.
+ *  - `'fifo'`.
+ *  - `'link'`.
+ *  - `'socket'`.
  *
  *  Examples:
  *
- *    File.ftype('README.md')   # => "file"
- *    File.ftype('lib')         # => "directory"
- *    File.ftype("/dev/null")   # => "characterSpecial"
- *    File.ftype("/dev/loop0")  # => "blockSpecial"
+ *  ```ruby
+ *  File.ftype('/etc/passwd') # => "file"
+ *  File.ftype('/etc')        # => "directory"
+ *  File.ftype("/dev/null")   # => "characterSpecial"
+ *  File.ftype("/dev/loop0")  # => "blockSpecial"
  *
- *    File.mkfifo('/tmp/pipe', 0666)
- *    File.ftype('/tmp/pipe')   # => "fifo"
+ *  File.mkfifo('/tmp/pipe', 0o666)
+ *  File.ftype('/tmp/pipe')   # => "fifo"
  *
- *    File.symlink('lib', 'lib_link')
- *    File.ftype('lib_link')    # => "link"
+ *  File.symlink('/etc/passwd', '/tmp/link')
+ *  File.ftype('/tmp/link')   # => "link"
  *
- *    UNIXServer.new('/tmp/socket')
- *    File.ftype('/tmp/socket') # => "socket"
+ *  require 'socket'
+ *  UNIXServer.new('/tmp/socket')
+ *  File.ftype('/tmp/socket') # => "socket"
  *
- *  Returns <tt>'unknown'</tt> if the type cannot be determined.
+ *  File.delete('/tmp/link', '/tmp/pipe', '/tmp/socket') # Clean up.
+ *  ```
+ *
+ *  Returns `'unknown'` if the type cannot be determined.
  */
 
 static VALUE
@@ -6927,40 +6958,44 @@ rb_stat_init_copy(VALUE copy, VALUE orig)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     stat.ftype -> string
+ *    ftype -> string
  *
- *  Returns the string type of the object at +path+, one of:
+ *  Returns the string type of the path in the [snapshot](rdoc-ref:File::Stat@Snapshot)
+ *  in `self`, one of:
  *
- *  - <tt>'file'</tt>.
- *  - <tt>'directory'</tt>.
- *  - <tt>'characterSpecial'</tt>.
- *  - <tt>'blockSpecial'</tt>.
- *  - <tt>'fifo'</tt>.
- *  - <tt>'link'</tt>.
- *  - <tt>'socket'</tt>.
+ *  - `'file'`.
+ *  - `'directory'`.
+ *  - `'characterSpecial'`.
+ *  - `'blockSpecial'`.
+ *  - `'fifo'`.
+ *  - `'link'`.
+ *  - `'socket'`.
  *
  *  Examples:
  *
- *    File.stat('README.md').ftype  # => "file"
- *    File.stat('lib').ftype        # => "directory"
- *    File.stat('/dev/null').ftype  # => "characterSpecial"
- *    File.stat('/dev/loop0').ftype # => "blockSpecial"
+ *  ```ruby
+ *  File.stat('/etc/passwd').ftype   # => "file"
+ *  File.stat('/etc').ftype          # => "directory"
+ *  File.stat('/dev/null').ftype     # => "characterSpecial"
+ *  File.stat('/dev/loop0').ftype    # => "blockSpecial"
  *
- *    File.mkfifo('/tmp/pipe', 0666)
- *    File.stat('/tmp/pipe').ftype  # => "fifo"
+ *  File.mkfifo('/tmp/pipe', 0o666)
+ *  File.stat('/tmp/pipe').ftype     # => "fifo"
  *
- *    # Follows symbolic link.
- *    File.symlink('lib', 'lib_link')
- *    File.stat('lib_link').ftype   # => "directory"
- *    # Does not follow symbolic link.
- *    File.lstat('lib_link').ftype  # => "link"
+ *  File.symlink('/etc/passwd', '/tmp/link')
+ *  File.lstat('/tmp/link').ftype    # => "link"
  *
- *    require 'socket'
- *    UNIXServer.new('/tmp/socket')
- *    File.stat('/tmp/socket').ftype # => "socket"
+ *  require 'socket'
+ *  UNIXServer.new('/tmp/socket')
+ *  File.stat('/tmp/socket').ftype   # => "socket"
  *
- *  Returns <tt>'unknown'</tt> if the type cannot be determined.
+ *  File.delete('/tmp/link', '/tmp/pipe', '/tmp/socket') # Clean up.
+ *  ```
+ *
+ *  Returns `'unknown'` if the type cannot be determined.
  */
 
 static VALUE
@@ -6970,13 +7005,19 @@ rb_stat_ftype(VALUE obj)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     stat.directory?   -> true or false
+ *    directory? -> true or false
  *
- *  Returns +true+ if <i>stat</i> is a directory, +false+ otherwise.
+ *  Returns whether the entry in the [snapshot](rdoc-ref:File::Stat@Snapshot) in `self`
+ *  is a directory:
  *
- *     File.stat("testfile").directory?   #=> false
- *     File.stat(".").directory?          #=> true
+ *  ```ruby
+ *  File.stat('/etc').directory?        # => true
+ *  File.stat('/etc/passwd').directory? # => false
+ *  ```
+ *
  */
 
 static VALUE
@@ -7185,19 +7226,25 @@ rb_stat_rowned(VALUE obj)
 }
 
 /*
+ * :markup: markdown
+ *
  * call-seq:
- *   stat.grpowned?(path) -> true or false
+ *   grpowned?(path) -> true or false
  *
- * Returns whether the filesystem entry for the given string +path+ exists,
- * and the effective group id of the calling process is the owner of the entry:
+ * Returns `false` on Windows.
  *
- *   File.stat('README.md').grpowned?   # => true
- *   File.stat('lib').grpowned?         # => true
- *   File.stat('/etc/passwd').grpowned? # => false
+ * On other systems, returns whether the effective group id of the calling process
+ * is the owner of the [snapshot](rdoc-ref:File::Stat@Snapshot) in `self`:
  *
- * Raises an exception if there is no entry at the given +path+.
+ * ```ruby
+ * filepath = '/tmp/t.tmp'
+ * File.write(filepath, 'foo')
+ * File.stat(filepath).grpowned?      # => true
+ * File.stat('/etc').grpowned?        # => false
+ * File.stat('/etc/passwd').grpowned? # => false
+ * File.delete(filepath)              # Clean up.
+ * ```
  *
- * Returns +false+ on Windows.
  */
 
 static VALUE
@@ -7516,17 +7563,18 @@ rb_stat_X(VALUE obj)
 }
 
 /*
+ * :markup: markdown
+ *
  *  call-seq:
  *    file? -> true or false
  *
- * Returns whether +self+ represents a filesystem entry that exists and is a regular file;
+ * Returns whether `self` represents a filesystem entry that exists and is a regular file;
  * see File::Stat.ftype:
  *
- *   # Paths.
- *   File.stat('README.md').file?     # => true
- *   File.stat('doc/').file?     # => false
- *   File.stat('nosuch').file? # Raises Errno::ENOENT: No such file or directory.
- *
+ * ```ruby
+ * File.stat('/etc/passwd').file? # => true
+ * File.stat('/etc').file?        # => false
+ * ```
  *
  */
 
