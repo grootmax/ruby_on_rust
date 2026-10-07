@@ -1,5 +1,8 @@
 name: Update default gems list
-on: [push, pull_request, merge_group]
+# Ruby on Rust: upstream-only automation, run on demand only (owner decision
+# 2026-10-07; see UPSTREAM.md). Upstream's original triggers are in git history.
+on:
+  workflow_dispatch:
 
 env:
   UPDATE_NEWS_ENABLED: true

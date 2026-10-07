@@ -1,6 +1,8 @@
 name: "Pull Request Labeler"
+# Ruby on Rust: upstream-only automation, run on demand only (owner decision
+# 2026-10-07; see UPSTREAM.md). Upstream's original triggers are in git history.
 on:
-- pull_request_target
+  workflow_dispatch:
 
 permissions:
   contents: read

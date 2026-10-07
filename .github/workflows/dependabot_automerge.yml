@@ -1,7 +1,9 @@
 # from https://github.com/gofiber/swagger/blob/main/.github/workflows/dependabot_automerge.yml
 name: Dependabot auto-merge
+# Ruby on Rust: upstream-only automation, run on demand only (owner decision
+# 2026-10-07; see UPSTREAM.md). Upstream's original triggers are in git history.
 on:
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: write

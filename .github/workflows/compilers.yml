@@ -1,24 +1,14 @@
 # Some tests depending on this name 'Compilations' via $GITHUB_WORKFLOW. Make sure to update such tests when renaming this workflow.
 name: Compilations
 
+# Ruby on Rust: upstream's full matrix runs nightly and on demand instead of
+# on every push and pull request, so the CI queue keeps up with the porting
+# PRs (owner decision 2026-10-07; see UPSTREAM.md). The per-PR gate is the
+# `Rust ports` workflow. Upstream's original triggers are in git history.
 on:
-  push:
-    paths-ignore:
-      - 'doc/**'
-      - '**/man/*'
-      - '**.md'
-      - '**.rdoc'
-      - '**/.document'
-      - '.*.yml'
-  pull_request:
-    paths-ignore:
-      - 'doc/**'
-      - '**/man/*'
-      - '**.md'
-      - '**.rdoc'
-      - '**/.document'
-      - '.*.yml'
-  merge_group:
+  schedule:
+    - cron: '17 20 * * *'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }} / ${{ startsWith(github.event_name, 'pull') && github.ref_name || github.sha }}
