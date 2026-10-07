@@ -7,8 +7,8 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 317,204 | 100.0% |
-| **Not Started** | 104 | 311,041 | 98.1% |
+| **Total C Source Files** | 113 | 317,448 | 100.0% |
+| **Not Started** | 104 | 311,285 | 98.1% |
 | **In Progress** | 2 | 5,817 | 1.8% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
@@ -23,8 +23,8 @@ _Just-In-Time compilers and execution machinery_
 | :--- | :--- | :--- | :--- | :--- |
 | `compile.c` | 15,441 | Not Started | `crate::compile` | Bytecode compiler |
 | `iseq.c` | 4,735 | Not Started | `crate::iseq` | Instruction sequences |
-| `jit.c` | 916 | Not Started | `jit` | C helpers shared by upstream YJIT/ZJIT |
-| `yjit.c` | 546 | Not Started | `yjit` | yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project |
+| `jit.c` | 965 | Not Started | `jit` | C helpers shared by upstream YJIT/ZJIT |
+| `yjit.c` | 603 | Not Started | `yjit` | yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project |
 | `zjit.c` | 406 | Not Started | `zjit` | zjit.c is the C side of upstream ZJIT; ZJIT itself is upstream Rust, not a port by this project |
 
 ### Core Data Structures
@@ -32,7 +32,7 @@ _Built-in data types, objects, and core classes_
 
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `array.c` | 9,132 | Not Started | `crate::array` | Array object implementation |
+| `array.c` | 9,137 | Not Started | `crate::array` | Array object implementation |
 | `bignum.c` | 7,350 | Not Started | `crate::bignum` | Big integer support |
 | `class.c` | 3,412 | Not Started | `crate::class` | Class and module hierarchy |
 | `compar.c` | 355 | Not Started | `crate::compar` | Comparable mixin module |
@@ -78,7 +78,7 @@ _Garbage collector, object allocator, and memory views_
 
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `gc.c` | 7,030 | Not Started | `gc::mmtk` | MMTk support is upstream modular GC, not a port by this project |
+| `gc.c` | 7,106 | Not Started | `gc::mmtk` | MMTk support is upstream modular GC, not a port by this project |
 | `imemo.c` | 726 | Not Started | `crate::imemo` | Internal memo objects |
 | `memory_view.c` | 902 | Not Started | `crate::memory_view` | Memory view interface |
 | `shape.c` | 1,716 | Not Started | `crate::shape` | Object shape / property layout tracking |
@@ -89,7 +89,7 @@ _Threading, ractors, synchronization, and scheduling_
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `concurrent_set.c` | 522 | Not Started | `crate::concurrent_set` | Lock-free concurrent set |
-| `ractor.c` | 4,312 | Not Started | `crate::ractor` | Ractor actor model implementation |
+| `ractor.c` | 4,321 | Not Started | `crate::ractor` | Ractor actor model implementation |
 | `ractor_sync.c` | 1,940 | Not Started | `crate::ractor::sync` | Ractor synchronization |
 | `scheduler.c` | 1,395 | Not Started | `crate::scheduler` | Fiber scheduler interface |
 | `signal.c` | 1,646 | Not Started | `crate::signal` | Signal handling |
@@ -121,7 +121,7 @@ _Input/Output operations, files, directories, and processes_
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `dir.c` | 4,197 | Not Started | `crate::dir` | Directory operations |
-| `file.c` | 9,429 | Not Started | `crate::file` | File system operations |
+| `file.c` | 9,477 | Not Started | `crate::file` | File system operations |
 | `io.c` | 16,334 | Not Started | `crate::io` | IO class operations |
 | `io_buffer.c` | 5,060 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
 | `pathname.c` | 457 | Not Started | `crate::pathname` | Pathname standard helper |
@@ -194,7 +194,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | C Source File | Subsystem | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `addr2line.c` | Utilities & Support | 2,778 | Not Started | `crate::addr2line` | Address to source line resolution |
-| `array.c` | Core Data Structures | 9,132 | Not Started | `crate::array` | Array object implementation |
+| `array.c` | Core Data Structures | 9,137 | Not Started | `crate::array` | Array object implementation |
 | `ast.c` | Parser & AST | 1,280 | Not Started | `crate::parser::ast` | Ruby::AST module |
 | `bignum.c` | Core Data Structures | 7,350 | Not Started | `crate::bignum` | Big integer support |
 | `box.c` | Utilities & Support | 1,346 | Not Started | `crate::box` | Value boxing helpers |
@@ -220,8 +220,8 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `eval.c` | Virtual Machine & Execution | 2,344 | Not Started | `crate::eval` | Top-level evaluation entry points |
 | `eval_error.c` | Virtual Machine & Execution | 588 | Not Started | `crate::eval::error` | Evaluation error handling |
 | `eval_jump.c` | Virtual Machine & Execution | 144 | Not Started | `crate::eval::jump` | Control flow jumps (throw, break, return) |
-| `file.c` | IO & Filesystem | 9,429 | Not Started | `crate::file` | File system operations |
-| `gc.c` | Memory & Garbage Collection | 7,030 | Not Started | `gc::mmtk` | MMTk support is upstream modular GC, not a port by this project |
+| `file.c` | IO & Filesystem | 9,477 | Not Started | `crate::file` | File system operations |
+| `gc.c` | Memory & Garbage Collection | 7,106 | Not Started | `gc::mmtk` | MMTk support is upstream modular GC, not a port by this project |
 | `goruby.c` | Platform & Miscellaneous | 68 | N/A | `N/A` | Golf Ruby executable wrapper |
 | `hash.c` | Core Data Structures | 7,993 | Not Started | `crate::hash` | Hash map implementation |
 | `id_table.c` | Utilities & Support | 573 | Not Started | `crate::id_table` | ID lookup table |
@@ -230,7 +230,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `io.c` | IO & Filesystem | 16,334 | Not Started | `crate::io` | IO class operations |
 | `io_buffer.c` | IO & Filesystem | 5,060 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
 | `iseq.c` | JIT Compiler | 4,735 | Not Started | `crate::iseq` | Instruction sequences |
-| `jit.c` | JIT Compiler | 916 | Not Started | `jit` | C helpers shared by upstream YJIT/ZJIT |
+| `jit.c` | JIT Compiler | 965 | Not Started | `jit` | C helpers shared by upstream YJIT/ZJIT |
 | `load.c` | Utilities & Support | 1,828 | Not Started | `crate::load` | Require and load mechanism |
 | `loadpath.c` | Utilities & Support | 91 | Not Started | `crate::loadpath` | LOAD_PATH initialization |
 | `localeinit.c` | Utilities & Support | 137 | Not Started | `crate::localeinit` | Locale initialization |
@@ -251,7 +251,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `prism_init.c` | Parser & AST | 9 | Not Started | `crate::parser::prism_init` | Prism initialization |
 | `proc.c` | Core Data Structures | 5,538 | Not Started | `crate::proc` | Proc, Method, and Binding objects |
 | `process.c` | IO & Filesystem | 9,651 | Not Started | `crate::process` | Process management |
-| `ractor.c` | Concurrency & Threads | 4,312 | Not Started | `crate::ractor` | Ractor actor model implementation |
+| `ractor.c` | Concurrency & Threads | 4,321 | Not Started | `crate::ractor` | Ractor actor model implementation |
 | `ractor_sync.c` | Concurrency & Threads | 1,940 | Not Started | `crate::ractor::sync` | Ractor synchronization |
 | `random.c` | IO & Filesystem | 1,862 | Not Started | `crate::random` | Random number generation |
 | `range.c` | Core Data Structures | 3,006 | Not Started | `crate::range` | Range object implementation |
@@ -304,5 +304,5 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `vm_trace.c` | Virtual Machine & Execution | 1,983 | Not Started | `crate::vm::trace` | TracePoint and event hooks |
 | `vsnprintf.c` | Utilities & Support | 1,298 | Not Started | `crate::vsnprintf` | Portable vsnprintf |
 | `weakmap.c` | Core Data Structures | 999 | Not Started | `crate::weakmap` | ObjectSpace::WeakMap |
-| `yjit.c` | JIT Compiler | 546 | Not Started | `yjit` | yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project |
+| `yjit.c` | JIT Compiler | 603 | Not Started | `yjit` | yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project |
 | `zjit.c` | JIT Compiler | 406 | Not Started | `zjit` | zjit.c is the C side of upstream ZJIT; ZJIT itself is upstream Rust, not a port by this project |

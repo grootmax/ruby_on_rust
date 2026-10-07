@@ -177,6 +177,10 @@ If the same check fails after **two** fix attempts, stop changing code. Post a P
 
 ---
 
-## 12. Syncing From Upstream
+## 12. Upstream (ruby/ruby)
 
-After merging `ruby/ruby` `master` into this fork, run `ruby tool/generate_porting_ledger.rb` and commit the updated `PORTING.md` to refresh the line counts. `--check` (run by the `Miscellaneous checks` workflow) ignores line-count drift, so upstream syncs no longer turn master red. It still fails when a top-level C file is added or removed, or when statuses, targets, subsystems or notes in `PORTING.md` differ from `tool/porting_status.yml`.
+The fork stopped syncing from ruby/ruby on 2026-10-07; the base commit and the policy are in `UPSTREAM.md`.
+
+- **Never merge ruby/ruby `master` into this repository.**
+- Security fixes are cherry-picked as single PRs labelled `security-backport`. When the affected function has a Rust port, fix both the C (behind `#if !USE_RUST_PORTS`) and the Rust port, and add a regression test.
+- After any change to top-level C files, run `ruby tool/generate_porting_ledger.rb` to refresh `PORTING.md`. `--check` ignores line-count drift but fails on file-list, status, target, subsystem or note differences.
