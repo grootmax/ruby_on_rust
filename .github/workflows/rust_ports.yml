@@ -4,7 +4,10 @@ name: Rust ports
 # cannot be built, so these jobs prove that the default `auto` mode really
 # uses Rust on Linux and macOS.  The full upstream matrix runs separately.
 on:
+  # Branches are checked through their pull requests; push runs only on
+  # master, so each PR push starts one gate run, not two.
   push:
+    branches: [master]
     paths-ignore:
       - 'doc/**'
       - '**/man/*'
