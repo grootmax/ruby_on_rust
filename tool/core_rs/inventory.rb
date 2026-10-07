@@ -136,7 +136,7 @@ def scan_file(path, pub, aliases)
       semi = text.index(";")
       eq = text.index("=")
       if brace && (!semi || brace < semi) && !(eq && eq < (text.index("(") || 0)) &&
-         text[0...brace] =~ /\)\s*(?:\w+\s*(?:\([^)]*\))?\s*)*\z/m
+         text[0...brace] =~ /\)\s*(?:\w+\b\s*(?:\([^)]*\)\s*)?)*\z/m
         last = (j...code.size).find { |k| raw[k].start_with?("}") }
         if last
           head = (i > 0 ? code[i - 1] : "") + line
