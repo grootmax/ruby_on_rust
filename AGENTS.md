@@ -179,4 +179,4 @@ If the same check fails after **two** fix attempts, stop changing code. Post a P
 
 ## 12. Syncing From Upstream
 
-After merging `ruby/ruby` `master` into this fork, run `ruby tool/generate_porting_ledger.rb` and commit the updated `PORTING.md`. C line counts change on every sync, and the `Miscellaneous checks` workflow will fail until the ledger is regenerated.
+After merging `ruby/ruby` `master` into this fork, run `ruby tool/generate_porting_ledger.rb` and commit the updated `PORTING.md` to refresh the line counts. `--check` (run by the `Miscellaneous checks` workflow) ignores line-count drift, so upstream syncs no longer turn master red. It still fails when a top-level C file is added or removed, or when statuses, targets, subsystems or notes in `PORTING.md` differ from `tool/porting_status.yml`.
