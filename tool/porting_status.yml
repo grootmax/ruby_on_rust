@@ -401,10 +401,10 @@ files:
     subsystem: "Encoding & Regex"
     notes: "Character transcoding"
   re.c:
-    status: Not Started
-    target: "crate::re"
+    status: In Progress
+    target: "core_rs::re"
     subsystem: "Encoding & Regex"
-    notes: "Regexp class interface"
+    notes: "Ported: rb_memsearch (all search algorithms), rb_memcicmp. Remaining: Regexp class interface"
   regcomp.c:
     status: Not Started
     target: "crate::regcomp"

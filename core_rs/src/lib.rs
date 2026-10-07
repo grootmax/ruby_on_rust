@@ -18,6 +18,7 @@
 #![cfg_attr(not(test), no_std)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
+pub mod re;
 pub mod util;
 
 /// C runtime pieces that `no_std` code needs.

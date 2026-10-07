@@ -67,9 +67,14 @@ struct RRegexp_and_re_pattern_buffer {
 
 VALUE rb_eRegexpError, rb_eRegexpTimeoutError;
 
+#ifndef USE_RUST_PORTS
+# define USE_RUST_PORTS 0
+#endif
+
 typedef char onig_errmsg_buffer[ONIG_MAX_ERROR_MESSAGE_LEN];
 #define errcpy(err, msg) strlcpy((err), (msg), ONIG_MAX_ERROR_MESSAGE_LEN)
 
+#if !USE_RUST_PORTS /* casetable is used only by rb_memcicmp, ported to core_rs/src/re.rs */
 #if 'a' == 97   /* it's ascii */
 static const char casetable[] = {
         '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
@@ -120,10 +125,12 @@ static const char casetable[] = {
 #else
 # error >>> "You lose. You will need a translation table for your character set." <<<
 #endif
+#endif /* !USE_RUST_PORTS: casetable */
 
 // The process-global timeout for regexp matching
 rb_hrtime_t rb_reg_match_time_limit = 0;
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/re.rs */
 int
 rb_memcicmp(const void *x, const void *y, long len)
 {
@@ -317,6 +324,7 @@ rb_memsearch(const void *x0, long m, const void *y0, long n, rb_encoding *enc)
     }
     return rb_memsearch_qs(x0, m, y0, n);
 }
+#endif /* !USE_RUST_PORTS: rb_memcicmp, rb_memsearch */
 
 static int
 char_to_option(int c)

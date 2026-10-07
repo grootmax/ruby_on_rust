@@ -67,6 +67,43 @@ class TestRustPorts < Test::Unit::TestCase
     assert_equal("\x01" + "8", eval('"\18"'))
   end
 
+  # rb_memsearch via String#index, #split and #each_line (re.c).  Covers each
+  # algorithm: memchr (m == 1), short patterns, Quick Search for binary and
+  # for UTF-8, and code-unit aligned search for UTF-16/UTF-32.
+  def test_memsearch
+    assert_equal(4, "hello world".index("o w"))
+    assert_equal(6, "abcabcabcabcabcabd".b.index("abcabcabcabd".b))
+    assert_equal(10, "abababababababababac".index("ababababac"))
+    assert_equal(3, "ありがとうございます".index("とうござ"))
+    assert_equal(5, "ありがとうございます、ありがとうございます".index("ございます、あり"))
+    assert_equal(29, ("x" * 30 + "\u{1F600}y").index("x\u{1F600}y"))
+    assert_equal(0, "abc".index(""))
+    assert_equal(0, "abc".index("abc"))
+    assert_nil("abc".index("abcd"))
+    assert_equal(["a", "b", "", "c"], "a,b,,c".split(","))
+    assert_equal(["one", "two", "three"], "one<>two<>three".split("<>"))
+    assert_equal(["a\r\n", "b\r\n", "c"], "a\r\nb\r\nc".each_line("\r\n").to_a)
+  end
+
+  def test_memsearch_wide_encodings
+    u16 = ->(s) { s.encode("UTF-16LE") }
+    u32 = ->(s) { s.encode("UTF-32LE") }
+    assert_equal(2, u16["abc"].index(u16["c"]))
+    assert_equal(2, u32["abcd"].index(u32["cd"]))
+    # The bytes of the needle occur only at an odd offset, which is not a
+    # code unit boundary.
+    assert_nil(u16["šĀ"].index(u16["\u0001"]))
+    assert_nil(u16["愀b"].index(u16["a"]))
+  end
+
+  # rb_memcicmp via Float#round(half:) option parsing (numeric.c).
+  def test_memcicmp
+    assert_equal(3, 2.5.round(half: :up))
+    assert_equal(3, 2.5.round(half: "UP"))
+    assert_equal(2, 2.5.round(half: "Even"))
+    assert_equal(2, 2.5.round(half: :even))
+  end
+
   # ruby_each_words via --enable/--disable option lists (ruby.c).
   def test_each_words_feature_lists
     assert_in_out_err(%w[--disable=gems,did_you_mean -e p(defined?(Gem))], "", ["nil"], [])
