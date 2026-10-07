@@ -95,3 +95,7 @@ jobs:
           ../src/test/ruby/test_literal.rb
           ../src/test/ruby/test_m17n.rb
           "
+
+defaults:
+  run:
+    working-directory: build

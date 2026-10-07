@@ -4175,6 +4175,34 @@ AS_CASE(["$rb_rust_ports"], [no], [], [
                 LIBS="$rb_rust_ports_save_LIBS"
                 AC_MSG_RESULT($rb_rust_ports_ok)
             ])
+            dnl The partial link must keep the rb_*/ruby_* entry points global
+            dnl and localize everything else.  Old LLVM binutils (e.g. the
+            dnl llvm-objcopy that comes with clang 6-9) lack --wildcard, so try
+            dnl the exact pipeline the Makefile uses on the probe library.
+            AS_IF([test "$rb_rust_ports_ok" = yes], [
+                AC_MSG_CHECKING([whether ${LD}, ${NM} and ${OBJCOPY} can partially link core_rs])
+                AS_CASE(["$target_os"],
+                [darwin*], [
+                    AS_IF([echo _rb_conftest_core_rs > "$rb_rust_ports_conftest/syms" &&
+                           $CC -nodefaultlibs -r -o "$rb_rust_ports_conftest/core_rs.o" \
+                               -exported_symbols_list "$rb_rust_ports_conftest/syms" \
+                               "$rb_rust_ports_conftest/libconftest.a" >&AS_MESSAGE_LOG_FD 2>&1],
+                        [], [rb_rust_ports_ok=no])
+                ], [
+                    AS_IF([test "$OBJCOPY" != ":" &&
+                           $NM --defined-only --extern-only "$rb_rust_ports_conftest/libconftest.a" 2>/dev/null |
+                               grep 'T rb_conftest_core_rs' >/dev/null &&
+                           $LD -r -o "$rb_rust_ports_conftest/core_rs.o" -u rb_conftest_core_rs \
+                               "$rb_rust_ports_conftest/libconftest.a" >&AS_MESSAGE_LOG_FD 2>&1 &&
+                           $OBJCOPY --wildcard --keep-global-symbol="rb_*" --keep-global-symbol="ruby_*" \
+                               "$rb_rust_ports_conftest/core_rs.o" >&AS_MESSAGE_LOG_FD 2>&1 &&
+                           $NM "$rb_rust_ports_conftest/core_rs.o" 2>/dev/null | grep 'T rb_conftest_core_rs' >/dev/null],
+                        [], [rb_rust_ports_ok=no])
+                ])
+                AS_IF([test "$rb_rust_ports_ok" = no],
+                    [rb_rust_ports_why="${LD}/${NM}/${OBJCOPY} cannot partially link and localize the Rust staticlib"])
+                AC_MSG_RESULT($rb_rust_ports_ok)
+            ])
             rm -rf "$rb_rust_ports_conftest"
         ],
         [rb_rust_ports_why="target OS $target_os is not supported yet"])
@@ -4183,7 +4211,7 @@ AS_CASE(["$rb_rust_ports"], [no], [], [
 
 AS_CASE(["$rb_rust_ports:$rb_rust_ports_ok"],
 [yes:no], [
-    AC_MSG_ERROR([--with-rust-ports was given but the Rust ports cannot be built: $rb_rust_ports_why. Install rustc 1.85.0+ (https://www.rust-lang.org/tools/install) or configure with --without-rust-ports])
+    AC_MSG_ERROR([--with-rust-ports was given but the Rust ports cannot be built: $rb_rust_ports_why. Install rustc 1.85.0+ (https://www.rust-lang.org/tools/install) and GNU-compatible ld/nm/objcopy, or configure with --without-rust-ports])
 ],
 [auto:no], [
     AC_MSG_WARN([building WITHOUT the Rust ports: $rb_rust_ports_why])

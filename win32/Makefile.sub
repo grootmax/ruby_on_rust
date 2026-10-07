@@ -972,6 +972,7 @@ s,@CFLAGS@,$(CFLAGS),;t t
 s,@warnflags@,$(WARNFLAGS),;t t
 s,@WERRORFLAG@,$(WERRORFLAG),;t t
 s,@DEFS@,$(DEFS),;t t
+s,@USE_RUST_PORTS@,0,;t t
 s,@CPPFLAGS@,$(CPPFLAGS),;t t
 s,@CXXFLAGS@,$(CXXFLAGS),;t t
 s,@incflags@,$(incflags),;t t
