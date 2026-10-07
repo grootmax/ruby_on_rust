@@ -206,7 +206,7 @@ def demote_non_leaves(funcs)
     end
     break unless changed
   end
-  funcs.each { |f| f.body = nil }
+  funcs.each { |f| f.body = nil } # callees stay: --check uses them
 end
 
 # ---- port units --------------------------------------------------------------
@@ -339,11 +339,16 @@ def check(funcs)
   exports = rust_exports
   ported = funcs.select(&:ported)
   ported.each do |f|
-    # Static helpers are ported inside the function that uses them, or
-    # exported as rb_core_<file>_<name>.
-    target = f.static ? "rb_core_#{File.basename(f.file, '.c')}_#{f.name}" : f.name
-    next if f.static && !exports.include?(target) && ported.any? { |g| g.file == f.file && !g.static }
-    errors << "#{f.file}:#{f.first}: #{f.name} is behind #if !USE_RUST_PORTS but core_rs exports no #{target}" unless exports.include?(target)
+    if f.static
+      # A ported static function needs an rb_core_<file>_<name> export only
+      # while C code that is not ported still calls it.
+      target = "rb_core_#{File.basename(f.file, '.c')}_#{f.name}"
+      next if exports.include?(target)
+      caller = funcs.find { |g| g.file == f.file && !g.ported && g.callees&.include?(f.name) }
+      errors << "#{f.file}:#{f.first}: #{f.name} is ported but still called by #{caller.name} (#{f.file}:#{caller.first}); core_rs must export #{target}" if caller
+    else
+      errors << "#{f.file}:#{f.first}: #{f.name} is behind #if !USE_RUST_PORTS but core_rs exports no #{f.name}" unless exports.include?(f.name)
+    end
   end
   exports.each do |e|
     errors << "core_rs exports #{e}, but no C definition of it is behind #if !USE_RUST_PORTS" unless
