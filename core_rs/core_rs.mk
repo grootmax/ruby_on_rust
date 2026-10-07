@@ -10,6 +10,7 @@
 
 # Keep in sync with core_rs/src/.
 CORE_RS_SRCS = $(srcdir)/core_rs/src/lib.rs \
+	$(srcdir)/core_rs/src/complex.rs \
 	$(srcdir)/core_rs/src/re.rs \
 	$(srcdir)/core_rs/src/util.rs \
 	$(empty)
@@ -36,3 +37,12 @@ core-rs-test:
 	    -o $(TOP_BUILD_DIR)/target/core_rs/core_rs-test \
 	    $(srcdir)/core_rs/src/lib.rs
 	$(Q) $(TOP_BUILD_DIR)/target/core_rs/core_rs-test
+
+# Internal (rb_core_*) exports of core_rs must stay out of libruby's dynamic
+# symbol table (internal/core_rs.h).  Fails if any of them is visible.
+core-rs-check-hidden: $(LIBRUBY_SO)
+	$(Q) if $(NM) -D --defined-only $(LIBRUBY_SO) | grep ' rb_core_'; then \
+	    echo 'core_rs: rb_core_* symbols are exported from $(LIBRUBY_SO); declare them in internal/core_rs.h' >&2; \
+	    exit 1; \
+	fi
+	$(Q) echo 'core_rs: no rb_core_* symbol is exported from $(LIBRUBY_SO)'

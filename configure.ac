@@ -4235,6 +4235,9 @@ AS_IF([test "$rb_rust_ports_ok" = yes && test "$rb_rust_ports" != no], [
     # personality, which a panic=abort no_std crate does not define.
     AS_CASE(["$target_os"],
     [darwin*], [
+        # rb_core_* are internal C<->Rust entry points (internal/core_rs.h):
+        # linkable inside libruby, never exported from it.
+        LIBRUBY_DLDFLAGS="$LIBRUBY_DLDFLAGS "'-Wl,-unexported_symbol,_rb_core_*'
         CORE_RS_PARTIAL_LINK='$(tooldir)/darwin-ar $(NM) --defined-only --extern-only $(CORE_RS_LIB) | sed -n -e "s/.* //" -e "/^$(SYMBOL_PREFIX)rb_/p" -e "/^$(SYMBOL_PREFIX)ruby_/p" > $(CORE_RS_LIB:.a=.symbols) && $(CC) -nodefaultlibs -r -o $@ -exported_symbols_list $(CORE_RS_LIB:.a=.symbols) $(CORE_RS_LIB)'
     ], [
         CORE_RS_PARTIAL_LINK='$(LD) -r -o $@ $$($(NM) --defined-only --extern-only $(CORE_RS_LIB) 2>/dev/null | sed -n -e "s/.* T \\($(SYMBOL_PREFIX)rb_.*\\)/-u \\1/p" -e "s/.* T \\($(SYMBOL_PREFIX)ruby_.*\\)/-u \\1/p") $(CORE_RS_LIB) && $(OBJCOPY) --wildcard --keep-global-symbol="$(SYMBOL_PREFIX)rb_*" --keep-global-symbol="$(SYMBOL_PREFIX)ruby_*" $@'
