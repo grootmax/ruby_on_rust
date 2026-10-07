@@ -1670,37 +1670,43 @@ class Pathname    # * File *
   # Same as #fnmatch.
   def fnmatch?(pattern, ...) File.fnmatch?(pattern, @path, ...) end
 
+  #  :markup: markdown
+  #
   #  call-seq:
   #    ftype -> string
   #
-  #  Returns the string type of the object at the path in <tt>self</tt>, one of:
+  #  Returns the string type of the object at the path in `self`, one of:
   #
-  #  - <tt>'file'</tt>.
-  #  - <tt>'directory'</tt>.
-  #  - <tt>'characterSpecial'</tt>.
-  #  - <tt>'blockSpecial'</tt>.
-  #  - <tt>'fifo'</tt>.
-  #  - <tt>'link'</tt>.
-  #  - <tt>'socket'</tt>.
+  #  - `'file'`.
+  #  - `'directory'`.
+  #  - `'characterSpecial'`.
+  #  - `'blockSpecial'`.
+  #  - `'fifo'`.
+  #  - `'link'`.
+  #  - `'socket'`.
   #
   #  Examples:
   #
-  #    Pathname('README.md').ftype   # => "file"
-  #    Pathname('lib').ftype         # => "directory"
-  #    Pathname('/dev/null').ftype   # => "characterSpecial"
-  #    Pathname('/dev/loop0').ftype  # => "blockSpecial"
+  #  ```ruby
+  #  Pathname('/etc/passwd').ftype # => "file"
+  #  Pathname('/etc').ftype        # => "directory"
+  #  Pathname('/dev/null').ftype   # => "characterSpecial"
+  #  Pathname('/dev/loop0').ftype  # => "blockSpecial"
   #
-  #    File.mkfifo('/tmp/pipe', 0666)
-  #    Pathname('/tmp/pipe').ftype   # => "fifo"
+  #  File.mkfifo('/tmp/pipe', 0o666)
+  #  Pathname('/tmp/pipe').ftype   # => "fifo"
   #
-  #    File.symlink('lib', 'lib_link')
-  #    Pathname('lib_link').ftype    # => "link"
+  #  File.symlink('/etc/passwd', '/tmp/link')
+  #  Pathname('/tmp/link').ftype   # => "link"
   #
-  #    require 'socket'
-  #    UNIXServer.new('/tmp/socket')
-  #    Pathname('/tmp/socket').ftype # => "socket"
+  #  require 'socket'
+  #  UNIXServer.new('/tmp/socket')
+  #  Pathname('/tmp/socket').ftype # => "socket"
   #
-  #  Returns <tt>'unknown'</tt> if the type cannot be determined.
+  #  File.delete('/tmp/link', '/tmp/pipe', '/tmp/socket') # Clean up.
+  #  ```
+  #
+  #  Returns `'unknown'` if the type cannot be determined.
   def ftype() File.ftype(@path) end
 
   # :markup: markdown
@@ -2400,18 +2406,26 @@ class Pathname    # * FileTest *
   #
   def exist?() FileTest.exist?(@path) end
 
+  # :markup: markdown
+  #
   # call-seq:
-  #   grpowned?(path) -> true or false
+  #   grpowned? -> true or false
   #
-  # Returns whether the filesystem entry for the path stored in +self+ exists,
-  # and the effective group id of the calling process is the owner of the entry:
+  # Returns `false` on Windows.
   #
-  #   Pathname('README.md').grpowned?   # => true
-  #   Pathname('lib').grpowned?         # => true
-  #   Pathname('/etc/passwd').grpowned? # => false
-  #   Pathname('nosuch').grpowned?      # => false
+  # On other systems, returns whether the effective group id of the calling process
+  # is the owner of the entry at the path in `self`:
   #
-  # Returns +false+ on Windows.
+  # ```ruby
+  # # => "/tmp/t.tmp"
+  # File.write(filepath, 'foo')
+  # Pathname(filepath).grpowned?      # => true
+  # Pathname('/etc').grpowned?        # => false
+  # Pathname('/etc/passwd').grpowned? # => false
+  # Pathname('nosuch').grpowned?      # => false
+  # File.delete(filepath)             # Clean up.
+  # ```
+  #
   def grpowned?() FileTest.grpowned?(@path) end
 
   # :markup: markdown
@@ -2422,26 +2436,10 @@ class Pathname    # * FileTest *
   # Returns whether the entry represented by `self` is a directory:
   #
   # ```ruby
-  # Pathname('/etc').directory?      # => true
-  # Pathname('lib').directory?       # => true
-  # Pathname('README.md').directory? # => false
-  # Pathname('nosuch').directory?    # => false
-  # Pathname($stdin).directory?      # => false
-  # ```
-  #
-  # Follows symbolic links:
-  #
-  # ```ruby
-  # target_pn = Pathname('doc')
-  # link_pn = Pathname('link')
-  # link_pn.make_symlink(target_pn)
-  # link_pn.directory?               # => true
-  # link_pn.delete
-  # target_pn = Pathname('README.md')
-  # link_pn = Pathname('link')
-  # link_pn.make_symlink(target_pn)
-  # link_pn.directory?               # => false
-  # link_pn.delete
+  # Pathname('/etc').directory?        # => true
+  # Pathname('/etc/passwd').directory? # => false
+  # Pathname($stdin).directory?        # => false
+  # Pathname('nosuch').directory?      # => false
   # ```
   #
   def directory?() FileTest.directory?(@path) end
@@ -2452,12 +2450,12 @@ class Pathname    # * FileTest *
   #   file? -> true or false
   #
   # Returns whether the entry at the path in `self` exists and is a regular file;
-  # see #ftype:
+  # see Pathname#ftype:
   #
   # ```ruby
-  # Pathname('README.md').file? # => true
-  # Pathname('lib/').file?      # => false
-  # Pathname('nosuch').file?    # => false
+  # Pathname('/etc/passwd').file? # => true
+  # Pathname('/etc').file?        # => false
+  # Pathname('nosuch').file?      # => false
   # ```
   #
   def file?() FileTest.file?(@path) end
