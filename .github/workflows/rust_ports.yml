@@ -86,6 +86,9 @@ jobs:
         run: >-
           make test-all TESTS="
           ../src/test/ruby/test_rust_ports.rb
+          ../src/test/ruby/test_rust_ports_complex.rb
+          ../src/test/ruby/test_complex.rb
+          ../src/test/ruby/test_rational.rb
           ../src/test/ruby/test_integer.rb
           ../src/test/ruby/test_bignum.rb
           ../src/test/ruby/test_string.rb
@@ -95,6 +98,76 @@ jobs:
           ../src/test/ruby/test_literal.rb
           ../src/test/ruby/test_m17n.rb
           "
+
+  # The proofs that need both build modes side by side: differential fuzzing
+  # of every core_rs/fuzz unit, identical exported symbols, hidden internal
+  # symbols, and the ledger/inventory checks.  Linux only: the fuzz harness
+  # needs GNU or LLVM nm/objcopy (core_rs/fuzz/README.md).
+  port-proofs:
+    name: ubuntu-24.04 (fuzz, exports, ledger)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+
+    env:
+      GITPULLOPTIONS: --no-tags origin ${{ github.ref }}
+      RUBY_DEBUG: ci
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: /.github
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup/ubuntu
+
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: '3.1'
+          bundler: none
+
+      - uses: ./.github/actions/setup/directories
+        with:
+          srcdir: src
+          builddir: build
+          makeup: true
+          clean: true
+
+      - name: Configure both modes (shared libruby)
+        run: |
+          ../src/configure -C --disable-install-doc --enable-shared ${ruby_configure_args} --with-rust-ports
+          mkdir ../build-c
+          cd ../build-c
+          ../src/configure -C --disable-install-doc --enable-shared ${ruby_configure_args} --without-rust-ports
+
+      - name: Build with Rust ports
+        run: make
+
+      - name: Build without Rust ports
+        run: make
+        working-directory: build-c
+
+      - name: Internal rb_core_* symbols are hidden
+        run: make core-rs-check-hidden
+
+      - name: Exported symbols are identical in both modes
+        run: |
+          nm -D --defined-only ../build-c/libruby.so | awk '{print $3}' | sort > exports-c.txt
+          nm -D --defined-only libruby.so | awk '{print $3}' | sort > exports-rs.txt
+          wc -l exports-c.txt exports-rs.txt
+          diff -u exports-c.txt exports-rs.txt
+
+      - name: Differential fuzz (every unit, 1M cases plus mutation check)
+        run: ruby core_rs/fuzz/run.rb --with-ports ../build --without-ports ../build-c core_rs/fuzz/units/*.c
+        working-directory: src
+
+      - name: Porting ledger is current
+        run: ruby tool/generate_porting_ledger.rb --check
+        working-directory: src
+
+      - name: core_rs inventory check
+        run: ruby tool/core_rs/inventory.rb --check
+        working-directory: src
 
 defaults:
   run:
