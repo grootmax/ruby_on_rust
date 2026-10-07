@@ -20,6 +20,7 @@
 #include "internal/array.h"
 #include "internal/class.h"
 #include "internal/complex.h"
+#include "internal/core_rs.h"
 #include "internal/error.h"
 #include "internal/math.h"
 #include "internal/numeric.h"
@@ -27,6 +28,10 @@
 #include "internal/rational.h"
 #include "internal/string.h"
 #include "ruby_assert.h"
+
+#ifndef USE_RUST_PORTS
+# define USE_RUST_PORTS 0
+#endif
 
 #define ZERO INT2FIX(0)
 #define ONE INT2FIX(1)
@@ -1919,6 +1924,7 @@ numeric_to_c(VALUE self)
     return rb_complex_new1(self);
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/complex.rs (port unit complex-A-01) */
 inline static int
 issign(int c)
 {
@@ -2057,6 +2063,15 @@ isimagunit(int c)
     return (c == 'i' || c == 'I' ||
             c == 'j' || c == 'J');
 }
+#else
+#define issign rb_core_complex_issign
+#define read_sign rb_core_complex_read_sign
+#define isdecimal rb_core_complex_isdecimal
+#define read_rat_nos rb_core_complex_read_rat_nos
+#define read_rat rb_core_complex_read_rat
+#define isimagunit rb_core_complex_isimagunit
+#define skip_ws rb_core_complex_skip_ws
+#endif /* !USE_RUST_PORTS: issign .. isimagunit */
 
 static VALUE
 str2num(char *s)
@@ -2150,12 +2165,14 @@ read_comp(const char **s, int strict,
     }
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/complex.rs */
 inline static void
 skip_ws(const char **s)
 {
     while (isspace((unsigned char)**s))
         (*s)++;
 }
+#endif /* !USE_RUST_PORTS: skip_ws */
 
 static int
 parse_comp(const char *s, int strict, VALUE *num)
