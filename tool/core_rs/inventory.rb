@@ -270,6 +270,14 @@ end
 
 # ---- port kit -------------------------------------------------------------------
 
+WAVE_B_RULES = <<~MD
+  ### Ruby objects and exceptions (Wave B, AGENTS.md §6.9)
+  - Use `crate::ffi` for `VALUE`, `Qnil`/`Qtrue`/`Qfalse`, `INT2FIX`/`FIX2LONG`, `RTEST` and the C API. If a public C API function you need is missing, add it to `core_rs/src/ffi/api.rs` with its prototype copied from `include/ruby/` (this file is in scope). Never declare internal functions.
+  - Exception safety: no Rust frame may hold a `Drop` value across a call that can raise (`rb_raise`, `rb_funcallv`, conversions, allocation). If cleanup is needed, call the raising code through `ffi::protect::protect` and re-raise with `ffi::protect::jump_tag`, as the C does with `rb_protect`/`rb_jump_tag`.
+  - Raise the same exception class with the same message at the same point as the C. The fuzz unit must compare raised exceptions too (run both sides under `rb_protect` and compare `rb_errinfo()` class and message).
+
+MD
+
 def kit(unit)
   file = unit[:file]
   mod = File.basename(file, ".c").tr("-", "_")
@@ -304,7 +312,7 @@ def kit(unit)
     - No "safety improvements" (e.g. ignoring NULL): document the C precondition instead.
     - If the C reads past a buffer end, do not reproduce the overread; return the same result and say so in a comment, as `core_rs/src/re.rs` does.
 
-    ### Required evidence (put it in the PR description, AGENTS.md §9)
+    #{unit[:wave] == "B" ? WAVE_B_RULES : ""}### Required evidence (put it in the PR description, AGENTS.md §9)
     1. `make core-rs-test`: Rust unit tests that call the real functions (no `#[cfg(test)]` stubs).
     2. Differential fuzz, with both builds configured with `--enable-shared`, one of them also with `--without-rust-ports`:
        `ruby core_rs/fuzz/run.rb --with-ports ../build --without-ports ../build-noports core_rs/fuzz/units/<your unit>.c`

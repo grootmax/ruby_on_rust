@@ -28,6 +28,25 @@
 
 #if USE_RUST_PORTS
 
+#include "ruby/internal/special_consts.h"
+#include "ruby/internal/static_assert.h"
+
+/* core_rs/src/ffi/value.rs transcribes the special constants and derives
+ * USE_FLONUM from the pointer width, and assumes `long` is as wide as
+ * VALUE.  Fail the C build if this configuration disagrees. */
+RBIMPL_STATIC_ASSERT(core_rs_long_is_value_sized, SIZEOF_LONG == SIZEOF_VALUE);
+RBIMPL_STATIC_ASSERT(core_rs_use_flonum, USE_FLONUM == (SIZEOF_VALUE == 8));
+RBIMPL_STATIC_ASSERT(core_rs_qnil, RUBY_Qnil == (USE_FLONUM ? 0x04 : 0x02));
+RBIMPL_STATIC_ASSERT(core_rs_qtrue, RUBY_Qtrue == (USE_FLONUM ? 0x14 : 0x06));
+RBIMPL_STATIC_ASSERT(core_rs_qundef, RUBY_Qundef == (USE_FLONUM ? 0x24 : 0x0a));
+RBIMPL_STATIC_ASSERT(core_rs_qfalse, RUBY_Qfalse == 0);
+RBIMPL_STATIC_ASSERT(core_rs_immediate_mask, RUBY_IMMEDIATE_MASK == (USE_FLONUM ? 0x07 : 0x03));
+RBIMPL_STATIC_ASSERT(core_rs_fixnum_flag, RUBY_FIXNUM_FLAG == 0x01);
+RBIMPL_STATIC_ASSERT(core_rs_flonum_mask, RUBY_FLONUM_MASK == (USE_FLONUM ? 0x03 : 0x00));
+RBIMPL_STATIC_ASSERT(core_rs_flonum_flag, RUBY_FLONUM_FLAG == 0x02);
+RBIMPL_STATIC_ASSERT(core_rs_symbol_flag, RUBY_SYMBOL_FLAG == (USE_FLONUM ? 0x0c : 0x0e));
+RBIMPL_STATIC_ASSERT(core_rs_special_shift, RUBY_SPECIAL_SHIFT == 8);
+
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility push(hidden)
 #endif
