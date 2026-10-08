@@ -37,9 +37,14 @@ module CoreApiDumper
         next if name.nil? || name.empty? || name.start_with?("#<") || name.include?(":#<")
         next if EXCLUDED_PREFIXES.any? { |prefix| name == prefix || name.start_with?("#{prefix}::") }
 
-        anc = mod.ancestors.map(&:name).compact.reject { |n| n.empty? || n.start_with?("#<") }.sort
+        anc = mod.ancestors.map(&:name).compact.reject do |n|
+          n.empty? || n.start_with?("#<") || EXCLUDED_PREFIXES.any? { |prefix| n == prefix || n.start_with?("#{prefix}::") }
+        end.sort
 
-        consts = mod.constants(false).reject { |c| EXCLUDED_PREFIXES.include?(c.to_s) }.map do |c|
+        consts = mod.constants(false).reject do |c|
+          c_str = c.to_s
+          EXCLUDED_PREFIXES.any? { |prefix| c_str == prefix || c_str.start_with?("#{prefix}::") }
+        end.map do |c|
           begin
             old_v = $VERBOSE
             $VERBOSE = nil
@@ -298,6 +303,11 @@ module CoreApiDumper
 
   class Runner
     def self.run(argv = ARGV)
+      if argv.include?("--internal-dump")
+        puts Dumper.dump_core_api
+        exit 0
+      end
+
       require "optparse"
       require "open3"
       require "rbconfig"

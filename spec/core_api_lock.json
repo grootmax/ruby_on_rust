@@ -4,7 +4,6 @@
       "ARGF.class",
       "BasicObject",
       "Enumerable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -481,7 +480,6 @@
       "ArgumentError",
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -502,8 +500,6 @@
       "Array",
       "BasicObject",
       "Enumerable",
-      "JSON::Ext::Generator::GeneratorMethods::Array",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -1581,10 +1577,7 @@
       "BasicObject"
     ],
     "constants": [
-      {
-        "name": "BasicObject",
-        "value": "BasicObject"
-      }
+
     ],
     "instance_methods": [
       {
@@ -1721,7 +1714,6 @@
     "ancestors": [
       "BasicObject",
       "Binding",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -1830,7 +1822,6 @@
     "ancestors": [
       "BasicObject",
       "Class",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Module",
       "Object"
@@ -1874,14 +1865,6 @@
           ]
         ],
         "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "json_creatable?",
-        "parameters": [
-
-        ],
-        "visibility": "public"
       },
       {
         "arity": -1,
@@ -1928,7 +1911,6 @@
       "ClosedQueueError",
       "Exception",
       "IndexError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -2037,16 +2019,12 @@
       "BasicObject",
       "Comparable",
       "Complex",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Numeric",
       "Object"
     ],
     "constants": [
-      {
-        "name": "I",
-        "value": "<Complex>"
-      }
+
     ],
     "instance_methods": [
       {
@@ -2442,7 +2420,6 @@
     "ancestors": [
       "BasicObject",
       "Complex::compatible",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -2470,7 +2447,6 @@
     "ancestors": [
       "BasicObject",
       "Data",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -2606,7 +2582,6 @@
       "BasicObject",
       "Dir",
       "Enumerable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -2967,7 +2942,6 @@
       "EOFError",
       "Exception",
       "IOError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -2987,875 +2961,11 @@
     "ancestors": [
       "BasicObject",
       "Encoding",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
     "constants": [
-      {
-        "name": "ANSI_X3_4_1968",
-        "value": "US-ASCII"
-      },
-      {
-        "name": "ASCII",
-        "value": "US-ASCII"
-      },
-      {
-        "name": "ASCII_8BIT",
-        "value": "ASCII-8BIT"
-      },
-      {
-        "name": "BIG5",
-        "value": "Big5"
-      },
-      {
-        "name": "BIG5_HKSCS",
-        "value": "Big5-HKSCS"
-      },
-      {
-        "name": "BIG5_HKSCS_2008",
-        "value": "Big5-HKSCS"
-      },
-      {
-        "name": "BIG5_UAO",
-        "value": "Big5-UAO"
-      },
-      {
-        "name": "BINARY",
-        "value": "ASCII-8BIT"
-      },
-      {
-        "name": "Big5",
-        "value": "Big5"
-      },
-      {
-        "name": "Big5_HKSCS",
-        "value": "Big5-HKSCS"
-      },
-      {
-        "name": "Big5_HKSCS_2008",
-        "value": "Big5-HKSCS"
-      },
-      {
-        "name": "Big5_UAO",
-        "value": "Big5-UAO"
-      },
-      {
-        "name": "CESU_8",
-        "value": "CESU-8"
-      },
-      {
-        "name": "CP1250",
-        "value": "Windows-1250"
-      },
-      {
-        "name": "CP1251",
-        "value": "Windows-1251"
-      },
-      {
-        "name": "CP1252",
-        "value": "Windows-1252"
-      },
-      {
-        "name": "CP1253",
-        "value": "Windows-1253"
-      },
-      {
-        "name": "CP1254",
-        "value": "Windows-1254"
-      },
-      {
-        "name": "CP1255",
-        "value": "Windows-1255"
-      },
-      {
-        "name": "CP1256",
-        "value": "Windows-1256"
-      },
-      {
-        "name": "CP1257",
-        "value": "Windows-1257"
-      },
-      {
-        "name": "CP1258",
-        "value": "Windows-1258"
-      },
-      {
-        "name": "CP437",
-        "value": "IBM437"
-      },
-      {
-        "name": "CP50220",
-        "value": "CP50220"
-      },
-      {
-        "name": "CP50221",
-        "value": "CP50221"
-      },
-      {
-        "name": "CP51932",
-        "value": "CP51932"
-      },
-      {
-        "name": "CP65000",
-        "value": "UTF-7"
-      },
-      {
-        "name": "CP65001",
-        "value": "UTF-8"
-      },
-      {
-        "name": "CP720",
-        "value": "IBM720"
-      },
-      {
-        "name": "CP737",
-        "value": "IBM737"
-      },
-      {
-        "name": "CP775",
-        "value": "IBM775"
-      },
-      {
-        "name": "CP850",
-        "value": "CP850"
-      },
-      {
-        "name": "CP852",
-        "value": "CP852"
-      },
-      {
-        "name": "CP855",
-        "value": "CP855"
-      },
-      {
-        "name": "CP857",
-        "value": "IBM857"
-      },
-      {
-        "name": "CP860",
-        "value": "IBM860"
-      },
-      {
-        "name": "CP861",
-        "value": "IBM861"
-      },
-      {
-        "name": "CP862",
-        "value": "IBM862"
-      },
-      {
-        "name": "CP863",
-        "value": "IBM863"
-      },
-      {
-        "name": "CP864",
-        "value": "IBM864"
-      },
-      {
-        "name": "CP865",
-        "value": "IBM865"
-      },
-      {
-        "name": "CP866",
-        "value": "IBM866"
-      },
-      {
-        "name": "CP869",
-        "value": "IBM869"
-      },
-      {
-        "name": "CP874",
-        "value": "Windows-874"
-      },
-      {
-        "name": "CP878",
-        "value": "KOI8-R"
-      },
-      {
-        "name": "CP932",
-        "value": "Windows-31J"
-      },
-      {
-        "name": "CP936",
-        "value": "GBK"
-      },
-      {
-        "name": "CP949",
-        "value": "CP949"
-      },
-      {
-        "name": "CP950",
-        "value": "CP950"
-      },
-      {
-        "name": "CP951",
-        "value": "CP951"
-      },
-      {
-        "name": "CSWINDOWS31J",
-        "value": "Windows-31J"
-      },
-      {
-        "name": "CompatibilityError",
-        "value": "Encoding::CompatibilityError"
-      },
-      {
-        "name": "Converter",
-        "value": "Encoding::Converter"
-      },
-      {
-        "name": "ConverterNotFoundError",
-        "value": "Encoding::ConverterNotFoundError"
-      },
-      {
-        "name": "CsWindows31J",
-        "value": "Windows-31J"
-      },
-      {
-        "name": "EBCDIC_CP_US",
-        "value": "IBM037"
-      },
-      {
-        "name": "EMACS_MULE",
-        "value": "Emacs-Mule"
-      },
-      {
-        "name": "EUCCN",
-        "value": "GB2312"
-      },
-      {
-        "name": "EUCJP",
-        "value": "EUC-JP"
-      },
-      {
-        "name": "EUCJP_MS",
-        "value": "eucJP-ms"
-      },
-      {
-        "name": "EUCKR",
-        "value": "EUC-KR"
-      },
-      {
-        "name": "EUCTW",
-        "value": "EUC-TW"
-      },
-      {
-        "name": "EUC_CN",
-        "value": "GB2312"
-      },
-      {
-        "name": "EUC_JISX0213",
-        "value": "EUC-JIS-2004"
-      },
-      {
-        "name": "EUC_JIS_2004",
-        "value": "EUC-JIS-2004"
-      },
-      {
-        "name": "EUC_JP",
-        "value": "EUC-JP"
-      },
-      {
-        "name": "EUC_JP_MS",
-        "value": "eucJP-ms"
-      },
-      {
-        "name": "EUC_KR",
-        "value": "EUC-KR"
-      },
-      {
-        "name": "EUC_TW",
-        "value": "EUC-TW"
-      },
-      {
-        "name": "Emacs_Mule",
-        "value": "Emacs-Mule"
-      },
-      {
-        "name": "EucCN",
-        "value": "GB2312"
-      },
-      {
-        "name": "EucJP",
-        "value": "EUC-JP"
-      },
-      {
-        "name": "EucJP_ms",
-        "value": "eucJP-ms"
-      },
-      {
-        "name": "EucKR",
-        "value": "EUC-KR"
-      },
-      {
-        "name": "EucTW",
-        "value": "EUC-TW"
-      },
-      {
-        "name": "GB12345",
-        "value": "GB12345"
-      },
-      {
-        "name": "GB18030",
-        "value": "GB18030"
-      },
-      {
-        "name": "GB1988",
-        "value": "GB1988"
-      },
-      {
-        "name": "GB2312",
-        "value": "GB2312"
-      },
-      {
-        "name": "GBK",
-        "value": "GBK"
-      },
-      {
-        "name": "IBM037",
-        "value": "IBM037"
-      },
-      {
-        "name": "IBM437",
-        "value": "IBM437"
-      },
-      {
-        "name": "IBM720",
-        "value": "IBM720"
-      },
-      {
-        "name": "IBM737",
-        "value": "IBM737"
-      },
-      {
-        "name": "IBM775",
-        "value": "IBM775"
-      },
-      {
-        "name": "IBM850",
-        "value": "CP850"
-      },
-      {
-        "name": "IBM852",
-        "value": "IBM852"
-      },
-      {
-        "name": "IBM855",
-        "value": "IBM855"
-      },
-      {
-        "name": "IBM857",
-        "value": "IBM857"
-      },
-      {
-        "name": "IBM860",
-        "value": "IBM860"
-      },
-      {
-        "name": "IBM861",
-        "value": "IBM861"
-      },
-      {
-        "name": "IBM862",
-        "value": "IBM862"
-      },
-      {
-        "name": "IBM863",
-        "value": "IBM863"
-      },
-      {
-        "name": "IBM864",
-        "value": "IBM864"
-      },
-      {
-        "name": "IBM865",
-        "value": "IBM865"
-      },
-      {
-        "name": "IBM866",
-        "value": "IBM866"
-      },
-      {
-        "name": "IBM869",
-        "value": "IBM869"
-      },
-      {
-        "name": "ISO2022_JP",
-        "value": "ISO-2022-JP"
-      },
-      {
-        "name": "ISO2022_JP2",
-        "value": "ISO-2022-JP-2"
-      },
-      {
-        "name": "ISO8859_1",
-        "value": "ISO-8859-1"
-      },
-      {
-        "name": "ISO8859_10",
-        "value": "ISO-8859-10"
-      },
-      {
-        "name": "ISO8859_11",
-        "value": "ISO-8859-11"
-      },
-      {
-        "name": "ISO8859_13",
-        "value": "ISO-8859-13"
-      },
-      {
-        "name": "ISO8859_14",
-        "value": "ISO-8859-14"
-      },
-      {
-        "name": "ISO8859_15",
-        "value": "ISO-8859-15"
-      },
-      {
-        "name": "ISO8859_16",
-        "value": "ISO-8859-16"
-      },
-      {
-        "name": "ISO8859_2",
-        "value": "ISO-8859-2"
-      },
-      {
-        "name": "ISO8859_3",
-        "value": "ISO-8859-3"
-      },
-      {
-        "name": "ISO8859_4",
-        "value": "ISO-8859-4"
-      },
-      {
-        "name": "ISO8859_5",
-        "value": "ISO-8859-5"
-      },
-      {
-        "name": "ISO8859_6",
-        "value": "ISO-8859-6"
-      },
-      {
-        "name": "ISO8859_7",
-        "value": "ISO-8859-7"
-      },
-      {
-        "name": "ISO8859_8",
-        "value": "ISO-8859-8"
-      },
-      {
-        "name": "ISO8859_9",
-        "value": "ISO-8859-9"
-      },
-      {
-        "name": "ISO_2022_JP",
-        "value": "ISO-2022-JP"
-      },
-      {
-        "name": "ISO_2022_JP_2",
-        "value": "ISO-2022-JP-2"
-      },
-      {
-        "name": "ISO_2022_JP_KDDI",
-        "value": "ISO-2022-JP-KDDI"
-      },
-      {
-        "name": "ISO_8859_1",
-        "value": "ISO-8859-1"
-      },
-      {
-        "name": "ISO_8859_10",
-        "value": "ISO-8859-10"
-      },
-      {
-        "name": "ISO_8859_11",
-        "value": "ISO-8859-11"
-      },
-      {
-        "name": "ISO_8859_13",
-        "value": "ISO-8859-13"
-      },
-      {
-        "name": "ISO_8859_14",
-        "value": "ISO-8859-14"
-      },
-      {
-        "name": "ISO_8859_15",
-        "value": "ISO-8859-15"
-      },
-      {
-        "name": "ISO_8859_16",
-        "value": "ISO-8859-16"
-      },
-      {
-        "name": "ISO_8859_2",
-        "value": "ISO-8859-2"
-      },
-      {
-        "name": "ISO_8859_3",
-        "value": "ISO-8859-3"
-      },
-      {
-        "name": "ISO_8859_4",
-        "value": "ISO-8859-4"
-      },
-      {
-        "name": "ISO_8859_5",
-        "value": "ISO-8859-5"
-      },
-      {
-        "name": "ISO_8859_6",
-        "value": "ISO-8859-6"
-      },
-      {
-        "name": "ISO_8859_7",
-        "value": "ISO-8859-7"
-      },
-      {
-        "name": "ISO_8859_8",
-        "value": "ISO-8859-8"
-      },
-      {
-        "name": "ISO_8859_9",
-        "value": "ISO-8859-9"
-      },
-      {
-        "name": "InvalidByteSequenceError",
-        "value": "Encoding::InvalidByteSequenceError"
-      },
-      {
-        "name": "KOI8_R",
-        "value": "KOI8-R"
-      },
-      {
-        "name": "KOI8_U",
-        "value": "KOI8-U"
-      },
-      {
-        "name": "MACCENTEURO",
-        "value": "macCentEuro"
-      },
-      {
-        "name": "MACCROATIAN",
-        "value": "macCroatian"
-      },
-      {
-        "name": "MACCYRILLIC",
-        "value": "macCyrillic"
-      },
-      {
-        "name": "MACGREEK",
-        "value": "macGreek"
-      },
-      {
-        "name": "MACICELAND",
-        "value": "macIceland"
-      },
-      {
-        "name": "MACJAPAN",
-        "value": "MacJapanese"
-      },
-      {
-        "name": "MACJAPANESE",
-        "value": "MacJapanese"
-      },
-      {
-        "name": "MACROMAN",
-        "value": "macRoman"
-      },
-      {
-        "name": "MACROMANIA",
-        "value": "macRomania"
-      },
-      {
-        "name": "MACTHAI",
-        "value": "macThai"
-      },
-      {
-        "name": "MACTURKISH",
-        "value": "macTurkish"
-      },
-      {
-        "name": "MACUKRAINE",
-        "value": "macUkraine"
-      },
-      {
-        "name": "MacCentEuro",
-        "value": "macCentEuro"
-      },
-      {
-        "name": "MacCroatian",
-        "value": "macCroatian"
-      },
-      {
-        "name": "MacCyrillic",
-        "value": "macCyrillic"
-      },
-      {
-        "name": "MacGreek",
-        "value": "macGreek"
-      },
-      {
-        "name": "MacIceland",
-        "value": "macIceland"
-      },
-      {
-        "name": "MacJapan",
-        "value": "MacJapanese"
-      },
-      {
-        "name": "MacJapanese",
-        "value": "MacJapanese"
-      },
-      {
-        "name": "MacRoman",
-        "value": "macRoman"
-      },
-      {
-        "name": "MacRomania",
-        "value": "macRomania"
-      },
-      {
-        "name": "MacThai",
-        "value": "macThai"
-      },
-      {
-        "name": "MacTurkish",
-        "value": "macTurkish"
-      },
-      {
-        "name": "MacUkraine",
-        "value": "macUkraine"
-      },
-      {
-        "name": "PCK",
-        "value": "Windows-31J"
-      },
-      {
-        "name": "SHIFT_JIS",
-        "value": "Shift_JIS"
-      },
-      {
-        "name": "SJIS",
-        "value": "Windows-31J"
-      },
-      {
-        "name": "SJIS_DOCOMO",
-        "value": "SJIS-DoCoMo"
-      },
-      {
-        "name": "SJIS_DoCoMo",
-        "value": "SJIS-DoCoMo"
-      },
-      {
-        "name": "SJIS_KDDI",
-        "value": "SJIS-KDDI"
-      },
-      {
-        "name": "SJIS_SOFTBANK",
-        "value": "SJIS-SoftBank"
-      },
-      {
-        "name": "SJIS_SoftBank",
-        "value": "SJIS-SoftBank"
-      },
-      {
-        "name": "STATELESS_ISO_2022_JP",
-        "value": "stateless-ISO-2022-JP"
-      },
-      {
-        "name": "STATELESS_ISO_2022_JP_KDDI",
-        "value": "stateless-ISO-2022-JP-KDDI"
-      },
-      {
-        "name": "Shift_JIS",
-        "value": "Shift_JIS"
-      },
-      {
-        "name": "Stateless_ISO_2022_JP",
-        "value": "stateless-ISO-2022-JP"
-      },
-      {
-        "name": "Stateless_ISO_2022_JP_KDDI",
-        "value": "stateless-ISO-2022-JP-KDDI"
-      },
-      {
-        "name": "TIS_620",
-        "value": "TIS-620"
-      },
-      {
-        "name": "UCS_2BE",
-        "value": "UTF-16BE"
-      },
-      {
-        "name": "UCS_4BE",
-        "value": "UTF-32BE"
-      },
-      {
-        "name": "UCS_4LE",
-        "value": "UTF-32LE"
-      },
-      {
-        "name": "US_ASCII",
-        "value": "US-ASCII"
-      },
-      {
-        "name": "UTF8_DOCOMO",
-        "value": "UTF8-DoCoMo"
-      },
-      {
-        "name": "UTF8_DoCoMo",
-        "value": "UTF8-DoCoMo"
-      },
-      {
-        "name": "UTF8_KDDI",
-        "value": "UTF8-KDDI"
-      },
-      {
-        "name": "UTF8_MAC",
-        "value": "UTF8-MAC"
-      },
-      {
-        "name": "UTF8_SOFTBANK",
-        "value": "UTF8-SoftBank"
-      },
-      {
-        "name": "UTF8_SoftBank",
-        "value": "UTF8-SoftBank"
-      },
-      {
-        "name": "UTF_16",
-        "value": "UTF-16"
-      },
-      {
-        "name": "UTF_16BE",
-        "value": "UTF-16BE"
-      },
-      {
-        "name": "UTF_16LE",
-        "value": "UTF-16LE"
-      },
-      {
-        "name": "UTF_32",
-        "value": "UTF-32"
-      },
-      {
-        "name": "UTF_32BE",
-        "value": "UTF-32BE"
-      },
-      {
-        "name": "UTF_32LE",
-        "value": "UTF-32LE"
-      },
-      {
-        "name": "UTF_7",
-        "value": "UTF-7"
-      },
-      {
-        "name": "UTF_8",
-        "value": "UTF-8"
-      },
-      {
-        "name": "UTF_8_HFS",
-        "value": "UTF8-MAC"
-      },
-      {
-        "name": "UTF_8_MAC",
-        "value": "UTF8-MAC"
-      },
-      {
-        "name": "UndefinedConversionError",
-        "value": "Encoding::UndefinedConversionError"
-      },
-      {
-        "name": "WINDOWS_1250",
-        "value": "Windows-1250"
-      },
-      {
-        "name": "WINDOWS_1251",
-        "value": "Windows-1251"
-      },
-      {
-        "name": "WINDOWS_1252",
-        "value": "Windows-1252"
-      },
-      {
-        "name": "WINDOWS_1253",
-        "value": "Windows-1253"
-      },
-      {
-        "name": "WINDOWS_1254",
-        "value": "Windows-1254"
-      },
-      {
-        "name": "WINDOWS_1255",
-        "value": "Windows-1255"
-      },
-      {
-        "name": "WINDOWS_1256",
-        "value": "Windows-1256"
-      },
-      {
-        "name": "WINDOWS_1257",
-        "value": "Windows-1257"
-      },
-      {
-        "name": "WINDOWS_1258",
-        "value": "Windows-1258"
-      },
-      {
-        "name": "WINDOWS_31J",
-        "value": "Windows-31J"
-      },
-      {
-        "name": "WINDOWS_874",
-        "value": "Windows-874"
-      },
-      {
-        "name": "Windows_1250",
-        "value": "Windows-1250"
-      },
-      {
-        "name": "Windows_1251",
-        "value": "Windows-1251"
-      },
-      {
-        "name": "Windows_1252",
-        "value": "Windows-1252"
-      },
-      {
-        "name": "Windows_1253",
-        "value": "Windows-1253"
-      },
-      {
-        "name": "Windows_1254",
-        "value": "Windows-1254"
-      },
-      {
-        "name": "Windows_1255",
-        "value": "Windows-1255"
-      },
-      {
-        "name": "Windows_1256",
-        "value": "Windows-1256"
-      },
-      {
-        "name": "Windows_1257",
-        "value": "Windows-1257"
-      },
-      {
-        "name": "Windows_1258",
-        "value": "Windows-1258"
-      },
-      {
-        "name": "Windows_31J",
-        "value": "Windows-31J"
-      },
-      {
-        "name": "Windows_874",
-        "value": "Windows-874"
-      }
+
     ],
     "instance_methods": [
       {
@@ -4038,7 +3148,6 @@
       "Encoding::CompatibilityError",
       "EncodingError",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -4058,67 +3167,11 @@
     "ancestors": [
       "BasicObject",
       "Encoding::Converter",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
     "constants": [
-      {
-        "name": "AFTER_OUTPUT",
-        "value": "262144"
-      },
-      {
-        "name": "CRLF_NEWLINE_DECORATOR",
-        "value": "4096"
-      },
-      {
-        "name": "CR_NEWLINE_DECORATOR",
-        "value": "8192"
-      },
-      {
-        "name": "INVALID_MASK",
-        "value": "15"
-      },
-      {
-        "name": "INVALID_REPLACE",
-        "value": "2"
-      },
-      {
-        "name": "LF_NEWLINE_DECORATOR",
-        "value": "16384"
-      },
-      {
-        "name": "PARTIAL_INPUT",
-        "value": "131072"
-      },
-      {
-        "name": "UNDEF_HEX_CHARREF",
-        "value": "48"
-      },
-      {
-        "name": "UNDEF_MASK",
-        "value": "240"
-      },
-      {
-        "name": "UNDEF_REPLACE",
-        "value": "32"
-      },
-      {
-        "name": "UNIVERSAL_NEWLINE_DECORATOR",
-        "value": "256"
-      },
-      {
-        "name": "XML_ATTR_CONTENT_DECORATOR",
-        "value": "65536"
-      },
-      {
-        "name": "XML_ATTR_QUOTE_DECORATOR",
-        "value": "1048576"
-      },
-      {
-        "name": "XML_TEXT_DECORATOR",
-        "value": "32768"
-      }
+
     ],
     "instance_methods": [
       {
@@ -4286,7 +3339,6 @@
       "Encoding::ConverterNotFoundError",
       "EncodingError",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -4308,7 +3360,6 @@
       "Encoding::InvalidByteSequenceError",
       "EncodingError",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -4385,7 +3436,6 @@
       "Encoding::UndefinedConversionError",
       "EncodingError",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -4445,7 +3495,6 @@
       "BasicObject",
       "EncodingError",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -5053,39 +4102,11 @@
       "BasicObject",
       "Enumerable",
       "Enumerator",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
     "constants": [
-      {
-        "name": "ArithmeticSequence",
-        "value": "Enumerator::ArithmeticSequence"
-      },
-      {
-        "name": "Chain",
-        "value": "Enumerator::Chain"
-      },
-      {
-        "name": "Generator",
-        "value": "Enumerator::Generator"
-      },
-      {
-        "name": "Lazy",
-        "value": "Enumerator::Lazy"
-      },
-      {
-        "name": "Producer",
-        "value": "Enumerator::Producer"
-      },
-      {
-        "name": "Product",
-        "value": "Enumerator::Product"
-      },
-      {
-        "name": "Yielder",
-        "value": "Enumerator::Yielder"
-      }
+
     ],
     "instance_methods": [
       {
@@ -5263,7 +4284,6 @@
       "Enumerable",
       "Enumerator",
       "Enumerator::ArithmeticSequence",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -5397,7 +4417,6 @@
       "Enumerable",
       "Enumerator",
       "Enumerator::Chain",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -5470,7 +4489,6 @@
       "BasicObject",
       "Enumerable",
       "Enumerator::Generator",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -5520,7 +4538,6 @@
       "Enumerable",
       "Enumerator",
       "Enumerator::Lazy",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -5964,7 +4981,6 @@
     "ancestors": [
       "BasicObject",
       "Enumerator::Producer",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -5992,7 +5008,6 @@
       "Enumerable",
       "Enumerator",
       "Enumerator::Product",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -6062,7 +5077,6 @@
     "ancestors": [
       "BasicObject",
       "Enumerator::Yielder",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -6117,638 +5131,7 @@
       "Errno"
     ],
     "constants": [
-      {
-        "name": "E2BIG",
-        "value": "Errno::E2BIG"
-      },
-      {
-        "name": "EACCES",
-        "value": "Errno::EACCES"
-      },
-      {
-        "name": "EADDRINUSE",
-        "value": "Errno::EADDRINUSE"
-      },
-      {
-        "name": "EADDRNOTAVAIL",
-        "value": "Errno::EADDRNOTAVAIL"
-      },
-      {
-        "name": "EADV",
-        "value": "Errno::EADV"
-      },
-      {
-        "name": "EAFNOSUPPORT",
-        "value": "Errno::EAFNOSUPPORT"
-      },
-      {
-        "name": "EAGAIN",
-        "value": "Errno::EAGAIN"
-      },
-      {
-        "name": "EALREADY",
-        "value": "Errno::EALREADY"
-      },
-      {
-        "name": "EAUTH",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EBADARCH",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EBADE",
-        "value": "Errno::EBADE"
-      },
-      {
-        "name": "EBADEXEC",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EBADF",
-        "value": "Errno::EBADF"
-      },
-      {
-        "name": "EBADFD",
-        "value": "Errno::EBADFD"
-      },
-      {
-        "name": "EBADMACHO",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EBADMSG",
-        "value": "Errno::EBADMSG"
-      },
-      {
-        "name": "EBADR",
-        "value": "Errno::EBADR"
-      },
-      {
-        "name": "EBADRPC",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EBADRQC",
-        "value": "Errno::EBADRQC"
-      },
-      {
-        "name": "EBADSLT",
-        "value": "Errno::EBADSLT"
-      },
-      {
-        "name": "EBFONT",
-        "value": "Errno::EBFONT"
-      },
-      {
-        "name": "EBUSY",
-        "value": "Errno::EBUSY"
-      },
-      {
-        "name": "ECANCELED",
-        "value": "Errno::ECANCELED"
-      },
-      {
-        "name": "ECAPMODE",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "ECHILD",
-        "value": "Errno::ECHILD"
-      },
-      {
-        "name": "ECHRNG",
-        "value": "Errno::ECHRNG"
-      },
-      {
-        "name": "ECOMM",
-        "value": "Errno::ECOMM"
-      },
-      {
-        "name": "ECONNABORTED",
-        "value": "Errno::ECONNABORTED"
-      },
-      {
-        "name": "ECONNREFUSED",
-        "value": "Errno::ECONNREFUSED"
-      },
-      {
-        "name": "ECONNRESET",
-        "value": "Errno::ECONNRESET"
-      },
-      {
-        "name": "EDEADLK",
-        "value": "Errno::EDEADLK"
-      },
-      {
-        "name": "EDEADLOCK",
-        "value": "Errno::EDEADLK"
-      },
-      {
-        "name": "EDESTADDRREQ",
-        "value": "Errno::EDESTADDRREQ"
-      },
-      {
-        "name": "EDEVERR",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EDOM",
-        "value": "Errno::EDOM"
-      },
-      {
-        "name": "EDOOFUS",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EDOTDOT",
-        "value": "Errno::EDOTDOT"
-      },
-      {
-        "name": "EDQUOT",
-        "value": "Errno::EDQUOT"
-      },
-      {
-        "name": "EEXIST",
-        "value": "Errno::EEXIST"
-      },
-      {
-        "name": "EFAULT",
-        "value": "Errno::EFAULT"
-      },
-      {
-        "name": "EFBIG",
-        "value": "Errno::EFBIG"
-      },
-      {
-        "name": "EFTYPE",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EHOSTDOWN",
-        "value": "Errno::EHOSTDOWN"
-      },
-      {
-        "name": "EHOSTUNREACH",
-        "value": "Errno::EHOSTUNREACH"
-      },
-      {
-        "name": "EHWPOISON",
-        "value": "Errno::EHWPOISON"
-      },
-      {
-        "name": "EIDRM",
-        "value": "Errno::EIDRM"
-      },
-      {
-        "name": "EILSEQ",
-        "value": "Errno::EILSEQ"
-      },
-      {
-        "name": "EINPROGRESS",
-        "value": "Errno::EINPROGRESS"
-      },
-      {
-        "name": "EINTR",
-        "value": "Errno::EINTR"
-      },
-      {
-        "name": "EINVAL",
-        "value": "Errno::EINVAL"
-      },
-      {
-        "name": "EIO",
-        "value": "Errno::EIO"
-      },
-      {
-        "name": "EIPSEC",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EISCONN",
-        "value": "Errno::EISCONN"
-      },
-      {
-        "name": "EISDIR",
-        "value": "Errno::EISDIR"
-      },
-      {
-        "name": "EISNAM",
-        "value": "Errno::EISNAM"
-      },
-      {
-        "name": "EKEYEXPIRED",
-        "value": "Errno::EKEYEXPIRED"
-      },
-      {
-        "name": "EKEYREJECTED",
-        "value": "Errno::EKEYREJECTED"
-      },
-      {
-        "name": "EKEYREVOKED",
-        "value": "Errno::EKEYREVOKED"
-      },
-      {
-        "name": "EL2HLT",
-        "value": "Errno::EL2HLT"
-      },
-      {
-        "name": "EL2NSYNC",
-        "value": "Errno::EL2NSYNC"
-      },
-      {
-        "name": "EL3HLT",
-        "value": "Errno::EL3HLT"
-      },
-      {
-        "name": "EL3RST",
-        "value": "Errno::EL3RST"
-      },
-      {
-        "name": "ELAST",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "ELIBACC",
-        "value": "Errno::ELIBACC"
-      },
-      {
-        "name": "ELIBBAD",
-        "value": "Errno::ELIBBAD"
-      },
-      {
-        "name": "ELIBEXEC",
-        "value": "Errno::ELIBEXEC"
-      },
-      {
-        "name": "ELIBMAX",
-        "value": "Errno::ELIBMAX"
-      },
-      {
-        "name": "ELIBSCN",
-        "value": "Errno::ELIBSCN"
-      },
-      {
-        "name": "ELNRNG",
-        "value": "Errno::ELNRNG"
-      },
-      {
-        "name": "ELOOP",
-        "value": "Errno::ELOOP"
-      },
-      {
-        "name": "EMEDIUMTYPE",
-        "value": "Errno::EMEDIUMTYPE"
-      },
-      {
-        "name": "EMFILE",
-        "value": "Errno::EMFILE"
-      },
-      {
-        "name": "EMLINK",
-        "value": "Errno::EMLINK"
-      },
-      {
-        "name": "EMSGSIZE",
-        "value": "Errno::EMSGSIZE"
-      },
-      {
-        "name": "EMULTIHOP",
-        "value": "Errno::EMULTIHOP"
-      },
-      {
-        "name": "ENAMETOOLONG",
-        "value": "Errno::ENAMETOOLONG"
-      },
-      {
-        "name": "ENAVAIL",
-        "value": "Errno::ENAVAIL"
-      },
-      {
-        "name": "ENEEDAUTH",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "ENETDOWN",
-        "value": "Errno::ENETDOWN"
-      },
-      {
-        "name": "ENETRESET",
-        "value": "Errno::ENETRESET"
-      },
-      {
-        "name": "ENETUNREACH",
-        "value": "Errno::ENETUNREACH"
-      },
-      {
-        "name": "ENFILE",
-        "value": "Errno::ENFILE"
-      },
-      {
-        "name": "ENOANO",
-        "value": "Errno::ENOANO"
-      },
-      {
-        "name": "ENOATTR",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "ENOBUFS",
-        "value": "Errno::ENOBUFS"
-      },
-      {
-        "name": "ENOCSI",
-        "value": "Errno::ENOCSI"
-      },
-      {
-        "name": "ENODATA",
-        "value": "Errno::ENODATA"
-      },
-      {
-        "name": "ENODEV",
-        "value": "Errno::ENODEV"
-      },
-      {
-        "name": "ENOENT",
-        "value": "Errno::ENOENT"
-      },
-      {
-        "name": "ENOEXEC",
-        "value": "Errno::ENOEXEC"
-      },
-      {
-        "name": "ENOKEY",
-        "value": "Errno::ENOKEY"
-      },
-      {
-        "name": "ENOLCK",
-        "value": "Errno::ENOLCK"
-      },
-      {
-        "name": "ENOLINK",
-        "value": "Errno::ENOLINK"
-      },
-      {
-        "name": "ENOMEDIUM",
-        "value": "Errno::ENOMEDIUM"
-      },
-      {
-        "name": "ENOMEM",
-        "value": "Errno::ENOMEM"
-      },
-      {
-        "name": "ENOMSG",
-        "value": "Errno::ENOMSG"
-      },
-      {
-        "name": "ENONET",
-        "value": "Errno::ENONET"
-      },
-      {
-        "name": "ENOPKG",
-        "value": "Errno::ENOPKG"
-      },
-      {
-        "name": "ENOPOLICY",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "ENOPROTOOPT",
-        "value": "Errno::ENOPROTOOPT"
-      },
-      {
-        "name": "ENOSPC",
-        "value": "Errno::ENOSPC"
-      },
-      {
-        "name": "ENOSR",
-        "value": "Errno::ENOSR"
-      },
-      {
-        "name": "ENOSTR",
-        "value": "Errno::ENOSTR"
-      },
-      {
-        "name": "ENOSYS",
-        "value": "Errno::ENOSYS"
-      },
-      {
-        "name": "ENOTBLK",
-        "value": "Errno::ENOTBLK"
-      },
-      {
-        "name": "ENOTCAPABLE",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "ENOTCONN",
-        "value": "Errno::ENOTCONN"
-      },
-      {
-        "name": "ENOTDIR",
-        "value": "Errno::ENOTDIR"
-      },
-      {
-        "name": "ENOTEMPTY",
-        "value": "Errno::ENOTEMPTY"
-      },
-      {
-        "name": "ENOTNAM",
-        "value": "Errno::ENOTNAM"
-      },
-      {
-        "name": "ENOTRECOVERABLE",
-        "value": "Errno::ENOTRECOVERABLE"
-      },
-      {
-        "name": "ENOTSOCK",
-        "value": "Errno::ENOTSOCK"
-      },
-      {
-        "name": "ENOTSUP",
-        "value": "Errno::ENOTSUP"
-      },
-      {
-        "name": "ENOTTY",
-        "value": "Errno::ENOTTY"
-      },
-      {
-        "name": "ENOTUNIQ",
-        "value": "Errno::ENOTUNIQ"
-      },
-      {
-        "name": "ENXIO",
-        "value": "Errno::ENXIO"
-      },
-      {
-        "name": "EOPNOTSUPP",
-        "value": "Errno::ENOTSUP"
-      },
-      {
-        "name": "EOVERFLOW",
-        "value": "Errno::EOVERFLOW"
-      },
-      {
-        "name": "EOWNERDEAD",
-        "value": "Errno::EOWNERDEAD"
-      },
-      {
-        "name": "EPERM",
-        "value": "Errno::EPERM"
-      },
-      {
-        "name": "EPFNOSUPPORT",
-        "value": "Errno::EPFNOSUPPORT"
-      },
-      {
-        "name": "EPIPE",
-        "value": "Errno::EPIPE"
-      },
-      {
-        "name": "EPROCLIM",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EPROCUNAVAIL",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EPROGMISMATCH",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EPROGUNAVAIL",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EPROTO",
-        "value": "Errno::EPROTO"
-      },
-      {
-        "name": "EPROTONOSUPPORT",
-        "value": "Errno::EPROTONOSUPPORT"
-      },
-      {
-        "name": "EPROTOTYPE",
-        "value": "Errno::EPROTOTYPE"
-      },
-      {
-        "name": "EPWROFF",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "EQFULL",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "ERANGE",
-        "value": "Errno::ERANGE"
-      },
-      {
-        "name": "EREMCHG",
-        "value": "Errno::EREMCHG"
-      },
-      {
-        "name": "EREMOTE",
-        "value": "Errno::EREMOTE"
-      },
-      {
-        "name": "EREMOTEIO",
-        "value": "Errno::EREMOTEIO"
-      },
-      {
-        "name": "ERESTART",
-        "value": "Errno::ERESTART"
-      },
-      {
-        "name": "ERFKILL",
-        "value": "Errno::ERFKILL"
-      },
-      {
-        "name": "EROFS",
-        "value": "Errno::EROFS"
-      },
-      {
-        "name": "ERPCMISMATCH",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "ESHLIBVERS",
-        "value": "Errno::NOERROR"
-      },
-      {
-        "name": "ESHUTDOWN",
-        "value": "Errno::ESHUTDOWN"
-      },
-      {
-        "name": "ESOCKTNOSUPPORT",
-        "value": "Errno::ESOCKTNOSUPPORT"
-      },
-      {
-        "name": "ESPIPE",
-        "value": "Errno::ESPIPE"
-      },
-      {
-        "name": "ESRCH",
-        "value": "Errno::ESRCH"
-      },
-      {
-        "name": "ESRMNT",
-        "value": "Errno::ESRMNT"
-      },
-      {
-        "name": "ESTALE",
-        "value": "Errno::ESTALE"
-      },
-      {
-        "name": "ESTRPIPE",
-        "value": "Errno::ESTRPIPE"
-      },
-      {
-        "name": "ETIME",
-        "value": "Errno::ETIME"
-      },
-      {
-        "name": "ETIMEDOUT",
-        "value": "Errno::ETIMEDOUT"
-      },
-      {
-        "name": "ETOOMANYREFS",
-        "value": "Errno::ETOOMANYREFS"
-      },
-      {
-        "name": "ETXTBSY",
-        "value": "Errno::ETXTBSY"
-      },
-      {
-        "name": "EUCLEAN",
-        "value": "Errno::EUCLEAN"
-      },
-      {
-        "name": "EUNATCH",
-        "value": "Errno::EUNATCH"
-      },
-      {
-        "name": "EUSERS",
-        "value": "Errno::EUSERS"
-      },
-      {
-        "name": "EWOULDBLOCK",
-        "value": "Errno::EAGAIN"
-      },
-      {
-        "name": "EXDEV",
-        "value": "Errno::EXDEV"
-      },
-      {
-        "name": "EXFULL",
-        "value": "Errno::EXFULL"
-      },
-      {
-        "name": "NOERROR",
-        "value": "Errno::NOERROR"
-      }
+
     ],
     "instance_methods": [
 
@@ -6763,17 +5146,13 @@
       "BasicObject",
       "Errno::E2BIG",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "7"
-      }
+
     ],
     "instance_methods": [
 
@@ -6788,17 +5167,13 @@
       "BasicObject",
       "Errno::EACCES",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "13"
-      }
+
     ],
     "instance_methods": [
 
@@ -6813,17 +5188,13 @@
       "BasicObject",
       "Errno::EADDRINUSE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "98"
-      }
+
     ],
     "instance_methods": [
 
@@ -6838,17 +5209,13 @@
       "BasicObject",
       "Errno::EADDRNOTAVAIL",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "99"
-      }
+
     ],
     "instance_methods": [
 
@@ -6863,17 +5230,13 @@
       "BasicObject",
       "Errno::EADV",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "68"
-      }
+
     ],
     "instance_methods": [
 
@@ -6888,17 +5251,13 @@
       "BasicObject",
       "Errno::EAFNOSUPPORT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "97"
-      }
+
     ],
     "instance_methods": [
 
@@ -6913,17 +5272,13 @@
       "BasicObject",
       "Errno::EAGAIN",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "11"
-      }
+
     ],
     "instance_methods": [
 
@@ -6938,17 +5293,13 @@
       "BasicObject",
       "Errno::EALREADY",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "114"
-      }
+
     ],
     "instance_methods": [
 
@@ -6963,17 +5314,13 @@
       "BasicObject",
       "Errno::EBADE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "52"
-      }
+
     ],
     "instance_methods": [
 
@@ -6988,17 +5335,13 @@
       "BasicObject",
       "Errno::EBADF",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "9"
-      }
+
     ],
     "instance_methods": [
 
@@ -7013,17 +5356,13 @@
       "BasicObject",
       "Errno::EBADFD",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "77"
-      }
+
     ],
     "instance_methods": [
 
@@ -7038,17 +5377,13 @@
       "BasicObject",
       "Errno::EBADMSG",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "74"
-      }
+
     ],
     "instance_methods": [
 
@@ -7063,17 +5398,13 @@
       "BasicObject",
       "Errno::EBADR",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "53"
-      }
+
     ],
     "instance_methods": [
 
@@ -7088,17 +5419,13 @@
       "BasicObject",
       "Errno::EBADRQC",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "56"
-      }
+
     ],
     "instance_methods": [
 
@@ -7113,17 +5440,13 @@
       "BasicObject",
       "Errno::EBADSLT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "57"
-      }
+
     ],
     "instance_methods": [
 
@@ -7138,17 +5461,13 @@
       "BasicObject",
       "Errno::EBFONT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "59"
-      }
+
     ],
     "instance_methods": [
 
@@ -7163,17 +5482,13 @@
       "BasicObject",
       "Errno::EBUSY",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "16"
-      }
+
     ],
     "instance_methods": [
 
@@ -7188,17 +5503,13 @@
       "BasicObject",
       "Errno::ECANCELED",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "125"
-      }
+
     ],
     "instance_methods": [
 
@@ -7213,17 +5524,13 @@
       "BasicObject",
       "Errno::ECHILD",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "10"
-      }
+
     ],
     "instance_methods": [
 
@@ -7238,17 +5545,13 @@
       "BasicObject",
       "Errno::ECHRNG",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "44"
-      }
+
     ],
     "instance_methods": [
 
@@ -7263,17 +5566,13 @@
       "BasicObject",
       "Errno::ECOMM",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "70"
-      }
+
     ],
     "instance_methods": [
 
@@ -7288,17 +5587,13 @@
       "BasicObject",
       "Errno::ECONNABORTED",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "103"
-      }
+
     ],
     "instance_methods": [
 
@@ -7313,17 +5608,13 @@
       "BasicObject",
       "Errno::ECONNREFUSED",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "111"
-      }
+
     ],
     "instance_methods": [
 
@@ -7338,17 +5629,13 @@
       "BasicObject",
       "Errno::ECONNRESET",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "104"
-      }
+
     ],
     "instance_methods": [
 
@@ -7363,17 +5650,13 @@
       "BasicObject",
       "Errno::EDEADLK",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "35"
-      }
+
     ],
     "instance_methods": [
 
@@ -7388,17 +5671,13 @@
       "BasicObject",
       "Errno::EDESTADDRREQ",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "89"
-      }
+
     ],
     "instance_methods": [
 
@@ -7413,17 +5692,13 @@
       "BasicObject",
       "Errno::EDOM",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "33"
-      }
+
     ],
     "instance_methods": [
 
@@ -7438,17 +5713,13 @@
       "BasicObject",
       "Errno::EDOTDOT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "73"
-      }
+
     ],
     "instance_methods": [
 
@@ -7463,17 +5734,13 @@
       "BasicObject",
       "Errno::EDQUOT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "122"
-      }
+
     ],
     "instance_methods": [
 
@@ -7488,17 +5755,13 @@
       "BasicObject",
       "Errno::EEXIST",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "17"
-      }
+
     ],
     "instance_methods": [
 
@@ -7513,17 +5776,13 @@
       "BasicObject",
       "Errno::EFAULT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "14"
-      }
+
     ],
     "instance_methods": [
 
@@ -7538,17 +5797,13 @@
       "BasicObject",
       "Errno::EFBIG",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "27"
-      }
+
     ],
     "instance_methods": [
 
@@ -7563,17 +5818,13 @@
       "BasicObject",
       "Errno::EHOSTDOWN",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "112"
-      }
+
     ],
     "instance_methods": [
 
@@ -7588,17 +5839,13 @@
       "BasicObject",
       "Errno::EHOSTUNREACH",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "113"
-      }
+
     ],
     "instance_methods": [
 
@@ -7613,17 +5860,13 @@
       "BasicObject",
       "Errno::EHWPOISON",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "133"
-      }
+
     ],
     "instance_methods": [
 
@@ -7638,17 +5881,13 @@
       "BasicObject",
       "Errno::EIDRM",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "43"
-      }
+
     ],
     "instance_methods": [
 
@@ -7663,17 +5902,13 @@
       "BasicObject",
       "Errno::EILSEQ",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "84"
-      }
+
     ],
     "instance_methods": [
 
@@ -7688,17 +5923,13 @@
       "BasicObject",
       "Errno::EINPROGRESS",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "115"
-      }
+
     ],
     "instance_methods": [
 
@@ -7713,17 +5944,13 @@
       "BasicObject",
       "Errno::EINTR",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "4"
-      }
+
     ],
     "instance_methods": [
 
@@ -7738,17 +5965,13 @@
       "BasicObject",
       "Errno::EINVAL",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "22"
-      }
+
     ],
     "instance_methods": [
 
@@ -7763,17 +5986,13 @@
       "BasicObject",
       "Errno::EIO",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "5"
-      }
+
     ],
     "instance_methods": [
 
@@ -7788,17 +6007,13 @@
       "BasicObject",
       "Errno::EISCONN",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "106"
-      }
+
     ],
     "instance_methods": [
 
@@ -7813,17 +6028,13 @@
       "BasicObject",
       "Errno::EISDIR",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "21"
-      }
+
     ],
     "instance_methods": [
 
@@ -7838,17 +6049,13 @@
       "BasicObject",
       "Errno::EISNAM",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "120"
-      }
+
     ],
     "instance_methods": [
 
@@ -7863,17 +6070,13 @@
       "BasicObject",
       "Errno::EKEYEXPIRED",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "127"
-      }
+
     ],
     "instance_methods": [
 
@@ -7888,17 +6091,13 @@
       "BasicObject",
       "Errno::EKEYREJECTED",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "129"
-      }
+
     ],
     "instance_methods": [
 
@@ -7913,17 +6112,13 @@
       "BasicObject",
       "Errno::EKEYREVOKED",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "128"
-      }
+
     ],
     "instance_methods": [
 
@@ -7938,17 +6133,13 @@
       "BasicObject",
       "Errno::EL2HLT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "51"
-      }
+
     ],
     "instance_methods": [
 
@@ -7963,17 +6154,13 @@
       "BasicObject",
       "Errno::EL2NSYNC",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "45"
-      }
+
     ],
     "instance_methods": [
 
@@ -7988,17 +6175,13 @@
       "BasicObject",
       "Errno::EL3HLT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "46"
-      }
+
     ],
     "instance_methods": [
 
@@ -8013,17 +6196,13 @@
       "BasicObject",
       "Errno::EL3RST",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "47"
-      }
+
     ],
     "instance_methods": [
 
@@ -8038,17 +6217,13 @@
       "BasicObject",
       "Errno::ELIBACC",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "79"
-      }
+
     ],
     "instance_methods": [
 
@@ -8063,17 +6238,13 @@
       "BasicObject",
       "Errno::ELIBBAD",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "80"
-      }
+
     ],
     "instance_methods": [
 
@@ -8088,17 +6259,13 @@
       "BasicObject",
       "Errno::ELIBEXEC",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "83"
-      }
+
     ],
     "instance_methods": [
 
@@ -8113,17 +6280,13 @@
       "BasicObject",
       "Errno::ELIBMAX",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "82"
-      }
+
     ],
     "instance_methods": [
 
@@ -8138,17 +6301,13 @@
       "BasicObject",
       "Errno::ELIBSCN",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "81"
-      }
+
     ],
     "instance_methods": [
 
@@ -8163,17 +6322,13 @@
       "BasicObject",
       "Errno::ELNRNG",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "48"
-      }
+
     ],
     "instance_methods": [
 
@@ -8188,17 +6343,13 @@
       "BasicObject",
       "Errno::ELOOP",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "40"
-      }
+
     ],
     "instance_methods": [
 
@@ -8213,17 +6364,13 @@
       "BasicObject",
       "Errno::EMEDIUMTYPE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "124"
-      }
+
     ],
     "instance_methods": [
 
@@ -8238,17 +6385,13 @@
       "BasicObject",
       "Errno::EMFILE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "24"
-      }
+
     ],
     "instance_methods": [
 
@@ -8263,17 +6406,13 @@
       "BasicObject",
       "Errno::EMLINK",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "31"
-      }
+
     ],
     "instance_methods": [
 
@@ -8288,17 +6427,13 @@
       "BasicObject",
       "Errno::EMSGSIZE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "90"
-      }
+
     ],
     "instance_methods": [
 
@@ -8313,17 +6448,13 @@
       "BasicObject",
       "Errno::EMULTIHOP",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "72"
-      }
+
     ],
     "instance_methods": [
 
@@ -8338,17 +6469,13 @@
       "BasicObject",
       "Errno::ENAMETOOLONG",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "36"
-      }
+
     ],
     "instance_methods": [
 
@@ -8363,17 +6490,13 @@
       "BasicObject",
       "Errno::ENAVAIL",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "119"
-      }
+
     ],
     "instance_methods": [
 
@@ -8388,17 +6511,13 @@
       "BasicObject",
       "Errno::ENETDOWN",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "100"
-      }
+
     ],
     "instance_methods": [
 
@@ -8413,17 +6532,13 @@
       "BasicObject",
       "Errno::ENETRESET",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "102"
-      }
+
     ],
     "instance_methods": [
 
@@ -8438,17 +6553,13 @@
       "BasicObject",
       "Errno::ENETUNREACH",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "101"
-      }
+
     ],
     "instance_methods": [
 
@@ -8463,17 +6574,13 @@
       "BasicObject",
       "Errno::ENFILE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "23"
-      }
+
     ],
     "instance_methods": [
 
@@ -8488,17 +6595,13 @@
       "BasicObject",
       "Errno::ENOANO",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "55"
-      }
+
     ],
     "instance_methods": [
 
@@ -8513,17 +6616,13 @@
       "BasicObject",
       "Errno::ENOBUFS",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "105"
-      }
+
     ],
     "instance_methods": [
 
@@ -8538,17 +6637,13 @@
       "BasicObject",
       "Errno::ENOCSI",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "50"
-      }
+
     ],
     "instance_methods": [
 
@@ -8563,17 +6658,13 @@
       "BasicObject",
       "Errno::ENODATA",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "61"
-      }
+
     ],
     "instance_methods": [
 
@@ -8588,17 +6679,13 @@
       "BasicObject",
       "Errno::ENODEV",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "19"
-      }
+
     ],
     "instance_methods": [
 
@@ -8613,17 +6700,13 @@
       "BasicObject",
       "Errno::ENOENT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "2"
-      }
+
     ],
     "instance_methods": [
 
@@ -8638,17 +6721,13 @@
       "BasicObject",
       "Errno::ENOEXEC",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "8"
-      }
+
     ],
     "instance_methods": [
 
@@ -8663,17 +6742,13 @@
       "BasicObject",
       "Errno::ENOKEY",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "126"
-      }
+
     ],
     "instance_methods": [
 
@@ -8688,17 +6763,13 @@
       "BasicObject",
       "Errno::ENOLCK",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "37"
-      }
+
     ],
     "instance_methods": [
 
@@ -8713,17 +6784,13 @@
       "BasicObject",
       "Errno::ENOLINK",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "67"
-      }
+
     ],
     "instance_methods": [
 
@@ -8738,17 +6805,13 @@
       "BasicObject",
       "Errno::ENOMEDIUM",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "123"
-      }
+
     ],
     "instance_methods": [
 
@@ -8763,17 +6826,13 @@
       "BasicObject",
       "Errno::ENOMEM",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "12"
-      }
+
     ],
     "instance_methods": [
 
@@ -8788,17 +6847,13 @@
       "BasicObject",
       "Errno::ENOMSG",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "42"
-      }
+
     ],
     "instance_methods": [
 
@@ -8813,17 +6868,13 @@
       "BasicObject",
       "Errno::ENONET",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "64"
-      }
+
     ],
     "instance_methods": [
 
@@ -8838,17 +6889,13 @@
       "BasicObject",
       "Errno::ENOPKG",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "65"
-      }
+
     ],
     "instance_methods": [
 
@@ -8863,17 +6910,13 @@
       "BasicObject",
       "Errno::ENOPROTOOPT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "92"
-      }
+
     ],
     "instance_methods": [
 
@@ -8888,17 +6931,13 @@
       "BasicObject",
       "Errno::ENOSPC",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "28"
-      }
+
     ],
     "instance_methods": [
 
@@ -8913,17 +6952,13 @@
       "BasicObject",
       "Errno::ENOSR",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "63"
-      }
+
     ],
     "instance_methods": [
 
@@ -8938,17 +6973,13 @@
       "BasicObject",
       "Errno::ENOSTR",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "60"
-      }
+
     ],
     "instance_methods": [
 
@@ -8963,17 +6994,13 @@
       "BasicObject",
       "Errno::ENOSYS",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "38"
-      }
+
     ],
     "instance_methods": [
 
@@ -8988,17 +7015,13 @@
       "BasicObject",
       "Errno::ENOTBLK",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "15"
-      }
+
     ],
     "instance_methods": [
 
@@ -9013,17 +7036,13 @@
       "BasicObject",
       "Errno::ENOTCONN",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "107"
-      }
+
     ],
     "instance_methods": [
 
@@ -9038,17 +7057,13 @@
       "BasicObject",
       "Errno::ENOTDIR",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "20"
-      }
+
     ],
     "instance_methods": [
 
@@ -9063,17 +7078,13 @@
       "BasicObject",
       "Errno::ENOTEMPTY",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "39"
-      }
+
     ],
     "instance_methods": [
 
@@ -9088,17 +7099,13 @@
       "BasicObject",
       "Errno::ENOTNAM",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "118"
-      }
+
     ],
     "instance_methods": [
 
@@ -9113,17 +7120,13 @@
       "BasicObject",
       "Errno::ENOTRECOVERABLE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "131"
-      }
+
     ],
     "instance_methods": [
 
@@ -9138,17 +7141,13 @@
       "BasicObject",
       "Errno::ENOTSOCK",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "88"
-      }
+
     ],
     "instance_methods": [
 
@@ -9163,17 +7162,13 @@
       "BasicObject",
       "Errno::ENOTSUP",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "95"
-      }
+
     ],
     "instance_methods": [
 
@@ -9188,17 +7183,13 @@
       "BasicObject",
       "Errno::ENOTTY",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "25"
-      }
+
     ],
     "instance_methods": [
 
@@ -9213,17 +7204,13 @@
       "BasicObject",
       "Errno::ENOTUNIQ",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "76"
-      }
+
     ],
     "instance_methods": [
 
@@ -9238,17 +7225,13 @@
       "BasicObject",
       "Errno::ENXIO",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "6"
-      }
+
     ],
     "instance_methods": [
 
@@ -9263,17 +7246,13 @@
       "BasicObject",
       "Errno::EOVERFLOW",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "75"
-      }
+
     ],
     "instance_methods": [
 
@@ -9288,17 +7267,13 @@
       "BasicObject",
       "Errno::EOWNERDEAD",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "130"
-      }
+
     ],
     "instance_methods": [
 
@@ -9313,17 +7288,13 @@
       "BasicObject",
       "Errno::EPERM",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "1"
-      }
+
     ],
     "instance_methods": [
 
@@ -9338,17 +7309,13 @@
       "BasicObject",
       "Errno::EPFNOSUPPORT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "96"
-      }
+
     ],
     "instance_methods": [
 
@@ -9363,17 +7330,13 @@
       "BasicObject",
       "Errno::EPIPE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "32"
-      }
+
     ],
     "instance_methods": [
 
@@ -9388,17 +7351,13 @@
       "BasicObject",
       "Errno::EPROTO",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "71"
-      }
+
     ],
     "instance_methods": [
 
@@ -9413,17 +7372,13 @@
       "BasicObject",
       "Errno::EPROTONOSUPPORT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "93"
-      }
+
     ],
     "instance_methods": [
 
@@ -9438,17 +7393,13 @@
       "BasicObject",
       "Errno::EPROTOTYPE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "91"
-      }
+
     ],
     "instance_methods": [
 
@@ -9463,17 +7414,13 @@
       "BasicObject",
       "Errno::ERANGE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "34"
-      }
+
     ],
     "instance_methods": [
 
@@ -9488,17 +7435,13 @@
       "BasicObject",
       "Errno::EREMCHG",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "78"
-      }
+
     ],
     "instance_methods": [
 
@@ -9513,17 +7456,13 @@
       "BasicObject",
       "Errno::EREMOTE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "66"
-      }
+
     ],
     "instance_methods": [
 
@@ -9538,17 +7477,13 @@
       "BasicObject",
       "Errno::EREMOTEIO",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "121"
-      }
+
     ],
     "instance_methods": [
 
@@ -9563,17 +7498,13 @@
       "BasicObject",
       "Errno::ERESTART",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "85"
-      }
+
     ],
     "instance_methods": [
 
@@ -9588,17 +7519,13 @@
       "BasicObject",
       "Errno::ERFKILL",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "132"
-      }
+
     ],
     "instance_methods": [
 
@@ -9613,17 +7540,13 @@
       "BasicObject",
       "Errno::EROFS",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "30"
-      }
+
     ],
     "instance_methods": [
 
@@ -9638,17 +7561,13 @@
       "BasicObject",
       "Errno::ESHUTDOWN",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "108"
-      }
+
     ],
     "instance_methods": [
 
@@ -9663,17 +7582,13 @@
       "BasicObject",
       "Errno::ESOCKTNOSUPPORT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "94"
-      }
+
     ],
     "instance_methods": [
 
@@ -9688,17 +7603,13 @@
       "BasicObject",
       "Errno::ESPIPE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "29"
-      }
+
     ],
     "instance_methods": [
 
@@ -9713,17 +7624,13 @@
       "BasicObject",
       "Errno::ESRCH",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "3"
-      }
+
     ],
     "instance_methods": [
 
@@ -9738,17 +7645,13 @@
       "BasicObject",
       "Errno::ESRMNT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "69"
-      }
+
     ],
     "instance_methods": [
 
@@ -9763,17 +7666,13 @@
       "BasicObject",
       "Errno::ESTALE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "116"
-      }
+
     ],
     "instance_methods": [
 
@@ -9788,17 +7687,13 @@
       "BasicObject",
       "Errno::ESTRPIPE",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "86"
-      }
+
     ],
     "instance_methods": [
 
@@ -9813,17 +7708,13 @@
       "BasicObject",
       "Errno::ETIME",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "62"
-      }
+
     ],
     "instance_methods": [
 
@@ -9838,17 +7729,13 @@
       "BasicObject",
       "Errno::ETIMEDOUT",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "110"
-      }
+
     ],
     "instance_methods": [
 
@@ -9863,17 +7750,13 @@
       "BasicObject",
       "Errno::ETOOMANYREFS",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "109"
-      }
+
     ],
     "instance_methods": [
 
@@ -9888,17 +7771,13 @@
       "BasicObject",
       "Errno::ETXTBSY",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "26"
-      }
+
     ],
     "instance_methods": [
 
@@ -9913,17 +7792,13 @@
       "BasicObject",
       "Errno::EUCLEAN",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "117"
-      }
+
     ],
     "instance_methods": [
 
@@ -9938,17 +7813,13 @@
       "BasicObject",
       "Errno::EUNATCH",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "49"
-      }
+
     ],
     "instance_methods": [
 
@@ -9963,17 +7834,13 @@
       "BasicObject",
       "Errno::EUSERS",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "87"
-      }
+
     ],
     "instance_methods": [
 
@@ -9988,17 +7855,13 @@
       "BasicObject",
       "Errno::EXDEV",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "18"
-      }
+
     ],
     "instance_methods": [
 
@@ -10013,17 +7876,13 @@
       "BasicObject",
       "Errno::EXFULL",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "54"
-      }
+
     ],
     "instance_methods": [
 
@@ -10038,17 +7897,13 @@
       "BasicObject",
       "Errno::NOERROR",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
       "SystemCallError"
     ],
     "constants": [
-      {
-        "name": "Errno",
-        "value": "0"
-      }
+
     ],
     "instance_methods": [
 
@@ -10062,7 +7917,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -10238,8 +8092,6 @@
     "ancestors": [
       "BasicObject",
       "FalseClass",
-      "JSON::Ext::Generator::GeneratorMethods::FalseClass",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -10313,7 +8165,6 @@
     "ancestors": [
       "BasicObject",
       "Fiber",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -10534,7 +8385,6 @@
       "BasicObject",
       "Exception",
       "FiberError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -10557,35 +8407,11 @@
       "File",
       "File::Constants",
       "IO",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
     "constants": [
-      {
-        "name": "ALT_SEPARATOR",
-        "value": "<ALT_SEPARATOR>"
-      },
-      {
-        "name": "Constants",
-        "value": "File::Constants"
-      },
-      {
-        "name": "PATH_SEPARATOR",
-        "value": "<PATH_SEPARATOR>"
-      },
-      {
-        "name": "SEPARATOR",
-        "value": "/"
-      },
-      {
-        "name": "Separator",
-        "value": "/"
-      },
-      {
-        "name": "Stat",
-        "value": "File::Stat"
-      }
+
     ],
     "instance_methods": [
       {
@@ -11324,126 +9150,7 @@
       "File::Constants"
     ],
     "constants": [
-      {
-        "name": "APPEND",
-        "value": "1024"
-      },
-      {
-        "name": "BINARY",
-        "value": "0"
-      },
-      {
-        "name": "CREAT",
-        "value": "64"
-      },
-      {
-        "name": "DIRECT",
-        "value": "16384"
-      },
-      {
-        "name": "DSYNC",
-        "value": "4096"
-      },
-      {
-        "name": "EXCL",
-        "value": "128"
-      },
-      {
-        "name": "FNM_CASEFOLD",
-        "value": "8"
-      },
-      {
-        "name": "FNM_DOTMATCH",
-        "value": "4"
-      },
-      {
-        "name": "FNM_EXTGLOB",
-        "value": "16"
-      },
-      {
-        "name": "FNM_NOESCAPE",
-        "value": "1"
-      },
-      {
-        "name": "FNM_PATHNAME",
-        "value": "2"
-      },
-      {
-        "name": "FNM_SHORTNAME",
-        "value": "0"
-      },
-      {
-        "name": "FNM_SYSCASE",
-        "value": "0"
-      },
-      {
-        "name": "LOCK_EX",
-        "value": "2"
-      },
-      {
-        "name": "LOCK_NB",
-        "value": "4"
-      },
-      {
-        "name": "LOCK_SH",
-        "value": "1"
-      },
-      {
-        "name": "LOCK_UN",
-        "value": "8"
-      },
-      {
-        "name": "NOATIME",
-        "value": "262144"
-      },
-      {
-        "name": "NOCTTY",
-        "value": "256"
-      },
-      {
-        "name": "NOFOLLOW",
-        "value": "131072"
-      },
-      {
-        "name": "NONBLOCK",
-        "value": "2048"
-      },
-      {
-        "name": "NULL",
-        "value": "<NULL>"
-      },
-      {
-        "name": "RDONLY",
-        "value": "0"
-      },
-      {
-        "name": "RDWR",
-        "value": "2"
-      },
-      {
-        "name": "RSYNC",
-        "value": "1052672"
-      },
-      {
-        "name": "SHARE_DELETE",
-        "value": "0"
-      },
-      {
-        "name": "SYNC",
-        "value": "1052672"
-      },
-      {
-        "name": "TMPFILE",
-        "value": "4259840"
-      },
-      {
-        "name": "TRUNC",
-        "value": "512"
-      },
-      {
-        "name": "WRONLY",
-        "value": "1"
-      }
+
     ],
     "instance_methods": [
 
@@ -11458,7 +9165,6 @@
       "BasicObject",
       "Comparable",
       "File::Stat",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -12382,61 +10088,12 @@
       "BasicObject",
       "Comparable",
       "Float",
-      "JSON::Ext::Generator::GeneratorMethods::Float",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Numeric",
       "Object"
     ],
     "constants": [
-      {
-        "name": "DIG",
-        "value": "15"
-      },
-      {
-        "name": "EPSILON",
-        "value": "2.220446049250313e-16"
-      },
-      {
-        "name": "INFINITY",
-        "value": "Float::INFINITY"
-      },
-      {
-        "name": "MANT_DIG",
-        "value": "53"
-      },
-      {
-        "name": "MAX",
-        "value": "1.7976931348623157e+308"
-      },
-      {
-        "name": "MAX_10_EXP",
-        "value": "308"
-      },
-      {
-        "name": "MAX_EXP",
-        "value": "1024"
-      },
-      {
-        "name": "MIN",
-        "value": "2.2250738585072014e-308"
-      },
-      {
-        "name": "MIN_10_EXP",
-        "value": "-307"
-      },
-      {
-        "name": "MIN_EXP",
-        "value": "-1021"
-      },
-      {
-        "name": "NAN",
-        "value": "Float::NAN"
-      },
-      {
-        "name": "RADIX",
-        "value": "2"
-      }
+
     ],
     "instance_methods": [
       {
@@ -12874,7 +10531,6 @@
       "BasicObject",
       "Exception",
       "FloatDomainError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RangeError",
@@ -12891,193 +10547,11 @@
     ],
     "type": "class"
   },
-  "Forwardable": {
-    "ancestors": [
-      "Forwardable"
-    ],
-    "constants": [
-      {
-        "name": "FORWARDABLE_VERSION",
-        "value": "1.3.3"
-      },
-      {
-        "name": "VERSION",
-        "value": "1.3.3"
-      }
-    ],
-    "instance_methods": [
-      {
-        "arity": -3,
-        "name": "def_delegator",
-        "parameters": [
-          [
-            "req",
-            "accessor"
-          ],
-          [
-            "req",
-            "method"
-          ],
-          [
-            "opt",
-            "ali"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -2,
-        "name": "def_delegators",
-        "parameters": [
-          [
-            "req",
-            "accessor"
-          ],
-          [
-            "rest",
-            "methods"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -3,
-        "name": "def_instance_delegator",
-        "parameters": [
-          [
-            "req",
-            "accessor"
-          ],
-          [
-            "req",
-            "method"
-          ],
-          [
-            "opt",
-            "ali"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -2,
-        "name": "def_instance_delegators",
-        "parameters": [
-          [
-            "req",
-            "accessor"
-          ],
-          [
-            "rest",
-            "methods"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "delegate",
-        "parameters": [
-          [
-            "req",
-            "hash"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "instance_delegate",
-        "parameters": [
-          [
-            "req",
-            "hash"
-          ]
-        ],
-        "visibility": "public"
-      }
-    ],
-    "singleton_methods": [
-      {
-        "arity": 3,
-        "name": "_compile_method",
-        "parameters": [
-          [
-            "req",
-            "src"
-          ],
-          [
-            "req",
-            "file"
-          ],
-          [
-            "req",
-            "line"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 4,
-        "name": "_delegator_method",
-        "parameters": [
-          [
-            "req",
-            "obj"
-          ],
-          [
-            "req",
-            "accessor"
-          ],
-          [
-            "req",
-            "method"
-          ],
-          [
-            "req",
-            "ali"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "_valid_method?",
-        "parameters": [
-          [
-            "req",
-            "method"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "debug",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "debug=",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      }
-    ],
-    "type": "module"
-  },
   "FrozenError": {
     "ancestors": [
       "BasicObject",
       "Exception",
       "FrozenError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RuntimeError",
@@ -13116,18 +10590,7 @@
       "GC"
     ],
     "constants": [
-      {
-        "name": "INTERNAL_CONSTANTS",
-        "value": "<Hash>"
-      },
-      {
-        "name": "OPTS",
-        "value": "<Array>"
-      },
-      {
-        "name": "Profiler",
-        "value": "GC::Profiler"
-      }
+
     ],
     "instance_methods": [
       {
@@ -13442,8 +10905,6 @@
       "BasicObject",
       "Enumerable",
       "Hash",
-      "JSON::Ext::Generator::GeneratorMethods::Hash",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -14178,83 +11639,11 @@
       "Enumerable",
       "File::Constants",
       "IO",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
     "constants": [
-      {
-        "name": "Buffer",
-        "value": "IO::Buffer"
-      },
-      {
-        "name": "EAGAINWaitReadable",
-        "value": "IO::EAGAINWaitReadable"
-      },
-      {
-        "name": "EAGAINWaitWritable",
-        "value": "IO::EAGAINWaitWritable"
-      },
-      {
-        "name": "EINPROGRESSWaitReadable",
-        "value": "IO::EINPROGRESSWaitReadable"
-      },
-      {
-        "name": "EINPROGRESSWaitWritable",
-        "value": "IO::EINPROGRESSWaitWritable"
-      },
-      {
-        "name": "EWOULDBLOCKWaitReadable",
-        "value": "IO::EAGAINWaitReadable"
-      },
-      {
-        "name": "EWOULDBLOCKWaitWritable",
-        "value": "IO::EAGAINWaitWritable"
-      },
-      {
-        "name": "PRIORITY",
-        "value": "2"
-      },
-      {
-        "name": "READABLE",
-        "value": "1"
-      },
-      {
-        "name": "SEEK_CUR",
-        "value": "1"
-      },
-      {
-        "name": "SEEK_DATA",
-        "value": "3"
-      },
-      {
-        "name": "SEEK_END",
-        "value": "2"
-      },
-      {
-        "name": "SEEK_HOLE",
-        "value": "4"
-      },
-      {
-        "name": "SEEK_SET",
-        "value": "0"
-      },
-      {
-        "name": "TimeoutError",
-        "value": "IO::TimeoutError"
-      },
-      {
-        "name": "WRITABLE",
-        "value": "4"
-      },
-      {
-        "name": "WaitReadable",
-        "value": "IO::WaitReadable"
-      },
-      {
-        "name": "WaitWritable",
-        "value": "IO::WaitWritable"
-      }
+
     ],
     "instance_methods": [
       {
@@ -15146,83 +12535,11 @@
       "BasicObject",
       "Comparable",
       "IO::Buffer",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
     "constants": [
-      {
-        "name": "AccessError",
-        "value": "IO::Buffer::AccessError"
-      },
-      {
-        "name": "AllocationError",
-        "value": "IO::Buffer::AllocationError"
-      },
-      {
-        "name": "BIG_ENDIAN",
-        "value": "8"
-      },
-      {
-        "name": "DEFAULT_SIZE",
-        "value": "65536"
-      },
-      {
-        "name": "EXTERNAL",
-        "value": "1"
-      },
-      {
-        "name": "HOST_ENDIAN",
-        "value": "4"
-      },
-      {
-        "name": "INTERNAL",
-        "value": "2"
-      },
-      {
-        "name": "InvalidatedError",
-        "value": "IO::Buffer::InvalidatedError"
-      },
-      {
-        "name": "LITTLE_ENDIAN",
-        "value": "4"
-      },
-      {
-        "name": "LOCKED",
-        "value": "32"
-      },
-      {
-        "name": "LockedError",
-        "value": "IO::Buffer::LockedError"
-      },
-      {
-        "name": "MAPPED",
-        "value": "4"
-      },
-      {
-        "name": "MaskError",
-        "value": "IO::Buffer::MaskError"
-      },
-      {
-        "name": "NETWORK_ENDIAN",
-        "value": "8"
-      },
-      {
-        "name": "PAGE_SIZE",
-        "value": "4096"
-      },
-      {
-        "name": "PRIVATE",
-        "value": "64"
-      },
-      {
-        "name": "READONLY",
-        "value": "128"
-      },
-      {
-        "name": "SHARED",
-        "value": "8"
-      }
+
     ],
     "instance_methods": [
       {
@@ -15687,7 +13004,6 @@
       "BasicObject",
       "Exception",
       "IO::Buffer::AccessError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RuntimeError",
@@ -15709,7 +13025,6 @@
       "BasicObject",
       "Exception",
       "IO::Buffer::AllocationError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RuntimeError",
@@ -15731,7 +13046,6 @@
       "BasicObject",
       "Exception",
       "IO::Buffer::InvalidatedError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RuntimeError",
@@ -15753,7 +13067,6 @@
       "BasicObject",
       "Exception",
       "IO::Buffer::LockedError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RuntimeError",
@@ -15776,7 +13089,6 @@
       "BasicObject",
       "Exception",
       "IO::Buffer::MaskError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -15799,7 +13111,6 @@
       "Exception",
       "IO::EAGAINWaitReadable",
       "IO::WaitReadable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -15823,7 +13134,6 @@
       "Exception",
       "IO::EAGAINWaitWritable",
       "IO::WaitWritable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -15847,7 +13157,6 @@
       "Exception",
       "IO::EINPROGRESSWaitReadable",
       "IO::WaitReadable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -15871,7 +13180,6 @@
       "Exception",
       "IO::EINPROGRESSWaitWritable",
       "IO::WaitWritable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -15894,7 +13202,6 @@
       "Exception",
       "IO::TimeoutError",
       "IOError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -15940,156 +13247,11 @@
     ],
     "type": "module"
   },
-  "IO::generic_readable": {
-    "ancestors": [
-      "IO::generic_readable"
-    ],
-    "constants": [
-
-    ],
-    "instance_methods": [
-      {
-        "arity": -1,
-        "name": "read_nonblock",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "readbyte",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "readchar",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "readline",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "readpartial",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "sysread",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      }
-    ],
-    "singleton_methods": [
-
-    ],
-    "type": "module"
-  },
-  "IO::generic_writable": {
-    "ancestors": [
-      "IO::generic_writable"
-    ],
-    "constants": [
-
-    ],
-    "instance_methods": [
-      {
-        "arity": 1,
-        "name": "<<",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "print",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "printf",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "puts",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "syswrite",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "write_nonblock",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      }
-    ],
-    "singleton_methods": [
-
-    ],
-    "type": "module"
-  },
   "IOError": {
     "ancestors": [
       "BasicObject",
       "Exception",
       "IOError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -16110,7 +13272,6 @@
       "BasicObject",
       "Exception",
       "IndexError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -16131,17 +13292,12 @@
       "BasicObject",
       "Comparable",
       "Integer",
-      "JSON::Ext::Generator::GeneratorMethods::Integer",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Numeric",
       "Object"
     ],
     "constants": [
-      {
-        "name": "GMP_VERSION",
-        "value": "GMP 6.3.0"
-      }
+
     ],
     "instance_methods": [
       {
@@ -16783,7 +13939,6 @@
       "BasicObject",
       "Exception",
       "Interrupt",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "SignalException"
@@ -16897,21 +14052,6 @@
         "parameters": [
           [
             "rest"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": -2,
-        "name": "JSON",
-        "parameters": [
-          [
-            "req",
-            "object"
-          ],
-          [
-            "rest",
-            "args"
           ]
         ],
         "visibility": "private"
@@ -17358,28 +14498,6 @@
 
         ],
         "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "j",
-        "parameters": [
-          [
-            "rest",
-            "objs"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": -1,
-        "name": "jj",
-        "parameters": [
-          [
-            "rest",
-            "objs"
-          ]
-        ],
-        "visibility": "private"
       },
       {
         "arity": 1,
@@ -18523,7 +15641,6 @@
       "BasicObject",
       "Exception",
       "IndexError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "KeyError",
       "Object",
@@ -18569,7 +15686,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "LoadError",
       "Object",
@@ -18597,7 +15713,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "LocalJumpError",
       "Object",
@@ -18634,14 +15749,7 @@
       "Marshal"
     ],
     "constants": [
-      {
-        "name": "MAJOR_VERSION",
-        "value": "4"
-      },
-      {
-        "name": "MINOR_VERSION",
-        "value": "8"
-      }
+
     ],
     "instance_methods": [
       {
@@ -18710,7 +15818,6 @@
   "MatchData": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "MatchData",
       "Object"
@@ -18962,18 +16069,7 @@
       "Math"
     ],
     "constants": [
-      {
-        "name": "DomainError",
-        "value": "Math::DomainError"
-      },
-      {
-        "name": "E",
-        "value": "2.718281828459045"
-      },
-      {
-        "name": "PI",
-        "value": "3.141592653589793"
-      }
+
     ],
     "instance_methods": [
       {
@@ -19523,7 +16619,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Math::DomainError",
       "Object",
@@ -19543,7 +16638,6 @@
   "Method": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Method",
       "Object"
@@ -19753,7 +16847,6 @@
   "Module": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Module",
       "Object"
@@ -20597,7 +17690,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "NameError",
       "Object",
@@ -20650,7 +17742,6 @@
   "NameError::message": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "NameError::message",
       "Object"
@@ -20715,8 +17806,6 @@
   "NilClass": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::NilClass",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "NilClass",
       "Object"
@@ -20867,7 +17956,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "NoMatchingPatternError",
       "Object",
@@ -20888,7 +17976,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "NoMatchingPatternError",
       "NoMatchingPatternKeyError",
@@ -20935,7 +18022,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "NoMemoryError",
       "Object"
@@ -20955,7 +18041,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "NameError",
       "NoMethodError",
@@ -21002,7 +18087,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "NotImplementedError",
       "Object",
@@ -21023,7 +18107,6 @@
     "ancestors": [
       "BasicObject",
       "Comparable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Numeric",
       "Object"
@@ -21451,7 +18534,6 @@
   "Object": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object"
     ],
@@ -21461,252 +18543,8 @@
         "value": "<ARGF>"
       },
       {
-        "name": "ARGV",
-        "value": "<Array>"
-      },
-      {
-        "name": "ArgumentError",
-        "value": "ArgumentError"
-      },
-      {
-        "name": "Array",
-        "value": "Array"
-      },
-      {
-        "name": "BasicObject",
-        "value": "BasicObject"
-      },
-      {
-        "name": "Binding",
-        "value": "Binding"
-      },
-      {
-        "name": "CROSS_COMPILING",
-        "value": ""
-      },
-      {
-        "name": "Class",
-        "value": "Class"
-      },
-      {
-        "name": "ClosedQueueError",
-        "value": "ClosedQueueError"
-      },
-      {
-        "name": "Comparable",
-        "value": "Comparable"
-      },
-      {
-        "name": "Complex",
-        "value": "Complex"
-      },
-      {
-        "name": "ConditionVariable",
-        "value": "Thread::ConditionVariable"
-      },
-      {
-        "name": "Data",
-        "value": "Data"
-      },
-      {
-        "name": "Dir",
-        "value": "Dir"
-      },
-      {
         "name": "ENV",
         "value": "<ENV>"
-      },
-      {
-        "name": "EOFError",
-        "value": "EOFError"
-      },
-      {
-        "name": "Encoding",
-        "value": "Encoding"
-      },
-      {
-        "name": "EncodingError",
-        "value": "EncodingError"
-      },
-      {
-        "name": "Enumerable",
-        "value": "Enumerable"
-      },
-      {
-        "name": "Enumerator",
-        "value": "Enumerator"
-      },
-      {
-        "name": "Errno",
-        "value": "Errno"
-      },
-      {
-        "name": "Exception",
-        "value": "Exception"
-      },
-      {
-        "name": "FalseClass",
-        "value": "FalseClass"
-      },
-      {
-        "name": "Fiber",
-        "value": "Fiber"
-      },
-      {
-        "name": "FiberError",
-        "value": "FiberError"
-      },
-      {
-        "name": "File",
-        "value": "File"
-      },
-      {
-        "name": "FileTest",
-        "value": "FileTest"
-      },
-      {
-        "name": "Float",
-        "value": "Float"
-      },
-      {
-        "name": "FloatDomainError",
-        "value": "FloatDomainError"
-      },
-      {
-        "name": "Forwardable",
-        "value": "Forwardable"
-      },
-      {
-        "name": "FrozenError",
-        "value": "FrozenError"
-      },
-      {
-        "name": "GC",
-        "value": "GC"
-      },
-      {
-        "name": "Hash",
-        "value": "Hash"
-      },
-      {
-        "name": "IO",
-        "value": "IO"
-      },
-      {
-        "name": "IOError",
-        "value": "IOError"
-      },
-      {
-        "name": "IndexError",
-        "value": "IndexError"
-      },
-      {
-        "name": "Integer",
-        "value": "Integer"
-      },
-      {
-        "name": "Interrupt",
-        "value": "Interrupt"
-      },
-      {
-        "name": "Kernel",
-        "value": "Kernel"
-      },
-      {
-        "name": "KeyError",
-        "value": "KeyError"
-      },
-      {
-        "name": "LoadError",
-        "value": "LoadError"
-      },
-      {
-        "name": "LocalJumpError",
-        "value": "LocalJumpError"
-      },
-      {
-        "name": "Marshal",
-        "value": "Marshal"
-      },
-      {
-        "name": "MatchData",
-        "value": "MatchData"
-      },
-      {
-        "name": "Math",
-        "value": "Math"
-      },
-      {
-        "name": "Method",
-        "value": "Method"
-      },
-      {
-        "name": "Module",
-        "value": "Module"
-      },
-      {
-        "name": "Mutex",
-        "value": "Thread::Mutex"
-      },
-      {
-        "name": "NameError",
-        "value": "NameError"
-      },
-      {
-        "name": "NilClass",
-        "value": "NilClass"
-      },
-      {
-        "name": "NoMatchingPatternError",
-        "value": "NoMatchingPatternError"
-      },
-      {
-        "name": "NoMatchingPatternKeyError",
-        "value": "NoMatchingPatternKeyError"
-      },
-      {
-        "name": "NoMemoryError",
-        "value": "NoMemoryError"
-      },
-      {
-        "name": "NoMethodError",
-        "value": "NoMethodError"
-      },
-      {
-        "name": "NotImplementedError",
-        "value": "NotImplementedError"
-      },
-      {
-        "name": "Numeric",
-        "value": "Numeric"
-      },
-      {
-        "name": "Object",
-        "value": "Object"
-      },
-      {
-        "name": "ObjectSpace",
-        "value": "ObjectSpace"
-      },
-      {
-        "name": "OpenStruct",
-        "value": "OpenStruct"
-      },
-      {
-        "name": "OptParse",
-        "value": "OptionParser"
-      },
-      {
-        "name": "Proc",
-        "value": "Proc"
-      },
-      {
-        "name": "Process",
-        "value": "Process"
-      },
-      {
-        "name": "Queue",
-        "value": "Thread::Queue"
       },
       {
         "name": "RUBY_COPYRIGHT",
@@ -21745,203 +18583,15 @@
         "value": "<RUBY_VERSION>"
       },
       {
-        "name": "Ractor",
-        "value": "Ractor"
-      },
-      {
-        "name": "Random",
-        "value": "Random"
-      },
-      {
-        "name": "Range",
-        "value": "Range"
-      },
-      {
-        "name": "RangeError",
-        "value": "RangeError"
-      },
-      {
-        "name": "Rational",
-        "value": "Rational"
-      },
-      {
-        "name": "Refinement",
-        "value": "Refinement"
-      },
-      {
-        "name": "Regexp",
-        "value": "Regexp"
-      },
-      {
-        "name": "RegexpError",
-        "value": "RegexpError"
-      },
-      {
-        "name": "RubyVM",
-        "value": "RubyVM"
-      },
-      {
-        "name": "RuntimeError",
-        "value": "RuntimeError"
-      },
-      {
-        "name": "STDERR",
-        "value": "<IO>"
-      },
-      {
-        "name": "STDIN",
-        "value": "<IO>"
-      },
-      {
-        "name": "STDOUT",
-        "value": "<IO>"
-      },
-      {
-        "name": "ScriptError",
-        "value": "ScriptError"
-      },
-      {
-        "name": "SecurityError",
-        "value": "SecurityError"
-      },
-      {
-        "name": "Set",
-        "value": "Set"
-      },
-      {
-        "name": "Signal",
-        "value": "Signal"
-      },
-      {
-        "name": "SignalException",
-        "value": "SignalException"
-      },
-      {
-        "name": "SingleForwardable",
-        "value": "SingleForwardable"
-      },
-      {
-        "name": "SizedQueue",
-        "value": "Thread::SizedQueue"
-      },
-      {
-        "name": "StandardError",
-        "value": "StandardError"
-      },
-      {
-        "name": "StopIteration",
-        "value": "StopIteration"
-      },
-      {
-        "name": "String",
-        "value": "String"
-      },
-      {
-        "name": "StringIO",
-        "value": "StringIO"
-      },
-      {
-        "name": "Struct",
-        "value": "Struct"
-      },
-      {
-        "name": "Symbol",
-        "value": "Symbol"
-      },
-      {
-        "name": "SyntaxError",
-        "value": "SyntaxError"
-      },
-      {
-        "name": "SystemCallError",
-        "value": "SystemCallError"
-      },
-      {
-        "name": "SystemExit",
-        "value": "SystemExit"
-      },
-      {
-        "name": "SystemStackError",
-        "value": "SystemStackError"
-      },
-      {
         "name": "TOPLEVEL_BINDING",
         "value": "<TOPLEVEL_BINDING>"
-      },
-      {
-        "name": "Thread",
-        "value": "Thread"
-      },
-      {
-        "name": "ThreadError",
-        "value": "ThreadError"
-      },
-      {
-        "name": "ThreadGroup",
-        "value": "ThreadGroup"
-      },
-      {
-        "name": "Time",
-        "value": "Time"
-      },
-      {
-        "name": "TracePoint",
-        "value": "TracePoint"
-      },
-      {
-        "name": "TrueClass",
-        "value": "TrueClass"
-      },
-      {
-        "name": "TypeError",
-        "value": "TypeError"
-      },
-      {
-        "name": "UnboundMethod",
-        "value": "UnboundMethod"
-      },
-      {
-        "name": "UncaughtThrowError",
-        "value": "UncaughtThrowError"
-      },
-      {
-        "name": "UnicodeNormalize",
-        "value": "UnicodeNormalize"
-      },
-      {
-        "name": "Warning",
-        "value": "Warning"
-      },
-      {
-        "name": "ZeroDivisionError",
-        "value": "ZeroDivisionError"
       }
     ],
     "instance_methods": [
-      {
-        "arity": -1,
-        "name": "to_yaml",
-        "parameters": [
-          [
-            "opt",
-            "options"
-          ]
-        ],
-        "visibility": "public"
-      }
+
     ],
     "singleton_methods": [
-      {
-        "arity": 1,
-        "name": "yaml_tag",
-        "parameters": [
-          [
-            "req",
-            "url"
-          ]
-        ],
-        "visibility": "public"
-      }
+
     ],
     "type": "class"
   },
@@ -21950,10 +18600,7 @@
       "ObjectSpace"
     ],
     "constants": [
-      {
-        "name": "WeakMap",
-        "value": "ObjectSpace::WeakMap"
-      }
+
     ],
     "instance_methods": [
       {
@@ -22103,7 +18750,6 @@
     "ancestors": [
       "BasicObject",
       "Enumerable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "ObjectSpace::WeakMap"
@@ -22243,750 +18889,9 @@
     ],
     "type": "class"
   },
-  "OpenStruct": {
-    "ancestors": [
-      "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
-      "Kernel",
-      "Object",
-      "OpenStruct"
-    ],
-    "constants": [
-      {
-        "name": "InspectKey",
-        "value": "__inspect_key__"
-      },
-      {
-        "name": "VERSION",
-        "value": "0.5.5"
-      }
-    ],
-    "instance_methods": [
-      {
-        "arity": 1,
-        "name": "==",
-        "parameters": [
-          [
-            "req",
-            "other"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "[]",
-        "parameters": [
-          [
-            "req",
-            "name"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 2,
-        "name": "[]=",
-        "parameters": [
-          [
-            "req",
-            "name"
-          ],
-          [
-            "req",
-            "value"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "__id__!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "__send__!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "block_given!",
-        "parameters": [
-
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "class!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "clone!",
-        "parameters": [
-          [
-            "key",
-            "freeze"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "define_singleton_method!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "delete_field",
-        "parameters": [
-          [
-            "req",
-            "name"
-          ],
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "delete_field!",
-        "parameters": [
-          [
-            "req",
-            "name"
-          ],
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -2,
-        "name": "dig",
-        "parameters": [
-          [
-            "req",
-            "name"
-          ],
-          [
-            "rest",
-            "names"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -2,
-        "name": "dig!",
-        "parameters": [
-          [
-            "req",
-            "name"
-          ],
-          [
-            "rest",
-            "names"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "display!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "dup!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "each_pair",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "each_pair!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "encode_with",
-        "parameters": [
-          [
-            "req",
-            "coder"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "encode_with!",
-        "parameters": [
-          [
-            "req",
-            "coder"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "enum_for!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "eql?",
-        "parameters": [
-          [
-            "req",
-            "other"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "extend!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "freeze",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "freeze!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "hash",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "hash!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "init_with",
-        "parameters": [
-          [
-            "req",
-            "coder"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "init_with!",
-        "parameters": [
-          [
-            "req",
-            "coder"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "initialize",
-        "parameters": [
-          [
-            "opt",
-            "hash"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 1,
-        "name": "initialize_clone",
-        "parameters": [
-          [
-            "req",
-            "orig"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 1,
-        "name": "initialize_dup",
-        "parameters": [
-          [
-            "req",
-            "orig"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "inspect",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "inspect!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "instance_eval!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "instance_exec!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "instance_variable_get!",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 2,
-        "name": "instance_variable_set!",
-        "parameters": [
-          [
-            "req"
-          ],
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "instance_variables!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "is_method_protected!",
-        "parameters": [
-          [
-            "req",
-            "name"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "itself!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "marshal_dump",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "marshal_dump!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "marshal_load",
-        "parameters": [
-          [
-            "req",
-            "hash"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 1,
-        "name": "method!",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -2,
-        "name": "method_missing",
-        "parameters": [
-          [
-            "req",
-            "mid"
-          ],
-          [
-            "rest",
-            "args"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": -1,
-        "name": "methods!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "new_ostruct_member!",
-        "parameters": [
-          [
-            "req",
-            "name"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "object_id!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "private_methods!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "protected_methods!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "public_method!",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "public_methods!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "public_send!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "raise!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 1,
-        "name": "remove_instance_variable!",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "send!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 2,
-        "name": "set_ostruct_member_value!",
-        "parameters": [
-          [
-            "req",
-            "name"
-          ],
-          [
-            "req",
-            "value"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "singleton_class!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "singleton_method!",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "singleton_methods!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "table",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "table!",
-        "parameters": [
-
-        ],
-        "visibility": "protected"
-      },
-      {
-        "arity": 0,
-        "name": "tap!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "then!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "to_enum!",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "to_h",
-        "parameters": [
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "to_h!",
-        "parameters": [
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "to_s",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "to_s!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "update_to_values!",
-        "parameters": [
-          [
-            "req",
-            "hash"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "yield_self!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      }
-    ],
-    "singleton_methods": [
-
-    ],
-    "type": "class"
-  },
   "Proc": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Proc"
@@ -23203,166 +19108,7 @@
       "Process"
     ],
     "constants": [
-      {
-        "name": "CLOCK_BOOTTIME",
-        "value": "7"
-      },
-      {
-        "name": "CLOCK_BOOTTIME_ALARM",
-        "value": "9"
-      },
-      {
-        "name": "CLOCK_MONOTONIC",
-        "value": "1"
-      },
-      {
-        "name": "CLOCK_MONOTONIC_COARSE",
-        "value": "6"
-      },
-      {
-        "name": "CLOCK_MONOTONIC_RAW",
-        "value": "4"
-      },
-      {
-        "name": "CLOCK_PROCESS_CPUTIME_ID",
-        "value": "2"
-      },
-      {
-        "name": "CLOCK_REALTIME",
-        "value": "0"
-      },
-      {
-        "name": "CLOCK_REALTIME_ALARM",
-        "value": "8"
-      },
-      {
-        "name": "CLOCK_REALTIME_COARSE",
-        "value": "5"
-      },
-      {
-        "name": "CLOCK_TAI",
-        "value": "11"
-      },
-      {
-        "name": "CLOCK_THREAD_CPUTIME_ID",
-        "value": "3"
-      },
-      {
-        "name": "GID",
-        "value": "Process::GID"
-      },
-      {
-        "name": "PRIO_PGRP",
-        "value": "1"
-      },
-      {
-        "name": "PRIO_PROCESS",
-        "value": "0"
-      },
-      {
-        "name": "PRIO_USER",
-        "value": "2"
-      },
-      {
-        "name": "RLIMIT_AS",
-        "value": "9"
-      },
-      {
-        "name": "RLIMIT_CORE",
-        "value": "4"
-      },
-      {
-        "name": "RLIMIT_CPU",
-        "value": "0"
-      },
-      {
-        "name": "RLIMIT_DATA",
-        "value": "2"
-      },
-      {
-        "name": "RLIMIT_FSIZE",
-        "value": "1"
-      },
-      {
-        "name": "RLIMIT_MEMLOCK",
-        "value": "8"
-      },
-      {
-        "name": "RLIMIT_MSGQUEUE",
-        "value": "12"
-      },
-      {
-        "name": "RLIMIT_NICE",
-        "value": "13"
-      },
-      {
-        "name": "RLIMIT_NOFILE",
-        "value": "7"
-      },
-      {
-        "name": "RLIMIT_NPROC",
-        "value": "6"
-      },
-      {
-        "name": "RLIMIT_RSS",
-        "value": "5"
-      },
-      {
-        "name": "RLIMIT_RTPRIO",
-        "value": "14"
-      },
-      {
-        "name": "RLIMIT_RTTIME",
-        "value": "15"
-      },
-      {
-        "name": "RLIMIT_SIGPENDING",
-        "value": "11"
-      },
-      {
-        "name": "RLIMIT_STACK",
-        "value": "3"
-      },
-      {
-        "name": "RLIM_INFINITY",
-        "value": "18446744073709551615"
-      },
-      {
-        "name": "RLIM_SAVED_CUR",
-        "value": "18446744073709551615"
-      },
-      {
-        "name": "RLIM_SAVED_MAX",
-        "value": "18446744073709551615"
-      },
-      {
-        "name": "Status",
-        "value": "Process::Status"
-      },
-      {
-        "name": "Sys",
-        "value": "Process::Sys"
-      },
-      {
-        "name": "Tms",
-        "value": "Process::Tms"
-      },
-      {
-        "name": "UID",
-        "value": "Process::UID"
-      },
-      {
-        "name": "WNOHANG",
-        "value": "1"
-      },
-      {
-        "name": "WUNTRACED",
-        "value": "2"
-      },
-      {
-        "name": "Waiter",
-        "value": "Process::Waiter"
-      }
+
     ],
     "instance_methods": [
       {
@@ -24360,7 +20106,6 @@
   "Process::Status": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Process::Status"
@@ -24835,7 +20580,6 @@
     "ancestors": [
       "BasicObject",
       "Enumerable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Process::Tms",
@@ -25152,7 +20896,6 @@
   "Process::Waiter": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Process::Waiter",
@@ -25179,40 +20922,12 @@
   "Ractor": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Ractor"
     ],
     "constants": [
-      {
-        "name": "ClosedError",
-        "value": "Ractor::ClosedError"
-      },
-      {
-        "name": "Error",
-        "value": "Ractor::Error"
-      },
-      {
-        "name": "IsolationError",
-        "value": "Ractor::IsolationError"
-      },
-      {
-        "name": "MovedError",
-        "value": "Ractor::MovedError"
-      },
-      {
-        "name": "MovedObject",
-        "value": "Ractor::MovedObject"
-      },
-      {
-        "name": "RemoteError",
-        "value": "Ractor::RemoteError"
-      },
-      {
-        "name": "UnsafeError",
-        "value": "Ractor::UnsafeError"
-      }
+
     ],
     "instance_methods": [
       {
@@ -25486,7 +21201,6 @@
       "BasicObject",
       "Exception",
       "IndexError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Ractor::ClosedError",
@@ -25508,7 +21222,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Ractor::Error",
@@ -25530,7 +21243,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Ractor::Error",
@@ -25553,7 +21265,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Ractor::Error",
@@ -25681,7 +21392,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Ractor::Error",
@@ -25711,7 +21421,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Ractor::Error",
@@ -25733,7 +21442,6 @@
   "Random": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Random",
@@ -25741,14 +21449,7 @@
       "Random::Formatter"
     ],
     "constants": [
-      {
-        "name": "Base",
-        "value": "Random::Base"
-      },
-      {
-        "name": "Formatter",
-        "value": "Random::Formatter"
-      }
+
     ],
     "instance_methods": [
       {
@@ -25885,7 +21586,6 @@
   "Random::Base": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Random::Base",
@@ -25977,7 +21677,6 @@
     "ancestors": [
       "BasicObject",
       "Enumerable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Range"
@@ -26242,7 +21941,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RangeError",
@@ -26263,7 +21961,6 @@
     "ancestors": [
       "BasicObject",
       "Comparable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Numeric",
       "Object",
@@ -26553,7 +22250,6 @@
   "Rational::compatible": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Rational::compatible"
@@ -26581,7 +22277,6 @@
   "Refinement": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Module",
       "Object",
@@ -26618,36 +22313,12 @@
   "Regexp": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Regexp"
     ],
     "constants": [
-      {
-        "name": "EXTENDED",
-        "value": "2"
-      },
-      {
-        "name": "FIXEDENCODING",
-        "value": "16"
-      },
-      {
-        "name": "IGNORECASE",
-        "value": "1"
-      },
-      {
-        "name": "MULTILINE",
-        "value": "4"
-      },
-      {
-        "name": "NOENCODING",
-        "value": "32"
-      },
-      {
-        "name": "TimeoutError",
-        "value": "Regexp::TimeoutError"
-      }
+
     ],
     "instance_methods": [
       {
@@ -26923,7 +22594,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Regexp::TimeoutError",
@@ -26945,7 +22615,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RegexpError",
@@ -26965,36 +22634,12 @@
   "RubyVM": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RubyVM"
     ],
     "constants": [
-      {
-        "name": "AbstractSyntaxTree",
-        "value": "RubyVM::AbstractSyntaxTree"
-      },
-      {
-        "name": "DEFAULT_PARAMS",
-        "value": "<Hash>"
-      },
-      {
-        "name": "INSTRUCTION_NAMES",
-        "value": "<Array>"
-      },
-      {
-        "name": "InstructionSequence",
-        "value": "RubyVM::InstructionSequence"
-      },
-      {
-        "name": "MJIT",
-        "value": "RubyVM::MJIT"
-      },
-      {
-        "name": "OPTS",
-        "value": "<Array>"
-      }
+
     ],
     "instance_methods": [
 
@@ -27036,10 +22681,7 @@
       "RubyVM::AbstractSyntaxTree"
     ],
     "constants": [
-      {
-        "name": "Node",
-        "value": "RubyVM::AbstractSyntaxTree::Node"
-      }
+
     ],
     "instance_methods": [
 
@@ -27131,7 +22773,6 @@
   "RubyVM::AbstractSyntaxTree::Node": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RubyVM::AbstractSyntaxTree::Node"
@@ -27245,7 +22886,6 @@
   "RubyVM::InstructionSequence": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RubyVM::InstructionSequence"
@@ -27516,7 +23156,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "RuntimeError",
@@ -27537,7 +23176,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "ScriptError"
@@ -27557,7 +23195,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "SecurityError"
@@ -27570,720 +23207,6 @@
     ],
     "singleton_methods": [
 
-    ],
-    "type": "class"
-  },
-  "Set": {
-    "ancestors": [
-      "BasicObject",
-      "Enumerable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
-      "Kernel",
-      "Object",
-      "Set"
-    ],
-    "constants": [
-      {
-        "name": "InspectKey",
-        "value": "__inspect_key__"
-      }
-    ],
-    "instance_methods": [
-      {
-        "arity": 1,
-        "name": "&",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "+",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "-",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "<",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "<<",
-        "parameters": [
-          [
-            "req",
-            "o"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "<=",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "<=>",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "==",
-        "parameters": [
-          [
-            "req",
-            "other"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "===",
-        "parameters": [
-          [
-            "req",
-            "o"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": ">",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": ">=",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "^",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "add",
-        "parameters": [
-          [
-            "req",
-            "o"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "add?",
-        "parameters": [
-          [
-            "req",
-            "o"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "classify",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "clear",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "collect!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "compare_by_identity",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "compare_by_identity?",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "delete",
-        "parameters": [
-          [
-            "req",
-            "o"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "delete?",
-        "parameters": [
-          [
-            "req",
-            "o"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "delete_if",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "difference",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "disjoint?",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "divide",
-        "parameters": [
-          [
-            "block",
-            "func"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "do_with_enum",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ],
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "each",
-        "parameters": [
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "empty?",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "eql?",
-        "parameters": [
-          [
-            "req",
-            "o"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "filter!",
-        "parameters": [
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "flatten",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "flatten!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -2,
-        "name": "flatten_merge",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ],
-          [
-            "opt",
-            "seen"
-          ]
-        ],
-        "visibility": "protected"
-      },
-      {
-        "arity": 0,
-        "name": "freeze",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "hash",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "include?",
-        "parameters": [
-          [
-            "req",
-            "o"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "initialize",
-        "parameters": [
-          [
-            "opt",
-            "enum"
-          ],
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": -2,
-        "name": "initialize_clone",
-        "parameters": [
-          [
-            "req",
-            "orig"
-          ],
-          [
-            "keyrest",
-            "options"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 1,
-        "name": "initialize_dup",
-        "parameters": [
-          [
-            "req",
-            "orig"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "inspect",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "intersect?",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "intersection",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "join",
-        "parameters": [
-          [
-            "opt",
-            "separator"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "keep_if",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "length",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "map!",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "member?",
-        "parameters": [
-          [
-            "req",
-            "o"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "merge",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "pretty_print",
-        "parameters": [
-          [
-            "req",
-            "pp"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "pretty_print_cycle",
-        "parameters": [
-          [
-            "req",
-            "pp"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "proper_subset?",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "proper_superset?",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "reject!",
-        "parameters": [
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "replace",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "reset",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "select!",
-        "parameters": [
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "size",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "subset?",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "subtract",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "superset?",
-        "parameters": [
-          [
-            "req",
-            "set"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "to_a",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "to_s",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "to_set",
-        "parameters": [
-          [
-            "opt",
-            "klass"
-          ],
-          [
-            "rest",
-            "args"
-          ],
-          [
-            "block",
-            "block"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "union",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "|",
-        "parameters": [
-          [
-            "req",
-            "enum"
-          ]
-        ],
-        "visibility": "public"
-      }
-    ],
-    "singleton_methods": [
-      {
-        "arity": -1,
-        "name": "[]",
-        "parameters": [
-          [
-            "rest",
-            "ary"
-          ]
-        ],
-        "visibility": "public"
-      }
     ],
     "type": "class"
   },
@@ -28360,7 +23283,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "SignalException"
@@ -28401,115 +23323,10 @@
     ],
     "type": "class"
   },
-  "SingleForwardable": {
-    "ancestors": [
-      "SingleForwardable"
-    ],
-    "constants": [
-
-    ],
-    "instance_methods": [
-      {
-        "arity": -3,
-        "name": "def_delegator",
-        "parameters": [
-          [
-            "req",
-            "accessor"
-          ],
-          [
-            "req",
-            "method"
-          ],
-          [
-            "opt",
-            "ali"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -2,
-        "name": "def_delegators",
-        "parameters": [
-          [
-            "req",
-            "accessor"
-          ],
-          [
-            "rest",
-            "methods"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -3,
-        "name": "def_single_delegator",
-        "parameters": [
-          [
-            "req",
-            "accessor"
-          ],
-          [
-            "req",
-            "method"
-          ],
-          [
-            "opt",
-            "ali"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -2,
-        "name": "def_single_delegators",
-        "parameters": [
-          [
-            "req",
-            "accessor"
-          ],
-          [
-            "rest",
-            "methods"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "delegate",
-        "parameters": [
-          [
-            "req",
-            "hash"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "single_delegate",
-        "parameters": [
-          [
-            "req",
-            "hash"
-          ]
-        ],
-        "visibility": "public"
-      }
-    ],
-    "singleton_methods": [
-
-    ],
-    "type": "module"
-  },
   "StandardError": {
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError"
@@ -28530,7 +23347,6 @@
       "BasicObject",
       "Exception",
       "IndexError",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -28558,8 +23374,6 @@
     "ancestors": [
       "BasicObject",
       "Comparable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
-      "JSON::Ext::Generator::GeneratorMethods::String",
       "Kernel",
       "Object",
       "String"
@@ -29851,502 +24665,10 @@
     ],
     "type": "class"
   },
-  "StringIO": {
-    "ancestors": [
-      "BasicObject",
-      "Enumerable",
-      "IO::generic_readable",
-      "IO::generic_writable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
-      "Kernel",
-      "Object",
-      "StringIO"
-    ],
-    "constants": [
-      {
-        "name": "VERSION",
-        "value": "3.0.4"
-      }
-    ],
-    "instance_methods": [
-      {
-        "arity": 0,
-        "name": "binmode",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "close",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "close_read",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "close_write",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "closed?",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "closed_read?",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "closed_write?",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "each",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "each_byte",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "each_char",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "each_codepoint",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "each_line",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "eof",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "eof?",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "external_encoding",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "fcntl",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "fileno",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "flush",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "fsync",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "getbyte",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "getc",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "gets",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "initialize",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 1,
-        "name": "initialize_copy",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "private"
-      },
-      {
-        "arity": 0,
-        "name": "internal_encoding",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "isatty",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "length",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "lineno",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "lineno=",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "pid",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "pos",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "pos=",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "putc",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "read",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "readlines",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "reopen",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "rewind",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "seek",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "set_encoding",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "set_encoding_by_bom",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "size",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "string",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "string=",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "sync",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "sync=",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "tell",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "truncate",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 0,
-        "name": "tty?",
-        "parameters": [
-
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "ungetbyte",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": 1,
-        "name": "ungetc",
-        "parameters": [
-          [
-            "req"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "write",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      }
-    ],
-    "singleton_methods": [
-      {
-        "arity": -1,
-        "name": "new",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      },
-      {
-        "arity": -1,
-        "name": "open",
-        "parameters": [
-          [
-            "rest"
-          ]
-        ],
-        "visibility": "public"
-      }
-    ],
-    "type": "class"
-  },
   "Struct": {
     "ancestors": [
       "BasicObject",
       "Enumerable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Struct"
@@ -30583,7 +24905,6 @@
     "ancestors": [
       "BasicObject",
       "Comparable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Symbol"
@@ -30873,7 +25194,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "ScriptError",
@@ -30911,7 +25231,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -30958,7 +25277,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "SystemExit"
@@ -31003,7 +25321,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "SystemStackError"
@@ -31022,32 +25339,12 @@
   "Thread": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Thread"
     ],
     "constants": [
-      {
-        "name": "Backtrace",
-        "value": "Thread::Backtrace"
-      },
-      {
-        "name": "ConditionVariable",
-        "value": "Thread::ConditionVariable"
-      },
-      {
-        "name": "Mutex",
-        "value": "Thread::Mutex"
-      },
-      {
-        "name": "Queue",
-        "value": "Thread::Queue"
-      },
-      {
-        "name": "SizedQueue",
-        "value": "Thread::SizedQueue"
-      }
+
     ],
     "instance_methods": [
       {
@@ -31576,16 +25873,12 @@
   "Thread::Backtrace": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Thread::Backtrace"
     ],
     "constants": [
-      {
-        "name": "Location",
-        "value": "Thread::Backtrace::Location"
-      }
+
     ],
     "instance_methods": [
 
@@ -31605,7 +25898,6 @@
   "Thread::Backtrace::Location": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Thread::Backtrace::Location"
@@ -31679,7 +25971,6 @@
   "Thread::ConditionVariable": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Thread::ConditionVariable"
@@ -31739,7 +26030,6 @@
   "Thread::Mutex": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Thread::Mutex"
@@ -31823,7 +26113,6 @@
   "Thread::Queue": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Thread::Queue"
@@ -31990,7 +26279,6 @@
   "Thread::SizedQueue": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Thread::Queue",
@@ -32188,7 +26476,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -32208,16 +26495,12 @@
   "ThreadGroup": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "ThreadGroup"
     ],
     "constants": [
-      {
-        "name": "Default",
-        "value": "<ThreadGroup>"
-      }
+
     ],
     "instance_methods": [
       {
@@ -32264,7 +26547,6 @@
     "ancestors": [
       "BasicObject",
       "Comparable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Time"
@@ -32890,7 +27172,6 @@
   "Time::tm": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "Time::tm"
@@ -33187,7 +27468,6 @@
   "TracePoint": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "TracePoint"
@@ -33389,8 +27669,6 @@
   "TrueClass": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
-      "JSON::Ext::Generator::GeneratorMethods::TrueClass",
       "Kernel",
       "Object",
       "TrueClass"
@@ -33465,7 +27743,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -33485,7 +27762,6 @@
   "UnboundMethod": {
     "ancestors": [
       "BasicObject",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "UnboundMethod"
@@ -33633,7 +27909,6 @@
       "ArgumentError",
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -33748,8 +28023,6 @@
     "ancestors": [
       "BasicObject",
       "Comparable",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
-      "JSON::Ext::Generator::GeneratorMethods::String",
       "Kernel",
       "Object",
       "String",
@@ -33779,7 +28052,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "StandardError",
@@ -33800,7 +28072,6 @@
     "ancestors": [
       "BasicObject",
       "Exception",
-      "JSON::Ext::Generator::GeneratorMethods::Object",
       "Kernel",
       "Object",
       "fatal"
