@@ -50,6 +50,12 @@ jobs:
           ruby tool/generate_porting_ledger.rb --check
         if: always()
 
+      - name: Check method kinds (Rule 7 reflection inspector)
+        run: |
+          ruby tool/check_method_kinds.rb
+          ruby -I. -Itest test/ruby_on_rust/test_method_kinds.rb
+        if: always()
+
       - name: Check for code styles
         run: |
           set -x
