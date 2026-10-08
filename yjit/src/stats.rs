@@ -1,10 +1,8 @@
 //! Everything related to the collection of runtime stats in YJIT
 //! See the --yjit-stats command-line option
 
-#![allow(clippy::incompatible_msrv, clippy::declare_interior_mutable_const)]
-
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{OnceLock, RwLock};
+use std::ptr::addr_of_mut;
+use std::sync::atomic::Ordering;
 use std::time::Instant;
 use std::collections::HashMap;
 
@@ -19,99 +17,92 @@ mod jit;
 
 /// Running total of how many ISeqs are in the system.
 #[no_mangle]
-pub static rb_yjit_live_iseq_count: AtomicU64 = AtomicU64::new(0);
+pub static mut rb_yjit_live_iseq_count: u64 = 0;
 
 /// Monotonically increasing total of how many ISEQs were allocated
 #[no_mangle]
-pub static rb_yjit_iseq_alloc_count: AtomicU64 = AtomicU64::new(0);
+pub static mut rb_yjit_iseq_alloc_count: u64 = 0;
 
 /// Monotonically increasing total of time spent compiling.
 #[no_mangle]
-pub static rb_yjit_total_compile_time_ns: AtomicU64 = AtomicU64::new(0);
+pub static mut rb_yjit_total_compile_time_ns: u64 = 0;
 
 // Time allocated for compilation. When going over, compilation is paused.
 #[no_mangle]
-pub static rb_yjit_max_compile_time_ns: AtomicU64 = AtomicU64::new(0);
+pub static mut rb_yjit_max_compile_time_ns: u64 = 0;
 
 /// The number of bytes YJIT has allocated on the Rust heap.
 pub fn yjit_alloc_size() -> usize {
     jit::GLOBAL_ALLOCATOR.alloc_size.load(Ordering::SeqCst)
 }
 
-/// Thread-safe structure holding C function / ISEQ statistics
-#[derive(Default)]
-struct MethodStats {
-    name_to_idx: HashMap<String, usize>,
-    call_counts: Vec<AtomicU64>,
-}
+/// Mapping of C function / ISEQ name to integer indices
+/// This is accessed at compilation time only (protected by a lock)
+static mut CFUNC_NAME_TO_IDX: Option<HashMap<String, usize>> = None;
+static mut ISEQ_NAME_TO_IDX: Option<HashMap<String, usize>> = None;
 
-/// Mapping and call counts for C functions / ISEQ indices
-static CFUNC_STATS: OnceLock<RwLock<MethodStats>> = OnceLock::new();
-static ISEQ_STATS: OnceLock<RwLock<MethodStats>> = OnceLock::new();
-
-fn cfunc_stats() -> &'static RwLock<MethodStats> {
-    CFUNC_STATS.get_or_init(|| RwLock::new(MethodStats::default()))
-}
-
-fn iseq_stats() -> &'static RwLock<MethodStats> {
-    ISEQ_STATS.get_or_init(|| RwLock::new(MethodStats::default()))
-}
+/// Vector of call counts for each C function / ISEQ index
+/// This is modified (but not resized) by JITted code
+static mut CFUNC_CALL_COUNT: Option<Vec<u64>> = None;
+static mut ISEQ_CALL_COUNT: Option<Vec<u64>> = None;
 
 /// Assign an index to a given cfunc name string
 pub fn get_cfunc_idx(name: &str) -> usize {
-    get_method_idx(name, cfunc_stats())
+    // SAFETY: We acquire a VM lock and don't create multiple &mut references to these static mut variables.
+    unsafe { get_method_idx(name, &mut *addr_of_mut!(CFUNC_NAME_TO_IDX), &mut *addr_of_mut!(CFUNC_CALL_COUNT)) }
 }
 
 /// Assign an index to a given ISEQ name string
 pub fn get_iseq_idx(name: &str) -> usize {
-    get_method_idx(name, iseq_stats())
+    // SAFETY: We acquire a VM lock and don't create multiple &mut references to these static mut variables.
+    unsafe { get_method_idx(name, &mut *addr_of_mut!(ISEQ_NAME_TO_IDX), &mut *addr_of_mut!(ISEQ_CALL_COUNT)) }
 }
 
-fn get_method_idx(name: &str, stats_lock: &RwLock<MethodStats>) -> usize {
-    if let Ok(guard) = stats_lock.read() {
-        if let Some(&idx) = guard.name_to_idx.get(name) {
-            return idx;
+fn get_method_idx(
+    name: &str,
+    method_name_to_idx: &mut Option<HashMap<String, usize>>,
+    method_call_count: &mut Option<Vec<u64>>,
+) -> usize {
+    //println!("{}", name);
+
+    let name_to_idx = method_name_to_idx.get_or_insert_with(HashMap::default);
+    let call_count = method_call_count.get_or_insert_with(Vec::default);
+
+    match name_to_idx.get(name) {
+        Some(idx) => *idx,
+        None => {
+            let idx = name_to_idx.len();
+            name_to_idx.insert(name.to_string(), idx);
+
+            // Resize the call count vector
+            if idx >= call_count.len() {
+                call_count.resize(idx + 1, 0);
+            }
+
+            idx
         }
     }
-
-    let mut guard = stats_lock.write().unwrap();
-    if let Some(&idx) = guard.name_to_idx.get(name) {
-        return idx;
-    }
-
-    let idx = guard.name_to_idx.len();
-    guard.name_to_idx.insert(name.to_string(), idx);
-    if idx >= guard.call_counts.len() {
-        guard.call_counts.resize_with(idx + 1, || AtomicU64::new(0));
-    }
-
-    idx
 }
 
 // Increment the counter for a C function
 pub extern "C" fn incr_cfunc_counter(idx: usize) {
-    if let Ok(guard) = cfunc_stats().read() {
-        if idx < guard.call_counts.len() {
-            guard.call_counts[idx].fetch_add(1, Ordering::Relaxed);
-        }
-    }
+    let cfunc_call_count = unsafe { CFUNC_CALL_COUNT.as_mut().unwrap() };
+    assert!(idx < cfunc_call_count.len());
+    cfunc_call_count[idx] += 1;
 }
 
 // Increment the counter for an ISEQ
 pub extern "C" fn incr_iseq_counter(idx: usize) {
-    if let Ok(guard) = iseq_stats().read() {
-        if idx < guard.call_counts.len() {
-            guard.call_counts[idx].fetch_add(1, Ordering::Relaxed);
-        }
-    }
+    let iseq_call_count = unsafe { ISEQ_CALL_COUNT.as_mut().unwrap() };
+    assert!(idx < iseq_call_count.len());
+    iseq_call_count[idx] += 1;
 }
 
 /// YJIT exit counts for each instruction type.
 /// Note that `VM_INSTRUCTION_SIZE` is an upper bound and the actual number
 /// of VM opcodes may be different in the build. See [`rb_vm_instruction_size()`]
 const VM_INSTRUCTION_SIZE_USIZE: usize = VM_INSTRUCTION_SIZE as usize;
-const ATOMIC_ZERO: AtomicU64 = AtomicU64::new(0);
-static EXIT_OP_COUNT: [AtomicU64; VM_INSTRUCTION_SIZE_USIZE] = [ATOMIC_ZERO; VM_INSTRUCTION_SIZE_USIZE];
+static mut EXIT_OP_COUNT: [u64; VM_INSTRUCTION_SIZE_USIZE] = [0; VM_INSTRUCTION_SIZE_USIZE];
 
 /// Global state needed for collecting backtraces of exits
 pub struct YjitExitLocations {
@@ -126,7 +117,7 @@ pub struct YjitExitLocations {
 }
 
 /// Private singleton instance of yjit exit locations
-static YJIT_EXIT_LOCATIONS: RwLock<Option<YjitExitLocations>> = RwLock::new(None);
+static mut YJIT_EXIT_LOCATIONS: Option<YjitExitLocations> = None;
 
 impl YjitExitLocations {
     /// Initialize the yjit exit locations
@@ -143,13 +134,35 @@ impl YjitExitLocations {
         };
 
         // Initialize the yjit exit locations instance
-        if let Ok(mut guard) = YJIT_EXIT_LOCATIONS.write() {
-            *guard = Some(yjit_exit_locations);
+        unsafe {
+            YJIT_EXIT_LOCATIONS = Some(yjit_exit_locations);
         }
     }
 
-    /// Mark the data stored in YjitExitLocations that needs to be used by
-    /// rb_yjit_add_frame.
+    /// Get a mutable reference to the yjit exit locations globals instance
+    pub fn get_instance() -> &'static mut YjitExitLocations {
+        unsafe { YJIT_EXIT_LOCATIONS.as_mut().unwrap() }
+    }
+
+    /// Get a mutable reference to the yjit raw samples Vec
+    pub fn get_raw_samples() -> &'static mut Vec<VALUE> {
+        &mut YjitExitLocations::get_instance().raw_samples
+    }
+
+    /// Get a mutable reference to yjit the line samples Vec.
+    pub fn get_line_samples() -> &'static mut Vec<i32> {
+        &mut YjitExitLocations::get_instance().line_samples
+    }
+
+    /// Get the number of samples skipped
+    pub fn get_skipped_samples() -> &'static mut usize {
+        &mut YjitExitLocations::get_instance().skipped_samples
+    }
+
+    /// Mark the data stored in YjitExitLocations::get_raw_samples that needs to be used by
+    /// rb_yjit_add_frame. YjitExitLocations::get_raw_samples are an array of
+    /// VALUE pointers, exit instruction, and number of times we've seen this stack row
+    /// as collected by rb_yjit_record_exit_stack.
     ///
     /// These need to have rb_gc_mark called so they can be used by rb_yjit_add_frame.
     pub fn gc_mark_raw_samples() {
@@ -163,31 +176,27 @@ impl YjitExitLocations {
             return;
         }
 
-        if let Ok(guard) = YJIT_EXIT_LOCATIONS.read() {
-            if let Some(locs) = guard.as_ref() {
-                let mut idx: size_t = 0;
-                let yjit_raw_samples = &locs.raw_samples;
+        let mut idx: size_t = 0;
+        let yjit_raw_samples = YjitExitLocations::get_raw_samples();
 
-                while idx < yjit_raw_samples.len() as size_t {
-                    let num = yjit_raw_samples[idx as usize];
-                    let mut i = 0;
-                    idx += 1;
+        while idx < yjit_raw_samples.len() as size_t {
+            let num = yjit_raw_samples[idx as usize];
+            let mut i = 0;
+            idx += 1;
 
-                    // Mark the yjit_raw_samples at the given index. These represent
-                    // the data that needs to be GC'd which are the current frames.
-                    while i < i32::from(num) {
-                        unsafe { rb_gc_mark(yjit_raw_samples[idx as usize]); }
-                        i += 1;
-                        idx += 1;
-                    }
-
-                    // Increase index for exit instruction.
-                    idx += 1;
-                    // Increase index for bookkeeping value (number of times we've seen this
-                    // row in a stack).
-                    idx += 1;
-                }
+            // Mark the yjit_raw_samples at the given index. These represent
+            // the data that needs to be GC'd which are the current frames.
+            while i < i32::from(num) {
+                unsafe { rb_gc_mark(yjit_raw_samples[idx as usize]); }
+                i += 1;
+                idx += 1;
             }
+
+            // Increase index for exit instruction.
+            idx += 1;
+            // Increase index for bookkeeping value (number of times we've seen this
+            // row in a stack).
+            idx += 1;
         }
     }
 }
@@ -196,13 +205,8 @@ impl YjitExitLocations {
 macro_rules! make_counters {
     ($($counter_name:ident,)+) => {
         /// Struct containing the counter values
-        pub struct Counters { $(pub $counter_name: AtomicU64),+ }
-
-        impl Counters {
-            pub fn reset(&self) {
-                $( self.$counter_name.store(0, std::sync::atomic::Ordering::Relaxed); )+
-            }
-        }
+        #[derive(Default, Debug)]
+        pub struct Counters { $(pub $counter_name: u64),+ }
 
         /// Enum to represent a counter
         #[allow(non_camel_case_types)]
@@ -227,24 +231,16 @@ macro_rules! make_counters {
         }
 
         /// Global counters instance, initialized to zero
-        pub static COUNTERS: Counters = Counters { $( $counter_name: AtomicU64::new(0) ),+ };
+        pub static mut COUNTERS: Counters = Counters { $($counter_name: 0),+ };
 
         /// Counter names constant
         const COUNTER_NAMES: &'static [&'static str] = &[ $(stringify!($counter_name)),+ ];
 
-        /// Map a counter name string to a counter atomic reference
-        pub fn get_counter(name: &str) -> Option<&'static AtomicU64> {
-            match name {
-                $( stringify!($counter_name) => { Some(&COUNTERS.$counter_name) } ),+
-                _ => None,
-            }
-        }
-
         /// Map a counter name string to a counter pointer
         pub fn get_counter_ptr(name: &str) -> *mut u64 {
-            match get_counter(name) {
-                Some(counter) => counter as *const AtomicU64 as *mut u64,
-                None => panic!(),
+            match name {
+                $( stringify!($counter_name) => { ptr_to_counter!($counter_name) } ),+
+                _ => panic!()
             }
         }
     }
@@ -282,27 +278,57 @@ pub const DEFAULT_COUNTERS: &'static [Counter] = &[
 
 /// Macro to increase a counter by name and count
 macro_rules! incr_counter_by {
+    // Unsafe is ok here because options are initialized
+    // once before any Ruby code executes
     ($counter_name:ident, $count:expr) => {
-        $crate::stats::COUNTERS.$counter_name.fetch_add($count as u64, std::sync::atomic::Ordering::Relaxed);
+        #[allow(unused_unsafe)]
+        {
+            unsafe { $crate::stats::COUNTERS.$counter_name += $count as u64 }
+        }
     };
 }
 pub(crate) use incr_counter_by;
 
 /// Macro to increase a counter if the given value is larger
 macro_rules! incr_counter_to {
+    // Unsafe is ok here because options are initialized
+    // once before any Ruby code executes
     ($counter_name:ident, $count:expr) => {
-        $crate::stats::COUNTERS.$counter_name.fetch_max($count as u64, std::sync::atomic::Ordering::Relaxed);
+        #[allow(unused_unsafe)]
+        {
+            unsafe {
+                $crate::stats::COUNTERS.$counter_name = u64::max(
+                    $crate::stats::COUNTERS.$counter_name,
+                    $count as u64,
+                )
+            }
+        }
     };
 }
 pub(crate) use incr_counter_to;
 
 /// Macro to increment a counter by name
 macro_rules! incr_counter {
+    // Unsafe is ok here because options are initialized
+    // once before any Ruby code executes
     ($counter_name:ident) => {
-        $crate::stats::COUNTERS.$counter_name.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        #[allow(unused_unsafe)]
+        {
+            unsafe { $crate::stats::COUNTERS.$counter_name += 1 }
+        }
     };
 }
 pub(crate) use incr_counter;
+
+/// Macro to get a raw pointer to a given counter
+macro_rules! ptr_to_counter {
+    ($counter_name:ident) => {
+        unsafe {
+            let ctr_ptr = std::ptr::addr_of_mut!(COUNTERS.$counter_name);
+            ctr_ptr
+        }
+    };
+}
 
 // Declare all the counters we track
 make_counters! {
@@ -606,6 +632,7 @@ make_counters! {
 /// Check if stats generation is enabled
 #[no_mangle]
 pub extern "C" fn rb_yjit_stats_enabled_p(_ec: EcPtr, _ruby_self: VALUE) -> VALUE {
+
     if get_option!(gen_stats) {
         return Qtrue;
     } else {
@@ -647,25 +674,32 @@ pub extern "C" fn rb_yjit_trace_exit_locations_enabled_p(_ec: EcPtr, _ruby_self:
 /// into raw, lines, and frames hash for RubyVM::YJIT.exit_locations.
 #[no_mangle]
 pub extern "C" fn rb_yjit_get_exit_locations(_ec: EcPtr, _ruby_self: VALUE) -> VALUE {
-    if !yjit_enabled_p() || get_option!(trace_exits).is_none() {
+    // Return if YJIT is not enabled
+    if !yjit_enabled_p() {
         return Qnil;
     }
 
-    if let Ok(mut guard) = YJIT_EXIT_LOCATIONS.write() {
-        if let Some(locs) = guard.as_mut() {
-            assert_eq!(locs.raw_samples.len(), locs.line_samples.len());
-            let samples_len = locs.raw_samples.len() as i32;
-            return unsafe {
-                rb_yjit_exit_locations_dict(
-                    locs.raw_samples.as_mut_ptr(),
-                    locs.line_samples.as_mut_ptr(),
-                    samples_len,
-                )
-            };
-        }
+    // Return if --yjit-trace-exits isn't enabled
+    if get_option!(trace_exits).is_none() {
+        return Qnil;
     }
 
-    Qnil
+    // Pass yjit_raw_samples and yjit_line_samples
+    // to the C function called rb_yjit_exit_locations_dict for parsing.
+    let yjit_raw_samples = YjitExitLocations::get_raw_samples();
+    let yjit_line_samples = YjitExitLocations::get_line_samples();
+
+    // Assert that the two Vec's are the same length. If they aren't
+    // equal something went wrong.
+    assert_eq!(yjit_raw_samples.len(), yjit_line_samples.len());
+
+    // yjit_raw_samples and yjit_line_samples are the same length so
+    // pass only one of the lengths in the C function.
+    let samples_len = yjit_raw_samples.len() as i32;
+
+    unsafe {
+        rb_yjit_exit_locations_dict(yjit_raw_samples.as_mut_ptr(), yjit_line_samples.as_mut_ptr(), samples_len)
+    }
 }
 
 /// Increment a counter by name from the CRuby side
@@ -674,9 +708,8 @@ pub extern "C" fn rb_yjit_get_exit_locations(_ec: EcPtr, _ruby_self: VALUE) -> V
 pub extern "C" fn rb_yjit_incr_counter(counter_name: *const std::os::raw::c_char) {
     use std::ffi::CStr;
     let counter_name = unsafe { CStr::from_ptr(counter_name).to_str().unwrap() };
-    if let Some(counter) = get_counter(counter_name) {
-        counter.fetch_add(1, Ordering::Relaxed);
-    }
+    let counter_ptr = get_counter_ptr(counter_name);
+    unsafe { *counter_ptr += 1 };
 }
 
 /// Export all YJIT statistics as a Ruby hash.
@@ -757,8 +790,8 @@ fn rb_yjit_gen_stats_dict(key: VALUE) -> VALUE {
             set_stat_usize!(hash, "vm_insns_count", rb_vm_insn_count as usize);
         }
 
-        set_stat_usize!(hash, "live_iseq_count", rb_yjit_live_iseq_count.load(Ordering::Relaxed) as usize);
-        set_stat_usize!(hash, "iseq_alloc_count", rb_yjit_iseq_alloc_count.load(Ordering::Relaxed) as usize);
+        set_stat_usize!(hash, "live_iseq_count", rb_yjit_live_iseq_count as usize);
+        set_stat_usize!(hash, "iseq_alloc_count", rb_yjit_iseq_alloc_count as usize);
 
         set_stat!(hash, "object_shape_count", rb_object_shape_count());
 
@@ -770,12 +803,14 @@ fn rb_yjit_gen_stats_dict(key: VALUE) -> VALUE {
     // If we're not generating stats, put only default counters
     if !get_option!(gen_stats) {
         for counter in DEFAULT_COUNTERS {
-            if let Some(counter_ref) = get_counter(&counter.get_name()) {
-                let counter_val = counter_ref.load(Ordering::Relaxed);
-                let key = &counter.get_name();
-                let value = unsafe { rb_uint2inum(counter_val as usize) };
-                unsafe { set_stat!(hash, key, value); }
-            }
+            // Get the counter value
+            let counter_ptr = get_counter_ptr(&counter.get_name());
+            let counter_val = unsafe { *counter_ptr };
+
+            // Put counter into hash
+            let key = &counter.get_name();
+            let value = unsafe { rb_uint2inum(counter_val as usize) };
+            unsafe { set_stat!(hash, key, value); }
         }
 
         return hash;
@@ -787,10 +822,10 @@ fn rb_yjit_gen_stats_dict(key: VALUE) -> VALUE {
 
         // For each counter we track
         for counter_name in COUNTER_NAMES {
-            if let Some(counter_ref) = get_counter(counter_name) {
-                let counter_val = counter_ref.load(Ordering::Relaxed);
-                set_stat_usize!(hash, counter_name, counter_val as usize);
-            }
+            // Get the counter value
+            let counter_ptr = get_counter_ptr(counter_name);
+            let counter_val = *counter_ptr;
+            set_stat_usize!(hash, counter_name, counter_val as usize);
         }
 
         let mut side_exits = 0;
@@ -801,19 +836,19 @@ fn rb_yjit_gen_stats_dict(key: VALUE) -> VALUE {
         for op_idx in 0..rb_vm_instruction_size().as_usize() {
             let op_name = insn_name(op_idx);
             let key_string = "exit_".to_owned() + &op_name;
-            let count = EXIT_OP_COUNT[op_idx].load(Ordering::Relaxed);
+            let count = EXIT_OP_COUNT[op_idx];
             side_exits += count;
             set_stat_usize!(hash, &key_string, count as usize);
         }
 
         set_stat_usize!(hash, "side_exit_count", side_exits as usize);
 
-        let total_exits = side_exits + COUNTERS.leave_interp_return.load(Ordering::Relaxed);
+        let total_exits = side_exits + *get_counter_ptr(&Counter::leave_interp_return.get_name());
         set_stat_usize!(hash, "total_exit_count", total_exits as usize);
 
         // Number of instructions that finish executing in YJIT.
         // See :count-placement: about the subtraction.
-        let retired_in_yjit = COUNTERS.yjit_insns_count.load(Ordering::Relaxed) - side_exits;
+        let retired_in_yjit = *get_counter_ptr(&Counter::yjit_insns_count.get_name()) - side_exits;
 
         // Average length of instruction sequences executed by YJIT
         let avg_len_in_yjit: f64 = if total_exits > 0 {
@@ -835,15 +870,15 @@ fn rb_yjit_gen_stats_dict(key: VALUE) -> VALUE {
         // Set method call counts in a Ruby dict
         fn set_call_counts(
             calls_hash: VALUE,
-            stats_lock: &RwLock<MethodStats>,
+            method_name_to_idx: &mut Option<HashMap<String, usize>>,
+            method_call_count: &mut Option<Vec<u64>>,
         ) {
-            if let Ok(guard) = stats_lock.read() {
+            if let (Some(name_to_idx), Some(call_counts)) = (method_name_to_idx, method_call_count) {
+                // Create a list of (name, call_count) pairs
                 let mut pairs = Vec::new();
-                for (name, idx) in &guard.name_to_idx {
-                    if *idx < guard.call_counts.len() {
-                        let count = guard.call_counts[*idx].load(Ordering::Relaxed);
-                        pairs.push((name, count));
-                    }
+                for (name, idx) in name_to_idx {
+                    let count = call_counts[*idx];
+                    pairs.push((name, count));
                 }
 
                 // Sort the vectors by decreasing call counts
@@ -865,14 +900,14 @@ fn rb_yjit_gen_stats_dict(key: VALUE) -> VALUE {
         // Create a hash for the cfunc call counts
         set_stat!(hash, "cfunc_calls", {
             let cfunc_calls = rb_hash_new();
-            set_call_counts(cfunc_calls, cfunc_stats());
+            set_call_counts(cfunc_calls, &mut *addr_of_mut!(CFUNC_NAME_TO_IDX), &mut *addr_of_mut!(CFUNC_CALL_COUNT));
             cfunc_calls
         });
 
         // Create a hash for the ISEQ call counts
         set_stat!(hash, "iseq_calls", {
             let iseq_calls = rb_hash_new();
-            set_call_counts(iseq_calls, iseq_stats());
+            set_call_counts(iseq_calls, &mut *addr_of_mut!(ISEQ_NAME_TO_IDX), &mut *addr_of_mut!(ISEQ_CALL_COUNT));
             iseq_calls
         });
     }
@@ -899,20 +934,11 @@ pub extern "C" fn rb_yjit_record_exit_stack(exit_pc: *const VALUE)
         return;
     }
 
-    let mut guard = match YJIT_EXIT_LOCATIONS.write() {
-        Ok(g) => g,
-        Err(_) => return,
-    };
-    let locs = match guard.as_mut() {
-        Some(l) => l,
-        None => return,
-    };
-
     if get_option!(trace_exits_sample_rate) > 0 {
-        if get_option!(trace_exits_sample_rate) <= locs.skipped_samples {
-            locs.skipped_samples = 0;
+        if get_option!(trace_exits_sample_rate) <= *YjitExitLocations::get_skipped_samples() {
+            YjitExitLocations::get_instance().skipped_samples = 0;
         } else {
-            locs.skipped_samples += 1;
+            YjitExitLocations::get_instance().skipped_samples += 1;
             return;
         }
     }
@@ -943,8 +969,8 @@ pub extern "C" fn rb_yjit_record_exit_stack(exit_pc: *const VALUE)
         let stack_length = unsafe { rb_profile_frames(0, BUFF_LEN as i32, frames_buffer.as_mut_ptr(), lines_buffer.as_mut_ptr()) };
         let samples_length = (stack_length as usize) + 3;
 
-        let yjit_raw_samples = &mut locs.raw_samples;
-        let yjit_line_samples = &mut locs.line_samples;
+        let yjit_raw_samples = YjitExitLocations::get_raw_samples();
+        let yjit_line_samples = YjitExitLocations::get_line_samples();
 
         // If yjit_raw_samples is less than or equal to the current length of the samples
         // we might have seen this stack trace previously.
@@ -1019,21 +1045,20 @@ pub extern "C" fn rb_yjit_record_exit_stack(exit_pc: *const VALUE)
 /// Primitive called in yjit.rb. Zero out all the counters.
 #[no_mangle]
 pub extern "C" fn rb_yjit_reset_stats_bang(_ec: EcPtr, _ruby_self: VALUE) -> VALUE {
-    for op_count in EXIT_OP_COUNT.iter() {
-        op_count.store(0, Ordering::Relaxed);
+    unsafe {
+        EXIT_OP_COUNT = [0; VM_INSTRUCTION_SIZE_USIZE];
+        COUNTERS = Counters::default();
     }
-    COUNTERS.reset();
 
     return Qnil;
 }
 
 #[no_mangle]
 pub extern "C" fn rb_yjit_update_max_compile_time_ns(max_compile_time_ns: u64) {
-    rb_yjit_max_compile_time_ns.store(max_compile_time_ns, Ordering::Relaxed);
-    let total = rb_yjit_total_compile_time_ns.load(Ordering::Relaxed);
-
     unsafe {
-        if max_compile_time_ns == 0 || max_compile_time_ns > total {
+        rb_yjit_max_compile_time_ns = max_compile_time_ns;
+
+        if rb_yjit_max_compile_time_ns == 0 || rb_yjit_max_compile_time_ns > rb_yjit_total_compile_time_ns {
             rb_yjit_compiling_p = !out_of_memory_p();
         } else {
             rb_yjit_compiling_p = false;
@@ -1054,12 +1079,12 @@ pub extern "C" fn rb_yjit_collect_binding_set() {
 #[no_mangle]
 pub extern "C" fn rb_yjit_count_side_exit_op(exit_pc: *const VALUE) -> *const VALUE {
     #[cfg(not(test))]
-    {
+    unsafe {
         // Get the opcode from the encoded insn handler at this PC
-        let opcode = unsafe { rb_vm_insn_addr2opcode((*exit_pc).as_ptr()) };
+        let opcode = rb_vm_insn_addr2opcode((*exit_pc).as_ptr());
 
         // Increment the exit op count for this opcode
-        EXIT_OP_COUNT[opcode as usize].fetch_add(1, Ordering::Relaxed);
+        EXIT_OP_COUNT[opcode as usize] += 1;
     };
 
     // This function must return exit_pc!
@@ -1073,69 +1098,8 @@ pub fn with_compile_time<F, R>(func: F) -> R where F: FnOnce() -> R {
     let nanos = Instant::now().duration_since(start).as_nanos();
     incr_counter_by!(compile_time_ns, nanos);
 
-    rb_yjit_total_compile_time_ns.fetch_add(nanos as u64, Ordering::Relaxed);
+    unsafe {
+        rb_yjit_total_compile_time_ns += nanos as u64;
+    }
     ret
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::thread;
-
-    #[test]
-    fn test_atomic_iseq_counters() {
-        rb_yjit_live_iseq_count.store(0, Ordering::Relaxed);
-        rb_yjit_live_iseq_count.fetch_add(1, Ordering::Relaxed);
-        assert_eq!(rb_yjit_live_iseq_count.load(Ordering::Relaxed), 1);
-        rb_yjit_live_iseq_count.fetch_sub(1, Ordering::Relaxed);
-        assert_eq!(rb_yjit_live_iseq_count.load(Ordering::Relaxed), 0);
-    }
-
-    #[test]
-    fn test_concurrent_counter_increments() {
-        let initial = COUNTERS.yjit_insns_count.load(Ordering::Relaxed);
-        let handles: Vec<_> = (0..10)
-            .map(|_| {
-                thread::spawn(|| {
-                    for _ in 0..100 {
-                        incr_counter!(yjit_insns_count);
-                    }
-                })
-            })
-            .collect();
-
-        for h in handles {
-            h.join().unwrap();
-        }
-
-        assert_eq!(
-            COUNTERS.yjit_insns_count.load(Ordering::Relaxed),
-            initial + 1000
-        );
-    }
-
-    #[test]
-    fn test_concurrent_cfunc_stats() {
-        let idx = get_cfunc_idx("test_method_foo");
-        let handles: Vec<_> = (0..10)
-            .map(|_| {
-                thread::spawn(move || {
-                    for _ in 0..50 {
-                        incr_cfunc_counter(idx);
-                    }
-                })
-            })
-            .collect();
-
-        for h in handles {
-            h.join().unwrap();
-        }
-
-        if let Ok(guard) = cfunc_stats().read() {
-            assert!(guard.call_counts[idx].load(Ordering::Relaxed) >= 500);
-        } else {
-            panic!("Failed to acquire read lock on cfunc_stats");
-        }
-    }
-}
-
