@@ -10,12 +10,18 @@
 
 # Keep in sync with core_rs/src/.
 CORE_RS_SRCS = $(srcdir)/core_rs/src/lib.rs \
+	$(srcdir)/core_rs/src/array.rs \
 	$(srcdir)/core_rs/src/complex.rs \
 	$(srcdir)/core_rs/src/ffi/mod.rs \
 	$(srcdir)/core_rs/src/ffi/api.rs \
 	$(srcdir)/core_rs/src/ffi/protect.rs \
 	$(srcdir)/core_rs/src/ffi/value.rs \
+	$(srcdir)/core_rs/src/gc.rs \
+	$(srcdir)/core_rs/src/hash.rs \
+	$(srcdir)/core_rs/src/object.rs \
 	$(srcdir)/core_rs/src/re.rs \
+	$(srcdir)/core_rs/src/string.rs \
+	$(srcdir)/core_rs/src/usdt.rs \
 	$(srcdir)/core_rs/src/util.rs \
 	$(empty)
 
@@ -44,10 +50,11 @@ core-rs: $(CORE_RS_OBJ)
 
 # Unit tests for the pure parts of core_rs (needs only rustc; std is used
 # by the test harness, the library itself stays no_std).
-core-rs-test:
+core-rs-test: probes_bridge.$(OBJEXT)
 	$(Q) $(MAKEDIRS) $(TOP_BUILD_DIR)/target/core_rs
 	$(Q) $(RUSTC) --crate-name=core_rs --edition=2024 --test \
 	    `$(CORE_RS_CFG)` \
+	    -C link-arg=probes_bridge.$(OBJEXT) \
 	    -o $(TOP_BUILD_DIR)/target/core_rs/core_rs-test \
 	    $(srcdir)/core_rs/src/lib.rs
 	$(Q) $(TOP_BUILD_DIR)/target/core_rs/core_rs-test

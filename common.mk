@@ -173,6 +173,7 @@ COMMONOBJS    = \
 		pathname.$(OBJEXT) \
 		parse.$(OBJEXT) \
 		parser_st.$(OBJEXT) \
+		probes_bridge.$(OBJEXT) \
 		proc.$(OBJEXT) \
 		process.$(OBJEXT) \
 		ractor.$(OBJEXT) \

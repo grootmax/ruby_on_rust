@@ -20,9 +20,15 @@
 #![cfg_attr(not(test), no_std)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
+pub mod array;
 pub mod complex;
 pub mod ffi;
+pub mod gc;
+pub mod hash;
+pub mod object;
 pub mod re;
+pub mod string;
+pub mod usdt;
 pub mod util;
 
 /// C runtime pieces that `no_std` code needs.
