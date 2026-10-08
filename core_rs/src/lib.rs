@@ -24,6 +24,7 @@ pub mod complex;
 pub mod ffi;
 pub mod re;
 pub mod util;
+pub mod vm_exec;
 
 /// C runtime pieces that `no_std` code needs.
 mod libc {

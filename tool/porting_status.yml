@@ -181,8 +181,8 @@ files:
     subsystem: "Virtual Machine & Execution"
     notes: "Method dispatch and evaluation"
   vm_exec.c:
-    status: Not Started
-    target: "crate::vm::exec"
+    status: Ported
+    target: "crate::vm_exec"
     subsystem: "Virtual Machine & Execution"
     notes: "VM loop execution"
   vm_insnhelper.c:
