@@ -527,74 +527,10 @@ fn main() {
         bindings_string = bindings_string.replace(needle, replacement);
     }
 
-    bindings_string = strip_raw_bitfield_accessors(&bindings_string);
-
     // Write out to file
     let mut out_path: PathBuf = src_root;
     out_path.push(jit_name);
     out_path.push("src");
     out_path.push("cruby_bindings.inc.rs");
     std::fs::write(out_path, bindings_string).expect("file output failed");
-}
-
-fn is_raw_bitfield_fn(fn_name: &str) -> bool {
-    matches!(fn_name, "raw_get" | "raw_set" | "raw_get_bit" | "raw_set_bit")
-        || fn_name.ends_with("_raw")
-}
-
-fn strip_raw_bitfield_accessors(code: &str) -> String {
-    let lines: Vec<&str> = code.lines().collect();
-    let mut out = Vec::new();
-    let mut i = 0;
-
-    while i < lines.len() {
-        let line = lines[i];
-        let trimmed = line.trim();
-
-        // Check if current line is `#[inline]` followed by `pub unsafe fn ...`
-        let (fn_line_idx, _has_inline) = if trimmed == "#[inline]" && i + 1 < lines.len() {
-            (i + 1, true)
-        } else {
-            (i, false)
-        };
-
-        let fn_line = lines[fn_line_idx].trim();
-        if fn_line.starts_with("pub unsafe fn ") {
-            if let Some(after_pub) = fn_line.strip_prefix("pub unsafe fn ") {
-                if let Some(fn_name) = after_pub.split('(').next().map(|s| s.trim()) {
-                    if is_raw_bitfield_fn(fn_name) {
-                        // Skip this function block along with its preceding attribute if any
-                        i = fn_line_idx;
-                        let mut brace_depth = 0;
-                        let mut started = false;
-                        while i < lines.len() {
-                            let l = lines[i];
-                            for ch in l.chars() {
-                                if ch == '{' {
-                                    brace_depth += 1;
-                                    started = true;
-                                } else if ch == '}' {
-                                    brace_depth -= 1;
-                                }
-                            }
-                            i += 1;
-                            if started && brace_depth == 0 {
-                                break;
-                            }
-                        }
-                        continue;
-                    }
-                }
-            }
-        }
-
-        out.push(line);
-        i += 1;
-    }
-
-    let mut result = out.join("\n");
-    if code.ends_with('\n') {
-        result.push('\n');
-    }
-    result
 }
