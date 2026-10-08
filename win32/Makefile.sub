@@ -328,41 +328,41 @@ MISSING = $(MISSING) explicit_bzero.obj memrchr.obj
 !endif
 DLNOBJS = dln.obj
 
+!if !defined(RUSTC)
+RUSTC = rustc
+!endif
+!if !defined(CARGO)
+CARGO = cargo
+!endif
+!if !defined(CARGO_TARGET_DIR)
+CARGO_TARGET_DIR = target
+!endif
+!if !defined(RUST_LIB)
+RUST_LIB = target/release/ruby.lib
+!endif
+
 !if "$(YJIT_SUPPORT)" == "yes"
 !if "$(ARCH)" != "x64"
 !error YJIT is supported only on x64, not $(ARCH).  Retry without --enable-yjit.
 !endif
-!if !defined(RUSTC)
-RUSTC = rustc
-!endif
 YJIT_OBJ = yjit.$(OBJEXT)
 JIT_OBJ = jit.$(OBJEXT)
-YJIT_LIBS = target/release/yjit.lib
-RUST_LIB = $(YJIT_LIBS)
-# Not archived into $(LIBRUBY_A), whose every symbol mkexports.rb exports.
-# After $(LIBS), so C code imports imagehlp.dll, which loads dbghelp lazily.
-JIT_LIBS = $(RUST_LIB) ntdll.lib userenv.lib dbghelp.lib
-!if !defined(INSTALL_STATIC_LIBRARY)
-INSTALL_STATIC_LIBRARY = no
-!elseif "$(INSTALL_STATIC_LIBRARY)" != "no"
-!error YJIT does not support the static library.  Retry without --enable-install-static-library.
-!endif
-# Explicit, so that a windows-gnu default toolchain does not build libyjit.a.
-JIT_RUST_FLAGS = --crate-type=staticlib --target=x86_64-pc-windows-msvc --cfg feature=\"stats_allocator\"
-!if !defined(RUSTC_FLAGS)
-RUSTC_FLAGS = -g -C lto=thin -C opt-level=3 -C overflow-checks=on
+!if !defined(CARGO_BUILD_ARGS)
+CARGO_BUILD_ARGS = --release --features yjit
 !endif
 !elseif defined(YJIT_SUPPORT) && "$(YJIT_SUPPORT)" != "no"
 !error YJIT_SUPPORT accepts only yes or no, not $(YJIT_SUPPORT).  Retry without YJIT_SUPPORT=$(YJIT_SUPPORT).
 !else
 YJIT_SUPPORT = no
-!if !defined(RUSTC)
-RUSTC = no
+!if !defined(CARGO_BUILD_ARGS)
+CARGO_BUILD_ARGS = --release
 !endif
 !endif
 !if !defined(INSTALL_STATIC_LIBRARY)
 INSTALL_STATIC_LIBRARY = yes
 !endif
+
+JIT_LIBS = $(RUST_LIB) ntdll.lib userenv.lib dbghelp.lib
 
 !if "$(ARCH)" == "x64"
 COROUTINE_OBJ = coroutine/win64/Context.obj
@@ -1111,6 +1111,9 @@ s,@DLDLIBS@,$(DLDLIBS),;t t
 s,@ENABLE_SHARED@,yes,;t t
 s,@YJIT_SUPPORT@,$(YJIT_SUPPORT),;t t
 s,@RUSTC@,$(RUSTC),;t t
+s,@CARGO@,$(CARGO),;t t
+s,@CARGO_BUILD_ARGS@,$(CARGO_BUILD_ARGS),;t t
+s,@RUST_LIB@,$(RUST_LIB),;t t
 s,@BASERUBY@,$(BASERUBY),;t t
 s,@OUTFLAG@,$(OUTFLAG),;t t
 s,@COUTFLAG@,$(COUTFLAG),;t t
@@ -1231,10 +1234,10 @@ PRE_LIBRUBY_UPDATE = $(RM) $(LIBRUBY_EXTS)
 PRE_LIBRUBY_UPDATE =
 !endif
 
-$(LIBRUBY_A):	$(OBJS) $(INITOBJS)
+$(LIBRUBY_A):	$(OBJS) $(INITOBJS) $(RUST_LIB)
 		@-$(PRE_LIBRUBY_UPDATE)
 		$(ECHO) linking static-library $(@:\=/)
-		$(Q) $(AR) $(ARFLAGS)$@ $(OBJS) $(INITOBJS)
+		$(Q) $(AR) $(ARFLAGS)$@ $(OBJS) $(INITOBJS) $(RUST_LIB)
 
 $(LIBRUBY):	$(RUBYDEF)
 		$(ECHO) linking import-library $(@:\=/)
@@ -1255,21 +1258,24 @@ $(RUBYDEF):	$(LIBRUBY_A) $(DLDOBJS) $(RBCONFIG)
 		$(Q) $(BOOTSTRAPRUBY_COMMAND) $(srcdir)/win32/mkexports.rb \
 		  -output=$@ -arch=$(ARCH) $(LIBRUBY_A) -- $(DLDOBJS)
 
-!if "$(YJIT_SUPPORT)" == "yes"
 # A rule would mark the stamp updated even when rustc is unchanged.
 !if [(if not exist target md target) & $(RUSTC) -V | $(IFCHANGE) --empty target/.rustc-version - > nul]
 !endif
-# Not common.mk's YJIT_RUSTC_ARGS, whose single quotes cmd.exe keeps.
-$(YJIT_LIBS): $(srcdir)/yjit/src/*.rs $(srcdir)/yjit/src/asm/*.rs \
-		$(srcdir)/yjit/src/asm/x86_64/*.rs $(srcdir)/yjit/src/asm/arm64/*.rs \
-		$(srcdir)/yjit/src/asm/arm64/arg/*.rs $(srcdir)/yjit/src/asm/arm64/inst/*.rs \
-		$(srcdir)/yjit/src/backend/*.rs $(srcdir)/yjit/src/backend/x86_64/*.rs \
-		$(srcdir)/yjit/src/backend/arm64/*.rs $(srcdir)/jit/src/lib.rs \
-		target/.rustc-version
-		$(ECHO) building Rust YJIT (release mode)
-		$(Q) $(RUSTC) --crate-name=yjit $(JIT_RUST_FLAGS) $(RUSTC_FLAGS) \
-			--edition=2021 --out-dir=$(@D) $(srcdir)/yjit/src/lib.rs
+
+!if "$(CARGO)" == "no"
+!error cargo is required to build Ruby.
+!elseif [$(CARGO) -V > nul 2>&1]
+!error cargo is required to build Ruby.
 !endif
+!if "$(RUSTC)" == "no"
+!error rustc is required to build Ruby.
+!elseif [$(RUSTC) -V > nul 2>&1]
+!error rustc is required to build Ruby.
+!endif
+
+$(RUST_LIB): $(srcdir)/ruby.rs $(srcdir)/Cargo.toml target/.rustc-version
+		$(ECHO) building Rust $(@:\=/)
+		$(Q) set CARGO_TARGET_DIR=$(CARGO_TARGET_DIR)& $(CARGO) build --manifest-path $(srcdir)/Cargo.toml $(CARGO_BUILD_ARGS)
 
 {$(win_srcdir)}.def.lib:
 		$(Q) $(AR) $(ARFLAGS)$@ -def:$<
