@@ -24,10 +24,10 @@ macro_rules! compile_patch_points {
                 // Stop marking GC offsets corrupted by the jump instruction
                 remove_gc_offsets(patch_point.version, &written_range);
 
-                let mut version = patch_point.version;
-                let iseq = unsafe { version.as_ref() }.iseq;
+                let version = patch_point.version;
+                let iseq = version.iseq();
                 if !iseq.is_null() {
-                    invalidate_iseq_version($cb, iseq, &mut version);
+                    invalidate_iseq_version($cb, iseq, version);
                     // Remember NoSingletonClass busts on the payload
                     if is_no_singleton_class!($cause) {
                         let payload = get_or_create_iseq_payload(iseq);
@@ -226,14 +226,13 @@ pub extern "C" fn rb_zjit_invalidate_no_ep_escape(iseq: IseqPtr) {
             // JIT-to-JIT calls so the interpreter takes over permanently.
             let payload = get_or_create_iseq_payload(iseq);
             patched_versions.extend(payload.versions.last());
-            for mut version in patched_versions {
-                use crate::payload::IseqStatus;
-                let owner_iseq = unsafe { version.as_ref() }.iseq;
+            for version in patched_versions {
+                let owner_iseq = version.iseq();
                 if owner_iseq.is_null() {
                     continue;
                 }
-                if unsafe { version.as_ref() }.status != IseqStatus::Invalidated {
-                    unsafe { version.as_mut() }.status = IseqStatus::Invalidated;
+                if !version.is_invalidated() {
+                    version.set_invalidated();
                     unsafe { rb_iseq_reset_jit_func(owner_iseq) };
 
                     // Re-stub incoming JIT-to-JIT calls. Resetting jit_func is not
@@ -242,7 +241,7 @@ pub extern "C" fn rb_zjit_invalidate_no_ep_escape(iseq: IseqPtr) {
                     // without_locals() frame states. A frame entered through a
                     // JIT-to-JIT call does not write locals to the stack, so resuming
                     // the interpreter through such an exit would read garbage locals.
-                    for incoming in unsafe { version.as_ref() }.incoming.iter() {
+                    for incoming in version.incoming().iter() {
                         if let Err(err) = crate::codegen::gen_iseq_call(cb, incoming) {
                             debug!("{err:?}: gen_iseq_call failed during EP escape invalidation: {}", iseq_name(owner_iseq));
                         }
@@ -442,7 +441,7 @@ pub fn track_no_trace_point_assumption(
 
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_tracing_invalidate_all() {
-    use crate::payload::{get_or_create_iseq_payload, IseqStatus};
+    use crate::payload::get_or_create_iseq_payload;
     use crate::cruby::for_each_iseq;
 
     if !zjit_enabled_p() {
@@ -456,8 +455,8 @@ pub extern "C" fn rb_zjit_tracing_invalidate_all() {
         for_each_iseq(|iseq| {
             let payload = get_or_create_iseq_payload(iseq);
 
-            if let Some(version) = payload.versions.last_mut() {
-                unsafe { version.as_mut() }.status = IseqStatus::Invalidated;
+            if let Some(version) = payload.versions.last() {
+                version.set_invalidated();
             }
             unsafe { rb_iseq_reset_jit_func(iseq) };
         });
