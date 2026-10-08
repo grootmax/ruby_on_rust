@@ -164,6 +164,10 @@ jobs:
         run: ruby core_rs/fuzz/run.rb --with-ports ../build --without-ports ../build-c core_rs/fuzz/units/*.c
         working-directory: src
 
+      - name: Differential runner (test snippets)
+        run: ruby tool/ruby_on_rust/diff_runner.rb --ref-ruby ../build-c/miniruby --ror-ruby ./miniruby test/ruby_on_rust/
+        working-directory: src
+
       - name: Porting ledger is current
         run: ruby tool/generate_porting_ledger.rb --check
         working-directory: src

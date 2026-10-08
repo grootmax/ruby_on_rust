@@ -932,6 +932,13 @@ yes-test-tool: prog PHONY
 	$(ACTIONS_ENDGROUP)
 no-test-tool: PHONY
 
+test-ruby-on-rust: $(TEST_RUNNABLE)-test-ruby-on-rust
+yes-test-ruby-on-rust: prog PHONY
+	$(ACTIONS_GROUP)
+	$(gnumake_recursive)$(Q)$(exec) $(BASERUBY) "$(srcdir)/tool/ruby_on_rust/diff_runner.rb" --ref-ruby="$(BASERUBY)" --ror-ruby="$(RUNRUBY)" $(srcdir)/test/ruby_on_rust
+	$(ACTIONS_ENDGROUP)
+no-test-ruby-on-rust: PHONY
+
 test-sample: test-basic # backward compatibility for mswin-build
 test-short: test-coroutine $(DOT_WAIT) btest-ruby $(DOT_WAIT) test-knownbug $(DOT_WAIT) test-basic
 test: test-short

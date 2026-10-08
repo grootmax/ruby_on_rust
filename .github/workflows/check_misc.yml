@@ -50,6 +50,11 @@ jobs:
           ruby tool/generate_porting_ledger.rb --check
         if: always()
 
+      - name: Check Ruby on Rust differential runner
+        run: |
+          ruby tool/ruby_on_rust/diff_runner.rb test/ruby_on_rust/
+        if: always()
+
       - name: Check for code styles
         run: |
           set -x
