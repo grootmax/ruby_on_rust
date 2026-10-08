@@ -148,7 +148,7 @@ jobs:
         id: rdoc
         run: |
           set -- $(sed 's/#.*//;/^rdoc /!d' gems/bundled_gems)
-          { echo version=$2; echo ref=$4; } >> $GITHUB_OUTPUT
+          { echo version=$2; echo ref=${4:-v$2}; } >> $GITHUB_OUTPUT
         if: always()
 
       - name: Checkout rdoc
