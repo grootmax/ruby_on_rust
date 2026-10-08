@@ -193,7 +193,8 @@ pub extern "C" fn rb_yjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exc
     // this is a large application (has very many ISEQs), switch to
     // using the call threshold for large applications after this entry point
     use crate::stats::rb_yjit_live_iseq_count;
-    if unsafe { rb_yjit_call_threshold } == SMALL_CALL_THRESHOLD && unsafe { rb_yjit_live_iseq_count } > LARGE_ISEQ_COUNT {
+    use std::sync::atomic::Ordering;
+    if unsafe { rb_yjit_call_threshold } == SMALL_CALL_THRESHOLD && rb_yjit_live_iseq_count.load(Ordering::Relaxed) > LARGE_ISEQ_COUNT {
         unsafe { rb_yjit_call_threshold = LARGE_CALL_THRESHOLD; };
     }
 
@@ -201,8 +202,10 @@ pub extern "C" fn rb_yjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exc
 
     // Stop compiling if we ran out of executable memory so that the
     // interpreter stops incrementing ISEQ call counters.
-    unsafe {
-        if out_of_memory_p() || (rb_yjit_max_compile_time_ns > 0 && rb_yjit_total_compile_time_ns >= rb_yjit_max_compile_time_ns) {
+    let max_time = rb_yjit_max_compile_time_ns.load(Ordering::Relaxed);
+    let total_time = rb_yjit_total_compile_time_ns.load(Ordering::Relaxed);
+    if out_of_memory_p() || (max_time > 0 && total_time >= max_time) {
+        unsafe {
             rb_yjit_compiling_p = false;
         }
     }
