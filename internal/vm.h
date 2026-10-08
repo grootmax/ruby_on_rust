@@ -49,7 +49,13 @@ void rb_vm_mark(void *ptr);
 void rb_vm_register_global_object(VALUE obj);
 void rb_vm_each_stack_value(void *ptr, void (*cb)(VALUE, void*), void *ctx);
 PUREFUNC(VALUE rb_vm_top_self(void));
+#if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
+# pragma GCC visibility push(hidden)
+#endif
 const void **rb_vm_get_insns_address_table(void);
+#if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
+# pragma GCC visibility pop
+#endif
 VALUE rb_source_location(int *pline);
 const char *rb_source_location_cstr(int *pline);
 void rb_vm_pop_cfunc_frame(void);

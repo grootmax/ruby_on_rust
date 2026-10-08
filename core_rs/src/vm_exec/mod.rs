@@ -42,7 +42,7 @@ unsafe extern "C" {
 
 #[cfg(test)]
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn rb_core_vm_exec_core_c(_ec: *mut rb_execution_context_t) -> VALUE {
+pub(crate) unsafe extern "C" fn rb_core_vm_exec_core_c(_ec: *mut rb_execution_context_t) -> VALUE {
     static DUMMY_TABLE: [usize; VM_INSTRUCTION_SIZE] = [0; VM_INSTRUCTION_SIZE];
     DUMMY_TABLE.as_ptr() as VALUE
 }
@@ -67,7 +67,7 @@ pub unsafe fn get_insns_address_table() -> &'static [*const (); VM_INSTRUCTION_S
 ///
 /// If `ec` is NULL, returns pointer to the instruction address table (`insns_address_table`).
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn rb_vm_exec_core_rs(ec: *mut rb_execution_context_t) -> VALUE {
+pub unsafe extern "C" fn rb_core_vm_exec_vm_exec_core(ec: *mut rb_execution_context_t) -> VALUE {
     if ec.is_null() {
         return unsafe { get_insns_address_table().as_ptr() as VALUE };
     }
@@ -88,7 +88,7 @@ pub unsafe extern "C" fn rb_vm_exec_core_rs(ec: *mut rb_execution_context_t) -> 
 
 /// Boundary C-compatible function returning instruction address table.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn rb_vm_get_insns_address_table_rs() -> *const *const () {
+pub unsafe extern "C" fn rb_vm_get_insns_address_table() -> *const *const () {
     unsafe { get_insns_address_table().as_ptr() }
 }
 
@@ -99,8 +99,8 @@ mod tests {
 
     #[test]
     fn test_null_ec_returns_instruction_table() {
-        let ret = unsafe { rb_vm_exec_core_rs(ptr::null_mut()) };
-        let table = unsafe { rb_vm_get_insns_address_table_rs() };
+        let ret = unsafe { rb_core_vm_exec_vm_exec_core(ptr::null_mut()) };
+        let table = unsafe { rb_vm_get_insns_address_table() };
         assert_eq!(ret, table as VALUE);
     }
 }
