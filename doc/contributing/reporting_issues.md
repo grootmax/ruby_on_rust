@@ -30,6 +30,24 @@ following these steps:
 * Please reply to feedback requests. If a bug report doesn't get any feedback,
   it'll eventually get rejected.
 
+### Upstream bug tracking workflow (Rule 4)
+
+When porting C source code to Rust, developers may encounter unexpected CRuby quirks, edge case discrepancies, or bugs in the baseline C implementation. Under Rule 4, developers track CRuby quirks and bug drafts in `doc/upstream_bugs/` to prevent losing critical context during porting.
+
+To track an upstream bug or quirk:
+
+1. **Draft a Report in `doc/upstream_bugs/`:**
+   - Copy [`doc/upstream_bugs/TEMPLATE.md`](../upstream_bugs/TEMPLATE.md) to a new Markdown report file in `doc/upstream_bugs/` (e.g., `doc/upstream_bugs/0001-numeric-overflow-quirk.md`).
+   - Document the CRuby baseline version (commit SHA or tag), reproduction script, expected vs actual behavior, affected Rust source path (e.g., in `core_rs/`), and Redmine submission status.
+   - The report template supports both unsubmitted drafts (`Draft / Unsubmitted`) and submitted Redmine issues (`Submitted`).
+
+2. **Update the Index Table:**
+   - Record the draft report entry in [`doc/upstream_bugs/README.md`](../upstream_bugs/README.md).
+   - Set the appropriate status flag (`Draft`, `Submitted`, `In Review`, `Resolved`, or `WontFix`).
+
+3. **Submit to Redmine:**
+   - When submitting the bug report to [bugs.ruby-lang.org](https://bugs.ruby-lang.org/), update the draft report and the index table in `doc/upstream_bugs/README.md` with the Redmine ticket URL and change the status flag from `Draft` to `Submitted`.
+
 ### Reporting website issues
 
 If you're having an issue with the bug tracker or the mailing list, you can
