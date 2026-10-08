@@ -138,7 +138,7 @@ impl VirtualMem {
 
 impl<A: Allocator> Drop for VirtualMemory<A> {
     fn drop(&mut self) {
-        #[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+        #[cfg(any(miri, fuzzing))]
         {
             use std::alloc::{dealloc, Layout};
             let ptr = self.region_start.as_ptr();

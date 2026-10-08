@@ -111,13 +111,13 @@ mod autogened {
 }
 pub use autogened::*;
 
-#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[cfg(any(miri, fuzzing))]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rb_jit_get_page_size() -> u32 {
     4096
 }
 
-#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[cfg(any(miri, fuzzing))]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rb_jit_reserve_addr_space(bytes: u32) -> *mut u8 {
     use std::alloc::{alloc_zeroed, Layout};
@@ -125,7 +125,7 @@ pub unsafe extern "C" fn rb_jit_reserve_addr_space(bytes: u32) -> *mut u8 {
     unsafe { alloc_zeroed(layout) }
 }
 
-#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[cfg(any(miri, fuzzing))]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rb_zjit_reserve_low_addr_space(bytes: usize) -> *mut u8 {
     use std::alloc::{alloc_zeroed, Layout};
@@ -133,18 +133,18 @@ pub unsafe extern "C" fn rb_zjit_reserve_low_addr_space(bytes: usize) -> *mut u8
     unsafe { alloc_zeroed(layout) }
 }
 
-#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[cfg(any(miri, fuzzing))]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rb_jit_mark_writable(_mem_block: *mut ::std::os::raw::c_void, _mem_size: u32) -> bool {
     true
 }
 
-#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[cfg(any(miri, fuzzing))]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rb_jit_mark_executable(_mem_block: *mut ::std::os::raw::c_void, _mem_size: u32) {
 }
 
-#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[cfg(any(miri, fuzzing))]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rb_jit_mark_unused(_mem_block: *mut ::std::os::raw::c_void, _mem_size: u32) -> bool {
     true

@@ -4525,6 +4525,6 @@ impl IseqCall {
 }
 
 
-#[cfg(all(test, not(miri), feature = "c-ffi"))]
+#[cfg(all(test, not(miri)))]
 #[path = "codegen_tests.rs"]
 mod tests;

@@ -23,8 +23,6 @@ yjit = { path = "../yjit" }
 # NOTE: Development builds select a set of these via configure.ac
 # For debugging, `make V=1` shows exact cargo invocation.
 [features]
-default = ["c-ffi"]
-c-ffi = []
 # Support --yjit-dump-disasm and RubyVM::YJIT.disasm using libcapstone.
 disasm = ["capstone"]
 runtime_checks = []

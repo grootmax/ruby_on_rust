@@ -35,7 +35,7 @@ Fuzz targets feed pseudo-random inputs and boundary conditions to verify that pu
 
 ## 2. Miri Verification (`cargo miri test`)
 
-ZJIT isolates C FFI declarations and shims behind feature flags (`c-ffi`) and `#[cfg(not(miri))]` conditional compilation. This allows Miri to verify pure Rust logic (encoders, data structures, register allocation) without failing on unresolved C symbols.
+ZJIT isolates C FFI declarations and shims behind `#[cfg(any(miri, fuzzing))]` conditional compilation. This allows Miri to verify pure Rust logic (encoders, data structures, register allocation) without failing on unresolved C symbols.
 
 ### Running Miri Tests
 To run Miri against the dedicated pure Rust test suite in ZJIT:
