@@ -137,72 +137,13 @@ impl JITFrame {
             }
         }
     }
-
-    /// Return the allocated stack map size for this frame pointer.
-    ///
-    /// # Safety
-    /// `ptr` must point to a valid, initialized `JITFrame`.
-    #[inline]
-    pub unsafe fn stack_size(ptr: *const Self) -> usize {
-        unsafe { (*ptr).stack_size as usize }
-    }
-
-    /// Write an encoded entry into the trailing stack map of this frame at `index`.
-    ///
-    /// # Safety
-    /// `ptr` must point to a valid `JITFrame` allocated with at least `index + 1` stack slots.
-    #[inline]
-    pub unsafe fn write_stack_entry(ptr: *const Self, index: usize, entry: VALUE) {
-        debug_assert!(index < unsafe { Self::stack_size(ptr) });
-        unsafe {
-            (*ptr.cast_mut()).stack.as_mut_ptr().add(index).write(entry);
-        }
-    }
-
-    /// Populate stack map entries into the JITFrame storage from an iterator.
-    ///
-    /// # Safety
-    /// `ptr` must point to a valid, writable `JITFrame` allocation whose `stack_size` matches the number of entries produced by `entries`.
-    pub unsafe fn set_stack_entries<I>(ptr: *const Self, entries: I)
-    where
-        I: IntoIterator<Item = VALUE>,
-    {
-        let stack_ptr = unsafe { (*ptr.cast_mut()).stack.as_mut_ptr() };
-        let mut count = 0;
-        for (idx, entry) in entries.into_iter().enumerate() {
-            debug_assert!(idx < unsafe { Self::stack_size(ptr) });
-            unsafe { stack_ptr.add(idx).write(entry); }
-            count += 1;
-        }
-        assert_eq!(unsafe { Self::stack_size(ptr) }, count, "JITFrame stack map entry count mismatch");
-    }
-
-    /// Mark the iseq pointer for GC from a raw pointer.
-    ///
-    /// # Safety
-    /// `ptr` must point to a valid `JITFrame` or be null.
-    pub unsafe fn mark_ptr(ptr: *const Self) {
-        if let Some(frame) = unsafe { ptr.as_ref() } {
-            frame.mark();
-        }
-    }
-
-    /// Update iseq references after GC compaction from a raw pointer.
-    ///
-    /// # Safety
-    /// `ptr` must point to a valid `JITFrame` or be null.
-    pub unsafe fn update_references_ptr(ptr: *mut Self) {
-        if let Some(frame) = unsafe { ptr.as_mut() } {
-            frame.update_references();
-        }
-    }
 }
 
 /// Update the iseq pointer in an on-stack JITFrame during GC compaction.
 /// Called from rb_execution_context_update in vm.c.
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_jit_frame_update_references(jit_frame: *mut JITFrame) {
-    unsafe { JITFrame::update_references_ptr(jit_frame); }
+    unsafe { &mut *jit_frame }.update_references();
 }
 
 #[cfg(test)]
@@ -534,32 +475,5 @@ mod tests {
             test
             test
         "), @"[2, 22, 4, 24]");
-    }
-
-    #[test]
-    fn test_jit_frame_boundary_shims() {
-        use crate::cruby::VALUE;
-        use crate::cruby::test_utils::with_rubyvm;
-        use std::ptr::null;
-
-        with_rubyvm(|| {
-            let frame = super::JITFrame::alloc(null(), null(), false, 2);
-            unsafe {
-                assert_eq!(super::JITFrame::stack_size(frame), 2);
-
-                let v1 = VALUE(42);
-                let v2 = VALUE(84);
-
-                super::JITFrame::write_stack_entry(frame, 0, v1);
-                super::JITFrame::set_stack_entries(frame, [v1, v2]);
-
-                // Test null pointer safety for mark_ptr and update_references_ptr
-                super::JITFrame::mark_ptr(null());
-                super::JITFrame::update_references_ptr(std::ptr::null_mut());
-
-                super::JITFrame::mark_ptr(frame);
-                super::JITFrame::update_references_ptr(frame.cast_mut());
-            }
-        });
     }
 }

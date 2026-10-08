@@ -3,7 +3,7 @@
 use std::ptr::null;
 use std::{ffi::c_void, ops::Range};
 use crate::{cruby::*, state::ZJITState, stats::with_time_stat, virtualmem::CodePtr};
-use crate::payload::{IseqPayload, IseqVersionRef, JITFrame, get_iseq_payload_ptr};
+use crate::payload::{IseqPayload, IseqVersionRef, get_iseq_payload_ptr};
 use crate::stats::Counter::gc_time_ns;
 
 /// GC callback for marking GC objects in the per-ISEQ payload.
@@ -107,7 +107,7 @@ pub extern "C" fn rb_zjit_root_update_references() {
     // but JITFrames not on the stack also need their iseq pointers updated
     // because the JIT code will reuse them on the next call.
     for &jit_frame in ZJITState::get_jit_frames().iter() {
-        unsafe { JITFrame::update_references_ptr(jit_frame); }
+        unsafe { &mut *jit_frame }.update_references();
     }
 }
 
@@ -251,7 +251,7 @@ pub extern "C" fn rb_zjit_root_mark() {
         return;
     }
     for &jit_frame in ZJITState::get_jit_frames().iter() {
-        unsafe { JITFrame::mark_ptr(jit_frame); }
+        unsafe { &*jit_frame }.mark();
     }
 }
 
