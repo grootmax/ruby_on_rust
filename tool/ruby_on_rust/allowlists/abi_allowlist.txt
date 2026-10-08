@@ -1,0 +1,8 @@
+# ABI Lock Allowlist
+# Line Format: <type>:<identifier> # <reason>
+# Allowed Types: header, macro, symbol, struct
+# Examples:
+# header:include/ruby/version.h # Header modification permitted for patch release
+# macro:HAVE_EXPERIMENTAL_FEATURE # Temporary macro flag
+# symbol:rb_experimental_fn # Unexported internal symbol allowance
+# struct:RObject.as.heap # Internal layout shift permitted

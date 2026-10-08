@@ -1,0 +1,6 @@
+# Documentation Lock Allowlist
+# Line Format: <type>:<identifier> # <reason>
+# Allowed Types: class, method, undocumented
+# Examples:
+# undocumented:Kernel#binding # Complex C internal method without inline RDoc
+# class:RubyVM # Internal VM class documentation exception

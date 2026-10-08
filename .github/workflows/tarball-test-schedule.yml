@@ -7,6 +7,34 @@ on:
 permissions: {}
 
 jobs:
+  update-compatibility:
+    name: Update Compatibility Report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: head
+
+      - name: Regenerate COMPATIBILITY.md
+        run: |
+          ruby tool/ruby_on_rust/update_compatibility.rb
+
+      - name: Publish COMPATIBILITY.md
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet COMPATIBILITY.md; then
+            git add COMPATIBILITY.md
+            git commit -m "Update COMPATIBILITY.md [skip ci]"
+            git push origin HEAD:${{ github.ref_name || 'master' }} || true
+          fi
+
   dispatch:
     if: ${{ github.event_name != 'schedule' || github.repository == 'ruby/ruby' }}
     runs-on: ubuntu-latest

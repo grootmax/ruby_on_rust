@@ -1,0 +1,3163 @@
+{
+  "headers": {
+    "include/ruby.h": {
+      "checksum": "04af8803affdcd5301e83d49078f64b10eb263823198913a6d7cd949a632d0a0",
+      "macros": [
+        "HAVE_RUBY_ATOMIC_H",
+        "HAVE_RUBY_DEBUG_H",
+        "HAVE_RUBY_DEFINES_H",
+        "HAVE_RUBY_ENCODING_H",
+        "HAVE_RUBY_FIBER_SCHEDULER_H",
+        "HAVE_RUBY_INTERN_H",
+        "HAVE_RUBY_IO_H",
+        "HAVE_RUBY_MEMORY_VIEW_H",
+        "HAVE_RUBY_MISSING_H",
+        "HAVE_RUBY_ONIGMO_H",
+        "HAVE_RUBY_ONIGURUMA_H",
+        "HAVE_RUBY_RACTOR_H",
+        "HAVE_RUBY_RANDOM_H",
+        "HAVE_RUBY_REGEX_H",
+        "HAVE_RUBY_RE_H",
+        "HAVE_RUBY_RUBY_H",
+        "HAVE_RUBY_ST_H",
+        "HAVE_RUBY_THREAD_H",
+        "HAVE_RUBY_THREAD_NATIVE_H",
+        "HAVE_RUBY_UTIL_H",
+        "HAVE_RUBY_VERSION_H",
+        "HAVE_RUBY_VM_H",
+        "HAVE_RUBY_WIN32_H",
+        "RUBY_H"
+      ]
+    },
+    "include/ruby/assert.h": {
+      "checksum": "1ed2a9d1dbfec38f44c435a099bf560496cc0596e381448fdaee5da68f2117d2",
+      "macros": [
+        "NDEBUG",
+        "RBIMPL_ASSERT_FUNC",
+        "RBIMPL_ASSERT_NOTHING",
+        "RBIMPL_ASSERT_OR_ASSUME",
+        "RBIMPL_NDEBUG",
+        "RBIMPL_RUBY_DEBUG",
+        "RBIMPL_VA_OPT_ARGS",
+        "RUBY_ASSERT",
+        "RUBY_ASSERT_ALWAYS",
+        "RUBY_ASSERT_BUILTIN_TYPE",
+        "RUBY_ASSERT_FAIL",
+        "RUBY_ASSERT_H",
+        "RUBY_ASSERT_MESG",
+        "RUBY_ASSERT_MESG_WHEN",
+        "RUBY_ASSERT_NDEBUG",
+        "RUBY_ASSERT_WHEN",
+        "RUBY_DEBUG",
+        "RUBY_NDEBUG"
+      ]
+    },
+    "include/ruby/atomic.h": {
+      "checksum": "15b84bab03b4cf288351de2be91878144248340aede45288c227ff4b955390a6",
+      "macros": [
+        "RBIMPL_ATOMIC_ACQUIRE",
+        "RBIMPL_ATOMIC_ACQ_REL",
+        "RBIMPL_ATOMIC_RELAXED",
+        "RBIMPL_ATOMIC_RELEASE",
+        "RBIMPL_ATOMIC_SEQ_CST",
+        "RUBY_ATOMIC_ADD",
+        "RUBY_ATOMIC_CAS",
+        "RUBY_ATOMIC_DEC",
+        "RUBY_ATOMIC_EXCHANGE",
+        "RUBY_ATOMIC_FETCH_ADD",
+        "RUBY_ATOMIC_FETCH_SUB",
+        "RUBY_ATOMIC_GENERIC_MACRO",
+        "RUBY_ATOMIC_H",
+        "RUBY_ATOMIC_INC",
+        "RUBY_ATOMIC_LOAD",
+        "RUBY_ATOMIC_OR",
+        "RUBY_ATOMIC_PTR_CAS",
+        "RUBY_ATOMIC_PTR_EXCHANGE",
+        "RUBY_ATOMIC_PTR_LOAD",
+        "RUBY_ATOMIC_PTR_SET",
+        "RUBY_ATOMIC_SET",
+        "RUBY_ATOMIC_SIZE_ADD",
+        "RUBY_ATOMIC_SIZE_CAS",
+        "RUBY_ATOMIC_SIZE_DEC",
+        "RUBY_ATOMIC_SIZE_EXCHANGE",
+        "RUBY_ATOMIC_SIZE_FETCH_ADD",
+        "RUBY_ATOMIC_SIZE_INC",
+        "RUBY_ATOMIC_SIZE_SUB",
+        "RUBY_ATOMIC_SUB",
+        "RUBY_ATOMIC_VALUE_CAS",
+        "RUBY_ATOMIC_VALUE_EXCHANGE",
+        "RUBY_ATOMIC_VALUE_SET"
+      ]
+    },
+    "include/ruby/backward.h": {
+      "checksum": "6197b040eba3a77233bb1a02a61538b211af71bd291157ac542b4c677f60da5e",
+      "macros": [
+        "RUBY_RUBY_BACKWARD_H"
+      ]
+    },
+    "include/ruby/backward/2/assume.h": {
+      "checksum": "89049221c7af4d87c385d4706787c1cb134af8aea4d1010328e35b92b08e36db",
+      "macros": [
+        "ASSUME",
+        "RB_LIKELY",
+        "RB_UNLIKELY",
+        "RUBY_BACKWARD2_ASSUME_H",
+        "UNREACHABLE",
+        "UNREACHABLE_RETURN"
+      ]
+    },
+    "include/ruby/backward/2/attributes.h": {
+      "checksum": "edd5c87e43c8dce692b8b9bd54391649518f80d479cbc127c1fe6c747de90cb6",
+      "macros": [
+        "ALWAYS_INLINE",
+        "COLDFUNC",
+        "CONSTFUNC",
+        "DEPRECATED",
+        "DEPRECATED_BY",
+        "DEPRECATED_TYPE",
+        "ERRORFUNC",
+        "FUNC_MINIMIZED",
+        "FUNC_UNOPTIMIZED",
+        "HAVE_ATTRIBUTE_ERRORFUNC",
+        "HAVE_ATTRIBUTE_WARNINGFUNC",
+        "NOINLINE",
+        "NORETURN",
+        "NORETURN_STYLE_NEW",
+        "PACKED_STRUCT",
+        "PACKED_STRUCT_UNALIGNED",
+        "PRINTF_ARGS",
+        "PUREFUNC",
+        "RB_UNUSED_VAR",
+        "RUBY_ALIAS_FUNCTION",
+        "RUBY_ALIAS_FUNCTION_TYPE",
+        "RUBY_ALIAS_FUNCTION_VOID",
+        "RUBY_ATTR_ALLOC_SIZE",
+        "RUBY_ATTR_MALLOC",
+        "RUBY_ATTR_RETURNS_NONNULL",
+        "RUBY_BACKWARD2_ATTRIBUTES_H",
+        "RUBY_CXX_DEPRECATED",
+        "RUBY_FUNC_NONNULL",
+        "WARNINGFUNC"
+      ]
+    },
+    "include/ruby/backward/2/bool.h": {
+      "checksum": "b80b27251e0837040505ebdbedf5aec785fcfde6c8edfc052524767b014ab759",
+      "macros": [
+        "FALSE",
+        "RUBY_BACKWARD2_BOOL_H",
+        "TRUE"
+      ]
+    },
+    "include/ruby/backward/2/gcc_version_since.h": {
+      "checksum": "a62f98ff628a5e5e89f7ea1d4edc25910d5d41fd9503da22ad9d134aae6b261f",
+      "macros": [
+        "GCC_VERSION_BEFORE",
+        "GCC_VERSION_SINCE",
+        "RUBY_BACKWARD2_GCC_VERSION_SINCE_H"
+      ]
+    },
+    "include/ruby/backward/2/inttypes.h": {
+      "checksum": "926b7589aa856c3265613d2b648e5f32d0f9da082047d0c9a0ffe6bfc810b74e",
+      "macros": [
+        "PRIXPTR",
+        "PRIXPTRDIFF",
+        "PRIXSIZE",
+        "PRIXVALUE",
+        "PRI_64_PREFIX",
+        "PRI_INT_PREFIX",
+        "PRI_LONG_PREFIX",
+        "PRI_PTRDIFF_PREFIX",
+        "PRI_SHORT_PREFIX",
+        "PRI_SIZE_PREFIX",
+        "PRI_TIMET_PREFIX",
+        "PRI_VALUE_PREFIX",
+        "PRIdPTR",
+        "PRIdPTRDIFF",
+        "PRIdSIZE",
+        "PRIdVALUE",
+        "PRIiPTR",
+        "PRIiPTRDIFF",
+        "PRIiSIZE",
+        "PRIoPTR",
+        "PRIoPTRDIFF",
+        "PRIoSIZE",
+        "PRIoVALUE",
+        "PRIsVALUE",
+        "PRIuPTR",
+        "PRIuPTRDIFF",
+        "PRIuSIZE",
+        "PRIuVALUE",
+        "PRIxPTR",
+        "PRIxPTRDIFF",
+        "PRIxSIZE",
+        "PRIxVALUE",
+        "RUBY_BACKWARD2_INTTYPES_H",
+        "RUBY_PRI_VALUE_MARK"
+      ]
+    },
+    "include/ruby/backward/2/limits.h": {
+      "checksum": "2058c9b35ee04cfcadab29140a2bc9881eef51227c82b4921f88e437d50092cc",
+      "macros": [
+        "CHAR_BIT",
+        "LLONG_MAX",
+        "LLONG_MIN",
+        "LONG_MAX",
+        "LONG_MIN",
+        "RUBY_BACKWARD2_LIMITS_H",
+        "SIZE_MAX",
+        "SIZE_MIN",
+        "SSIZE_MAX",
+        "SSIZE_MIN"
+      ]
+    },
+    "include/ruby/backward/2/long_long.h": {
+      "checksum": "15d68e2442e7af43b3e5f4e81612e3f8b99654e959f9d1018adb7c7de887c3c1",
+      "macros": [
+        "HAVE_LONG_LONG",
+        "HAVE_TRUE_LONG_LONG",
+        "LONG_LONG",
+        "RUBY_BACKWARD2_LONG_LONG_H",
+        "SIZEOF_LONG_LONG"
+      ]
+    },
+    "include/ruby/backward/2/r_cast.h": {
+      "checksum": "4961d626b8ca6791ab53ab17896963508d2084829372a02ebfb2acfe2d091552",
+      "macros": [
+        "RMOVED",
+        "RUBY_BACKWARD2_R_CAST_H",
+        "R_CAST"
+      ]
+    },
+    "include/ruby/backward/2/rmodule.h": {
+      "checksum": "938a427e528348afe9fffc3aebe5316ecc61f135d3100c7389965544f725eea3",
+      "macros": [
+        "RMODULE_CONST_TBL",
+        "RMODULE_IV_TBL",
+        "RMODULE_M_TBL",
+        "RMODULE_SUPER",
+        "RUBY_BACKWARD2_RMODULE_H"
+      ]
+    },
+    "include/ruby/backward/2/stdalign.h": {
+      "checksum": "32c10f54bb26a98c8f842975178208853697bd325a67d8b3776be6652da1a781",
+      "macros": [
+        "RUBY_ALIGNAS",
+        "RUBY_ALIGNOF",
+        "RUBY_BACKWARD2_STDALIGN_H"
+      ]
+    },
+    "include/ruby/backward/2/stdarg.h": {
+      "checksum": "fd395d56d552c003d986e0610f47f1423ecfa01ba231bf2385d9e3f1095af1c4",
+      "macros": [
+        "ANYARGS",
+        "RUBY_BACKWARD2_STDARG_H",
+        "_",
+        "__"
+      ]
+    },
+    "include/ruby/debug.h": {
+      "checksum": "f247fc5426ed68990dfe8bf60f25565a7f02f7f19b72a8d7e5bc1c711734bf5b",
+      "macros": [
+        "POSTPONED_JOB_HANDLE_INVALID",
+        "RB_DEBUG_H",
+        "RB_DEBUG_INSPECTOR_FRAME_DEPTH"
+      ]
+    },
+    "include/ruby/defines.h": {
+      "checksum": "c9e71e90218408bd1017ecab38fd9089fc3d719cf56853e6d79e8cd00e3120d9",
+      "macros": [
+        "FLUSH_REGISTER_WINDOWS",
+        "RB_GNUC_EXTENSION",
+        "RB_GNUC_EXTENSION_BLOCK",
+        "RUBY",
+        "RUBY_DEFINES_H",
+        "RUBY_MBCHAR_MAXSIZE"
+      ]
+    },
+    "include/ruby/encoding.h": {
+      "checksum": "c95693756923b9c21ce5b83397c9b751698c48a2c8b7051e0713677175ce14cd",
+      "macros": [
+        "RUBY_ENCODING_H"
+      ]
+    },
+    "include/ruby/fiber/scheduler.h": {
+      "checksum": "754b69031704baf1a78c6f6f372e09011500cbb60a106c7fe5e28d1054166025",
+      "macros": [
+        "RUBY_FIBER_SCHEDULER_H",
+        "RUBY_FIBER_SCHEDULER_VERSION"
+      ]
+    },
+    "include/ruby/intern.h": {
+      "checksum": "b0acfef7ed61068bc36d7091289a6fdcddb24bbd2cd5510e03dbf11cebfc0603",
+      "macros": [
+        "RUBY_INTERN_H"
+      ]
+    },
+    "include/ruby/internal/abi.h": {
+      "checksum": "bac13498189998f33efa35e4423328e1ffbab3d0e979e5de1f5bd76e81730d9f",
+      "macros": [
+        "RUBY_ABI_H",
+        "RUBY_ABI_VERSION",
+        "RUBY_DLN_CHECK_ABI"
+      ]
+    },
+    "include/ruby/internal/anyargs.h": {
+      "checksum": "ea25e9c1e2b832979ef98f6dab57f55e20753118e7f012230b06784d12f28bcf",
+      "macros": [
+        "RBIMPL_ANYARGS_ATTRSET",
+        "RBIMPL_ANYARGS_DECL",
+        "RBIMPL_ANYARGS_DISPATCH",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_00",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_01",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_02",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_03",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_04",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_05",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_06",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_07",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_08",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_09",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_10",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_11",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_12",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_13",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_14",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_15",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_m1",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_global_function_m2",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_00",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_01",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_02",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_03",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_04",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_05",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_06",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_07",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_08",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_09",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_10",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_11",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_12",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_13",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_14",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_15",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_00",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_01",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_02",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_03",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_04",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_05",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_06",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_07",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_08",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_09",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_10",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_11",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_12",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_13",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_14",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_15",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_m1",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_id_m2",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_m1",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_method_m2",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_00",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_01",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_02",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_03",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_04",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_05",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_06",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_07",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_08",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_09",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_10",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_11",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_12",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_13",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_14",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_15",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_m1",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_module_function_m2",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_00",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_01",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_02",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_03",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_04",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_05",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_06",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_07",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_08",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_09",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_10",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_11",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_12",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_13",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_14",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_15",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_m1",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_private_method_m2",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_00",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_01",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_02",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_03",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_04",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_05",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_06",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_07",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_08",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_09",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_10",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_11",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_12",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_13",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_14",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_15",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_m1",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_protected_method_m2",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_00",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_01",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_02",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_03",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_04",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_05",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_06",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_07",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_08",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_09",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_10",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_11",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_12",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_13",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_14",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_15",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_m1",
+        "RBIMPL_ANYARGS_DISPATCH_rb_define_singleton_method_m2",
+        "RBIMPL_ANYARGS_H",
+        "RBIMPL_CAST_FN_PTR",
+        "RBIMPL_CFUNC_IS_rb_f_notimplement",
+        "RUBY_METHOD_FUNC",
+        "rb_define_global_function",
+        "rb_define_method",
+        "rb_define_method_id",
+        "rb_define_module_function",
+        "rb_define_private_method",
+        "rb_define_protected_method",
+        "rb_define_singleton_method"
+      ]
+    },
+    "include/ruby/internal/arithmetic.h": {
+      "checksum": "06fdf5758afddd2672ac78ca5442871652ce41a744d737a4832a78cae9a3b9f5",
+      "macros": [
+        "RBIMPL_ARITHMETIC_H"
+      ]
+    },
+    "include/ruby/internal/arithmetic/char.h": {
+      "checksum": "30fe1447215c0071cd1b6f6e03bd0bdcb9645d6fefa0389a8606f0e61772e312",
+      "macros": [
+        "CHR2FIX",
+        "NUM2CHR",
+        "RBIMPL_ARITHMETIC_CHAR_H",
+        "RB_CHR2FIX",
+        "RB_NUM2CHR"
+      ]
+    },
+    "include/ruby/internal/arithmetic/double.h": {
+      "checksum": "db205374759e5cd168f55964d47e8b18bb2ecdcb0f45c6b4ae1dbf41040a41c1",
+      "macros": [
+        "DBL2NUM",
+        "NUM2DBL",
+        "RBIMPL_ARITHMETIC_DOUBLE_H",
+        "RFLOAT_VALUE"
+      ]
+    },
+    "include/ruby/internal/arithmetic/fixnum.h": {
+      "checksum": "2de3c7997ab8b1ebaf4021345100112948e53c262947ca96fe23fae1bbc8cc25",
+      "macros": [
+        "FIXABLE",
+        "FIXNUM_MAX",
+        "FIXNUM_MIN",
+        "NEGFIXABLE",
+        "POSFIXABLE",
+        "RBIMPL_ARITHMETIC_FIXNUM_H",
+        "RB_FIXABLE",
+        "RB_NEGFIXABLE",
+        "RB_POSFIXABLE",
+        "RUBY_FIXNUM_MAX",
+        "RUBY_FIXNUM_MIN"
+      ]
+    },
+    "include/ruby/internal/arithmetic/gid_t.h": {
+      "checksum": "1a2b5e86121b403cc36866acb54cba1e39b16ac7fdd0c2d6c999c879cf78d8ab",
+      "macros": [
+        "GIDT2NUM",
+        "NUM2GIDT",
+        "PRI_GIDT_PREFIX",
+        "RBIMPL_ARITHMETIC_GID_T_H"
+      ]
+    },
+    "include/ruby/internal/arithmetic/int.h": {
+      "checksum": "64fbb1f7f7e8262d1cb82a5a706a2f430b37569fa39406499472ae1e210dc6ce",
+      "macros": [
+        "FIX2INT",
+        "FIX2UINT",
+        "INT2NUM",
+        "NUM2INT",
+        "NUM2UINT",
+        "RBIMPL_ARITHMETIC_INT_H",
+        "RB_FIX2INT",
+        "RB_FIX2UINT",
+        "RB_INT2NUM",
+        "RB_NUM2INT",
+        "RB_NUM2UINT",
+        "RB_UINT2NUM",
+        "UINT2NUM"
+      ]
+    },
+    "include/ruby/internal/arithmetic/intptr_t.h": {
+      "checksum": "ab0972913c2a1e8cbc1839053ea8317cc15c74a9a44fe900344c890e632455bf",
+      "macros": [
+        "NUM2PTR",
+        "PTR2NUM",
+        "RBIMPL_ARITHMETIC_INTPTR_T_H",
+        "rb_int_new",
+        "rb_uint_new"
+      ]
+    },
+    "include/ruby/internal/arithmetic/long.h": {
+      "checksum": "6c050a5c827ffd33a1164d3a3c91bc52f7ff33fe31aa15f9b78c04dbe90c1d72",
+      "macros": [
+        "FIX2LONG",
+        "FIX2ULONG",
+        "INT2FIX",
+        "LONG2FIX",
+        "LONG2NUM",
+        "NUM2LONG",
+        "NUM2ULONG",
+        "RBIMPL_ARITHMETIC_LONG_H",
+        "RB_FIX2LONG",
+        "RB_FIX2ULONG",
+        "RB_INT2FIX",
+        "RB_LONG2FIX",
+        "RB_LONG2NUM",
+        "RB_NUM2LONG",
+        "RB_NUM2ULONG",
+        "RB_ULONG2NUM",
+        "ULONG2NUM",
+        "rb_fix_new",
+        "rb_long2int"
+      ]
+    },
+    "include/ruby/internal/arithmetic/long_long.h": {
+      "checksum": "bd09466e6d141dcdcc96cebf3c0d28e9b11e59b8defcf0084e9f28e6e89c1707",
+      "macros": [
+        "LL2NUM",
+        "NUM2LL",
+        "NUM2ULL",
+        "RBIMPL_ARITHMETIC_LONG_LONG_H",
+        "RB_LL2NUM",
+        "RB_NUM2LL",
+        "RB_NUM2ULL",
+        "RB_ULL2NUM",
+        "ULL2NUM"
+      ]
+    },
+    "include/ruby/internal/arithmetic/mode_t.h": {
+      "checksum": "29f5b839b866d27a8eb392dfe951c49b0e1f76f2970766aef342fea2c102bc65",
+      "macros": [
+        "MODET2NUM",
+        "NUM2MODET",
+        "PRI_MODET_PREFIX",
+        "RBIMPL_ARITHMETIC_MODE_T_H"
+      ]
+    },
+    "include/ruby/internal/arithmetic/off_t.h": {
+      "checksum": "ed62205f984a20cbdcc8502e90b239a7889d2d87d9390e2c5a50ed88a91b7419",
+      "macros": [
+        "NUM2OFFT",
+        "OFFT2NUM",
+        "PRI_OFFT_PREFIX",
+        "RBIMPL_ARITHMETIC_OFF_T_H"
+      ]
+    },
+    "include/ruby/internal/arithmetic/pid_t.h": {
+      "checksum": "cb947aa7a1823527ac0a546d3d9a0771ecefbcb02c92a19a0a929e62d96c8099",
+      "macros": [
+        "NUM2PIDT",
+        "PIDT2NUM",
+        "PRI_PIDT_PREFIX",
+        "RBIMPL_ARITHMETIC_PID_T_H"
+      ]
+    },
+    "include/ruby/internal/arithmetic/short.h": {
+      "checksum": "353925f6f1508deb74ca76d8246491849285420a2c235358bb70fed238d0e443",
+      "macros": [
+        "FIX2SHORT",
+        "NUM2SHORT",
+        "NUM2USHORT",
+        "RBIMPL_ARITHMETIC_SHORT_H",
+        "RB_FIX2SHORT",
+        "RB_NUM2SHORT",
+        "RB_NUM2USHORT",
+        "USHORT2NUM"
+      ]
+    },
+    "include/ruby/internal/arithmetic/size_t.h": {
+      "checksum": "14d23113d7995a94eeebdc9b8b9ff218bb188b9bcfa605459cc196cef3462e12",
+      "macros": [
+        "NUM2SIZET",
+        "NUM2SSIZET",
+        "RBIMPL_ARITHMETIC_SIZE_T_H",
+        "RB_NUM2SIZE",
+        "RB_NUM2SSIZE",
+        "RB_SIZE2NUM",
+        "RB_SSIZE2NUM",
+        "SIZET2NUM",
+        "SSIZET2NUM"
+      ]
+    },
+    "include/ruby/internal/arithmetic/st_data_t.h": {
+      "checksum": "da1ac5289d7809140d61a113b04c2ad6e3d1c97dfa1ea14119a6a899fe89eb35",
+      "macros": [
+        "RBIMPL_ARITHMERIC_ST_DATA_T_H",
+        "RB_ST2FIX",
+        "ST2FIX"
+      ]
+    },
+    "include/ruby/internal/arithmetic/uid_t.h": {
+      "checksum": "d5c142402c44f109b99a776d9d2138d2e35bbd81a053000e276c8f98b5a92ecb",
+      "macros": [
+        "NUM2UIDT",
+        "PRI_UIDT_PREFIX",
+        "RBIMPL_ARITHMETIC_UID_T_H",
+        "UIDT2NUM"
+      ]
+    },
+    "include/ruby/internal/assume.h": {
+      "checksum": "c063a72720e098330c1fa4d6eadd45d6851402ba1c2208a0372ae6611f39085b",
+      "macros": [
+        "RBIMPL_ASSUME",
+        "RBIMPL_ASSUME_H",
+        "RBIMPL_HAVE___ASSUME",
+        "RBIMPL_UNREACHABLE",
+        "RBIMPL_UNREACHABLE_RETURN"
+      ]
+    },
+    "include/ruby/internal/attr/alloc_size.h": {
+      "checksum": "d265f53d8d08a8e5a952cbd4a3b2ab970e9e8b9e10c6c8a9e779b500572f88a8",
+      "macros": [
+        "RBIMPL_ATTR_ALLOC_SIZE",
+        "RBIMPL_ATTR_ALLOC_SIZE_H"
+      ]
+    },
+    "include/ruby/internal/attr/artificial.h": {
+      "checksum": "703dd3f2db4028778e3e14037c85d0a41c5b26b3573ceb9d1c77e71975c7b322",
+      "macros": [
+        "RBIMPL_ATTR_ARTIFICIAL",
+        "RBIMPL_ATTR_ARTIFICIAL_H"
+      ]
+    },
+    "include/ruby/internal/attr/cold.h": {
+      "checksum": "158ad34ee6835cdc3512c93bdc63058d7d2983e5dde790fc28e6f3dcdec66b7e",
+      "macros": [
+        "RBIMPL_ATTR_COLD",
+        "RBIMPL_ATTR_COLD_H"
+      ]
+    },
+    "include/ruby/internal/attr/const.h": {
+      "checksum": "dec07796c27ce71ebd8d0511195b1eb10bc551d43d97add0095c836b4db688bb",
+      "macros": [
+        "RBIMPL_ATTR_CONST",
+        "RBIMPL_ATTR_CONST_H",
+        "RBIMPL_ATTR_CONST_UNLESS_DEBUG"
+      ]
+    },
+    "include/ruby/internal/attr/constexpr.h": {
+      "checksum": "817554061ec26f23f2a4880d6357810166c7c896622c552c5095f2f9d02d9149",
+      "macros": [
+        "RBIMPL_ATTR_CONSTEXPR",
+        "RBIMPL_ATTR_CONSTEXPR_CXX11",
+        "RBIMPL_ATTR_CONSTEXPR_CXX14",
+        "RBIMPL_ATTR_CONSTEXPR_H",
+        "RBIMPL_ATTR_CONSTEXPR_UNLESS_DEBUG",
+        "RBIMPL_HAS_ATTR_CONSTEXPR_CXX11",
+        "RBIMPL_HAS_ATTR_CONSTEXPR_CXX14"
+      ]
+    },
+    "include/ruby/internal/attr/deprecated.h": {
+      "checksum": "25b32bc5599ed9b141473a42ec6d607b22a835cc26a6e2b90fada61d6c1b96cb",
+      "macros": [
+        "RBIMPL_ATTR_DEPRECATED",
+        "RBIMPL_ATTR_DEPRECATED_EXT",
+        "RBIMPL_ATTR_DEPRECATED_H",
+        "RBIMPL_ATTR_DEPRECATED_INTERNAL",
+        "RBIMPL_ATTR_DEPRECATED_INTERNAL_ONLY",
+        "RBIMPL_ATTR_DEPRECATED_SINCE"
+      ]
+    },
+    "include/ruby/internal/attr/diagnose_if.h": {
+      "checksum": "5636727b5a573cd9442819e8c92b8a3952bfaaf746f380440673f47a6a875d99",
+      "macros": [
+        "RBIMPL_ATTR_DIAGNOSE_IF",
+        "RBIMPL_ATTR_DIAGNOSE_IF_H"
+      ]
+    },
+    "include/ruby/internal/attr/enum_extensibility.h": {
+      "checksum": "0ea20dab69d3bb91e4f3f3e0e8bd17f2c1dd4c64b8d4af3d86a5ad6516c88919",
+      "macros": [
+        "RBIMPL_ATTR_ENUM_EXTENSIBILITY",
+        "RBIMPL_ATTR_ENUM_EXTENSIBILITY_H"
+      ]
+    },
+    "include/ruby/internal/attr/error.h": {
+      "checksum": "c80decdc74eab7eddec7220464fcae5c0d3ad23c99e7b4f42280bdeaf9a1a14a",
+      "macros": [
+        "RBIMPL_ATTR_ERROR",
+        "RBIMPL_ATTR_ERROR_H"
+      ]
+    },
+    "include/ruby/internal/attr/flag_enum.h": {
+      "checksum": "6a425e4ca6e3cd0dc9766a598973f66f239b9fd8bca30d305a06ff3f6a3ff400",
+      "macros": [
+        "RBIMPL_ATTR_FLAG_ENUM",
+        "RBIMPL_ATTR_FLAG_ENUM_H"
+      ]
+    },
+    "include/ruby/internal/attr/forceinline.h": {
+      "checksum": "1ecc08dc6864989303b0752dbe88a90a6890086c86b2baee37a03ac8db022c50",
+      "macros": [
+        "RBIMPL_ATTR_FORCEINLINE",
+        "RBIMPL_ATTR_FORCEINLINE_H"
+      ]
+    },
+    "include/ruby/internal/attr/format.h": {
+      "checksum": "8843286cfdafb3f9e0dbe5bc87c92db4c7945d808c53e10327a74cc0349e8aa2",
+      "macros": [
+        "RBIMPL_ATTR_FORMAT",
+        "RBIMPL_ATTR_FORMAT_H",
+        "RBIMPL_PRINTF_FORMAT"
+      ]
+    },
+    "include/ruby/internal/attr/maybe_unused.h": {
+      "checksum": "bcb47f63377123c737f1382454b2f4f69a6c8bd8efaad02e326edbdb38b1f7be",
+      "macros": [
+        "RBIMPL_ATTR_MAYBE_UNUSED",
+        "RBIMPL_ATTR_MAYBE_UNUSED_H"
+      ]
+    },
+    "include/ruby/internal/attr/noalias.h": {
+      "checksum": "118fb3ff467c47ca1f93bba44c0439ee8fa769475c3e21308f8cdaafc99a2c3c",
+      "macros": [
+        "RBIMPL_ATTR_NOALIAS",
+        "RBIMPL_ATTR_NOALIAS_H"
+      ]
+    },
+    "include/ruby/internal/attr/nodiscard.h": {
+      "checksum": "f72adbd9e6550d957c0c3268da2234a84b31cb2d637fcbbc4116833b0402bed7",
+      "macros": [
+        "RBIMPL_ATTR_NODISCARD",
+        "RBIMPL_ATTR_NODISCARD_H"
+      ]
+    },
+    "include/ruby/internal/attr/noexcept.h": {
+      "checksum": "3db1083b5f1c3676bae3091123df9633dd2e19f52095ddf2b038aab22d42a132",
+      "macros": [
+        "RBIMPL_ATTR_NOEXCEPT",
+        "RBIMPL_ATTR_NOEXCEPT_H"
+      ]
+    },
+    "include/ruby/internal/attr/noinline.h": {
+      "checksum": "5884e6d0e60666729ad4718d3fe2f7c315cdb096b0f285e9049d01d106a51bdb",
+      "macros": [
+        "RBIMPL_ATTR_NOINLINE",
+        "RBIMPL_ATTR_NOINLINE_H"
+      ]
+    },
+    "include/ruby/internal/attr/nonnull.h": {
+      "checksum": "0d87841a4c952b189f01cca133dad1ebca07676c1530c613b84b8292845fd14f",
+      "macros": [
+        "RBIMPL_ATTR_NONNULL",
+        "RBIMPL_ATTR_NONNULL_H",
+        "RBIMPL_NONNULL_ARG"
+      ]
+    },
+    "include/ruby/internal/attr/nonstring.h": {
+      "checksum": "c0b6198d6b7e6db731102de4d74037e91897d810ef098609bb81aba3358d17b1",
+      "macros": [
+        "RBIMPL_ATTR_NONSTRING",
+        "RBIMPL_ATTR_NONSTRING_ARRAY",
+        "RBIMPL_ATTR_NONSTRING_H"
+      ]
+    },
+    "include/ruby/internal/attr/noreturn.h": {
+      "checksum": "7c370445f98d3f7763367f867610e01718b15aa8837709dfa7ff64403928f35e",
+      "macros": [
+        "RBIMPL_ATTR_NORETURN",
+        "RBIMPL_ATTR_NORETURN_H"
+      ]
+    },
+    "include/ruby/internal/attr/packed_struct.h": {
+      "checksum": "2f2839f0c35c264d6fea62aac40944f0d5ec52636a33b5edfcac49c50e727994",
+      "macros": [
+        "RBIMPL_ATTR_PACKED_STRUCT_BEGIN",
+        "RBIMPL_ATTR_PACKED_STRUCT_END",
+        "RBIMPL_ATTR_PACKED_STRUCT_H",
+        "RBIMPL_ATTR_PACKED_STRUCT_UNALIGNED_BEGIN",
+        "RBIMPL_ATTR_PACKED_STRUCT_UNALIGNED_END"
+      ]
+    },
+    "include/ruby/internal/attr/pure.h": {
+      "checksum": "c9e3d48a12b8cbb1788e04ff5df23d93954b435b2077dd297cc24cd8700d30bb",
+      "macros": [
+        "RBIMPL_ATTR_PURE",
+        "RBIMPL_ATTR_PURE_H",
+        "RBIMPL_ATTR_PURE_UNLESS_DEBUG"
+      ]
+    },
+    "include/ruby/internal/attr/restrict.h": {
+      "checksum": "8e6dd25e783bc70fb8240ae668f8f918c2befb7372feea199d04685d7216c0f3",
+      "macros": [
+        "RBIMPL_ATTR_RESTRICT",
+        "RBIMPL_ATTR_RESTRICT_H"
+      ]
+    },
+    "include/ruby/internal/attr/returns_nonnull.h": {
+      "checksum": "ec3de3643c2d5c784062d16fbb352c3b402dac028cf2ad7241fb88f0516a93bb",
+      "macros": [
+        "RBIMPL_ATTR_RETURNS_NONNULL",
+        "RBIMPL_ATTR_RETURNS_NONNULL_H"
+      ]
+    },
+    "include/ruby/internal/attr/warning.h": {
+      "checksum": "67fe3a5f3b10aece33e8fa3f01612bf79d1d12de028c8a1209a91abb7a39f793",
+      "macros": [
+        "RBIMPL_ATTR_WARNING",
+        "RBIMPL_ATTR_WARNING_H"
+      ]
+    },
+    "include/ruby/internal/attr/weakref.h": {
+      "checksum": "b9eb39590e8b0c9775da94dc8ed161bb2ee2fee3b9437bc4fb61fb607a154224",
+      "macros": [
+        "RBIMPL_ATTR_WEAKREF",
+        "RBIMPL_ATTR_WEAKREF_H"
+      ]
+    },
+    "include/ruby/internal/cast.h": {
+      "checksum": "5763f41df7e78876de1b017614b2df42e54c066ad7ec986b7e24b06a783157ba",
+      "macros": [
+        "RBIMPL_CAST",
+        "RBIMPL_CAST_H"
+      ]
+    },
+    "include/ruby/internal/compiler_is.h": {
+      "checksum": "33db323861bf5ae2daf58bc480e995e4c0c67dfa2916c7ec6dcd6d6df94635e0",
+      "macros": [
+        "RBIMPL_COMPILER_IS",
+        "RBIMPL_COMPILER_IS_H"
+      ]
+    },
+    "include/ruby/internal/compiler_is/apple.h": {
+      "checksum": "cadd1dcb919f3b0657c940342746cbfd99868dcc078b331627bbd8f7444c0998",
+      "macros": [
+        "RBIMPL_COMPILER_IS_APPLE_H",
+        "RBIMPL_COMPILER_IS_Apple",
+        "RBIMPL_COMPILER_VERSION_MAJOR",
+        "RBIMPL_COMPILER_VERSION_MINOR",
+        "RBIMPL_COMPILER_VERSION_PATCH"
+      ]
+    },
+    "include/ruby/internal/compiler_is/clang.h": {
+      "checksum": "4bc9c512b4a3d4ec0fa6a8b2b332521728b9fa84a6b9ba88286818b5d753d439",
+      "macros": [
+        "RBIMPL_COMPILER_IS_CLANG_H",
+        "RBIMPL_COMPILER_IS_Clang",
+        "RBIMPL_COMPILER_VERSION_MAJOR",
+        "RBIMPL_COMPILER_VERSION_MINOR",
+        "RBIMPL_COMPILER_VERSION_PATCH"
+      ]
+    },
+    "include/ruby/internal/compiler_is/gcc.h": {
+      "checksum": "10b3314ce6e4619f8b7d90987f692cd153e2e805c57c62978b1104b95b66f75a",
+      "macros": [
+        "RBIMPL_COMPILER_IS_GCC",
+        "RBIMPL_COMPILER_IS_GCC_H",
+        "RBIMPL_COMPILER_VERSION_MAJOR",
+        "RBIMPL_COMPILER_VERSION_MINOR",
+        "RBIMPL_COMPILER_VERSION_PATCH"
+      ]
+    },
+    "include/ruby/internal/compiler_is/intel.h": {
+      "checksum": "b9bee7e9de440ca09ad0da70798af0f8dbb253071e0406064cbe96ee4a568a51",
+      "macros": [
+        "RBIMPL_COMPILER_IS_INTEL_H",
+        "RBIMPL_COMPILER_IS_Intel",
+        "RBIMPL_COMPILER_VERSION_MAJOR",
+        "RBIMPL_COMPILER_VERSION_MINOR",
+        "RBIMPL_COMPILER_VERSION_PATCH"
+      ]
+    },
+    "include/ruby/internal/compiler_is/msvc.h": {
+      "checksum": "8b44ec72f3221d0ca2791a4b24ce9467f58e0eed5c7a366d9a580ac699a61a38",
+      "macros": [
+        "RBIMPL_COMPILER_IS_MSVC",
+        "RBIMPL_COMPILER_IS_MSVC_H",
+        "RBIMPL_COMPILER_VERSION_MAJOR",
+        "RBIMPL_COMPILER_VERSION_MINOR",
+        "RBIMPL_COMPILER_VERSION_PATCH"
+      ]
+    },
+    "include/ruby/internal/compiler_is/sunpro.h": {
+      "checksum": "51ef27ad4e4af2ddae991f4734082ca3574df759329b24048790d245cc7ddaa2",
+      "macros": [
+        "RBIMPL_COMPILER_IS_SUNPRO_H",
+        "RBIMPL_COMPILER_IS_SunPro",
+        "RBIMPL_COMPILER_VERSION_MAJOR",
+        "RBIMPL_COMPILER_VERSION_MINOR",
+        "RBIMPL_COMPILER_VERSION_PATCH"
+      ]
+    },
+    "include/ruby/internal/compiler_since.h": {
+      "checksum": "e51e4b276c9f055506959323c4336410cfd57218868ba88c7daa10cf3ed1ea7a",
+      "macros": [
+        "RBIMPL_COMPILER_BEFORE",
+        "RBIMPL_COMPILER_SINCE",
+        "RBIMPL_COMPILER_SINCE_H"
+      ]
+    },
+    "include/ruby/internal/config.h": {
+      "checksum": "e8278386b44d0c37c19f4cb39b6e838185aef39d8ee7940e72f97378c0a81e17",
+      "macros": [
+        "DLEXT_MAXLEN",
+        "HAVE_PROTOTYPES",
+        "HAVE_STDARG_PROTOTYPES",
+        "HAVE_VA_ARGS_MACRO",
+        "HAVE___VA_OPT__",
+        "RBIMPL_CONFIG_H",
+        "RBIMPL_TEST1",
+        "RBIMPL_TEST2",
+        "RBIMPL_TEST3",
+        "RUBY_PLATFORM",
+        "STRINGIZE",
+        "STRINGIZE0",
+        "TOKEN_PASTE",
+        "UNALIGNED_WORD_ACCESS",
+        "WORDS_BIGENDIAN"
+      ]
+    },
+    "include/ruby/internal/constant_p.h": {
+      "checksum": "4f3d040a8145c897c7701e538809f311cc445ed08ac072d4fcb411abefe8179a",
+      "macros": [
+        "RBIMPL_CONSTANT_P",
+        "RBIMPL_CONSTANT_P_H"
+      ]
+    },
+    "include/ruby/internal/core.h": {
+      "checksum": "a9404fc6d41eb46238602f81a012726ab41ca68f247d237b3f6cb77d10294070",
+      "macros": [
+        "RBIMPL_CORE_H"
+      ]
+    },
+    "include/ruby/internal/core/rarray.h": {
+      "checksum": "2fe2200fb19a9fe78a77014cb79dbbf6ef133075a7bf6074c67bcad3c1222621",
+      "macros": [
+        "FIX_CONST_VALUE_PTR",
+        "RARRAY",
+        "RARRAY_AREF",
+        "RARRAY_ASET",
+        "RARRAY_CONST_PTR",
+        "RARRAY_EMBED_FLAG",
+        "RARRAY_EMBED_LEN",
+        "RARRAY_EMBED_LEN_MASK",
+        "RARRAY_EMBED_LEN_SHIFT",
+        "RARRAY_LEN",
+        "RARRAY_LENINT",
+        "RARRAY_PTR",
+        "RARRAY_PTR_USE",
+        "RBIMPL_RARRAY_H",
+        "RBIMPL_RARRAY_STMT"
+      ]
+    },
+    "include/ruby/internal/core/rbasic.h": {
+      "checksum": "7cad79157d84f5f5f882787cf78fcb22c12900c0561e25da641c60134c1b001d",
+      "macros": [
+        "RBASIC",
+        "RBASIC_CLASS",
+        "RBASIC_INIT",
+        "RBASIC_SHAPE_ID_FIELD",
+        "RBIMPL_EMBED_LEN_MAX_OF",
+        "RBIMPL_RBASIC_H",
+        "RBIMPL_RVALUE_EMBED_LEN_MAX",
+        "RVALUE_EMBED_LEN_MAX"
+      ]
+    },
+    "include/ruby/internal/core/rbignum.h": {
+      "checksum": "a4631bd6b2450321c91fe32f23499938cbe9be2e2f59fa8ba5e874a7f3215a67",
+      "macros": [
+        "RBIGNUM_NEGATIVE_P",
+        "RBIGNUM_POSITIVE_P",
+        "RBIGNUM_SIGN",
+        "RBIMPL_RBIGNUM_H"
+      ]
+    },
+    "include/ruby/internal/core/rclass.h": {
+      "checksum": "1e59d995a1c1a02c610780025aeba39b62a56a1815ca9f2f3ea80303ba8d07f8",
+      "macros": [
+        "RBIMPL_RCLASS_H",
+        "RCLASS",
+        "RCLASS_SUPER",
+        "RMODULE",
+        "RMODULE_IS_REFINEMENT"
+      ]
+    },
+    "include/ruby/internal/core/rdata.h": {
+      "checksum": "059d168b6cfc8da9550561ad1a67332ebd1c5dd337cff2e9b90afaec67ff5507",
+      "macros": [
+        "RBIMPL_DATA_FUNC",
+        "RBIMPL_RDATA_H",
+        "RUBY_DEFAULT_FREE",
+        "RUBY_NEVER_FREE",
+        "RUBY_UNTYPED_DATA_WARNING"
+      ]
+    },
+    "include/ruby/internal/core/rfile.h": {
+      "checksum": "fa98e4fc1deb7d372fc4316ad5e69a53c63e3804acc9f3cf80edd8195a075c37",
+      "macros": [
+        "RBIMPL_RFILE_H",
+        "RFILE"
+      ]
+    },
+    "include/ruby/internal/core/rhash.h": {
+      "checksum": "fde71157a21567da1c8d97119d9efc962bed6017431d60d53fca03521f16474f",
+      "macros": [
+        "RBIMPL_RHASH_H",
+        "RHASH_EMPTY_P",
+        "RHASH_IFNONE",
+        "RHASH_SET_IFNONE",
+        "RHASH_SIZE"
+      ]
+    },
+    "include/ruby/internal/core/rmatch.h": {
+      "checksum": "6de81f28507debbd6da98a3cad124d2b722631b25a2432c6891a8119bbfa40a4",
+      "macros": [
+        "RBIMPL_RMATCH_H",
+        "RMATCH",
+        "RMATCH_REGS"
+      ]
+    },
+    "include/ruby/internal/core/robject.h": {
+      "checksum": "133d2b1c5f7a6383737b323bd2f4a65cf6fb8b5d822071da510f25a1071da7b5",
+      "macros": [
+        "RBIMPL_ROBJECT_H",
+        "ROBJECT"
+      ]
+    },
+    "include/ruby/internal/core/rregexp.h": {
+      "checksum": "e6b81c3b2c95e91427267c934c5f9024e372e485bdeb0f9d701d1afa103a3262",
+      "macros": [
+        "RBIMPL_RREGEXP_H",
+        "RREGEXP",
+        "RREGEXP_SRC",
+        "RREGEXP_SRC_END",
+        "RREGEXP_SRC_LEN",
+        "RREGEXP_SRC_PTR"
+      ]
+    },
+    "include/ruby/internal/core/rstring.h": {
+      "checksum": "65ff0b866c398ff20a69c78a8a8b75adfe0ec1d8e6ed578a1f7618df6a5aca3c",
+      "macros": [
+        "Check_SafeStr",
+        "ExportStringValue",
+        "RBIMPL_RSTRING_H",
+        "RSTRING",
+        "RSTRING_END",
+        "RSTRING_FSTR",
+        "RSTRING_GETMEM",
+        "RSTRING_LEN",
+        "RSTRING_LENINT",
+        "RSTRING_NOEMBED",
+        "RSTRING_PTR",
+        "SafeStringValue",
+        "StringValue",
+        "StringValueCStr",
+        "StringValuePtr"
+      ]
+    },
+    "include/ruby/internal/core/rstruct.h": {
+      "checksum": "7aa559f28f962b78914ac382a92ab0409c0555c050566ccbedd395b15b1ea2fc",
+      "macros": [
+        "RBIMPL_RSTRUCT_H",
+        "RSTRUCT_GET",
+        "RSTRUCT_LEN",
+        "RSTRUCT_SET"
+      ]
+    },
+    "include/ruby/internal/core/rtypeddata.h": {
+      "checksum": "6dfe6ffae678582b07346e272caa08908f6a647c33d689d0b01f64a8104ad270",
+      "macros": [
+        "Check_TypedStruct",
+        "DATA_PTR",
+        "HAVE_RB_DATA_TYPE_T_FUNCTION",
+        "HAVE_RB_DATA_TYPE_T_PARENT",
+        "HAVE_TYPE_RB_DATA_TYPE_T",
+        "RBIMPL_RTYPEDDATA_H",
+        "RBIMPL_TYPEDDATA_PRECONDITION",
+        "RDATA",
+        "RTYPEDDATA",
+        "RTYPEDDATA_DATA",
+        "RTYPEDDATA_P",
+        "RTYPEDDATA_TYPE",
+        "RUBY_TYPED_DEFAULT_FREE",
+        "RUBY_TYPED_EMBEDDABLE",
+        "RUBY_TYPED_FREE_IMMEDIATELY",
+        "RUBY_TYPED_FROZEN_SHAREABLE",
+        "RUBY_TYPED_NEVER_FREE",
+        "RUBY_TYPED_PROMOTED1",
+        "RUBY_TYPED_THREAD_SAFE_FREE",
+        "RUBY_TYPED_WB_PROTECTED",
+        "TYPED_DATA_EMBEDDED",
+        "TYPED_DATA_PTR_MASK",
+        "TypedData_Get_Struct",
+        "TypedData_Make_Struct",
+        "TypedData_Make_Struct0",
+        "TypedData_Wrap_Struct",
+        "rb_typeddata_inherited_p",
+        "rb_typeddata_is_kind_of"
+      ]
+    },
+    "include/ruby/internal/ctype.h": {
+      "checksum": "de8629e8c00e2992bd4f8b37ed2139e2a569b940563200334e62e439e3d2bcc0",
+      "macros": [
+        "ISALNUM",
+        "ISALPHA",
+        "ISASCII",
+        "ISBLANK",
+        "ISCNTRL",
+        "ISDIGIT",
+        "ISGRAPH",
+        "ISLOWER",
+        "ISPRINT",
+        "ISPUNCT",
+        "ISSPACE",
+        "ISUPPER",
+        "ISXDIGIT",
+        "RBIMPL_CTYPE_H",
+        "STRCASECMP",
+        "STRNCASECMP",
+        "STRTOUL",
+        "TOLOWER",
+        "TOUPPER"
+      ]
+    },
+    "include/ruby/internal/dllexport.h": {
+      "checksum": "7e01c395b156f64702bd1c68043d0f2ce0de95b2bec2d6ae8072d867f7f36287",
+      "macros": [
+        "RBIMPL_DLLEXPORT_H",
+        "RBIMPL_SYMBOL_EXPORT_BEGIN",
+        "RBIMPL_SYMBOL_EXPORT_END",
+        "RUBY_EXTERN",
+        "RUBY_FUNC_EXPORTED",
+        "RUBY_SYMBOL_EXPORT_BEGIN",
+        "RUBY_SYMBOL_EXPORT_END"
+      ]
+    },
+    "include/ruby/internal/dosish.h": {
+      "checksum": "3f3bd2fe027f2f3fa792682bade93f88ae209f8f7f51f58c0ccfb0d61797578e",
+      "macros": [
+        "CASEFOLD_FILESYSTEM",
+        "DOSISH",
+        "DOSISH_DRIVE_LETTER",
+        "ENV_IGNORECASE",
+        "PATH_ENV",
+        "PATH_SEP",
+        "PATH_SEP_CHAR",
+        "RBIMPL_DOSISH_H"
+      ]
+    },
+    "include/ruby/internal/encoding/coderange.h": {
+      "checksum": "680c24876740a9ab9777d72c21bd084109f381894afca91b8d46dc8f7a5626fc",
+      "macros": [
+        "ENCODING_CODERANGE_SET",
+        "ENC_CODERANGE",
+        "ENC_CODERANGE_7BIT",
+        "ENC_CODERANGE_AND",
+        "ENC_CODERANGE_ASCIIONLY",
+        "ENC_CODERANGE_BROKEN",
+        "ENC_CODERANGE_CLEAN_P",
+        "ENC_CODERANGE_CLEAR",
+        "ENC_CODERANGE_MASK",
+        "ENC_CODERANGE_SET",
+        "ENC_CODERANGE_UNKNOWN",
+        "ENC_CODERANGE_VALID",
+        "RB_ENC_CODERANGE",
+        "RB_ENC_CODERANGE_AND",
+        "RB_ENC_CODERANGE_ASCIIONLY",
+        "RB_ENC_CODERANGE_CLEAN_P",
+        "RB_ENC_CODERANGE_CLEAR",
+        "RB_ENC_CODERANGE_SET",
+        "RUBY_INTERNAL_ENCODING_CODERANGE_H"
+      ]
+    },
+    "include/ruby/internal/encoding/ctype.h": {
+      "checksum": "d990dcae8e394c2133f34231e8deeab3c3d96cac520ca00c62064b400a91c158",
+      "macros": [
+        "RUBY_INTERNAL_ENCODING_CTYPE_H",
+        "rb_enc_is_newline",
+        "rb_enc_isalnum",
+        "rb_enc_isalpha",
+        "rb_enc_isascii",
+        "rb_enc_iscntrl",
+        "rb_enc_isctype",
+        "rb_enc_isdigit",
+        "rb_enc_islower",
+        "rb_enc_isprint",
+        "rb_enc_ispunct",
+        "rb_enc_isspace",
+        "rb_enc_isupper"
+      ]
+    },
+    "include/ruby/internal/encoding/encoding.h": {
+      "checksum": "fa701126c2ada0bc2de8f75fea024e8af0d0d579aeb5b9e6c2f905b771f6d537",
+      "macros": [
+        "ENCODING_GET",
+        "ENCODING_GET_INLINED",
+        "ENCODING_INLINE_MAX",
+        "ENCODING_IS_ASCII8BIT",
+        "ENCODING_MASK",
+        "ENCODING_MAXNAMELEN",
+        "ENCODING_SET",
+        "ENCODING_SET_INLINED",
+        "ENCODING_SHIFT",
+        "MBCLEN_CHARFOUND_LEN",
+        "MBCLEN_CHARFOUND_P",
+        "MBCLEN_INVALID_P",
+        "MBCLEN_NEEDMORE_LEN",
+        "MBCLEN_NEEDMORE_P",
+        "RB_ENCODING_GET",
+        "RB_ENCODING_GET_INLINED",
+        "RB_ENCODING_IS_ASCII8BIT",
+        "RB_ENCODING_SET",
+        "RB_ENCODING_SET_INLINED",
+        "RUBY_INTERNAL_ENCODING_ENCODING_H",
+        "rb_enc_asciicompat",
+        "rb_enc_code_to_mbclen",
+        "rb_enc_codepoint",
+        "rb_enc_left_char_head",
+        "rb_enc_mbc_to_codepoint",
+        "rb_enc_mbcput",
+        "rb_enc_mbmaxlen",
+        "rb_enc_mbminlen",
+        "rb_enc_name",
+        "rb_enc_prev_char",
+        "rb_enc_right_char_head",
+        "rb_enc_step_back",
+        "rb_enc_str_asciicompat_p"
+      ]
+    },
+    "include/ruby/internal/encoding/pathname.h": {
+      "checksum": "5163d755ed8022449ccf43643639f08c017c9794a1d6c4ce71f4b274c7bd1fe4",
+      "macros": [
+        "RUBY_INTERNAL_ENCODING_PATHNAME_H"
+      ]
+    },
+    "include/ruby/internal/encoding/re.h": {
+      "checksum": "07c7f409aa73af90e2ba793f095e0c6b3dd0a17cbfc4445ac87c6f2a5dc9ccf8",
+      "macros": [
+        "RUBY_INTERNAL_ENCODING_RE_H"
+      ]
+    },
+    "include/ruby/internal/encoding/sprintf.h": {
+      "checksum": "2a057e06c7960f46dd585815fa2846dd38f2acca6f3a1cebdee34afd34b09dbd",
+      "macros": [
+        "RUBY_INTERNAL_ENCODING_SPRINTF_H"
+      ]
+    },
+    "include/ruby/internal/encoding/string.h": {
+      "checksum": "bd838db331402a386171219cbe5ef612b1f8a4a715bca32056c3b23f96cd4af4",
+      "macros": [
+        "RUBY_INTERNAL_ENCODING_STRING_H",
+        "rb_enc_str_coderange",
+        "rb_enc_str_new",
+        "rb_enc_str_new_cstr"
+      ]
+    },
+    "include/ruby/internal/encoding/symbol.h": {
+      "checksum": "f92f205ff4b6ac6b778ecd71efbd9d491e7277116b2a36f3252835ff8c9aa9c8",
+      "macros": [
+        "RUBY_INTERNAL_ENCODING_SYMBOL_H"
+      ]
+    },
+    "include/ruby/internal/encoding/transcode.h": {
+      "checksum": "f893e7b1a8b66fb8c2f54ef77f28cc07abbd154224d8b6b406406f72c0b834ed",
+      "macros": [
+        "ECONV_AFTER_OUTPUT",
+        "ECONV_CRLF_NEWLINE_DECORATOR",
+        "ECONV_CR_NEWLINE_DECORATOR",
+        "ECONV_DECORATOR_MASK",
+        "ECONV_DEFAULT_NEWLINE_DECORATOR",
+        "ECONV_ERROR_HANDLER_MASK",
+        "ECONV_INVALID_MASK",
+        "ECONV_INVALID_REPLACE",
+        "ECONV_LF_NEWLINE_DECORATOR",
+        "ECONV_NEWLINE_DECORATOR_MASK",
+        "ECONV_NEWLINE_DECORATOR_READ_MASK",
+        "ECONV_NEWLINE_DECORATOR_WRITE_MASK",
+        "ECONV_PARTIAL_INPUT",
+        "ECONV_STATEFUL_DECORATOR_MASK",
+        "ECONV_UNDEF_HEX_CHARREF",
+        "ECONV_UNDEF_MASK",
+        "ECONV_UNDEF_REPLACE",
+        "ECONV_UNIVERSAL_NEWLINE_DECORATOR",
+        "ECONV_XML_ATTR_CONTENT_DECORATOR",
+        "ECONV_XML_ATTR_QUOTE_DECORATOR",
+        "ECONV_XML_TEXT_DECORATOR",
+        "RUBY_INTERNAL_ENCODING_TRANSCODE_H"
+      ]
+    },
+    "include/ruby/internal/error.h": {
+      "checksum": "f2b82a680c9cc3fcc065ad8281fcb88b3c579eb3e636f77c6fbaa73930c43f77",
+      "macros": [
+        "RBIMPL_ERROR_H",
+        "RB_IO_WAIT_READABLE",
+        "RB_IO_WAIT_WRITABLE",
+        "ruby_debug",
+        "ruby_verbose"
+      ]
+    },
+    "include/ruby/internal/eval.h": {
+      "checksum": "19dc4a5bd207bc00e236b32ea2803258868cafab0d77aceaa968f89b044990ce",
+      "macros": [
+        "RBIMPL_EVAL_H",
+        "rb_funcall2",
+        "rb_funcall3"
+      ]
+    },
+    "include/ruby/internal/event.h": {
+      "checksum": "5421b4983a6399688c716b68b102fa5f2041f02cbee8658ec10228beceb5e519",
+      "macros": [
+        "RBIMPL_EVENT_H",
+        "RB_EVENT_HOOKS_HAVE_CALLBACK_DATA",
+        "RUBY_EVENT_ALL",
+        "RUBY_EVENT_B_CALL",
+        "RUBY_EVENT_B_RETURN",
+        "RUBY_EVENT_CALL",
+        "RUBY_EVENT_CLASS",
+        "RUBY_EVENT_C_CALL",
+        "RUBY_EVENT_C_RETURN",
+        "RUBY_EVENT_END",
+        "RUBY_EVENT_FIBER_SWITCH",
+        "RUBY_EVENT_LINE",
+        "RUBY_EVENT_NONE",
+        "RUBY_EVENT_RAISE",
+        "RUBY_EVENT_RESCUE",
+        "RUBY_EVENT_RESERVED_FOR_INTERNAL_USE",
+        "RUBY_EVENT_RETURN",
+        "RUBY_EVENT_SCRIPT_COMPILED",
+        "RUBY_EVENT_SWITCH",
+        "RUBY_EVENT_THREAD_BEGIN",
+        "RUBY_EVENT_THREAD_END",
+        "RUBY_EVENT_TRACEPOINT_ALL",
+        "RUBY_INTERNAL_EVENT_FREEOBJ",
+        "RUBY_INTERNAL_EVENT_GC_END_MARK",
+        "RUBY_INTERNAL_EVENT_GC_END_SWEEP",
+        "RUBY_INTERNAL_EVENT_GC_ENTER",
+        "RUBY_INTERNAL_EVENT_GC_EXIT",
+        "RUBY_INTERNAL_EVENT_GC_START",
+        "RUBY_INTERNAL_EVENT_MASK",
+        "RUBY_INTERNAL_EVENT_NEWOBJ",
+        "RUBY_INTERNAL_EVENT_OBJSPACE_MASK",
+        "RUBY_INTERNAL_EVENT_SWITCH"
+      ]
+    },
+    "include/ruby/internal/fl_type.h": {
+      "checksum": "f6aec54cd52cd2236f30c6e3a4db9fb0b5ebda5ae03d33bfa693c2aade39bc34",
+      "macros": [
+        "ELTS_SHARED",
+        "FL_ABLE",
+        "FL_ALL",
+        "FL_ALL_RAW",
+        "FL_ANY",
+        "FL_ANY_RAW",
+        "FL_EXIVAR",
+        "FL_FINALIZE",
+        "FL_FREEZE",
+        "FL_PROMOTED",
+        "FL_REVERSE",
+        "FL_REVERSE_RAW",
+        "FL_SET",
+        "FL_SET_RAW",
+        "FL_SHAREABLE",
+        "FL_SINGLETON",
+        "FL_TEST",
+        "FL_TEST_RAW",
+        "FL_UNSET",
+        "FL_UNSET_RAW",
+        "FL_UNTRUSTED",
+        "FL_USER0",
+        "FL_USER1",
+        "FL_USER10",
+        "FL_USER11",
+        "FL_USER12",
+        "FL_USER13",
+        "FL_USER14",
+        "FL_USER15",
+        "FL_USER16",
+        "FL_USER17",
+        "FL_USER18",
+        "FL_USER19",
+        "FL_USER2",
+        "FL_USER3",
+        "FL_USER4",
+        "FL_USER5",
+        "FL_USER6",
+        "FL_USER7",
+        "FL_USER8",
+        "FL_USER9",
+        "FL_USHIFT",
+        "FL_WB_PROTECTED",
+        "OBJ_FREEZE",
+        "OBJ_FREEZE_RAW",
+        "OBJ_FROZEN",
+        "OBJ_FROZEN_RAW",
+        "RBIMPL_FL_TYPE_H",
+        "RBIMPL_FL_USER_N",
+        "RBIMPL_HAVE_ENUM_ATTRIBUTE",
+        "RBIMPL_WIDER_ENUM",
+        "RB_FL_ABLE",
+        "RB_FL_ALL",
+        "RB_FL_ALL_RAW",
+        "RB_FL_ANY",
+        "RB_FL_ANY_RAW",
+        "RB_FL_REVERSE",
+        "RB_FL_REVERSE_RAW",
+        "RB_FL_SET",
+        "RB_FL_SET_RAW",
+        "RB_FL_TEST",
+        "RB_FL_TEST_RAW",
+        "RB_FL_UNSET",
+        "RB_FL_UNSET_RAW",
+        "RB_OBJ_FREEZE",
+        "RB_OBJ_FREEZE_RAW",
+        "RB_OBJ_FROZEN",
+        "RB_OBJ_FROZEN_RAW",
+        "RUBY_ELTS_SHARED",
+        "RUBY_FL_USER19"
+      ]
+    },
+    "include/ruby/internal/gc.h": {
+      "checksum": "582e43a65e1522e2ebd817223036af7d7accfa00c3ee637fbd8cdb7e22e3b512",
+      "macros": [
+        "OBJ_PROMOTED",
+        "OBJ_PROMOTED_RAW",
+        "OBJ_WB_UNPROTECT",
+        "RBIMPL_GC_H",
+        "RB_OBJ_PROMOTED",
+        "RB_OBJ_PROMOTED_RAW",
+        "RB_OBJ_WB_UNPROTECT",
+        "RB_OBJ_WB_UNPROTECT_FOR",
+        "RB_OBJ_WRITE",
+        "RB_OBJ_WRITTEN",
+        "RGENGC_LOGGING_WB_UNPROTECT",
+        "RUBY_REFERENCES",
+        "RUBY_REFERENCES_END",
+        "RUBY_REFERENCES_START",
+        "RUBY_REFS_LIST_PTR",
+        "RUBY_REF_EDGE",
+        "RUBY_REF_END",
+        "USE_RGENGC",
+        "USE_RGENGC_LOGGING_WB_UNPROTECT"
+      ]
+    },
+    "include/ruby/internal/glob.h": {
+      "checksum": "54004fc7fbf360ca82d69f7ac72592a433827b0b8f33a50ab5b51bb7c1c1f658",
+      "macros": [
+        "RBIMPL_GLOB_H"
+      ]
+    },
+    "include/ruby/internal/globals.h": {
+      "checksum": "00f4e42a64f4da937ff87b845002b5f84deb2f134f97b4bbb0bdbeac9b203dca",
+      "macros": [
+        "CLASS_OF",
+        "RBIMPL_GLOBALS_H",
+        "RUBY_INTEGER_UNIFICATION"
+      ]
+    },
+    "include/ruby/internal/has/attribute.h": {
+      "checksum": "90e2d24a2c5f51b31138cd1b283da00699a72161a95a77d0886dff9766c9362a",
+      "macros": [
+        "RBIMPL_HAS_ATTRIBUTE",
+        "RBIMPL_HAS_ATTRIBUTE_H",
+        "RBIMPL_HAS_ATTRIBUTE_alias",
+        "RBIMPL_HAS_ATTRIBUTE_aligned",
+        "RBIMPL_HAS_ATTRIBUTE_alloc_size",
+        "RBIMPL_HAS_ATTRIBUTE_always_inline",
+        "RBIMPL_HAS_ATTRIBUTE_artificial",
+        "RBIMPL_HAS_ATTRIBUTE_cdecl",
+        "RBIMPL_HAS_ATTRIBUTE_cold",
+        "RBIMPL_HAS_ATTRIBUTE_const",
+        "RBIMPL_HAS_ATTRIBUTE_constructor",
+        "RBIMPL_HAS_ATTRIBUTE_deprecated",
+        "RBIMPL_HAS_ATTRIBUTE_destructor",
+        "RBIMPL_HAS_ATTRIBUTE_dllexport",
+        "RBIMPL_HAS_ATTRIBUTE_dllimport",
+        "RBIMPL_HAS_ATTRIBUTE_error",
+        "RBIMPL_HAS_ATTRIBUTE_fastcall",
+        "RBIMPL_HAS_ATTRIBUTE_format",
+        "RBIMPL_HAS_ATTRIBUTE_hot",
+        "RBIMPL_HAS_ATTRIBUTE_leaf",
+        "RBIMPL_HAS_ATTRIBUTE_malloc",
+        "RBIMPL_HAS_ATTRIBUTE_no_address_safety_analysis",
+        "RBIMPL_HAS_ATTRIBUTE_no_sanitize",
+        "RBIMPL_HAS_ATTRIBUTE_no_sanitize_address",
+        "RBIMPL_HAS_ATTRIBUTE_no_sanitize_undefined",
+        "RBIMPL_HAS_ATTRIBUTE_noinline",
+        "RBIMPL_HAS_ATTRIBUTE_nonnull",
+        "RBIMPL_HAS_ATTRIBUTE_noreturn",
+        "RBIMPL_HAS_ATTRIBUTE_nothrow",
+        "RBIMPL_HAS_ATTRIBUTE_optimize",
+        "RBIMPL_HAS_ATTRIBUTE_packed",
+        "RBIMPL_HAS_ATTRIBUTE_pure",
+        "RBIMPL_HAS_ATTRIBUTE_returns_nonnull",
+        "RBIMPL_HAS_ATTRIBUTE_returns_twice",
+        "RBIMPL_HAS_ATTRIBUTE_stdcall",
+        "RBIMPL_HAS_ATTRIBUTE_unused",
+        "RBIMPL_HAS_ATTRIBUTE_vector_size",
+        "RBIMPL_HAS_ATTRIBUTE_visibility",
+        "RBIMPL_HAS_ATTRIBUTE_warn_unused_result",
+        "RBIMPL_HAS_ATTRIBUTE_warning",
+        "RBIMPL_HAS_ATTRIBUTE_weak",
+        "RBIMPL_HAVE___HAS_ATTRIBUTE"
+      ]
+    },
+    "include/ruby/internal/has/builtin.h": {
+      "checksum": "802f3b9185a3004d21eb157d5f1fe95804afab2c1df1ac11ffc562b98f0717e1",
+      "macros": [
+        "RBIMPL_HAS_BUILTIN",
+        "RBIMPL_HAS_BUILTIN_H",
+        "RBIMPL_HAS_BUILTIN___builtin_add_overflow",
+        "RBIMPL_HAS_BUILTIN___builtin_add_overflow_p",
+        "RBIMPL_HAS_BUILTIN___builtin_alloca",
+        "RBIMPL_HAS_BUILTIN___builtin_alloca_with_align",
+        "RBIMPL_HAS_BUILTIN___builtin_assume",
+        "RBIMPL_HAS_BUILTIN___builtin_assume_aligned",
+        "RBIMPL_HAS_BUILTIN___builtin_bswap128",
+        "RBIMPL_HAS_BUILTIN___builtin_bswap16",
+        "RBIMPL_HAS_BUILTIN___builtin_bswap32",
+        "RBIMPL_HAS_BUILTIN___builtin_bswap64",
+        "RBIMPL_HAS_BUILTIN___builtin_clz",
+        "RBIMPL_HAS_BUILTIN___builtin_clzl",
+        "RBIMPL_HAS_BUILTIN___builtin_clzll",
+        "RBIMPL_HAS_BUILTIN___builtin_constant_p",
+        "RBIMPL_HAS_BUILTIN___builtin_ctz",
+        "RBIMPL_HAS_BUILTIN___builtin_ctzl",
+        "RBIMPL_HAS_BUILTIN___builtin_ctzll",
+        "RBIMPL_HAS_BUILTIN___builtin_expect",
+        "RBIMPL_HAS_BUILTIN___builtin_memcpy",
+        "RBIMPL_HAS_BUILTIN___builtin_mul_overflow",
+        "RBIMPL_HAS_BUILTIN___builtin_mul_overflow_p",
+        "RBIMPL_HAS_BUILTIN___builtin_popcount",
+        "RBIMPL_HAS_BUILTIN___builtin_popcountl",
+        "RBIMPL_HAS_BUILTIN___builtin_popcountll",
+        "RBIMPL_HAS_BUILTIN___builtin_rotateleft32",
+        "RBIMPL_HAS_BUILTIN___builtin_rotateleft64",
+        "RBIMPL_HAS_BUILTIN___builtin_rotateright32",
+        "RBIMPL_HAS_BUILTIN___builtin_rotateright64",
+        "RBIMPL_HAS_BUILTIN___builtin_sub_overflow",
+        "RBIMPL_HAS_BUILTIN___builtin_sub_overflow_p",
+        "RBIMPL_HAS_BUILTIN___builtin_unreachable",
+        "RBIMPL_HAVE___HAS_BUILTIN"
+      ]
+    },
+    "include/ruby/internal/has/c_attribute.h": {
+      "checksum": "33e8148ee9acf3bf892536caad70a171fe90480b8619394e979ff6c2c66a5a04",
+      "macros": [
+        "RBIMPL_HAS_C_ATTRIBUTE",
+        "RBIMPL_HAS_C_ATTRIBUTE_H"
+      ]
+    },
+    "include/ruby/internal/has/cpp_attribute.h": {
+      "checksum": "c1c76b29a6c13b096b23718d3522a1db39cb5c3c6922744c0688b93e06f922b3",
+      "macros": [
+        "RBIMPL_HAS_CPP_ATTRIBUTE",
+        "RBIMPL_HAS_CPP_ATTRIBUTE0",
+        "RBIMPL_HAS_CPP_ATTRIBUTE_H",
+        "RBIMPL_HAS_CPP_ATTRIBUTE_carries_dependency",
+        "RBIMPL_HAS_CPP_ATTRIBUTE_deprecated",
+        "RBIMPL_HAS_CPP_ATTRIBUTE_fallthrough",
+        "RBIMPL_HAS_CPP_ATTRIBUTE_maybe_unused",
+        "RBIMPL_HAS_CPP_ATTRIBUTE_nodiscard",
+        "RBIMPL_HAS_CPP_ATTRIBUTE_noreturn"
+      ]
+    },
+    "include/ruby/internal/has/declspec_attribute.h": {
+      "checksum": "f728c050bb814b5905d3d7a91a950325b6ce9ffa8fbb54eab8f76f52a4ee854f",
+      "macros": [
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_H",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_align",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_deprecated",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_dllexport",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_dllimport",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_empty_bases",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_noalias",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_noinline",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_noreturn",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_nothrow",
+        "RBIMPL_HAS_DECLSPEC_ATTRIBUTE_restrict"
+      ]
+    },
+    "include/ruby/internal/has/extension.h": {
+      "checksum": "06596cd9aa6cd062c922a3045992117a315292e4c3876b7aaeca2cc4aa8112ed",
+      "macros": [
+        "RBIMPL_HAS_EXTENSION",
+        "RBIMPL_HAS_EXTENSION_H"
+      ]
+    },
+    "include/ruby/internal/has/feature.h": {
+      "checksum": "045e295f62df1655953f6f5655659b4a8def717f6270623d66112f84dcc940b2",
+      "macros": [
+        "RBIMPL_HAS_FEATURE",
+        "RBIMPL_HAS_FEATURE_H"
+      ]
+    },
+    "include/ruby/internal/has/warning.h": {
+      "checksum": "12c2d916fd118666a444e6d4a7934fad6ec2de3d2c69cd7d1bc86709b3ea5101",
+      "macros": [
+        "RBIMPL_HAS_WARNING",
+        "RBIMPL_HAS_WARNING_H"
+      ]
+    },
+    "include/ruby/internal/intern/array.h": {
+      "checksum": "661617ef6dce03e9d2cb51b17ccfdf8a08c5667aa210cff9a0f5a9c078a21692",
+      "macros": [
+        "RBIMPL_INTERN_ARRAY_H",
+        "rb_ary_new2",
+        "rb_ary_new3",
+        "rb_ary_new4",
+        "rb_ary_tmp_new"
+      ]
+    },
+    "include/ruby/internal/intern/bignum.h": {
+      "checksum": "5c4c943ab015e5c78ec4b6c999c86171ac400cb964b109169ee16c84e64284d7",
+      "macros": [
+        "INTEGER_PACK_2COMP",
+        "INTEGER_PACK_BIG_ENDIAN",
+        "INTEGER_PACK_FORCE_BIGNUM",
+        "INTEGER_PACK_FORCE_GENERIC_IMPLEMENTATION",
+        "INTEGER_PACK_LITTLE_ENDIAN",
+        "INTEGER_PACK_LSBYTE_FIRST",
+        "INTEGER_PACK_LSWORD_FIRST",
+        "INTEGER_PACK_MSBYTE_FIRST",
+        "INTEGER_PACK_MSWORD_FIRST",
+        "INTEGER_PACK_NATIVE_BYTE_ORDER",
+        "INTEGER_PACK_NEGATIVE",
+        "RBIMPL_INTERN_BIGNUM_H",
+        "RB_INT_PARSE_ALL",
+        "RB_INT_PARSE_DEFAULT",
+        "RB_INT_PARSE_PREFIX",
+        "RB_INT_PARSE_SIGN",
+        "RB_INT_PARSE_UNDERSCORE",
+        "rb_big2int",
+        "rb_big2uint"
+      ]
+    },
+    "include/ruby/internal/intern/class.h": {
+      "checksum": "d4d3685fb43db5f4be100281ddc04cbd8cf317693dd77aa94a5b7c76dcaea202",
+      "macros": [
+        "RBIMPL_INTERN_CLASS_H"
+      ]
+    },
+    "include/ruby/internal/intern/compar.h": {
+      "checksum": "e5f70ab16e699ff4c81c0f9e2b8c3e46da809aed44f255918ac92fb57e6ca786",
+      "macros": [
+        "RBIMPL_INTERN_COMPAR_H"
+      ]
+    },
+    "include/ruby/internal/intern/complex.h": {
+      "checksum": "779737e8eeff3147bf75d202897b0fb4b17253ed2ae07265dfb84f3c2f035ba4",
+      "macros": [
+        "RBIMPL_INTERN_COMPLEX_H",
+        "rb_Complex1",
+        "rb_Complex2",
+        "rb_complex_add",
+        "rb_complex_nagate",
+        "rb_complex_new1",
+        "rb_complex_new2",
+        "rb_complex_raw1",
+        "rb_complex_raw2",
+        "rb_complex_sub"
+      ]
+    },
+    "include/ruby/internal/intern/cont.h": {
+      "checksum": "1b128610a7c4c684713eb0aa306b192cf7814201d5b868999270667233554e7d",
+      "macros": [
+        "RBIMPL_INTERN_CONT_H"
+      ]
+    },
+    "include/ruby/internal/intern/dir.h": {
+      "checksum": "8cee9f3c351b2bf19d4529089c14720f9bdad4ee5c38f15d5cba1820b452d3cd",
+      "macros": [
+        "RBIMPL_INTERN_DIR_H"
+      ]
+    },
+    "include/ruby/internal/intern/enum.h": {
+      "checksum": "fdf7122ac808c1d750cd9e6b0c36e392da510f761da4c7be6e11189933380e27",
+      "macros": [
+        "RBIMPL_INTERN_ENUM_H"
+      ]
+    },
+    "include/ruby/internal/intern/enumerator.h": {
+      "checksum": "ebc4e00484b38ff213ab23334855eb74827d5607a62db3589d80a9d210c2dc34",
+      "macros": [
+        "RBIMPL_INTERN_ENUMERATOR_H",
+        "RETURN_ENUMERATOR",
+        "RETURN_ENUMERATOR_KW",
+        "RETURN_SIZED_ENUMERATOR",
+        "RETURN_SIZED_ENUMERATOR_KW",
+        "SIZED_ENUMERATOR",
+        "SIZED_ENUMERATOR_KW",
+        "rb_enumeratorize_with_size",
+        "rb_enumeratorize_with_size_kw"
+      ]
+    },
+    "include/ruby/internal/intern/error.h": {
+      "checksum": "a60266da2e2a54a13f36a90b07ddb9f6e3ad4c099c886b58169348b3f61c4a27",
+      "macros": [
+        "RBIMPL_INTERN_ERROR_H",
+        "UNLIMITED_ARGUMENTS",
+        "rb_check_arity",
+        "rb_check_frozen",
+        "rb_check_frozen_internal",
+        "rb_exc_new2",
+        "rb_exc_new3"
+      ]
+    },
+    "include/ruby/internal/intern/eval.h": {
+      "checksum": "aeae01a0707d9c73f52620f07de80f44639560671dcc32daf37a010428c94f16",
+      "macros": [
+        "RBIMPL_INTERN_EVAL_H"
+      ]
+    },
+    "include/ruby/internal/intern/file.h": {
+      "checksum": "b4505cbf2d246e773cbb612af1cca2b1ffc30c5fbd35184ce492b65eba77a9f0",
+      "macros": [
+        "RBIMPL_INTERN_FILE_H"
+      ]
+    },
+    "include/ruby/internal/intern/hash.h": {
+      "checksum": "179efe8c6fa294e2420ad13b43a56e1fbac2f2f58225ab1ce86396bbeebfa1a2",
+      "macros": [
+        "RBIMPL_INTERN_HASH_H",
+        "st_foreach_safe"
+      ]
+    },
+    "include/ruby/internal/intern/io.h": {
+      "checksum": "b778c1976d68d1243b05370ce1f60512b3401becbf01011d96bbc261f4fa1737",
+      "macros": [
+        "RBIMPL_INTERN_IO_H",
+        "RB_RESERVED_FD_P",
+        "rb_defout"
+      ]
+    },
+    "include/ruby/internal/intern/load.h": {
+      "checksum": "57a3e4ad58819dcc67dc62af4d8547b1bb209c3a1260514eed487783862870b4",
+      "macros": [
+        "HAVE_RB_EXT_RACTOR_SAFE",
+        "HAVE_RB_EXT_RESOLVE_SYMBOL",
+        "RBIMPL_INTERN_LOAD_H",
+        "RB_EXT_RACTOR_SAFE"
+      ]
+    },
+    "include/ruby/internal/intern/marshal.h": {
+      "checksum": "ae5a4b0e965f71c8af8206bce25df4e742bcf123e2b9bfa56a4f0c31c965751d",
+      "macros": [
+        "RBIMPL_INTERN_MARSHAL_H"
+      ]
+    },
+    "include/ruby/internal/intern/numeric.h": {
+      "checksum": "dcc09b7b11e8044440fb131ad704c067420bf30236aa3ee8ec5537005744d2f6",
+      "macros": [
+        "RBIMPL_INTERN_NUMERIC_H",
+        "RB_NUM_COERCE_FUNCS_NEED_OPID"
+      ]
+    },
+    "include/ruby/internal/intern/object.h": {
+      "checksum": "0353912b3e2ccffd40c94344fb5ba042882e08a3267b1fa42e14651c16c51feb",
+      "macros": [
+        "OBJ_INIT_COPY",
+        "RBIMPL_INTERN_OBJECT_H",
+        "RB_OBJ_INIT_COPY"
+      ]
+    },
+    "include/ruby/internal/intern/parse.h": {
+      "checksum": "065be0d9f074d333ce62c24ece465e5744c01435b3a543b7e68d983b8f428216",
+      "macros": [
+        "RBIMPL_INTERN_PARSE_H"
+      ]
+    },
+    "include/ruby/internal/intern/proc.h": {
+      "checksum": "e6b12af9eb74561f5ea440170cf98d4ecd3225eac6fdd9f3a740669392443a4b",
+      "macros": [
+        "RBIMPL_INTERN_PROC_H"
+      ]
+    },
+    "include/ruby/internal/intern/process.h": {
+      "checksum": "ff131a076086a35fce8d9873ef01f9a1352d1de30defacf92ec3ece22fb6e14e",
+      "macros": [
+        "RBIMPL_INTERN_PROCESS_H"
+      ]
+    },
+    "include/ruby/internal/intern/random.h": {
+      "checksum": "d398e1c8196326dfaa4e2fe08ad01cbe695e13679bc1b82c50821179c6cd25f9",
+      "macros": [
+        "RBIMPL_INTERN_RANDOM_H"
+      ]
+    },
+    "include/ruby/internal/intern/range.h": {
+      "checksum": "0c92416cd58a2e80e3d143fee5065695bfb5ed9737edec1f337555543321d08e",
+      "macros": [
+        "RBIMPL_INTERN_RANGE_H"
+      ]
+    },
+    "include/ruby/internal/intern/rational.h": {
+      "checksum": "dea07760b727a29095b4333c19cbe28ac5feba0a68222d51c26f2fe4b7d20863",
+      "macros": [
+        "RBIMPL_INTERN_RATIONAL_H",
+        "rb_Rational1",
+        "rb_Rational2",
+        "rb_rational_new1",
+        "rb_rational_new2",
+        "rb_rational_raw1",
+        "rb_rational_raw2"
+      ]
+    },
+    "include/ruby/internal/intern/re.h": {
+      "checksum": "0986ccd7ca8e69a20cd3dac76ce875c5ffff771c109e547b500051fa15da13dc",
+      "macros": [
+        "HAVE_RB_REG_NEW_STR",
+        "RBIMPL_INTERN_RE_H",
+        "rb_memcmp"
+      ]
+    },
+    "include/ruby/internal/intern/ruby.h": {
+      "checksum": "96ffec59f219726e9ce770f552f732b8c231b864693e9334de7d109cd915c2b7",
+      "macros": [
+        "RBIMPL_INTERN_RUBY_H",
+        "rb_argv"
+      ]
+    },
+    "include/ruby/internal/intern/select.h": {
+      "checksum": "a28729c605eed67a58bf485e95f647f49c94db44a028b96967d4cf0bda5a276c",
+      "macros": [
+        "RBIMPL_INTERN_SELECT_H",
+        "rb_fd_resize"
+      ]
+    },
+    "include/ruby/internal/intern/select/largesize.h": {
+      "checksum": "1a5daec7e4fe20da42ca5afea268f0d8d6eebbb6f257043488b658a8bf97f73f",
+      "macros": [
+        "RBIMPL_INTERN_SELECT_LARGESIZE_H",
+        "rb_fd_max",
+        "rb_fd_ptr"
+      ]
+    },
+    "include/ruby/internal/intern/select/posix.h": {
+      "checksum": "3ef7596626abe660173c4219df7ae52980a9ee06d24457ba765bd2093885f395",
+      "macros": [
+        "RBIMPL_INTERN_SELECT_POSIX_H",
+        "rb_fd_clr",
+        "rb_fd_copy",
+        "rb_fd_dup",
+        "rb_fd_init",
+        "rb_fd_init_copy",
+        "rb_fd_isset",
+        "rb_fd_max",
+        "rb_fd_ptr",
+        "rb_fd_select",
+        "rb_fd_set",
+        "rb_fd_term",
+        "rb_fd_zero"
+      ]
+    },
+    "include/ruby/internal/intern/select/win32.h": {
+      "checksum": "5bf781d8b51825c76840fcf48691f3a6c7858a41f03581c46f845d73c36e230b",
+      "macros": [
+        "RBIMPL_INTERN_SELECT_WIN32_H",
+        "rb_fd_clr",
+        "rb_fd_copy",
+        "rb_fd_dup",
+        "rb_fd_isset",
+        "rb_fd_max",
+        "rb_fd_ptr",
+        "rb_fd_zero"
+      ]
+    },
+    "include/ruby/internal/intern/set.h": {
+      "checksum": "8542176b00f119fd09f2de4dacef9d746b10605e1ba4683a5a20f1cf1f37cf62",
+      "macros": [
+        "RBIMPL_INTERN_SET_H"
+      ]
+    },
+    "include/ruby/internal/intern/signal.h": {
+      "checksum": "f4c12d8fc6fd481cd22bff9c811e6e14335a21a227f946679df4e5769d409c40",
+      "macros": [
+        "RBIMPL_INTERN_SIGNAL_H"
+      ]
+    },
+    "include/ruby/internal/intern/sprintf.h": {
+      "checksum": "4a18eb949ace72cdd3f1c1620e7da807534eaad47ed07298fcc9f9f437c9e63d",
+      "macros": [
+        "RBIMPL_INTERN_SPRINTF_H"
+      ]
+    },
+    "include/ruby/internal/intern/string.h": {
+      "checksum": "92fd0d56f239a55f6b83fa167d1d7c089793f4dd840adc662c464fdc6aca37db",
+      "macros": [
+        "RBIMPL_INTERN_STRING_H",
+        "rb_enc_str_new_lit",
+        "rb_enc_str_new_literal",
+        "rb_exc_new_cstr",
+        "rb_external_str_new_cstr",
+        "rb_hash_end",
+        "rb_hash_uint",
+        "rb_hash_uint32",
+        "rb_locale_str_new_cstr",
+        "rb_str_buf_cat",
+        "rb_str_buf_cat2",
+        "rb_str_buf_new2",
+        "rb_str_buf_new_cstr",
+        "rb_str_cat2",
+        "rb_str_cat_cstr",
+        "rb_str_dup_frozen",
+        "rb_str_new",
+        "rb_str_new2",
+        "rb_str_new3",
+        "rb_str_new4",
+        "rb_str_new5",
+        "rb_str_new_cstr",
+        "rb_str_new_lit",
+        "rb_str_new_literal",
+        "rb_strlen_lit",
+        "rb_usascii_str_new",
+        "rb_usascii_str_new2",
+        "rb_usascii_str_new_cstr",
+        "rb_usascii_str_new_lit",
+        "rb_usascii_str_new_literal",
+        "rb_utf8_str_new",
+        "rb_utf8_str_new_cstr",
+        "rb_utf8_str_new_lit",
+        "rb_utf8_str_new_literal"
+      ]
+    },
+    "include/ruby/internal/intern/struct.h": {
+      "checksum": "113ba74d59b3dc6af3ed416254d5b53205cdb454006748541aa36bdf10decb04",
+      "macros": [
+        "RBIMPL_INTERN_STRUCT_H"
+      ]
+    },
+    "include/ruby/internal/intern/thread.h": {
+      "checksum": "607adc1dd4566c4defb5748146fda688ac55702e27e04781e904e1d78f65f700",
+      "macros": [
+        "RBIMPL_INTERN_THREAD_H",
+        "RUBY_UBF_IO",
+        "RUBY_UBF_PROCESS"
+      ]
+    },
+    "include/ruby/internal/intern/time.h": {
+      "checksum": "4b2ae5abc81dceed835ae9d12a39de5acb161490ca5619a001b40304a8579156",
+      "macros": [
+        "RBIMPL_INTERN_TIME_H"
+      ]
+    },
+    "include/ruby/internal/intern/variable.h": {
+      "checksum": "fa5cd1e4a7eb265b520e963038ff6b0e8850589d47252e5696489087fea7cebc",
+      "macros": [
+        "RBIMPL_INTERN_VARIABLE_H"
+      ]
+    },
+    "include/ruby/internal/intern/vm.h": {
+      "checksum": "51902a820f768d9340f5f834375383497f46c85b37740c024d46cddec22450c1",
+      "macros": [
+        "HAVE_RB_DEFINE_ALLOC_FUNC",
+        "RBIMPL_INTERN_VM_H",
+        "rb_f_notimplement"
+      ]
+    },
+    "include/ruby/internal/interpreter.h": {
+      "checksum": "f16d15194289299ca32a79a224914f98a0aec21605e884e45a23e470f8d5c7d0",
+      "macros": [
+        "RBIMPL_INTERPRETER_H",
+        "RUBY_INIT_STACK"
+      ]
+    },
+    "include/ruby/internal/iterator.h": {
+      "checksum": "775cec9055bae84bf282f6af5fa234da939ff8e0ffdc7f0487022c5e52dcba66",
+      "macros": [
+        "RBIMPL_ITERATOR_H",
+        "RB_BLOCK_CALL_FUNC_ARGLIST",
+        "RB_BLOCK_CALL_FUNC_STRICT",
+        "RUBY_BLOCK_CALL_FUNC_TAKES_BLOCKARG"
+      ]
+    },
+    "include/ruby/internal/memory.h": {
+      "checksum": "47600d9f140525043ea46434c5e0c272c4c98c8f56f2af5fff3f23f9ef264e97",
+      "macros": [
+        "ALLOC",
+        "ALLOCA_N",
+        "ALLOCV",
+        "ALLOCV_END",
+        "ALLOCV_N",
+        "ALLOC_N",
+        "DSIZE_T",
+        "HAVE_RB_GC_GUARDED_PTR_VAL",
+        "MEMCMP",
+        "MEMCPY",
+        "MEMMOVE",
+        "MEMZERO",
+        "RBIMPL_MEMORY_H",
+        "RB_ALLOC",
+        "RB_ALLOCV",
+        "RB_ALLOCV_END",
+        "RB_ALLOCV_N",
+        "RB_ALLOC_N",
+        "RB_GC_GUARD",
+        "RB_REALLOC_N",
+        "RB_ZALLOC",
+        "RB_ZALLOC_N",
+        "REALLOC_N",
+        "RUBY_ALLOCV_LIMIT",
+        "ZALLOC",
+        "ZALLOC_N",
+        "alloca"
+      ]
+    },
+    "include/ruby/internal/method.h": {
+      "checksum": "cd187ed3be2c722b0cea47677097138556cfed8d8bccca06a53513d58c6d9f01",
+      "macros": [
+        "RBIMPL_METHOD_H"
+      ]
+    },
+    "include/ruby/internal/module.h": {
+      "checksum": "ecaa1eecfa1681bf027db004e65191cc165066c6321f50b0044d402032b493f3",
+      "macros": [
+        "RBIMPL_MODULE_H",
+        "rb_define_class",
+        "rb_define_class_under",
+        "rb_define_module",
+        "rb_define_module_under"
+      ]
+    },
+    "include/ruby/internal/newobj.h": {
+      "checksum": "76c8fa34686a4a2c785a72f627e45f9b803ceb2cbe16f54006339625f8990d85",
+      "macros": [
+        "CLONESETUP",
+        "DUPSETUP",
+        "OBJSETUP",
+        "RBIMPL_NEWOBJ_H"
+      ]
+    },
+    "include/ruby/internal/scan_args.h": {
+      "checksum": "8b83d5cafe9ef51b8efbac31d41d59ec8118f79477e946c80243ac5524662771",
+      "macros": [
+        "HAVE_RB_SCAN_ARGS_OPTIONAL_HASH",
+        "RBIMPL_SCAN_ARGS_H",
+        "RB_NO_KEYWORDS",
+        "RB_PASS_CALLED_KEYWORDS",
+        "RB_PASS_KEYWORDS",
+        "RB_SCAN_ARGS_KEYWORDS",
+        "RB_SCAN_ARGS_LAST_HASH_KEYWORDS",
+        "RB_SCAN_ARGS_PASS_CALLED_KEYWORDS",
+        "rb_scan_args",
+        "rb_scan_args0",
+        "rb_scan_args_count",
+        "rb_scan_args_count_block",
+        "rb_scan_args_count_end",
+        "rb_scan_args_count_hash",
+        "rb_scan_args_count_lead",
+        "rb_scan_args_count_opt",
+        "rb_scan_args_count_trail",
+        "rb_scan_args_count_var",
+        "rb_scan_args_isdigit",
+        "rb_scan_args_kw",
+        "rb_scan_args_kw0",
+        "rb_scan_args_next_param",
+        "rb_scan_args_verify"
+      ]
+    },
+    "include/ruby/internal/special_consts.h": {
+      "checksum": "1dcbc5510fa10eb2740e42eacf0a062a37d49c4f69aaef0de50d4a99aba9e5a4",
+      "macros": [
+        "FIXNUM_FLAG",
+        "FIXNUM_P",
+        "FLONUM_FLAG",
+        "FLONUM_MASK",
+        "FLONUM_P",
+        "IMMEDIATE_MASK",
+        "IMMEDIATE_P",
+        "NIL_P",
+        "Qfalse",
+        "Qnil",
+        "Qtrue",
+        "Qundef",
+        "RBIMPL_SPECIAL_CONSTS_H",
+        "RB_FIXNUM_P",
+        "RB_FLONUM_P",
+        "RB_IMMEDIATE_P",
+        "RB_NIL_OR_UNDEF_P",
+        "RB_NIL_P",
+        "RB_SPECIAL_CONST_P",
+        "RB_STATIC_SYM_P",
+        "RB_TEST",
+        "RB_UNDEF_P",
+        "RTEST",
+        "RUBY_Qfalse",
+        "RUBY_Qnil",
+        "RUBY_Qtrue",
+        "RUBY_Qundef",
+        "SPECIAL_CONST_P",
+        "STATIC_SYM_P",
+        "SYMBOL_FLAG",
+        "USE_FLONUM"
+      ]
+    },
+    "include/ruby/internal/static_assert.h": {
+      "checksum": "9d5d6c0f0975c3ba50b608d5aeba5461d5cc5236d9cac665bc615e3ce3809ad1",
+      "macros": [
+        "RBIMPL_STATIC_ASSERT",
+        "RBIMPL_STATIC_ASSERT0",
+        "RBIMPL_STATIC_ASSERT_H"
+      ]
+    },
+    "include/ruby/internal/stdalign.h": {
+      "checksum": "0498fd31b954a4fe361eda85b6c85ad2bfb5f84db3348dc2a886bcf4d90d9773",
+      "macros": [
+        "RBIMPL_ALIGNAS",
+        "RBIMPL_ALIGNOF",
+        "RBIMPL_STDALIGN_H"
+      ]
+    },
+    "include/ruby/internal/stdbool.h": {
+      "checksum": "96adfc1d43ecbd1652eba22dfc1214f85dd8aa88050b2b909d321db818565a36",
+      "macros": [
+        "RBIMPL_STDBOOL_H",
+        "__bool_true_false_are_defined"
+      ]
+    },
+    "include/ruby/internal/stdckdint.h": {
+      "checksum": "445d8d1b73cbb23ec0ed51d505562e29c9af6f13b3ab8ec761d11482fc205fc6",
+      "macros": [
+        "RBIMPL_HAVE_STDCKDINT_H",
+        "RBIMPL_STDCKDINT_H",
+        "__STDC_VERSION_STDCKDINT_H__",
+        "ckd_add",
+        "ckd_mul",
+        "ckd_sub"
+      ]
+    },
+    "include/ruby/internal/symbol.h": {
+      "checksum": "c3bf5b1c33ac1532e6dbe05eabf3d393ab8b27dc401e883799a33fdb7bbfab24",
+      "macros": [
+        "CONST_ID",
+        "CONST_ID_CACHE",
+        "ID2SYM",
+        "RBIMPL_SYMBOL_H",
+        "RB_ID2SYM",
+        "RB_SYM2ID",
+        "RUBY_CONST_ID",
+        "RUBY_CONST_ID_CACHE",
+        "SYM2ID",
+        "rb_intern",
+        "rb_intern_const"
+      ]
+    },
+    "include/ruby/internal/value.h": {
+      "checksum": "8063e3f2306d5b910452450a2f7df68faef8f56d518c64029477d6642b14dd5e",
+      "macros": [
+        "LONG_LONG_VALUE",
+        "PRI_VALUE_PREFIX",
+        "RBIMPL_VALUE_FULL",
+        "RBIMPL_VALUE_H",
+        "RBIMPL_VALUE_NULL",
+        "RBIMPL_VALUE_ONE",
+        "SIGNED_VALUE",
+        "SIZEOF_VALUE"
+      ]
+    },
+    "include/ruby/internal/value_type.h": {
+      "checksum": "07f9568ae18a45dd6fbaeab5306d4397bd2591845a7ce2566c3812fd78d2b221",
+      "macros": [
+        "BUILTIN_TYPE",
+        "Check_Type",
+        "DYNAMIC_SYM_P",
+        "RBIMPL_ASSERT_TYPE",
+        "RBIMPL_VALUE_TYPE_H",
+        "RB_BUILTIN_TYPE",
+        "RB_DYNAMIC_SYM_P",
+        "RB_FLOAT_TYPE_P",
+        "RB_INTEGER_TYPE_P",
+        "RB_SYMBOL_P",
+        "RB_TYPE_P",
+        "SYMBOL_P",
+        "TYPE",
+        "T_ARRAY",
+        "T_BIGNUM",
+        "T_CLASS",
+        "T_COMPLEX",
+        "T_DATA",
+        "T_FALSE",
+        "T_FILE",
+        "T_FIXNUM",
+        "T_FLOAT",
+        "T_HASH",
+        "T_ICLASS",
+        "T_IMEMO",
+        "T_MASK",
+        "T_MATCH",
+        "T_MODULE",
+        "T_MOVED",
+        "T_NIL",
+        "T_NODE",
+        "T_NONE",
+        "T_OBJECT",
+        "T_RATIONAL",
+        "T_REGEXP",
+        "T_STRING",
+        "T_STRUCT",
+        "T_SYMBOL",
+        "T_TRUE",
+        "T_UNDEF",
+        "T_ZOMBIE",
+        "rb_integer_type_p",
+        "rb_type_p"
+      ]
+    },
+    "include/ruby/internal/variable.h": {
+      "checksum": "4ba29a7e1ed428df28b0571efc204fc60d767a4ba3ceff9446ebf7ff966b1f5c",
+      "macros": [
+        "RBIMPL_VARIABLE_H"
+      ]
+    },
+    "include/ruby/internal/warning_push.h": {
+      "checksum": "6ddb3025df65144803518134f7eb8e5676d77b4e628ba464e76650c419c7496d",
+      "macros": [
+        "RBIMPL_WARNING_ERROR",
+        "RBIMPL_WARNING_IGNORED",
+        "RBIMPL_WARNING_POP",
+        "RBIMPL_WARNING_PRAGMA0",
+        "RBIMPL_WARNING_PRAGMA1",
+        "RBIMPL_WARNING_PRAGMA2",
+        "RBIMPL_WARNING_PUSH",
+        "RBIMPL_WARNING_PUSH_H"
+      ]
+    },
+    "include/ruby/internal/xmalloc.h": {
+      "checksum": "935e17eaf7c918d8ae5c79ba024d1c38e091fc8d73e214518936e4ff6e4d0501",
+      "macros": [
+        "RBIMPL_XMALLOC_H",
+        "USE_GC_MALLOC_OBJ_INFO_DETAILS",
+        "xcalloc",
+        "xfree",
+        "xfree_sized",
+        "xmalloc",
+        "xmalloc2",
+        "xrealloc",
+        "xrealloc2",
+        "xrealloc2_sized",
+        "xrealloc_sized"
+      ]
+    },
+    "include/ruby/io.h": {
+      "checksum": "0368366d9caa063b65095058c9248dbe1f6299647ac4df316cfa3b3c2421df8c",
+      "macros": [
+        "FMODE_APPEND",
+        "FMODE_BINMODE",
+        "FMODE_CREATE",
+        "FMODE_DUPLEX",
+        "FMODE_EXCL",
+        "FMODE_EXTERNAL",
+        "FMODE_READABLE",
+        "FMODE_READWRITE",
+        "FMODE_SETENC_BY_BOM",
+        "FMODE_SYNC",
+        "FMODE_TEXTMODE",
+        "FMODE_TRUNC",
+        "FMODE_TTY",
+        "FMODE_WRITABLE",
+        "GetOpenFile",
+        "HAVE_RB_IO_T",
+        "MakeOpenFile",
+        "RB_IO_OPEN",
+        "RB_IO_POINTER",
+        "RB_WAITFD_IN",
+        "RB_WAITFD_OUT",
+        "RB_WAITFD_PRI",
+        "RUBY_IO_H",
+        "RUBY_IO_TIMEOUT_DEFAULT",
+        "RUBY_IO_WAIT_METHODS",
+        "RUBY_USE_STATX",
+        "rb_io_mode_flags",
+        "rb_io_modenum_flags",
+        "rb_statx_new",
+        "reqevents",
+        "rtnevents"
+      ]
+    },
+    "include/ruby/io/buffer.h": {
+      "checksum": "a611c3538b7d9879ad8b34132c153043c7dd0aefbe528cc3d1d912e7a411a890",
+      "macros": [
+        "RB_IO_BUFFER_EXPERIMENTAL",
+        "RUBY_IO_BUFFER_H",
+        "RUBY_IO_BUFFER_VERSION"
+      ]
+    },
+    "include/ruby/memory_view.h": {
+      "checksum": "cd9895db40dde9e7afa215cb586678676f71043e991b15fd8a7d58fd0d122ffa",
+      "macros": [
+        "RUBY_MEMORY_VIEW_H"
+      ]
+    },
+    "include/ruby/missing.h": {
+      "checksum": "9ebe01ba336d3d3262bee5872bd634e1ae5ed131e0c11682c1a9693addbcd227",
+      "macros": [
+        "HAVE_FINITE",
+        "HAVE_WAITPID",
+        "HUGE_VAL",
+        "INFINITY",
+        "M_PI",
+        "M_PI_2",
+        "NAN",
+        "RUBY_MISSING_H",
+        "USE_RB_INFINITY",
+        "USE_RB_NAN",
+        "WNOHANG",
+        "explicit_bzero",
+        "finite"
+      ]
+    },
+    "include/ruby/onigmo.h": {
+      "checksum": "ffbf0f6cbcde2edef6135ee68d33ef0c295dfc517484f610a95a5bc2d44a63a3",
+      "macros": [
+        "INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR",
+        "ONIGENC_APPLY_ALL_CASE_FOLD",
+        "ONIGENC_CASE_ASCII_ONLY",
+        "ONIGENC_CASE_DOWNCASE",
+        "ONIGENC_CASE_DOWN_SPECIAL",
+        "ONIGENC_CASE_FOLD",
+        "ONIGENC_CASE_FOLD_DEFAULT",
+        "ONIGENC_CASE_FOLD_LITHUANIAN",
+        "ONIGENC_CASE_FOLD_MIN",
+        "ONIGENC_CASE_FOLD_TURKISH_AZERI",
+        "ONIGENC_CASE_IS_TITLECASE",
+        "ONIGENC_CASE_MODIFIED",
+        "ONIGENC_CASE_SPECIAL_OFFSET",
+        "ONIGENC_CASE_TITLECASE",
+        "ONIGENC_CASE_UPCASE",
+        "ONIGENC_CASE_UP_SPECIAL",
+        "ONIGENC_CODE_RANGE_FROM",
+        "ONIGENC_CODE_RANGE_NUM",
+        "ONIGENC_CODE_RANGE_TO",
+        "ONIGENC_CODE_TO_MBC",
+        "ONIGENC_CODE_TO_MBCLEN",
+        "ONIGENC_CODE_TO_MBC_MAXLEN",
+        "ONIGENC_CONSTRUCT_MBCLEN_CHARFOUND",
+        "ONIGENC_CONSTRUCT_MBCLEN_INVALID",
+        "ONIGENC_CONSTRUCT_MBCLEN_NEEDMORE",
+        "ONIGENC_CTYPE_ALNUM",
+        "ONIGENC_CTYPE_ALPHA",
+        "ONIGENC_CTYPE_ASCII",
+        "ONIGENC_CTYPE_BLANK",
+        "ONIGENC_CTYPE_CNTRL",
+        "ONIGENC_CTYPE_DIGIT",
+        "ONIGENC_CTYPE_GRAPH",
+        "ONIGENC_CTYPE_LOWER",
+        "ONIGENC_CTYPE_NEWLINE",
+        "ONIGENC_CTYPE_PRINT",
+        "ONIGENC_CTYPE_PUNCT",
+        "ONIGENC_CTYPE_SPACE",
+        "ONIGENC_CTYPE_UPPER",
+        "ONIGENC_CTYPE_WORD",
+        "ONIGENC_CTYPE_XDIGIT",
+        "ONIGENC_FLAG_NONE",
+        "ONIGENC_FLAG_UNICODE",
+        "ONIGENC_GET_CASE_FOLD_CODES_BY_STR",
+        "ONIGENC_GET_CASE_FOLD_CODES_MAX_NUM",
+        "ONIGENC_GET_CTYPE_CODE_RANGE",
+        "ONIGENC_IS_ALLOWED_REVERSE_MATCH",
+        "ONIGENC_IS_CODE_ALNUM",
+        "ONIGENC_IS_CODE_ALPHA",
+        "ONIGENC_IS_CODE_ASCII",
+        "ONIGENC_IS_CODE_BLANK",
+        "ONIGENC_IS_CODE_CNTRL",
+        "ONIGENC_IS_CODE_CTYPE",
+        "ONIGENC_IS_CODE_DIGIT",
+        "ONIGENC_IS_CODE_GRAPH",
+        "ONIGENC_IS_CODE_LOWER",
+        "ONIGENC_IS_CODE_NEWLINE",
+        "ONIGENC_IS_CODE_PRINT",
+        "ONIGENC_IS_CODE_PUNCT",
+        "ONIGENC_IS_CODE_SPACE",
+        "ONIGENC_IS_CODE_UPPER",
+        "ONIGENC_IS_CODE_WORD",
+        "ONIGENC_IS_CODE_XDIGIT",
+        "ONIGENC_IS_MBC_ASCII",
+        "ONIGENC_IS_MBC_ASCII_WORD",
+        "ONIGENC_IS_MBC_HEAD",
+        "ONIGENC_IS_MBC_NEWLINE",
+        "ONIGENC_IS_MBC_WORD",
+        "ONIGENC_IS_SINGLEBYTE",
+        "ONIGENC_IS_UNDEF",
+        "ONIGENC_IS_UNICODE",
+        "ONIGENC_LEFT_ADJUST_CHAR_HEAD",
+        "ONIGENC_MAX_COMP_CASE_FOLD_CODE_LEN",
+        "ONIGENC_MAX_STD_CTYPE",
+        "ONIGENC_MBCLEN_CHARFOUND_LEN",
+        "ONIGENC_MBCLEN_CHARFOUND_P",
+        "ONIGENC_MBCLEN_INVALID_P",
+        "ONIGENC_MBCLEN_NEEDMORE_LEN",
+        "ONIGENC_MBCLEN_NEEDMORE_P",
+        "ONIGENC_MBC_CASE_FOLD",
+        "ONIGENC_MBC_CASE_FOLD_MAXLEN",
+        "ONIGENC_MBC_ENC_LEN",
+        "ONIGENC_MBC_MAXLEN",
+        "ONIGENC_MBC_MAXLEN_DIST",
+        "ONIGENC_MBC_MINLEN",
+        "ONIGENC_MBC_TO_CODE",
+        "ONIGENC_NAME",
+        "ONIGENC_PRECISE_MBC_ENC_LEN",
+        "ONIGENC_PROPERTY_NAME_TO_CTYPE",
+        "ONIGENC_STEP_BACK",
+        "ONIGERR_CHAR_CLASS_VALUE_AT_END_OF_RANGE",
+        "ONIGERR_CHAR_CLASS_VALUE_AT_START_OF_RANGE",
+        "ONIGERR_CONTROL_CODE_SYNTAX",
+        "ONIGERR_DEFAULT_ENCODING_IS_NOT_SET",
+        "ONIGERR_EMPTY_CHAR_CLASS",
+        "ONIGERR_EMPTY_GROUP_NAME",
+        "ONIGERR_EMPTY_RANGE_IN_CHAR_CLASS",
+        "ONIGERR_END_PATTERN_AT_CONTROL",
+        "ONIGERR_END_PATTERN_AT_ESCAPE",
+        "ONIGERR_END_PATTERN_AT_LEFT_BRACE",
+        "ONIGERR_END_PATTERN_AT_LEFT_BRACKET",
+        "ONIGERR_END_PATTERN_AT_META",
+        "ONIGERR_END_PATTERN_IN_GROUP",
+        "ONIGERR_END_PATTERN_WITH_UNMATCHED_PARENTHESIS",
+        "ONIGERR_GROUP_NUMBER_OVER_FOR_CAPTURE_HISTORY",
+        "ONIGERR_INVALID_ARGUMENT",
+        "ONIGERR_INVALID_BACKREF",
+        "ONIGERR_INVALID_CHAR_IN_GROUP_NAME",
+        "ONIGERR_INVALID_CHAR_PROPERTY_NAME",
+        "ONIGERR_INVALID_CODE_POINT_VALUE",
+        "ONIGERR_INVALID_COMBINATION_OF_OPTIONS",
+        "ONIGERR_INVALID_CONDITION_PATTERN",
+        "ONIGERR_INVALID_GROUP_NAME",
+        "ONIGERR_INVALID_LOOK_BEHIND_PATTERN",
+        "ONIGERR_INVALID_POSIX_BRACKET_TYPE",
+        "ONIGERR_INVALID_REPEAT_RANGE_PATTERN",
+        "ONIGERR_INVALID_WIDE_CHAR_VALUE",
+        "ONIGERR_MATCH_STACK_LIMIT_OVER",
+        "ONIGERR_MEMORY",
+        "ONIGERR_META_CODE_SYNTAX",
+        "ONIGERR_MISMATCH_CODE_LENGTH_IN_CLASS_RANGE",
+        "ONIGERR_MULTIPLEX_DEFINED_NAME",
+        "ONIGERR_MULTIPLEX_DEFINITION_NAME_CALL",
+        "ONIGERR_NESTED_REPEAT_OPERATOR",
+        "ONIGERR_NEVER_ENDING_RECURSION",
+        "ONIGERR_NOT_SUPPORTED_ENCODING_COMBINATION",
+        "ONIGERR_NUMBERED_BACKREF_OR_CALL_NOT_ALLOWED",
+        "ONIGERR_PARSER_BUG",
+        "ONIGERR_PARSE_DEPTH_LIMIT_OVER",
+        "ONIGERR_PREMATURE_END_OF_CHAR_CLASS",
+        "ONIGERR_SPECIFIED_ENCODING_CANT_CONVERT_TO_WIDE_CHAR",
+        "ONIGERR_STACK_BUG",
+        "ONIGERR_TARGET_OF_REPEAT_OPERATOR_INVALID",
+        "ONIGERR_TARGET_OF_REPEAT_OPERATOR_NOT_SPECIFIED",
+        "ONIGERR_TIMEOUT",
+        "ONIGERR_TOO_BIG_BACKREF_NUMBER",
+        "ONIGERR_TOO_BIG_COMPILED_PROGRAM",
+        "ONIGERR_TOO_BIG_NUMBER",
+        "ONIGERR_TOO_BIG_NUMBER_FOR_REPEAT_RANGE",
+        "ONIGERR_TOO_BIG_WIDE_CHAR_VALUE",
+        "ONIGERR_TOO_LONG_WIDE_CHAR_VALUE",
+        "ONIGERR_TOO_MANY_CAPTURE_GROUPS",
+        "ONIGERR_TOO_MANY_MULTI_BYTE_RANGES",
+        "ONIGERR_TOO_MANY_NULL_CHECK",
+        "ONIGERR_TOO_MANY_RANGE_REPEAT",
+        "ONIGERR_TOO_SHORT_DIGITS",
+        "ONIGERR_TOO_SHORT_MULTI_BYTE_STRING",
+        "ONIGERR_TYPE_BUG",
+        "ONIGERR_UNDEFINED_BYTECODE",
+        "ONIGERR_UNDEFINED_GROUP_OPTION",
+        "ONIGERR_UNDEFINED_GROUP_REFERENCE",
+        "ONIGERR_UNDEFINED_NAME_REFERENCE",
+        "ONIGERR_UNEXPECTED_BYTECODE",
+        "ONIGERR_UNMATCHED_CLOSE_PARENTHESIS",
+        "ONIGERR_UNMATCHED_RANGE_SPECIFIER_IN_CHAR_CLASS",
+        "ONIGERR_UPPER_SMALLER_THAN_LOWER_IN_REPEAT_RANGE",
+        "ONIGMO_H",
+        "ONIGMO_VERSION_MAJOR",
+        "ONIGMO_VERSION_MINOR",
+        "ONIGMO_VERSION_TEENY",
+        "ONIG_CHAR_TABLE_SIZE",
+        "ONIG_ENCODING_ASCII",
+        "ONIG_ENCODING_BIG5",
+        "ONIG_ENCODING_CP1250",
+        "ONIG_ENCODING_CP1251",
+        "ONIG_ENCODING_CP1252",
+        "ONIG_ENCODING_CP1253",
+        "ONIG_ENCODING_CP1254",
+        "ONIG_ENCODING_CP1257",
+        "ONIG_ENCODING_CP932",
+        "ONIG_ENCODING_EUC_CN",
+        "ONIG_ENCODING_EUC_JP",
+        "ONIG_ENCODING_EUC_KR",
+        "ONIG_ENCODING_EUC_TW",
+        "ONIG_ENCODING_GB18030",
+        "ONIG_ENCODING_ISO_8859_1",
+        "ONIG_ENCODING_ISO_8859_10",
+        "ONIG_ENCODING_ISO_8859_11",
+        "ONIG_ENCODING_ISO_8859_13",
+        "ONIG_ENCODING_ISO_8859_14",
+        "ONIG_ENCODING_ISO_8859_15",
+        "ONIG_ENCODING_ISO_8859_16",
+        "ONIG_ENCODING_ISO_8859_2",
+        "ONIG_ENCODING_ISO_8859_3",
+        "ONIG_ENCODING_ISO_8859_4",
+        "ONIG_ENCODING_ISO_8859_5",
+        "ONIG_ENCODING_ISO_8859_6",
+        "ONIG_ENCODING_ISO_8859_7",
+        "ONIG_ENCODING_ISO_8859_8",
+        "ONIG_ENCODING_ISO_8859_9",
+        "ONIG_ENCODING_KOI8_R",
+        "ONIG_ENCODING_KOI8_U",
+        "ONIG_ENCODING_SHIFT_JIS",
+        "ONIG_ENCODING_SJIS",
+        "ONIG_ENCODING_UNDEF",
+        "ONIG_ENCODING_UTF16_BE",
+        "ONIG_ENCODING_UTF16_LE",
+        "ONIG_ENCODING_UTF32_BE",
+        "ONIG_ENCODING_UTF32_LE",
+        "ONIG_ENCODING_UTF8",
+        "ONIG_ENCODING_UTF_16BE",
+        "ONIG_ENCODING_UTF_16LE",
+        "ONIG_ENCODING_UTF_32BE",
+        "ONIG_ENCODING_UTF_32LE",
+        "ONIG_ENCODING_UTF_8",
+        "ONIG_ENCODING_WINDOWS_1250",
+        "ONIG_ENCODING_WINDOWS_1251",
+        "ONIG_ENCODING_WINDOWS_1252",
+        "ONIG_ENCODING_WINDOWS_1253",
+        "ONIG_ENCODING_WINDOWS_1254",
+        "ONIG_ENCODING_WINDOWS_1257",
+        "ONIG_ENCODING_WINDOWS_31J",
+        "ONIG_EXTERN",
+        "ONIG_INEFFECTIVE_META_CHAR",
+        "ONIG_INFINITE_DISTANCE",
+        "ONIG_IS_CAPTURE_HISTORY_GROUP",
+        "ONIG_IS_OPTION_ON",
+        "ONIG_IS_PATTERN_ERROR",
+        "ONIG_MAX_BACKREF_NUM",
+        "ONIG_MAX_CAPTURE_GROUP_NUM",
+        "ONIG_MAX_CAPTURE_HISTORY_GROUP",
+        "ONIG_MAX_ERROR_MESSAGE_LEN",
+        "ONIG_MAX_MULTI_BYTE_RANGES_NUM",
+        "ONIG_MAX_REPEAT_NUM",
+        "ONIG_META_CHAR_ANYCHAR",
+        "ONIG_META_CHAR_ANYCHAR_ANYTIME",
+        "ONIG_META_CHAR_ANYTIME",
+        "ONIG_META_CHAR_ESCAPE",
+        "ONIG_META_CHAR_ONE_OR_MORE_TIME",
+        "ONIG_META_CHAR_ZERO_OR_ONE_TIME",
+        "ONIG_MISMATCH",
+        "ONIG_NORMAL",
+        "ONIG_NO_SUPPORT_CONFIG",
+        "ONIG_NREGION",
+        "ONIG_NULL_WARN",
+        "ONIG_OPTION_ASCII_RANGE",
+        "ONIG_OPTION_CAPTURE_GROUP",
+        "ONIG_OPTION_DEFAULT",
+        "ONIG_OPTION_DONT_CAPTURE_GROUP",
+        "ONIG_OPTION_DOTALL",
+        "ONIG_OPTION_EXTEND",
+        "ONIG_OPTION_FIND_LONGEST",
+        "ONIG_OPTION_FIND_NOT_EMPTY",
+        "ONIG_OPTION_IGNORECASE",
+        "ONIG_OPTION_MAXBIT",
+        "ONIG_OPTION_MULTILINE",
+        "ONIG_OPTION_NEGATE_SINGLELINE",
+        "ONIG_OPTION_NEWLINE_CRLF",
+        "ONIG_OPTION_NONE",
+        "ONIG_OPTION_NOTBOL",
+        "ONIG_OPTION_NOTBOS",
+        "ONIG_OPTION_NOTEOL",
+        "ONIG_OPTION_NOTEOS",
+        "ONIG_OPTION_OFF",
+        "ONIG_OPTION_ON",
+        "ONIG_OPTION_POSIX_BRACKET_ALL_RANGE",
+        "ONIG_OPTION_SINGLELINE",
+        "ONIG_OPTION_WORD_BOUND_ALL_RANGE",
+        "ONIG_REGION_NOTPOS",
+        "ONIG_SYNTAX_ASIS",
+        "ONIG_SYNTAX_DEFAULT",
+        "ONIG_SYNTAX_EMACS",
+        "ONIG_SYNTAX_GNU_REGEX",
+        "ONIG_SYNTAX_GREP",
+        "ONIG_SYNTAX_JAVA",
+        "ONIG_SYNTAX_PERL",
+        "ONIG_SYNTAX_PERL58",
+        "ONIG_SYNTAX_PERL58_NG",
+        "ONIG_SYNTAX_POSIX_BASIC",
+        "ONIG_SYNTAX_POSIX_EXTENDED",
+        "ONIG_SYNTAX_PYTHON",
+        "ONIG_SYNTAX_RUBY",
+        "ONIG_SYN_ALLOW_DOUBLE_RANGE_OP_IN_CC",
+        "ONIG_SYN_ALLOW_EMPTY_RANGE_IN_CC",
+        "ONIG_SYN_ALLOW_INTERVAL_LOW_ABBREV",
+        "ONIG_SYN_ALLOW_INVALID_INTERVAL",
+        "ONIG_SYN_ALLOW_MULTIPLEX_DEFINITION_NAME",
+        "ONIG_SYN_ALLOW_MULTIPLEX_DEFINITION_NAME_CALL",
+        "ONIG_SYN_ALLOW_UNMATCHED_CLOSE_SUBEXP",
+        "ONIG_SYN_BACKSLASH_ESCAPE_IN_CC",
+        "ONIG_SYN_CAPTURE_ONLY_NAMED_GROUP",
+        "ONIG_SYN_CONTEXT_INDEP_ANCHORS",
+        "ONIG_SYN_CONTEXT_INDEP_REPEAT_OPS",
+        "ONIG_SYN_CONTEXT_INVALID_REPEAT_OPS",
+        "ONIG_SYN_DIFFERENT_LEN_ALT_LOOK_BEHIND",
+        "ONIG_SYN_FIXED_INTERVAL_IS_GREEDY_ONLY",
+        "ONIG_SYN_NOT_NEWLINE_IN_NEGATIVE_CC",
+        "ONIG_SYN_OP2_ATMARK_CAPTURE_HISTORY",
+        "ONIG_SYN_OP2_CCLASS_SET_OP",
+        "ONIG_SYN_OP2_ESC_CAPITAL_C_BAR_CONTROL",
+        "ONIG_SYN_OP2_ESC_CAPITAL_K_KEEP",
+        "ONIG_SYN_OP2_ESC_CAPITAL_M_BAR_META",
+        "ONIG_SYN_OP2_ESC_CAPITAL_Q_QUOTE",
+        "ONIG_SYN_OP2_ESC_CAPITAL_R_LINEBREAK",
+        "ONIG_SYN_OP2_ESC_CAPITAL_X_EXTENDED_GRAPHEME_CLUSTER",
+        "ONIG_SYN_OP2_ESC_GNU_BUF_ANCHOR",
+        "ONIG_SYN_OP2_ESC_G_BRACE_BACKREF",
+        "ONIG_SYN_OP2_ESC_G_SUBEXP_CALL",
+        "ONIG_SYN_OP2_ESC_H_HORIZONTAL_WHITESPACE",
+        "ONIG_SYN_OP2_ESC_H_XDIGIT",
+        "ONIG_SYN_OP2_ESC_K_NAMED_BACKREF",
+        "ONIG_SYN_OP2_ESC_P_BRACE_CHAR_PROPERTY",
+        "ONIG_SYN_OP2_ESC_P_BRACE_CIRCUMFLEX_NOT",
+        "ONIG_SYN_OP2_ESC_U_HEX4",
+        "ONIG_SYN_OP2_ESC_V_VERTICAL_WHITESPACE",
+        "ONIG_SYN_OP2_ESC_V_VTAB",
+        "ONIG_SYN_OP2_INEFFECTIVE_ESCAPE",
+        "ONIG_SYN_OP2_OPTION_PERL",
+        "ONIG_SYN_OP2_OPTION_RUBY",
+        "ONIG_SYN_OP2_PLUS_POSSESSIVE_INTERVAL",
+        "ONIG_SYN_OP2_PLUS_POSSESSIVE_REPEAT",
+        "ONIG_SYN_OP2_QMARK_CAPITAL_P_NAMED_GROUP",
+        "ONIG_SYN_OP2_QMARK_GROUP_EFFECT",
+        "ONIG_SYN_OP2_QMARK_LPAREN_CONDITION",
+        "ONIG_SYN_OP2_QMARK_LT_NAMED_GROUP",
+        "ONIG_SYN_OP2_QMARK_SUBEXP_CALL",
+        "ONIG_SYN_OP2_QMARK_TILDE_ABSENT",
+        "ONIG_SYN_OP2_QMARK_VBAR_BRANCH_RESET",
+        "ONIG_SYN_OP_ASTERISK_ZERO_INF",
+        "ONIG_SYN_OP_BRACE_INTERVAL",
+        "ONIG_SYN_OP_BRACKET_CC",
+        "ONIG_SYN_OP_DECIMAL_BACKREF",
+        "ONIG_SYN_OP_DOT_ANYCHAR",
+        "ONIG_SYN_OP_ESC_ASTERISK_ZERO_INF",
+        "ONIG_SYN_OP_ESC_AZ_BUF_ANCHOR",
+        "ONIG_SYN_OP_ESC_BRACE_INTERVAL",
+        "ONIG_SYN_OP_ESC_B_WORD_BOUND",
+        "ONIG_SYN_OP_ESC_CAPITAL_G_BEGIN_ANCHOR",
+        "ONIG_SYN_OP_ESC_CONTROL_CHARS",
+        "ONIG_SYN_OP_ESC_C_CONTROL",
+        "ONIG_SYN_OP_ESC_D_DIGIT",
+        "ONIG_SYN_OP_ESC_LPAREN_SUBEXP",
+        "ONIG_SYN_OP_ESC_LTGT_WORD_BEGIN_END",
+        "ONIG_SYN_OP_ESC_OCTAL3",
+        "ONIG_SYN_OP_ESC_O_BRACE_OCTAL",
+        "ONIG_SYN_OP_ESC_PLUS_ONE_INF",
+        "ONIG_SYN_OP_ESC_QMARK_ZERO_ONE",
+        "ONIG_SYN_OP_ESC_S_WHITE_SPACE",
+        "ONIG_SYN_OP_ESC_VBAR_ALT",
+        "ONIG_SYN_OP_ESC_W_WORD",
+        "ONIG_SYN_OP_ESC_X_BRACE_HEX8",
+        "ONIG_SYN_OP_ESC_X_HEX2",
+        "ONIG_SYN_OP_LINE_ANCHOR",
+        "ONIG_SYN_OP_LPAREN_SUBEXP",
+        "ONIG_SYN_OP_PLUS_ONE_INF",
+        "ONIG_SYN_OP_POSIX_BRACKET",
+        "ONIG_SYN_OP_QMARK_NON_GREEDY",
+        "ONIG_SYN_OP_QMARK_ZERO_ONE",
+        "ONIG_SYN_OP_VARIABLE_META_CHARACTERS",
+        "ONIG_SYN_OP_VBAR_ALT",
+        "ONIG_SYN_STRICT_CHECK_BACKREF",
+        "ONIG_SYN_USE_LEFT_MOST_NAMED_GROUP",
+        "ONIG_SYN_WARN_CC_DUP",
+        "ONIG_SYN_WARN_CC_OP_NOT_ESCAPED",
+        "ONIG_SYN_WARN_REDUNDANT_NESTED_REPEAT",
+        "ONIG_TRAVERSE_CALLBACK_AT_BOTH",
+        "ONIG_TRAVERSE_CALLBACK_AT_FIRST",
+        "ONIG_TRAVERSE_CALLBACK_AT_LAST",
+        "OnigCaseFoldFlags",
+        "OnigCodePointCount",
+        "OnigCodePointMask",
+        "OnigCodePointMaskWidth",
+        "OnigSpecialIndexShift",
+        "OnigSpecialIndexWidth",
+        "RUBY_SYMBOL_EXPORT_BEGIN",
+        "RUBY_SYMBOL_EXPORT_END",
+        "UChar",
+        "onig_enc_len"
+      ]
+    },
+    "include/ruby/oniguruma.h": {
+      "checksum": "38686a1351e873bf3f9cddf936fca35e5ea086c4dacdf0de4c9cf860486ee513",
+      "macros": [
+        "ONIGURUMA",
+        "ONIGURUMA_H",
+        "ONIGURUMA_VERSION_MAJOR",
+        "ONIGURUMA_VERSION_MINOR",
+        "ONIGURUMA_VERSION_TEENY"
+      ]
+    },
+    "include/ruby/ractor.h": {
+      "checksum": "d0e16d5afa2168a8899e50159c24ce1e34653a44c85edba8187a976fc0ca145b",
+      "macros": [
+        "RB_OBJ_SET_SHAREABLE",
+        "RB_OBJ_SHAREABLE_P",
+        "RB_RACTOR_LOCAL_STORAGE_TYPE_FREE",
+        "RUBY_RACTOR_H"
+      ]
+    },
+    "include/ruby/random.h": {
+      "checksum": "4effd928bcbbaa3f2791d9a19f4207cb0ee695e7661edb6b173750aab43bd3d8",
+      "macros": [
+        "RB_RANDOM_DATA_INIT_PARENT",
+        "RB_RANDOM_DEFINE_INIT_INT32_FUNC",
+        "RB_RANDOM_INTERFACE_DECLARE",
+        "RB_RANDOM_INTERFACE_DECLARE_WITH_REAL",
+        "RB_RANDOM_INTERFACE_DEFINE",
+        "RB_RANDOM_INTERFACE_DEFINE_WITH_REAL",
+        "RB_RANDOM_PARENT",
+        "RUBY_RANDOM_H",
+        "RUBY_RANDOM_INTERFACE_VERSION_INITIALIZER",
+        "RUBY_RANDOM_INTERFACE_VERSION_MAJOR",
+        "RUBY_RANDOM_INTERFACE_VERSION_MAJOR_MAX",
+        "RUBY_RANDOM_INTERFACE_VERSION_MINOR",
+        "RUBY_RANDOM_INTERFACE_VERSION_MINOR_MAX",
+        "RUBY_RANDOM_PASTE_VERSION_SUFFIX",
+        "RUBY_RANDOM_WITH_VERSION_SUFFIX",
+        "rb_random_data_type"
+      ]
+    },
+    "include/ruby/re.h": {
+      "checksum": "34d9262ba050d682fbc8e6f1c410ca82ba82a08879e10d90c360b40939870554",
+      "macros": [
+        "RUBY_RE_H"
+      ]
+    },
+    "include/ruby/regex.h": {
+      "checksum": "0017247f2638f5203a61a0c8de21dfc2361caea48979c9c3474351be62f03ed4",
+      "macros": [
+        "ONIGURUMA_REGEX_H",
+        "mbclen"
+      ]
+    },
+    "include/ruby/ruby.h": {
+      "checksum": "e96f05ff5401eaffdc1302c7cfe74c31943548efa9d515a2433f29be72ba55ba",
+      "macros": [
+        "FilePathStringValue",
+        "FilePathValue",
+        "HAVE_NATIVETHREAD",
+        "InitVM",
+        "RUBY_GLOBAL_SETUP",
+        "RUBY_RUBY_H",
+        "RUBY_VM",
+        "RUBY__ASAN_DEFAULT_OPTIONS",
+        "USE_SYMBOL_AS_METHOD_NAME",
+        "errno",
+        "rb_funcall",
+        "rb_orig_errno",
+        "rb_varargs_argc_check",
+        "rb_varargs_argc_check_runtime",
+        "rb_varargs_argc_valid_p",
+        "rb_varargs_bad_length",
+        "rb_yield_values",
+        "ruby_start_main"
+      ]
+    },
+    "include/ruby/st.h": {
+      "checksum": "d78e02e62ed7aebed37c9f02ffa897e0418faab2cb52c22b1d2c729661d75771",
+      "macros": [
+        "ANYARGS",
+        "CHAR_BIT",
+        "MAX_ST_INDEX_VAL",
+        "RUBY_ST_H",
+        "SIZEOF_ST_INDEX_T",
+        "ST_DATA_COMPATIBLE_P",
+        "ST_DATA_T_DEFINED",
+        "ST_INDEX_BITS",
+        "_",
+        "st_add_direct",
+        "st_cleanup_safe",
+        "st_clear",
+        "st_copy",
+        "st_delete",
+        "st_delete_safe",
+        "st_foreach",
+        "st_foreach_check",
+        "st_foreach_with_replace",
+        "st_free_table",
+        "st_get_key",
+        "st_hash",
+        "st_hash_end",
+        "st_hash_start",
+        "st_hash_uint",
+        "st_hash_uint32",
+        "st_init_numtable",
+        "st_init_numtable_with_size",
+        "st_init_strcasetable",
+        "st_init_strcasetable_with_size",
+        "st_init_strtable",
+        "st_init_strtable_with_size",
+        "st_init_table",
+        "st_init_table_with_size",
+        "st_insert",
+        "st_insert2",
+        "st_is_member",
+        "st_keys",
+        "st_keys_check",
+        "st_locale_insensitive_strcasecmp",
+        "st_locale_insensitive_strncasecmp",
+        "st_lookup",
+        "st_memsize",
+        "st_numcmp",
+        "st_numhash",
+        "st_shift",
+        "st_strcasecmp",
+        "st_strncasecmp",
+        "st_table_size",
+        "st_update",
+        "st_values",
+        "st_values_check"
+      ]
+    },
+    "include/ruby/subst.h": {
+      "checksum": "99c200ae82cf0db697ba84a47547084963a0a3408e2a935a13681575b537f6af",
+      "macros": [
+        "RUBY_SUBST_H",
+        "close",
+        "getpeername",
+        "getsockname",
+        "shutdown",
+        "snprintf",
+        "vsnprintf"
+      ]
+    },
+    "include/ruby/thread.h": {
+      "checksum": "8636327830abd8f9e1df0d7cda7588566fcbace5d12091f2fe72527fa04485b9",
+      "macros": [
+        "RB_INTERNAL_THREAD_SPECIFIC_KEY_MAX",
+        "RB_NOGVL_INTR_FAIL",
+        "RB_NOGVL_OFFLOAD_SAFE",
+        "RB_NOGVL_PENDING_INTR_FAIL",
+        "RB_NOGVL_UBF_ASYNC_SAFE",
+        "RUBY_CALL_WO_GVL_FLAG_SKIP_CHECK_INTS_",
+        "RUBY_CALL_WO_GVL_FLAG_SKIP_CHECK_INTS_AFTER",
+        "RUBY_INTERNAL_THREAD_EVENT_EXITED",
+        "RUBY_INTERNAL_THREAD_EVENT_MASK",
+        "RUBY_INTERNAL_THREAD_EVENT_READY",
+        "RUBY_INTERNAL_THREAD_EVENT_RESUMED",
+        "RUBY_INTERNAL_THREAD_EVENT_STARTED",
+        "RUBY_INTERNAL_THREAD_EVENT_SUSPENDED",
+        "RUBY_THREAD_H"
+      ]
+    },
+    "include/ruby/thread_native.h": {
+      "checksum": "d694b4868fbb79f60cee9506065a9ea0b19520bc3c9ad615112580b594509673",
+      "macros": [
+        "RUBY_THREAD_NATIVE_H"
+      ]
+    },
+    "include/ruby/util.h": {
+      "checksum": "fe18f0c9b600c8da72a8087ba1189d3c9d7456061262f9f858bd554b4629e155",
+      "macros": [
+        "DECIMAL_SIZE_OF",
+        "DECIMAL_SIZE_OF_BITS",
+        "DECIMAL_SIZE_OF_BYTES",
+        "RUBY_UTIL_H",
+        "ruby_qsort",
+        "scan_hex",
+        "scan_oct",
+        "strdup",
+        "strtod"
+      ]
+    },
+    "include/ruby/version.h": {
+      "checksum": "472c340b33b83ca240bf27a8c9754c3bc1037b89827c58205af9b41a732d4149",
+      "macros": [
+        "RUBY_API_VERSION_CODE",
+        "RUBY_API_VERSION_MAJOR",
+        "RUBY_API_VERSION_MINOR",
+        "RUBY_API_VERSION_TEENY",
+        "RUBY_AUTHOR",
+        "RUBY_BIRTH_DAY",
+        "RUBY_BIRTH_MONTH",
+        "RUBY_BIRTH_YEAR",
+        "RUBY_VERSION_H"
+      ]
+    },
+    "include/ruby/vm.h": {
+      "checksum": "488e796d6fb3f4de9ef8caadba4153d9bbfc64ba2184b965eb99f0734b9eab4d",
+      "macros": [
+        "RUBY_VM_H"
+      ]
+    },
+    "include/ruby/win32.h": {
+      "checksum": "c14022d2274a34c61c42f39f9f254605aafd510156a14f8c1aa9165fbc74019e",
+      "macros": [
+        "AT_FDCWD",
+        "CLOCK_MONOTONIC",
+        "CLOCK_PROCESS_CPUTIME_ID",
+        "CLOCK_REALTIME",
+        "CLOCK_REALTIME_COARSE",
+        "CLOCK_THREAD_CPUTIME_ID",
+        "EADDRINUSE",
+        "EADDRNOTAVAIL",
+        "EAFNOSUPPORT",
+        "EALREADY",
+        "ECONNABORTED",
+        "ECONNREFUSED",
+        "ECONNRESET",
+        "EDESTADDRREQ",
+        "EDQUOT",
+        "EHOSTDOWN",
+        "EHOSTUNREACH",
+        "EINPROGRESS",
+        "EISCONN",
+        "ELOOP",
+        "EMSGSIZE",
+        "ENETDOWN",
+        "ENETRESET",
+        "ENETUNREACH",
+        "ENOBUFS",
+        "ENOPROTOOPT",
+        "ENOTCONN",
+        "ENOTSOCK",
+        "EOPNOTSUPP",
+        "EPFNOSUPPORT",
+        "EPROCLIM",
+        "EPROTONOSUPPORT",
+        "EPROTOTYPE",
+        "EREMOTE",
+        "ESHUTDOWN",
+        "ESOCKTNOSUPPORT",
+        "ESTALE",
+        "ETIMEDOUT",
+        "ETOOMANYREFS",
+        "EUSERS",
+        "EWOULDBLOCK",
+        "FD_CLOEXEC",
+        "FD_CLR",
+        "FD_ISSET",
+        "FD_SET",
+        "F_DUPFD",
+        "F_DUPFD_CLOEXEC",
+        "F_GETFD",
+        "F_GETFL",
+        "F_SETFD",
+        "F_SETFL",
+        "HAVE_EXECV",
+        "HAVE_FTRUNCATE",
+        "HAVE_GETPPID",
+        "HAVE_KILL",
+        "HAVE_SHUTDOWN",
+        "HAVE_STRUCT_STAT_ST_ATIMENSEC",
+        "HAVE_STRUCT_STAT_ST_CTIMENSEC",
+        "HAVE_STRUCT_STAT_ST_INOHIGH",
+        "HAVE_STRUCT_STAT_ST_MTIMENSEC",
+        "HAVE_TRUNCATE",
+        "HAVE_UTIMENSAT",
+        "HAVE_UTIMES",
+        "IFF_POINTOPOINT",
+        "IFNAMSIZ",
+        "INFINITY",
+        "LOCK_EX",
+        "LOCK_NB",
+        "LOCK_SH",
+        "LOCK_UN",
+        "MAP_ANON",
+        "MAP_ANONYMOUS",
+        "MAP_FAILED",
+        "MAP_PRIVATE",
+        "O_NONBLOCK",
+        "O_SHARE_DELETE",
+        "PIPE_BUF",
+        "PROT_EXEC",
+        "PROT_READ",
+        "PROT_WRITE",
+        "RUBY_WIN32_H",
+        "SIGINT",
+        "SIGKILL",
+        "SIZEOF_STRUCT_STAT_ST_INO",
+        "SUFFIX",
+        "S_IFIFO",
+        "S_IFLNK",
+        "S_IFSOCK",
+        "S_IRGRP",
+        "S_IROTH",
+        "S_IRUSR",
+        "S_IWGRP",
+        "S_IWOTH",
+        "S_IWUSR",
+        "S_IXGRP",
+        "S_IXOTH",
+        "S_IXUSR",
+        "Sleep",
+        "WIN32",
+        "WNOHANG",
+        "accept",
+        "access",
+        "bind",
+        "clock_getres",
+        "clock_gettime",
+        "close",
+        "connect",
+        "copysign",
+        "dup2",
+        "execv",
+        "fclose",
+        "frexp",
+        "fstat",
+        "fsync",
+        "ftruncate",
+        "get_osfhandle",
+        "getcwd",
+        "getenv",
+        "gethostbyaddr",
+        "gethostbyname",
+        "gethostname",
+        "getpeername",
+        "getpid",
+        "getppid",
+        "getprotobyname",
+        "getprotobynumber",
+        "getservbyname",
+        "getservbyport",
+        "getsockname",
+        "getsockopt",
+        "inet_ntop",
+        "inet_pton",
+        "ioctlsocket",
+        "isascii",
+        "isatty",
+        "listen",
+        "lseek",
+        "lstat",
+        "mkdir",
+        "mmap",
+        "mode_t",
+        "modf",
+        "mprotect",
+        "munmap",
+        "open",
+        "pipe",
+        "pow",
+        "pread",
+        "pwrite",
+        "rb_w32_iswin95",
+        "rb_w32_iswinnt",
+        "read",
+        "recv",
+        "recvfrom",
+        "rename",
+        "rmdir",
+        "select",
+        "send",
+        "sendto",
+        "setsockopt",
+        "shutdown",
+        "sleep",
+        "socket",
+        "stat",
+        "stati128",
+        "strcasecmp",
+        "strerror",
+        "strncasecmp",
+        "times",
+        "truncate",
+        "unlink",
+        "utime",
+        "utimensat",
+        "utimes",
+        "write"
+      ]
+    }
+  },
+  "symbols": [
+    "rb_",
+    "ruby_"
+  ],
+  "structs": {
+    "RBasic": [
+
+    ],
+    "RObject": [
+      "basic",
+      "extended"
+    ],
+    "RClass": [
+
+    ],
+    "RFloat": [
+
+    ],
+    "RString": [
+      "basic",
+      "len",
+      "ptr",
+      "capa",
+      "shared"
+    ],
+    "RArray": [
+      "basic",
+      "len",
+      "capa",
+      "shared_root"
+    ],
+    "RRegexp": [
+      "basic",
+      "src",
+      "usecnt"
+    ],
+    "RHash": [
+
+    ],
+    "RFile": [
+      "basic",
+      "fptr"
+    ],
+    "RData": [
+      "basic",
+      "fields_obj",
+      "_reserved",
+      "data",
+      "dmark",
+      "dfree"
+    ],
+    "RTypedData": [
+      "basic",
+      "fields_obj",
+      "type",
+      "data"
+    ],
+    "RStruct": [
+
+    ],
+    "RBignum": [
+
+    ]
+  }
+}

@@ -50,6 +50,26 @@ jobs:
           ruby tool/generate_porting_ledger.rb --check
         if: always()
 
+      - name: Check API lock
+        run: |
+          ruby tool/ruby_on_rust/check_api_lock.rb --check
+        if: always()
+
+      - name: Check C ABI lock and struct offsets
+        run: |
+          ruby tool/ruby_on_rust/check_abi_lock.rb --check
+        if: always()
+
+      - name: Check core docs coverage lock
+        run: |
+          ruby tool/ruby_on_rust/check_docs_lock.rb --check
+        if: always()
+
+      - name: Check compatibility report freshness
+        run: |
+          ruby tool/ruby_on_rust/update_compatibility.rb --check
+        if: always()
+
       - name: Check for code styles
         run: |
           set -x

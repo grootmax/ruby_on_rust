@@ -1,0 +1,6 @@
+# API Lock Allowlist
+# Line Format: <type>:<identifier> # <reason>
+# Allowed Types: class, constant, method, arity, singleton_method
+# Examples:
+# method:Kernel#foo # Temporary deviation during porting
+# constant:Object::DEPRECATED_CONST # Pending deprecation removal
