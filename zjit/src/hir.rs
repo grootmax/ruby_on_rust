@@ -2647,6 +2647,9 @@ fn print_hir_dump(label: &str, body: &dyn std::fmt::Display) {
 /// `make_equal_to(B, E)` have the same result: the two sets are joined into the same graph
 /// component. After this operation, calling `find` on any element will return `E`.
 ///
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct SnapshotToken(pub usize);
+
 /// This is a useful data structure in compilers because it allows in-place rewriting without
 /// linking/unlinking instructions and without replacing all uses. When calling `make_equal_to` on
 /// any instruction, all of its uses now implicitly point to the replacement.
@@ -2657,11 +2660,28 @@ fn print_hir_dump(label: &str, body: &dyn std::fmt::Display) {
 #[derive(Debug)]
 struct UnionFind<T: Copy + Into<usize>> {
     forwarded: Vec<T>,
+    undo_log: Vec<(usize, T)>,
 }
 
 impl<T: Copy + Into<usize> + PartialEq + std::convert::From<usize>> UnionFind<T> {
     fn new() -> UnionFind<T> {
-        UnionFind { forwarded: vec![] }
+        UnionFind {
+            forwarded: vec![],
+            undo_log: vec![],
+        }
+    }
+
+    pub fn snapshot(&mut self) -> SnapshotToken {
+        SnapshotToken(self.undo_log.len())
+    }
+
+    pub fn restore(&mut self, token: SnapshotToken) {
+        while self.undo_log.len() > token.0 {
+            let (idx, old_value) = self.undo_log.pop().unwrap();
+            if idx < self.forwarded.len() {
+                self.forwarded[idx] = old_value;
+            }
+        }
     }
 
     /// Private. Return the internal representation of the forwarding pointer for a given element.
@@ -2672,12 +2692,17 @@ impl<T: Copy + Into<usize> + PartialEq + std::convert::From<usize>> UnionFind<T>
     /// Private. Set the internal representation of the forwarding pointer for the given element
     /// `idx`. Extend the internal vector if necessary.
     fn set(&mut self, idx: T, value: T) {
-        if idx.into() >= self.forwarded.len() {
-            for i in self.forwarded.len()..=idx.into() {
+        let idx_usize = idx.into();
+        let old_value = self.at(idx);
+        if idx_usize >= self.forwarded.len() {
+            for i in self.forwarded.len()..=idx_usize {
                 self.forwarded.push(i.into());
             }
         }
-        self.forwarded[idx.into()] = value;
+        if old_value != value {
+            self.undo_log.push((idx_usize, old_value));
+            self.forwarded[idx_usize] = value;
+        }
     }
 
     /// Find the set representative for `insn`. Perform path compression at the same time to speed
@@ -6779,41 +6804,174 @@ impl Function {
     ///
     /// Inspired by Cranelift's aegraph canonicalize step
     /// (<https://cfallin.org/blog/2026/04/09/aegraph/>).
+    /// Canonicalize: rewrite each operand through union-find and a map of the most recent `Guard*`
+    /// for that value in the dominator tree. Forwards guarded values and branch-refined virtual
+    /// aliases into branch-edge args and target block parameters (so `infer_types` narrows merge-block
+    /// parameters and `fold_constants` drops redundant guards) and ordinary in-block uses.
+    ///
+    /// Branch-scoped `UnionFind` snapshots and restorations isolate branch-specific type refinements
+    /// to their dominator branch arms.
+    ///
+    /// Inspired by Cranelift's aegraph canonicalize step
+    /// (<https://cfallin.org/blog/2026/04/09/aegraph/>).
     fn canonicalize(&mut self) {
-        // TODO(max): Don't make so many maps. Instead, use either undo-redo or dominator numbering
-        // information for dominator tree.
-        let mut rewrite_maps: Vec<Option<HashMap<InsnId, InsnId>>> = vec![None; self.blocks.len()];
         let dominators = Dominators::new(self);
-        for &block in dominators.cfi.reverse_post_order() {
-            let mut rewrite_map = rewrite_maps[dominators.idom(block)].clone().unwrap_or_else(|| HashMap::new());
-            for i in 0..self.blocks[block].insns.len() {
-                let insn_id = self.blocks[block].insns[i];
-                let canonical_id = self.union_find.borrow().find_const(insn_id);
-
-                let union_find = &self.union_find;
-                self.insns[canonical_id].for_each_operand_mut(|operand| {
-                    let canon = union_find.borrow().find_const(*operand);
-                    *operand = rewrite_map.get(&canon).copied().unwrap_or(canon);
-                });
-
-                // For the binary guards only `left` is registered because their infer_type is
-                // type_of(left).
-                match &self.insns[canonical_id] {
-                    Insn::GuardType      { val:  src, .. }
-                    | Insn::GuardBitEquals { val:  src, .. }
-                    | Insn::GuardAnyBitSet { val:  src, .. }
-                    | Insn::GuardNoBitsSet { val:  src, .. }
-                    | Insn::GuardGreaterEq { left: src, .. }
-                    | Insn::GuardLess      { left: src, .. } => {
-                        rewrite_map.insert(*src, canonical_id);
-                    }
-                    _ => {}
-                }
+        let rpo = dominators.cfi.reverse_post_order();
+        let mut idom_children: Vec<Vec<BlockId>> = vec![vec![]; self.blocks.len()];
+        for &block in rpo {
+            let idom = dominators.idom(block);
+            if idom != block && idom != IDOM_NONE {
+                idom_children[idom].push(block);
             }
-            rewrite_maps[block] = Some(rewrite_map);
         }
 
+        let root = self.entries_block;
+        self.canonicalize_block(root, &dominators, &idom_children, HashMap::new());
+
         crate::stats::trace_compile_phase("infer_types", || self.infer_types());
+    }
+
+    fn canonicalize_block(
+        &mut self,
+        block: BlockId,
+        dominators: &Dominators,
+        idom_children: &[Vec<BlockId>],
+        mut rewrite_map: HashMap<InsnId, InsnId>,
+    ) {
+        let snap = self.union_find.borrow_mut().snapshot();
+
+        let idom = dominators.idom(block);
+        if idom != block && idom != IDOM_NONE {
+            self.apply_branch_edge_refinements(idom, block);
+        }
+
+        for i in 0..self.blocks[block].insns.len() {
+            let insn_id = self.blocks[block].insns[i];
+            let canonical_id = self.union_find.borrow().find_const(insn_id);
+
+            let union_find = &self.union_find;
+            self.insns[canonical_id].for_each_operand_mut(|operand| {
+                let canon = union_find.borrow().find_const(*operand);
+                *operand = rewrite_map.get(&canon).copied().unwrap_or(canon);
+            });
+
+            match &self.insns[canonical_id] {
+                Insn::GuardType      { val:  src, .. }
+                | Insn::GuardBitEquals { val:  src, .. }
+                | Insn::GuardAnyBitSet { val:  src, .. }
+                | Insn::GuardNoBitsSet { val:  src, .. }
+                | Insn::GuardGreaterEq { left: src, .. }
+                | Insn::GuardLess      { left: src, .. } => {
+                    rewrite_map.insert(*src, canonical_id);
+                }
+                _ => {}
+            }
+        }
+
+        for &child in &idom_children[block] {
+            self.canonicalize_block(child, dominators, idom_children, rewrite_map.clone());
+        }
+
+        self.union_find.borrow_mut().restore(snap);
+    }
+
+    fn apply_branch_edge_refinements(&mut self, pred: BlockId, target: BlockId) {
+        let last_insn = match self.blocks[pred].insns.last().copied() {
+            Some(id) => self.union_find.borrow().find_const(id),
+            None => return,
+        };
+
+        enum EdgeBranch {
+            CondBranch { val: InsnId, is_true: bool, args: Vec<InsnId> },
+            CondBranchHasType { val: InsnId, expected: Type, is_true: bool, args: Vec<InsnId> },
+            Jump { args: Vec<InsnId> },
+        }
+
+        let edge_branch = match &self.insns[last_insn] {
+            Insn::CondBranch { val, if_true, if_false } => {
+                if if_true.target == target {
+                    Some(EdgeBranch::CondBranch { val: *val, is_true: true, args: if_true.args.clone() })
+                } else if if_false.target == target {
+                    Some(EdgeBranch::CondBranch { val: *val, is_true: false, args: if_false.args.clone() })
+                } else {
+                    None
+                }
+            }
+            Insn::CondBranchHasType(cond_data) => {
+                let CondBranchHasTypeData { val, expected, if_true, if_false } = &**cond_data;
+                if if_true.target == target {
+                    Some(EdgeBranch::CondBranchHasType { val: *val, expected: *expected, is_true: true, args: if_true.args.clone() })
+                } else if if_false.target == target {
+                    Some(EdgeBranch::CondBranchHasType { val: *val, expected: *expected, is_true: false, args: if_false.args.clone() })
+                } else {
+                    None
+                }
+            }
+            Insn::Jump(BranchEdge { target: jump_target, args }) => {
+                if *jump_target == target {
+                    Some(EdgeBranch::Jump { args: args.clone() })
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        };
+
+        match edge_branch {
+            Some(EdgeBranch::CondBranch { val, is_true, args }) => {
+                let target_type = if is_true { types::Truthy } else { types::Falsy };
+                let ref_alias = self.get_or_create_refine_alias(val, target_type, &args);
+                self.union_find.borrow_mut().make_equal_to(val, ref_alias);
+                self.unify_block_params(target, &args, Some((val, ref_alias)));
+            }
+            Some(EdgeBranch::CondBranchHasType { val, expected, is_true, args }) => {
+                if is_true {
+                    let ref_alias = self.get_or_create_refine_alias(val, expected, &args);
+                    self.union_find.borrow_mut().make_equal_to(val, ref_alias);
+                    self.unify_block_params(target, &args, Some((val, ref_alias)));
+                } else {
+                    self.unify_block_params(target, &args, None);
+                }
+            }
+            Some(EdgeBranch::Jump { args }) => {
+                self.unify_block_params(target, &args, None);
+            }
+            None => {}
+        }
+    }
+
+    fn get_or_create_refine_alias(&mut self, val: InsnId, new_type: Type, args: &[InsnId]) -> InsnId {
+        let canon_val = self.union_find.borrow().find_const(val);
+        for &arg in args {
+            let canon_arg = self.union_find.borrow().find_const(arg);
+            if let Insn::RefineType { val: ref_val, new_type: ref_type } = self.insns[canon_arg] {
+                if self.union_find.borrow().find_const(ref_val) == canon_val && ref_type.bit_equal(new_type) {
+                    return canon_arg;
+                }
+            }
+        }
+        let alias = self.new_insn(Insn::RefineType { val, new_type });
+        let refined_type = self.type_of(val).intersection(new_type);
+        self.insn_types[alias] = refined_type;
+        alias
+    }
+
+    fn unify_block_params(&mut self, target: BlockId, args: &[InsnId], branch_refinement: Option<(InsnId, InsnId)>) {
+        let params = self.blocks[target].params.clone();
+        let canon_val = branch_refinement.map(|(val, _)| self.union_find.borrow().find_const(val));
+        for (idx, &arg) in args.iter().enumerate() {
+            if idx < params.len() {
+                let param = params[idx];
+                let canon_arg = self.union_find.borrow().find_const(arg);
+                if let (Some((val, ref_alias)), Some(c_val)) = (branch_refinement, canon_val) {
+                    if arg == val || canon_arg == c_val {
+                        self.union_find.borrow_mut().make_equal_to(param, ref_alias);
+                        continue;
+                    }
+                }
+                self.union_find.borrow_mut().make_equal_to(param, arg);
+            }
+        }
     }
 
     /// Use type information left by `infer_types` to fold away operations that can be evaluated at compile-time.
@@ -11483,6 +11641,50 @@ mod union_find_tests {
         assert_eq!(uf.find(3usize), 5);
         assert_eq!(uf.find(4usize), 5);
         assert_eq!(uf.find(5usize), 5);
+    }
+
+    #[test]
+    fn test_snapshot_and_restore_reverts_equalities() {
+        let mut uf = UnionFind::new();
+        uf.make_equal_to(1, 2);
+        let snap = uf.snapshot();
+        uf.make_equal_to(2, 3);
+        assert_eq!(uf.find(1usize), 3);
+        uf.restore(snap);
+        assert_eq!(uf.find(1usize), 2);
+        assert_eq!(uf.find(2usize), 2);
+        assert_eq!(uf.find(3usize), 3);
+    }
+
+    #[test]
+    fn test_snapshot_and_restore_reverts_path_compression() {
+        let mut uf = UnionFind::new();
+        uf.make_equal_to(1, 2);
+        uf.make_equal_to(2, 3);
+        let snap = uf.snapshot();
+        assert_eq!(uf.at(1usize), 2);
+        // find(1) performs path compression setting 1 -> 3
+        assert_eq!(uf.find(1usize), 3);
+        assert_eq!(uf.at(1usize), 3);
+        uf.restore(snap);
+        // Reverted path compression
+        assert_eq!(uf.at(1usize), 2);
+    }
+
+    #[test]
+    fn test_nested_snapshot_and_restore() {
+        let mut uf = UnionFind::new();
+        uf.make_equal_to(1, 2);
+        let snap1 = uf.snapshot();
+        uf.make_equal_to(2, 3);
+        let snap2 = uf.snapshot();
+        uf.make_equal_to(3, 4);
+
+        assert_eq!(uf.find(1usize), 4);
+        uf.restore(snap2);
+        assert_eq!(uf.find(1usize), 3);
+        uf.restore(snap1);
+        assert_eq!(uf.find(1usize), 2);
     }
 }
 

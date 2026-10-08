@@ -26421,4 +26421,89 @@ mod hir_opt_tests {
           Return v90
         ");
     }
+
+    #[test]
+    fn test_union_find_branch_alias_unioning_prunes_guard() {
+        crate::options::rb_zjit_prepare_options();
+        let mut function = Function::new(std::ptr::null());
+        let entry = function.entry_block;
+        let v0 = function.push_insn(entry, Insn::Const { val: Const::Value(Qnil) });
+
+        let if_true = function.new_block(0);
+        let if_false = function.new_block(0);
+
+        let p_true = function.push_insn(if_true, Insn::Param);
+        let p_false = function.push_insn(if_false, Insn::Param);
+
+        function.push_insn(entry, Insn::CondBranchHasType(Box::new(CondBranchHasTypeData {
+            val: v0,
+            expected: types::String,
+            if_true: BranchEdge { target: if_true, args: vec![v0] },
+            if_false: BranchEdge { target: if_false, args: vec![v0] },
+        })));
+
+        let dummy_state = function.push_insn(if_true, Insn::Const { val: Const::CBool(true) });
+        let guard = function.push_insn(if_true, Insn::GuardType { val: p_true, guard_type: types::String, state: dummy_state, recompile: None });
+        function.push_insn(if_true, Insn::Return { val: guard });
+
+        function.push_insn(if_false, Insn::Return { val: p_false });
+
+        function.seal_entries();
+        function.canonicalize();
+        function.fold_constants();
+
+        // In if_true block, GuardType p_true, String should be pruned away by fold_constants!
+        let if_true_insns = &function.blocks[if_true].insns;
+        assert!(!if_true_insns.contains(&guard), "GuardType should be pruned in if_true block");
+    }
+
+    #[test]
+    fn test_multilevel_guard_folding_across_branches() {
+        crate::options::rb_zjit_prepare_options();
+        let mut function = Function::new(std::ptr::null());
+        let entry = function.entry_block;
+        let v0 = function.push_insn(entry, Insn::Const { val: Const::Value(Qnil) });
+
+        let level1_true = function.new_block(0);
+        let level1_false = function.new_block(0);
+        let p1 = function.push_insn(level1_true, Insn::Param);
+        let p1_f = function.push_insn(level1_false, Insn::Param);
+
+        function.push_insn(entry, Insn::CondBranchHasType(Box::new(CondBranchHasTypeData {
+            val: v0,
+            expected: types::HeapBasicObject,
+            if_true: BranchEdge { target: level1_true, args: vec![v0] },
+            if_false: BranchEdge { target: level1_false, args: vec![v0] },
+        })));
+
+        let level2_true = function.new_block(0);
+        let level2_false = function.new_block(0);
+        let p2 = function.push_insn(level2_true, Insn::Param);
+        let p2_f = function.push_insn(level2_false, Insn::Param);
+
+        function.push_insn(level1_true, Insn::CondBranchHasType(Box::new(CondBranchHasTypeData {
+            val: p1,
+            expected: types::String,
+            if_true: BranchEdge { target: level2_true, args: vec![p1] },
+            if_false: BranchEdge { target: level2_false, args: vec![p1] },
+        })));
+
+        let dummy_state = function.push_insn(level2_true, Insn::Const { val: Const::CBool(true) });
+        // Guard expecting HeapBasicObject (satisfied by level 1) and String (satisfied by level 2)
+        let guard1 = function.push_insn(level2_true, Insn::GuardType { val: p2, guard_type: types::HeapBasicObject, state: dummy_state, recompile: None });
+        let guard2 = function.push_insn(level2_true, Insn::GuardType { val: guard1, guard_type: types::String, state: dummy_state, recompile: None });
+        function.push_insn(level2_true, Insn::Return { val: guard2 });
+
+        function.push_insn(level1_false, Insn::Return { val: p1_f });
+        function.push_insn(level2_false, Insn::Return { val: p2_f });
+
+        function.seal_entries();
+        function.canonicalize();
+        function.fold_constants();
+
+        // Both guards in level2_true block should be pruned away!
+        let level2_insns = &function.blocks[level2_true].insns;
+        assert!(!level2_insns.contains(&guard1), "guard1 (HeapBasicObject) should be pruned");
+        assert!(!level2_insns.contains(&guard2), "guard2 (String) should be pruned");
+    }
 }
