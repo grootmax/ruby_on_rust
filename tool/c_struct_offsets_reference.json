@@ -1,0 +1,244 @@
+{
+  "structs": {
+    "RArray": {
+      "size": 40,
+      "fields": {
+        "basic": 0,
+        "as": 16,
+        "as.heap.len": 16,
+        "as.heap.aux.capa": 24,
+        "as.heap.aux.shared_root": 24,
+        "as.heap.ptr": 32,
+        "as.ary": 16
+      }
+    },
+    "RBasic": {
+      "size": 16,
+      "fields": {
+        "flags": 0,
+        "klass": 8
+      }
+    },
+    "RData": {
+      "size": 56,
+      "fields": {
+        "basic": 0,
+        "dmark": 40,
+        "dfree": 48,
+        "data": 32
+      }
+    },
+    "RFile": {
+      "size": 24,
+      "fields": {
+        "basic": 0,
+        "fptr": 16
+      }
+    },
+    "RHash": {
+      "size": 24,
+      "fields": {
+        "basic": 0,
+        "ifnone": 16
+      }
+    },
+    "RMatch": {
+      "size": 80,
+      "fields": {
+        "basic": 0,
+        "str": 16,
+        "regexp": 24,
+        "char_offset_num_allocated": 32,
+        "char_offset": 40,
+        "num_regs": 48,
+        "capa": 52
+      }
+    },
+    "RObject": {
+      "size": 24,
+      "fields": {
+        "basic": 0,
+        "as": 16,
+        "as.ary": 16,
+        "as.extended": 16
+      }
+    },
+    "RRegexp": {
+      "size": 32,
+      "fields": {
+        "basic": 0,
+        "src": 16,
+        "usecnt": 24
+      }
+    },
+    "RString": {
+      "size": 40,
+      "fields": {
+        "basic": 0,
+        "len": 16,
+        "as": 24,
+        "as.heap.ptr": 24,
+        "as.heap.aux.capa": 32,
+        "as.heap.aux.shared": 32,
+        "as.embed.ary": 24
+      }
+    },
+    "RTypedData": {
+      "size": 40,
+      "fields": {
+        "basic": 0,
+        "fields_obj": 16,
+        "type": 24,
+        "data": 32
+      }
+    },
+    "rb_data_type_struct": {
+      "size": 128,
+      "fields": {
+        "wrap_struct_name": 0,
+        "function": 8,
+        "function.dmark": 8,
+        "function.dfree": 16,
+        "function.dsize": 24,
+        "function.dcompact": 32,
+        "parent": 104,
+        "data": 112,
+        "flags": 120
+      }
+    },
+    "rb_fiber_scheduler_blocking_operation_state": {
+      "size": 16,
+      "fields": {
+        "result": 0,
+        "saved_errno": 8
+      }
+    },
+    "rb_internal_thread_event_data": {
+      "size": 8,
+      "fields": {
+        "thread": 0
+      }
+    },
+    "rb_io": {
+      "size": 208,
+      "fields": {
+        "self": 0,
+        "stdio_file": 8,
+        "fd": 16,
+        "mode": 20,
+        "pid": 24,
+        "lineno": 28,
+        "pathv": 32,
+        "finalize": 40,
+        "wbuf": 48,
+        "rbuf": 68,
+        "tied_io_for_writing": 88,
+        "encs": 96
+      }
+    },
+    "rb_io_encoding": {
+      "size": 32,
+      "fields": {
+        "enc": 0,
+        "enc2": 8,
+        "ecflags": 16
+      }
+    },
+    "rb_io_internal_buffer": {
+      "size": 20,
+      "fields": {
+        "ptr": 0,
+        "off": 8,
+        "len": 12,
+        "capa": 16
+      }
+    },
+    "rb_memory_view": {
+      "size": 112,
+      "fields": {
+        "obj": 0,
+        "data": 8,
+        "byte_size": 16,
+        "readonly": 24,
+        "format": 32,
+        "item_size": 40,
+        "item_desc.components": 48,
+        "item_desc.length": 56,
+        "ndim": 64,
+        "shape": 72,
+        "strides": 80,
+        "sub_offsets": 88,
+        "private_data": 96,
+        "_memory_view_entry": 104
+      }
+    },
+    "rb_memory_view_entry": {
+      "size": 24,
+      "fields": {
+        "get_func": 0,
+        "release_func": 8,
+        "available_p_func": 16
+      }
+    },
+    "rb_ractor_local_storage_type": {
+      "size": 16,
+      "fields": {
+        "mark": 0,
+        "free": 8
+      }
+    },
+    "rb_random_struct": {
+      "size": 8,
+      "fields": {
+        "seed": 0
+      }
+    },
+    "re_pattern_buffer": {
+      "size": 456,
+      "fields": {
+        "p": 0,
+        "used": 8,
+        "alloc": 12,
+        "options": 56,
+        "syntax": 80,
+        "chain": 448
+      }
+    },
+    "re_registers": {
+      "size": 24,
+      "fields": {
+        "allocated": 0,
+        "num_regs": 4,
+        "beg": 8,
+        "end": 16
+      }
+    },
+    "rmatch_offset": {
+      "size": 16,
+      "fields": {
+        "beg": 0,
+        "end": 8
+      }
+    },
+    "st_hash_type": {
+      "size": 16,
+      "fields": {
+        "compare": 0,
+        "hash": 8
+      }
+    },
+    "st_table": {
+      "size": 40,
+      "fields": {
+        "entry_power": 0,
+        "bin_power": 1,
+        "size_ind": 2,
+        "rebuilds_num": 3,
+        "entries_start": 4,
+        "type": 8,
+        "num_entries": 16,
+        "entries_bound": 24
+      }
+    }
+  }
+}
