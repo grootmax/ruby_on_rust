@@ -1,0 +1,83 @@
+name: Differential Testing & Locks
+
+on:
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }} / ${{ startsWith(github.event_name, 'pull') && github.ref_name || github.sha }}
+  cancel-in-progress: ${{ startsWith(github.event_name, 'pull') }}
+
+permissions:
+  contents: write
+
+jobs:
+  pr-differential-checks:
+    name: PR Differential & Lock Verification
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler: none
+
+      - name: API Lock Check
+        run: ruby tool/ruby_on_rust/api_lock.rb --check
+
+      - name: ABI Lock Check
+        run: ruby tool/ruby_on_rust/abi_lock.rb --check
+
+      - name: Docs Lock Check
+        run: ruby tool/ruby_on_rust/docs_lock.rb --check
+
+      - name: Differential Snippet Tests
+        run: ruby tool/ruby_on_rust/differential_runner.rb --check
+
+      - name: Verify COMPATIBILITY.md Freshness
+        run: ruby tool/ruby_on_rust/generate_compatibility_report.rb --check
+
+  nightly-fuzzing:
+    name: Nightly Edge Fuzzing & Compatibility Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler: none
+
+      - name: Run Edge Fuzzer across Core Classes
+        run: |
+          ruby tool/ruby_on_rust/edge_fuzzer.rb -n 1000 --output tool/ruby_on_rust/fuzz_results.json
+
+      - name: Regenerate COMPATIBILITY.md Report
+        run: |
+          ruby tool/ruby_on_rust/generate_compatibility_report.rb --fuzz-results tool/ruby_on_rust/fuzz_results.json
+
+      - name: Upload Compatibility Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compatibility-report
+          path: |
+            COMPATIBILITY.md
+            tool/ruby_on_rust/fuzz_results.json
+
+      - name: Commit & Push Updated COMPATIBILITY.md
+        if: github.event_name == 'schedule'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add COMPATIBILITY.md tool/ruby_on_rust/fuzz_results.json tool/ruby_on_rust/docs_lock.json
+          git diff-index --quiet HEAD || (git commit -m "Update COMPATIBILITY.md from nightly fuzzing run" && git push)

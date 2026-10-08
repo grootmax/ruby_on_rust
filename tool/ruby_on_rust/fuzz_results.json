@@ -1,0 +1,76 @@
+{
+  "summary": {
+    "seed": 42,
+    "iterations": 100,
+    "classes": [
+      "String",
+      "Array",
+      "Hash",
+      "Integer",
+      "Float",
+      "Range",
+      "Struct",
+      "Time",
+      "Comparable",
+      "Enumerable"
+    ],
+    "total_cases": 59,
+    "passed_cases": 59,
+    "failed_cases": 0,
+    "class_breakdown": {
+      "String": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0
+      },
+      "Array": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0
+      },
+      "Hash": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0
+      },
+      "Integer": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0
+      },
+      "Float": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0
+      },
+      "Range": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0
+      },
+      "Struct": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0
+      },
+      "Time": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0
+      },
+      "Comparable": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "Enumerable": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0
+      }
+    }
+  },
+  "failing_snippets": [
+
+  ]
+}

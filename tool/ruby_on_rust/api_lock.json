@@ -1,0 +1,5516 @@
+{
+  "Object": {
+    "public_instance_methods": [
+
+    ],
+    "singleton_methods": [
+
+    ],
+    "constants": [
+      "ARGF",
+      "ARGV",
+      "ArgumentError",
+      "Array",
+      "BasicObject",
+      "Binding",
+      "CROSS_COMPILING",
+      "Class",
+      "ClosedQueueError",
+      "Comparable",
+      "Complex",
+      "ConditionVariable",
+      "Data",
+      "DidYouMean",
+      "Dir",
+      "ENV",
+      "EOFError",
+      "Encoding",
+      "EncodingError",
+      "Enumerable",
+      "Enumerator",
+      "Errno",
+      "ErrorHighlight",
+      "Exception",
+      "FalseClass",
+      "Fiber",
+      "FiberError",
+      "File",
+      "FileTest",
+      "Float",
+      "FloatDomainError",
+      "FrozenError",
+      "GC",
+      "Gem",
+      "Hash",
+      "IO",
+      "IOError",
+      "IndexError",
+      "Integer",
+      "Interrupt",
+      "JSON",
+      "Kernel",
+      "KeyError",
+      "LoadError",
+      "LocalJumpError",
+      "Marshal",
+      "MatchData",
+      "Math",
+      "Method",
+      "Module",
+      "Monitor",
+      "MonitorMixin",
+      "Mutex",
+      "NameError",
+      "NilClass",
+      "NoMatchingPatternError",
+      "NoMatchingPatternKeyError",
+      "NoMemoryError",
+      "NoMethodError",
+      "NotImplementedError",
+      "Numeric",
+      "Object",
+      "ObjectSpace",
+      "OpenStruct",
+      "Proc",
+      "Process",
+      "Queue",
+      "RUBY_COPYRIGHT",
+      "RUBY_DESCRIPTION",
+      "RUBY_ENGINE",
+      "RUBY_ENGINE_VERSION",
+      "RUBY_PATCHLEVEL",
+      "RUBY_PLATFORM",
+      "RUBY_RELEASE_DATE",
+      "RUBY_REVISION",
+      "RUBY_VERSION",
+      "Ractor",
+      "Random",
+      "Range",
+      "RangeError",
+      "Rational",
+      "RbConfig",
+      "Refinement",
+      "Regexp",
+      "RegexpError",
+      "RubyVM",
+      "RuntimeError",
+      "STDERR",
+      "STDIN",
+      "STDOUT",
+      "ScriptError",
+      "SecurityError",
+      "Set",
+      "Signal",
+      "SignalException",
+      "SizedQueue",
+      "StandardError",
+      "StopIteration",
+      "String",
+      "Struct",
+      "Symbol",
+      "SyntaxError",
+      "SyntaxSuggest",
+      "SystemCallError",
+      "SystemExit",
+      "SystemStackError",
+      "TOPLEVEL_BINDING",
+      "Thread",
+      "ThreadError",
+      "ThreadGroup",
+      "Time",
+      "TracePoint",
+      "TrueClass",
+      "TypeError",
+      "UnboundMethod",
+      "UncaughtThrowError",
+      "UnicodeNormalize",
+      "Warning",
+      "ZeroDivisionError"
+    ]
+  },
+  "Kernel": {
+    "public_instance_methods": [
+      {
+        "name": "!~",
+        "arity": 1
+      },
+      {
+        "name": "<=>",
+        "arity": 1
+      },
+      {
+        "name": "===",
+        "arity": 1
+      },
+      {
+        "name": "class",
+        "arity": 0
+      },
+      {
+        "name": "clone",
+        "arity": -1
+      },
+      {
+        "name": "define_singleton_method",
+        "arity": -1
+      },
+      {
+        "name": "display",
+        "arity": -1
+      },
+      {
+        "name": "dup",
+        "arity": 0
+      },
+      {
+        "name": "enum_for",
+        "arity": -1
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "extend",
+        "arity": -1
+      },
+      {
+        "name": "freeze",
+        "arity": 0
+      },
+      {
+        "name": "frozen?",
+        "arity": 0
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "instance_of?",
+        "arity": 1
+      },
+      {
+        "name": "instance_variable_defined?",
+        "arity": 1
+      },
+      {
+        "name": "instance_variable_get",
+        "arity": 1
+      },
+      {
+        "name": "instance_variable_set",
+        "arity": 2
+      },
+      {
+        "name": "instance_variables",
+        "arity": 0
+      },
+      {
+        "name": "is_a?",
+        "arity": 1
+      },
+      {
+        "name": "itself",
+        "arity": 0
+      },
+      {
+        "name": "kind_of?",
+        "arity": 1
+      },
+      {
+        "name": "method",
+        "arity": 1
+      },
+      {
+        "name": "methods",
+        "arity": -1
+      },
+      {
+        "name": "nil?",
+        "arity": 0
+      },
+      {
+        "name": "object_id",
+        "arity": 0
+      },
+      {
+        "name": "private_methods",
+        "arity": -1
+      },
+      {
+        "name": "protected_methods",
+        "arity": -1
+      },
+      {
+        "name": "public_method",
+        "arity": 1
+      },
+      {
+        "name": "public_methods",
+        "arity": -1
+      },
+      {
+        "name": "public_send",
+        "arity": -1
+      },
+      {
+        "name": "remove_instance_variable",
+        "arity": 1
+      },
+      {
+        "name": "respond_to?",
+        "arity": -1
+      },
+      {
+        "name": "send",
+        "arity": -1
+      },
+      {
+        "name": "singleton_class",
+        "arity": 0
+      },
+      {
+        "name": "singleton_method",
+        "arity": 1
+      },
+      {
+        "name": "singleton_methods",
+        "arity": -1
+      },
+      {
+        "name": "tap",
+        "arity": 0
+      },
+      {
+        "name": "then",
+        "arity": 0
+      },
+      {
+        "name": "to_enum",
+        "arity": -1
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "yield_self",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "Array",
+        "arity": 1
+      },
+      {
+        "name": "Complex",
+        "arity": -1
+      },
+      {
+        "name": "Float",
+        "arity": -2
+      },
+      {
+        "name": "Hash",
+        "arity": 1
+      },
+      {
+        "name": "Integer",
+        "arity": -1
+      },
+      {
+        "name": "Rational",
+        "arity": -1
+      },
+      {
+        "name": "String",
+        "arity": 1
+      },
+      {
+        "name": "__callee__",
+        "arity": 0
+      },
+      {
+        "name": "__dir__",
+        "arity": 0
+      },
+      {
+        "name": "__method__",
+        "arity": 0
+      },
+      {
+        "name": "`",
+        "arity": 1
+      },
+      {
+        "name": "abort",
+        "arity": -1
+      },
+      {
+        "name": "at_exit",
+        "arity": 0
+      },
+      {
+        "name": "autoload",
+        "arity": 2
+      },
+      {
+        "name": "autoload?",
+        "arity": -1
+      },
+      {
+        "name": "binding",
+        "arity": 0
+      },
+      {
+        "name": "block_given?",
+        "arity": 0
+      },
+      {
+        "name": "caller",
+        "arity": -1
+      },
+      {
+        "name": "caller_locations",
+        "arity": -1
+      },
+      {
+        "name": "catch",
+        "arity": -1
+      },
+      {
+        "name": "eval",
+        "arity": -1
+      },
+      {
+        "name": "exec",
+        "arity": -1
+      },
+      {
+        "name": "exit",
+        "arity": -1
+      },
+      {
+        "name": "exit!",
+        "arity": -1
+      },
+      {
+        "name": "fail",
+        "arity": -1
+      },
+      {
+        "name": "fork",
+        "arity": 0
+      },
+      {
+        "name": "format",
+        "arity": -1
+      },
+      {
+        "name": "gets",
+        "arity": -1
+      },
+      {
+        "name": "global_variables",
+        "arity": 0
+      },
+      {
+        "name": "iterator?",
+        "arity": 0
+      },
+      {
+        "name": "lambda",
+        "arity": 0
+      },
+      {
+        "name": "load",
+        "arity": -1
+      },
+      {
+        "name": "local_variables",
+        "arity": 0
+      },
+      {
+        "name": "loop",
+        "arity": 0
+      },
+      {
+        "name": "open",
+        "arity": -1
+      },
+      {
+        "name": "p",
+        "arity": -1
+      },
+      {
+        "name": "print",
+        "arity": -1
+      },
+      {
+        "name": "printf",
+        "arity": -1
+      },
+      {
+        "name": "proc",
+        "arity": 0
+      },
+      {
+        "name": "putc",
+        "arity": 1
+      },
+      {
+        "name": "puts",
+        "arity": -1
+      },
+      {
+        "name": "raise",
+        "arity": -1
+      },
+      {
+        "name": "rand",
+        "arity": -1
+      },
+      {
+        "name": "readline",
+        "arity": -1
+      },
+      {
+        "name": "readlines",
+        "arity": -1
+      },
+      {
+        "name": "require",
+        "arity": 1
+      },
+      {
+        "name": "require_relative",
+        "arity": 1
+      },
+      {
+        "name": "select",
+        "arity": -1
+      },
+      {
+        "name": "set_trace_func",
+        "arity": 1
+      },
+      {
+        "name": "sleep",
+        "arity": -1
+      },
+      {
+        "name": "spawn",
+        "arity": -1
+      },
+      {
+        "name": "sprintf",
+        "arity": -1
+      },
+      {
+        "name": "srand",
+        "arity": -1
+      },
+      {
+        "name": "syscall",
+        "arity": -1
+      },
+      {
+        "name": "system",
+        "arity": -1
+      },
+      {
+        "name": "test",
+        "arity": -1
+      },
+      {
+        "name": "throw",
+        "arity": -1
+      },
+      {
+        "name": "trace_var",
+        "arity": -1
+      },
+      {
+        "name": "trap",
+        "arity": -1
+      },
+      {
+        "name": "untrace_var",
+        "arity": -1
+      },
+      {
+        "name": "warn",
+        "arity": -1
+      }
+    ],
+    "constants": [
+      "RUBYGEMS_ACTIVATION_MONITOR"
+    ]
+  },
+  "String": {
+    "public_instance_methods": [
+      {
+        "name": "%",
+        "arity": 1
+      },
+      {
+        "name": "*",
+        "arity": 1
+      },
+      {
+        "name": "+",
+        "arity": 1
+      },
+      {
+        "name": "+@",
+        "arity": 0
+      },
+      {
+        "name": "-@",
+        "arity": 0
+      },
+      {
+        "name": "<<",
+        "arity": 1
+      },
+      {
+        "name": "<=>",
+        "arity": 1
+      },
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "===",
+        "arity": 1
+      },
+      {
+        "name": "=~",
+        "arity": 1
+      },
+      {
+        "name": "[]",
+        "arity": -1
+      },
+      {
+        "name": "[]=",
+        "arity": -1
+      },
+      {
+        "name": "ascii_only?",
+        "arity": 0
+      },
+      {
+        "name": "b",
+        "arity": 0
+      },
+      {
+        "name": "byteindex",
+        "arity": -1
+      },
+      {
+        "name": "byterindex",
+        "arity": -1
+      },
+      {
+        "name": "bytes",
+        "arity": 0
+      },
+      {
+        "name": "bytesize",
+        "arity": 0
+      },
+      {
+        "name": "byteslice",
+        "arity": -1
+      },
+      {
+        "name": "bytesplice",
+        "arity": -1
+      },
+      {
+        "name": "capitalize",
+        "arity": -1
+      },
+      {
+        "name": "capitalize!",
+        "arity": -1
+      },
+      {
+        "name": "casecmp",
+        "arity": 1
+      },
+      {
+        "name": "casecmp?",
+        "arity": 1
+      },
+      {
+        "name": "center",
+        "arity": -1
+      },
+      {
+        "name": "chars",
+        "arity": 0
+      },
+      {
+        "name": "chomp",
+        "arity": -1
+      },
+      {
+        "name": "chomp!",
+        "arity": -1
+      },
+      {
+        "name": "chop",
+        "arity": 0
+      },
+      {
+        "name": "chop!",
+        "arity": 0
+      },
+      {
+        "name": "chr",
+        "arity": 0
+      },
+      {
+        "name": "clear",
+        "arity": 0
+      },
+      {
+        "name": "codepoints",
+        "arity": 0
+      },
+      {
+        "name": "concat",
+        "arity": -1
+      },
+      {
+        "name": "count",
+        "arity": -1
+      },
+      {
+        "name": "crypt",
+        "arity": 1
+      },
+      {
+        "name": "dedup",
+        "arity": 0
+      },
+      {
+        "name": "delete",
+        "arity": -1
+      },
+      {
+        "name": "delete!",
+        "arity": -1
+      },
+      {
+        "name": "delete_prefix",
+        "arity": 1
+      },
+      {
+        "name": "delete_prefix!",
+        "arity": 1
+      },
+      {
+        "name": "delete_suffix",
+        "arity": 1
+      },
+      {
+        "name": "delete_suffix!",
+        "arity": 1
+      },
+      {
+        "name": "downcase",
+        "arity": -1
+      },
+      {
+        "name": "downcase!",
+        "arity": -1
+      },
+      {
+        "name": "dump",
+        "arity": 0
+      },
+      {
+        "name": "each_byte",
+        "arity": 0
+      },
+      {
+        "name": "each_char",
+        "arity": 0
+      },
+      {
+        "name": "each_codepoint",
+        "arity": 0
+      },
+      {
+        "name": "each_grapheme_cluster",
+        "arity": 0
+      },
+      {
+        "name": "each_line",
+        "arity": -1
+      },
+      {
+        "name": "empty?",
+        "arity": 0
+      },
+      {
+        "name": "encode",
+        "arity": -1
+      },
+      {
+        "name": "encode!",
+        "arity": -1
+      },
+      {
+        "name": "encoding",
+        "arity": 0
+      },
+      {
+        "name": "end_with?",
+        "arity": -1
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "force_encoding",
+        "arity": 1
+      },
+      {
+        "name": "freeze",
+        "arity": 0
+      },
+      {
+        "name": "getbyte",
+        "arity": 1
+      },
+      {
+        "name": "grapheme_clusters",
+        "arity": 0
+      },
+      {
+        "name": "gsub",
+        "arity": -1
+      },
+      {
+        "name": "gsub!",
+        "arity": -1
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "hex",
+        "arity": 0
+      },
+      {
+        "name": "include?",
+        "arity": 1
+      },
+      {
+        "name": "index",
+        "arity": -1
+      },
+      {
+        "name": "insert",
+        "arity": 2
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "intern",
+        "arity": 0
+      },
+      {
+        "name": "length",
+        "arity": 0
+      },
+      {
+        "name": "lines",
+        "arity": -1
+      },
+      {
+        "name": "ljust",
+        "arity": -1
+      },
+      {
+        "name": "lstrip",
+        "arity": 0
+      },
+      {
+        "name": "lstrip!",
+        "arity": 0
+      },
+      {
+        "name": "match",
+        "arity": -1
+      },
+      {
+        "name": "match?",
+        "arity": -1
+      },
+      {
+        "name": "next",
+        "arity": 0
+      },
+      {
+        "name": "next!",
+        "arity": 0
+      },
+      {
+        "name": "oct",
+        "arity": 0
+      },
+      {
+        "name": "ord",
+        "arity": 0
+      },
+      {
+        "name": "partition",
+        "arity": 1
+      },
+      {
+        "name": "prepend",
+        "arity": -1
+      },
+      {
+        "name": "replace",
+        "arity": 1
+      },
+      {
+        "name": "reverse",
+        "arity": 0
+      },
+      {
+        "name": "reverse!",
+        "arity": 0
+      },
+      {
+        "name": "rindex",
+        "arity": -1
+      },
+      {
+        "name": "rjust",
+        "arity": -1
+      },
+      {
+        "name": "rpartition",
+        "arity": 1
+      },
+      {
+        "name": "rstrip",
+        "arity": 0
+      },
+      {
+        "name": "rstrip!",
+        "arity": 0
+      },
+      {
+        "name": "scan",
+        "arity": 1
+      },
+      {
+        "name": "scrub",
+        "arity": -1
+      },
+      {
+        "name": "scrub!",
+        "arity": -1
+      },
+      {
+        "name": "setbyte",
+        "arity": 2
+      },
+      {
+        "name": "size",
+        "arity": 0
+      },
+      {
+        "name": "slice",
+        "arity": -1
+      },
+      {
+        "name": "slice!",
+        "arity": -1
+      },
+      {
+        "name": "split",
+        "arity": -1
+      },
+      {
+        "name": "squeeze",
+        "arity": -1
+      },
+      {
+        "name": "squeeze!",
+        "arity": -1
+      },
+      {
+        "name": "start_with?",
+        "arity": -1
+      },
+      {
+        "name": "strip",
+        "arity": 0
+      },
+      {
+        "name": "strip!",
+        "arity": 0
+      },
+      {
+        "name": "sub",
+        "arity": -1
+      },
+      {
+        "name": "sub!",
+        "arity": -1
+      },
+      {
+        "name": "succ",
+        "arity": 0
+      },
+      {
+        "name": "succ!",
+        "arity": 0
+      },
+      {
+        "name": "sum",
+        "arity": -1
+      },
+      {
+        "name": "swapcase",
+        "arity": -1
+      },
+      {
+        "name": "swapcase!",
+        "arity": -1
+      },
+      {
+        "name": "to_c",
+        "arity": 0
+      },
+      {
+        "name": "to_f",
+        "arity": 0
+      },
+      {
+        "name": "to_i",
+        "arity": -1
+      },
+      {
+        "name": "to_r",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "to_str",
+        "arity": 0
+      },
+      {
+        "name": "to_sym",
+        "arity": 0
+      },
+      {
+        "name": "tr",
+        "arity": 2
+      },
+      {
+        "name": "tr!",
+        "arity": 2
+      },
+      {
+        "name": "tr_s",
+        "arity": 2
+      },
+      {
+        "name": "tr_s!",
+        "arity": 2
+      },
+      {
+        "name": "undump",
+        "arity": 0
+      },
+      {
+        "name": "unicode_normalize",
+        "arity": -1
+      },
+      {
+        "name": "unicode_normalize!",
+        "arity": -1
+      },
+      {
+        "name": "unicode_normalized?",
+        "arity": -1
+      },
+      {
+        "name": "unpack",
+        "arity": -2
+      },
+      {
+        "name": "unpack1",
+        "arity": -2
+      },
+      {
+        "name": "upcase",
+        "arity": -1
+      },
+      {
+        "name": "upcase!",
+        "arity": -1
+      },
+      {
+        "name": "upto",
+        "arity": -1
+      },
+      {
+        "name": "valid_encoding?",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "try_convert",
+        "arity": 1
+      }
+    ],
+    "constants": [
+
+    ]
+  },
+  "Array": {
+    "public_instance_methods": [
+      {
+        "name": "&",
+        "arity": 1
+      },
+      {
+        "name": "*",
+        "arity": 1
+      },
+      {
+        "name": "+",
+        "arity": 1
+      },
+      {
+        "name": "-",
+        "arity": 1
+      },
+      {
+        "name": "<<",
+        "arity": 1
+      },
+      {
+        "name": "<=>",
+        "arity": 1
+      },
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "[]",
+        "arity": -1
+      },
+      {
+        "name": "[]=",
+        "arity": -1
+      },
+      {
+        "name": "all?",
+        "arity": -1
+      },
+      {
+        "name": "any?",
+        "arity": -1
+      },
+      {
+        "name": "append",
+        "arity": -1
+      },
+      {
+        "name": "assoc",
+        "arity": 1
+      },
+      {
+        "name": "at",
+        "arity": 1
+      },
+      {
+        "name": "bsearch",
+        "arity": 0
+      },
+      {
+        "name": "bsearch_index",
+        "arity": 0
+      },
+      {
+        "name": "clear",
+        "arity": 0
+      },
+      {
+        "name": "collect",
+        "arity": 0
+      },
+      {
+        "name": "collect!",
+        "arity": 0
+      },
+      {
+        "name": "combination",
+        "arity": 1
+      },
+      {
+        "name": "compact",
+        "arity": 0
+      },
+      {
+        "name": "compact!",
+        "arity": 0
+      },
+      {
+        "name": "concat",
+        "arity": -1
+      },
+      {
+        "name": "count",
+        "arity": -1
+      },
+      {
+        "name": "cycle",
+        "arity": -1
+      },
+      {
+        "name": "deconstruct",
+        "arity": 0
+      },
+      {
+        "name": "delete",
+        "arity": 1
+      },
+      {
+        "name": "delete_at",
+        "arity": 1
+      },
+      {
+        "name": "delete_if",
+        "arity": 0
+      },
+      {
+        "name": "difference",
+        "arity": -1
+      },
+      {
+        "name": "dig",
+        "arity": -1
+      },
+      {
+        "name": "drop",
+        "arity": 1
+      },
+      {
+        "name": "drop_while",
+        "arity": 0
+      },
+      {
+        "name": "each",
+        "arity": 0
+      },
+      {
+        "name": "each_index",
+        "arity": 0
+      },
+      {
+        "name": "empty?",
+        "arity": 0
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "fetch",
+        "arity": -1
+      },
+      {
+        "name": "fill",
+        "arity": -1
+      },
+      {
+        "name": "filter",
+        "arity": 0
+      },
+      {
+        "name": "filter!",
+        "arity": 0
+      },
+      {
+        "name": "find_index",
+        "arity": -1
+      },
+      {
+        "name": "first",
+        "arity": -1
+      },
+      {
+        "name": "flatten",
+        "arity": -1
+      },
+      {
+        "name": "flatten!",
+        "arity": -1
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "include?",
+        "arity": 1
+      },
+      {
+        "name": "index",
+        "arity": -1
+      },
+      {
+        "name": "insert",
+        "arity": -1
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "intersect?",
+        "arity": 1
+      },
+      {
+        "name": "intersection",
+        "arity": -1
+      },
+      {
+        "name": "join",
+        "arity": -1
+      },
+      {
+        "name": "keep_if",
+        "arity": 0
+      },
+      {
+        "name": "last",
+        "arity": -1
+      },
+      {
+        "name": "length",
+        "arity": 0
+      },
+      {
+        "name": "map",
+        "arity": 0
+      },
+      {
+        "name": "map!",
+        "arity": 0
+      },
+      {
+        "name": "max",
+        "arity": -1
+      },
+      {
+        "name": "min",
+        "arity": -1
+      },
+      {
+        "name": "minmax",
+        "arity": 0
+      },
+      {
+        "name": "none?",
+        "arity": -1
+      },
+      {
+        "name": "one?",
+        "arity": -1
+      },
+      {
+        "name": "pack",
+        "arity": -2
+      },
+      {
+        "name": "permutation",
+        "arity": -1
+      },
+      {
+        "name": "pop",
+        "arity": -1
+      },
+      {
+        "name": "prepend",
+        "arity": -1
+      },
+      {
+        "name": "product",
+        "arity": -1
+      },
+      {
+        "name": "push",
+        "arity": -1
+      },
+      {
+        "name": "rassoc",
+        "arity": 1
+      },
+      {
+        "name": "reject",
+        "arity": 0
+      },
+      {
+        "name": "reject!",
+        "arity": 0
+      },
+      {
+        "name": "repeated_combination",
+        "arity": 1
+      },
+      {
+        "name": "repeated_permutation",
+        "arity": 1
+      },
+      {
+        "name": "replace",
+        "arity": 1
+      },
+      {
+        "name": "reverse",
+        "arity": 0
+      },
+      {
+        "name": "reverse!",
+        "arity": 0
+      },
+      {
+        "name": "reverse_each",
+        "arity": 0
+      },
+      {
+        "name": "rindex",
+        "arity": -1
+      },
+      {
+        "name": "rotate",
+        "arity": -1
+      },
+      {
+        "name": "rotate!",
+        "arity": -1
+      },
+      {
+        "name": "sample",
+        "arity": -1
+      },
+      {
+        "name": "select",
+        "arity": 0
+      },
+      {
+        "name": "select!",
+        "arity": 0
+      },
+      {
+        "name": "shift",
+        "arity": -1
+      },
+      {
+        "name": "shuffle",
+        "arity": -1
+      },
+      {
+        "name": "shuffle!",
+        "arity": -1
+      },
+      {
+        "name": "size",
+        "arity": 0
+      },
+      {
+        "name": "slice",
+        "arity": -1
+      },
+      {
+        "name": "slice!",
+        "arity": -1
+      },
+      {
+        "name": "sort",
+        "arity": 0
+      },
+      {
+        "name": "sort!",
+        "arity": 0
+      },
+      {
+        "name": "sort_by!",
+        "arity": 0
+      },
+      {
+        "name": "sum",
+        "arity": -1
+      },
+      {
+        "name": "take",
+        "arity": 1
+      },
+      {
+        "name": "take_while",
+        "arity": 0
+      },
+      {
+        "name": "to_a",
+        "arity": 0
+      },
+      {
+        "name": "to_ary",
+        "arity": 0
+      },
+      {
+        "name": "to_h",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "transpose",
+        "arity": 0
+      },
+      {
+        "name": "union",
+        "arity": -1
+      },
+      {
+        "name": "uniq",
+        "arity": 0
+      },
+      {
+        "name": "uniq!",
+        "arity": 0
+      },
+      {
+        "name": "unshift",
+        "arity": -1
+      },
+      {
+        "name": "values_at",
+        "arity": -1
+      },
+      {
+        "name": "zip",
+        "arity": -1
+      },
+      {
+        "name": "|",
+        "arity": 1
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "[]",
+        "arity": -1
+      },
+      {
+        "name": "new",
+        "arity": -1
+      },
+      {
+        "name": "try_convert",
+        "arity": 1
+      }
+    ],
+    "constants": [
+
+    ]
+  },
+  "Hash": {
+    "public_instance_methods": [
+      {
+        "name": "<",
+        "arity": 1
+      },
+      {
+        "name": "<=",
+        "arity": 1
+      },
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": ">",
+        "arity": 1
+      },
+      {
+        "name": ">=",
+        "arity": 1
+      },
+      {
+        "name": "[]",
+        "arity": 1
+      },
+      {
+        "name": "[]=",
+        "arity": 2
+      },
+      {
+        "name": "any?",
+        "arity": -1
+      },
+      {
+        "name": "assoc",
+        "arity": 1
+      },
+      {
+        "name": "clear",
+        "arity": 0
+      },
+      {
+        "name": "compact",
+        "arity": 0
+      },
+      {
+        "name": "compact!",
+        "arity": 0
+      },
+      {
+        "name": "compare_by_identity",
+        "arity": 0
+      },
+      {
+        "name": "compare_by_identity?",
+        "arity": 0
+      },
+      {
+        "name": "deconstruct_keys",
+        "arity": 1
+      },
+      {
+        "name": "default",
+        "arity": -1
+      },
+      {
+        "name": "default=",
+        "arity": 1
+      },
+      {
+        "name": "default_proc",
+        "arity": 0
+      },
+      {
+        "name": "default_proc=",
+        "arity": 1
+      },
+      {
+        "name": "delete",
+        "arity": 1
+      },
+      {
+        "name": "delete_if",
+        "arity": 0
+      },
+      {
+        "name": "dig",
+        "arity": -1
+      },
+      {
+        "name": "each",
+        "arity": 0
+      },
+      {
+        "name": "each_key",
+        "arity": 0
+      },
+      {
+        "name": "each_pair",
+        "arity": 0
+      },
+      {
+        "name": "each_value",
+        "arity": 0
+      },
+      {
+        "name": "empty?",
+        "arity": 0
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "except",
+        "arity": -1
+      },
+      {
+        "name": "fetch",
+        "arity": -1
+      },
+      {
+        "name": "fetch_values",
+        "arity": -1
+      },
+      {
+        "name": "filter",
+        "arity": 0
+      },
+      {
+        "name": "filter!",
+        "arity": 0
+      },
+      {
+        "name": "flatten",
+        "arity": -1
+      },
+      {
+        "name": "has_key?",
+        "arity": 1
+      },
+      {
+        "name": "has_value?",
+        "arity": 1
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "include?",
+        "arity": 1
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "invert",
+        "arity": 0
+      },
+      {
+        "name": "keep_if",
+        "arity": 0
+      },
+      {
+        "name": "key",
+        "arity": 1
+      },
+      {
+        "name": "key?",
+        "arity": 1
+      },
+      {
+        "name": "keys",
+        "arity": 0
+      },
+      {
+        "name": "length",
+        "arity": 0
+      },
+      {
+        "name": "member?",
+        "arity": 1
+      },
+      {
+        "name": "merge",
+        "arity": -1
+      },
+      {
+        "name": "merge!",
+        "arity": -1
+      },
+      {
+        "name": "rassoc",
+        "arity": 1
+      },
+      {
+        "name": "rehash",
+        "arity": 0
+      },
+      {
+        "name": "reject",
+        "arity": 0
+      },
+      {
+        "name": "reject!",
+        "arity": 0
+      },
+      {
+        "name": "replace",
+        "arity": 1
+      },
+      {
+        "name": "select",
+        "arity": 0
+      },
+      {
+        "name": "select!",
+        "arity": 0
+      },
+      {
+        "name": "shift",
+        "arity": 0
+      },
+      {
+        "name": "size",
+        "arity": 0
+      },
+      {
+        "name": "slice",
+        "arity": -1
+      },
+      {
+        "name": "store",
+        "arity": 2
+      },
+      {
+        "name": "to_a",
+        "arity": 0
+      },
+      {
+        "name": "to_h",
+        "arity": 0
+      },
+      {
+        "name": "to_hash",
+        "arity": 0
+      },
+      {
+        "name": "to_proc",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "transform_keys",
+        "arity": -1
+      },
+      {
+        "name": "transform_keys!",
+        "arity": -1
+      },
+      {
+        "name": "transform_values",
+        "arity": 0
+      },
+      {
+        "name": "transform_values!",
+        "arity": 0
+      },
+      {
+        "name": "update",
+        "arity": -1
+      },
+      {
+        "name": "value?",
+        "arity": 1
+      },
+      {
+        "name": "values",
+        "arity": 0
+      },
+      {
+        "name": "values_at",
+        "arity": -1
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "[]",
+        "arity": -1
+      },
+      {
+        "name": "ruby2_keywords_hash",
+        "arity": 1
+      },
+      {
+        "name": "ruby2_keywords_hash?",
+        "arity": 1
+      },
+      {
+        "name": "try_convert",
+        "arity": 1
+      }
+    ],
+    "constants": [
+
+    ]
+  },
+  "Integer": {
+    "public_instance_methods": [
+      {
+        "name": "%",
+        "arity": 1
+      },
+      {
+        "name": "&",
+        "arity": 1
+      },
+      {
+        "name": "*",
+        "arity": 1
+      },
+      {
+        "name": "**",
+        "arity": 1
+      },
+      {
+        "name": "+",
+        "arity": 1
+      },
+      {
+        "name": "-",
+        "arity": 1
+      },
+      {
+        "name": "-@",
+        "arity": 0
+      },
+      {
+        "name": "/",
+        "arity": 1
+      },
+      {
+        "name": "<",
+        "arity": 1
+      },
+      {
+        "name": "<<",
+        "arity": 1
+      },
+      {
+        "name": "<=",
+        "arity": 1
+      },
+      {
+        "name": "<=>",
+        "arity": 1
+      },
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "===",
+        "arity": 1
+      },
+      {
+        "name": ">",
+        "arity": 1
+      },
+      {
+        "name": ">=",
+        "arity": 1
+      },
+      {
+        "name": ">>",
+        "arity": 1
+      },
+      {
+        "name": "[]",
+        "arity": -1
+      },
+      {
+        "name": "^",
+        "arity": 1
+      },
+      {
+        "name": "abs",
+        "arity": 0
+      },
+      {
+        "name": "allbits?",
+        "arity": 1
+      },
+      {
+        "name": "anybits?",
+        "arity": 1
+      },
+      {
+        "name": "bit_length",
+        "arity": 0
+      },
+      {
+        "name": "ceil",
+        "arity": -1
+      },
+      {
+        "name": "ceildiv",
+        "arity": 1
+      },
+      {
+        "name": "chr",
+        "arity": -1
+      },
+      {
+        "name": "coerce",
+        "arity": 1
+      },
+      {
+        "name": "denominator",
+        "arity": 0
+      },
+      {
+        "name": "digits",
+        "arity": -1
+      },
+      {
+        "name": "div",
+        "arity": 1
+      },
+      {
+        "name": "divmod",
+        "arity": 1
+      },
+      {
+        "name": "downto",
+        "arity": 1
+      },
+      {
+        "name": "even?",
+        "arity": 0
+      },
+      {
+        "name": "fdiv",
+        "arity": 1
+      },
+      {
+        "name": "floor",
+        "arity": -1
+      },
+      {
+        "name": "gcd",
+        "arity": 1
+      },
+      {
+        "name": "gcdlcm",
+        "arity": 1
+      },
+      {
+        "name": "inspect",
+        "arity": -1
+      },
+      {
+        "name": "integer?",
+        "arity": 0
+      },
+      {
+        "name": "lcm",
+        "arity": 1
+      },
+      {
+        "name": "magnitude",
+        "arity": 0
+      },
+      {
+        "name": "modulo",
+        "arity": 1
+      },
+      {
+        "name": "next",
+        "arity": 0
+      },
+      {
+        "name": "nobits?",
+        "arity": 1
+      },
+      {
+        "name": "numerator",
+        "arity": 0
+      },
+      {
+        "name": "odd?",
+        "arity": 0
+      },
+      {
+        "name": "ord",
+        "arity": 0
+      },
+      {
+        "name": "pow",
+        "arity": -1
+      },
+      {
+        "name": "pred",
+        "arity": 0
+      },
+      {
+        "name": "rationalize",
+        "arity": -1
+      },
+      {
+        "name": "remainder",
+        "arity": 1
+      },
+      {
+        "name": "round",
+        "arity": -1
+      },
+      {
+        "name": "size",
+        "arity": 0
+      },
+      {
+        "name": "succ",
+        "arity": 0
+      },
+      {
+        "name": "times",
+        "arity": 0
+      },
+      {
+        "name": "to_f",
+        "arity": 0
+      },
+      {
+        "name": "to_i",
+        "arity": 0
+      },
+      {
+        "name": "to_int",
+        "arity": 0
+      },
+      {
+        "name": "to_r",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": -1
+      },
+      {
+        "name": "truncate",
+        "arity": -1
+      },
+      {
+        "name": "upto",
+        "arity": 1
+      },
+      {
+        "name": "zero?",
+        "arity": 0
+      },
+      {
+        "name": "|",
+        "arity": 1
+      },
+      {
+        "name": "~",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "sqrt",
+        "arity": 1
+      },
+      {
+        "name": "try_convert",
+        "arity": 1
+      }
+    ],
+    "constants": [
+      "GMP_VERSION"
+    ]
+  },
+  "Float": {
+    "public_instance_methods": [
+      {
+        "name": "%",
+        "arity": 1
+      },
+      {
+        "name": "*",
+        "arity": 1
+      },
+      {
+        "name": "**",
+        "arity": 1
+      },
+      {
+        "name": "+",
+        "arity": 1
+      },
+      {
+        "name": "-",
+        "arity": 1
+      },
+      {
+        "name": "-@",
+        "arity": 0
+      },
+      {
+        "name": "/",
+        "arity": 1
+      },
+      {
+        "name": "<",
+        "arity": 1
+      },
+      {
+        "name": "<=",
+        "arity": 1
+      },
+      {
+        "name": "<=>",
+        "arity": 1
+      },
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "===",
+        "arity": 1
+      },
+      {
+        "name": ">",
+        "arity": 1
+      },
+      {
+        "name": ">=",
+        "arity": 1
+      },
+      {
+        "name": "abs",
+        "arity": 0
+      },
+      {
+        "name": "angle",
+        "arity": 0
+      },
+      {
+        "name": "arg",
+        "arity": 0
+      },
+      {
+        "name": "ceil",
+        "arity": -1
+      },
+      {
+        "name": "coerce",
+        "arity": 1
+      },
+      {
+        "name": "denominator",
+        "arity": 0
+      },
+      {
+        "name": "divmod",
+        "arity": 1
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "fdiv",
+        "arity": 1
+      },
+      {
+        "name": "finite?",
+        "arity": 0
+      },
+      {
+        "name": "floor",
+        "arity": -1
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "infinite?",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "magnitude",
+        "arity": 0
+      },
+      {
+        "name": "modulo",
+        "arity": 1
+      },
+      {
+        "name": "nan?",
+        "arity": 0
+      },
+      {
+        "name": "negative?",
+        "arity": 0
+      },
+      {
+        "name": "next_float",
+        "arity": 0
+      },
+      {
+        "name": "numerator",
+        "arity": 0
+      },
+      {
+        "name": "phase",
+        "arity": 0
+      },
+      {
+        "name": "positive?",
+        "arity": 0
+      },
+      {
+        "name": "prev_float",
+        "arity": 0
+      },
+      {
+        "name": "quo",
+        "arity": 1
+      },
+      {
+        "name": "rationalize",
+        "arity": -1
+      },
+      {
+        "name": "round",
+        "arity": -1
+      },
+      {
+        "name": "to_f",
+        "arity": 0
+      },
+      {
+        "name": "to_i",
+        "arity": 0
+      },
+      {
+        "name": "to_int",
+        "arity": 0
+      },
+      {
+        "name": "to_r",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "truncate",
+        "arity": -1
+      },
+      {
+        "name": "zero?",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+
+    ],
+    "constants": [
+      "DIG",
+      "EPSILON",
+      "INFINITY",
+      "MANT_DIG",
+      "MAX",
+      "MAX_10_EXP",
+      "MAX_EXP",
+      "MIN",
+      "MIN_10_EXP",
+      "MIN_EXP",
+      "NAN",
+      "RADIX"
+    ]
+  },
+  "Range": {
+    "public_instance_methods": [
+      {
+        "name": "%",
+        "arity": 1
+      },
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "===",
+        "arity": 1
+      },
+      {
+        "name": "begin",
+        "arity": 0
+      },
+      {
+        "name": "bsearch",
+        "arity": 0
+      },
+      {
+        "name": "count",
+        "arity": -1
+      },
+      {
+        "name": "cover?",
+        "arity": 1
+      },
+      {
+        "name": "each",
+        "arity": 0
+      },
+      {
+        "name": "end",
+        "arity": 0
+      },
+      {
+        "name": "entries",
+        "arity": 0
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "exclude_end?",
+        "arity": 0
+      },
+      {
+        "name": "first",
+        "arity": -1
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "include?",
+        "arity": 1
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "last",
+        "arity": -1
+      },
+      {
+        "name": "max",
+        "arity": -1
+      },
+      {
+        "name": "member?",
+        "arity": 1
+      },
+      {
+        "name": "min",
+        "arity": -1
+      },
+      {
+        "name": "minmax",
+        "arity": 0
+      },
+      {
+        "name": "size",
+        "arity": 0
+      },
+      {
+        "name": "step",
+        "arity": -1
+      },
+      {
+        "name": "to_a",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+
+    ],
+    "constants": [
+
+    ]
+  },
+  "Struct": {
+    "public_instance_methods": [
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "[]",
+        "arity": 1
+      },
+      {
+        "name": "[]=",
+        "arity": 2
+      },
+      {
+        "name": "deconstruct",
+        "arity": 0
+      },
+      {
+        "name": "deconstruct_keys",
+        "arity": 1
+      },
+      {
+        "name": "dig",
+        "arity": -1
+      },
+      {
+        "name": "each",
+        "arity": 0
+      },
+      {
+        "name": "each_pair",
+        "arity": 0
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "filter",
+        "arity": -1
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "length",
+        "arity": 0
+      },
+      {
+        "name": "members",
+        "arity": 0
+      },
+      {
+        "name": "select",
+        "arity": -1
+      },
+      {
+        "name": "size",
+        "arity": 0
+      },
+      {
+        "name": "to_a",
+        "arity": 0
+      },
+      {
+        "name": "to_h",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "values",
+        "arity": 0
+      },
+      {
+        "name": "values_at",
+        "arity": -1
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "new",
+        "arity": -1
+      }
+    ],
+    "constants": [
+
+    ]
+  },
+  "Time": {
+    "public_instance_methods": [
+      {
+        "name": "+",
+        "arity": 1
+      },
+      {
+        "name": "-",
+        "arity": 1
+      },
+      {
+        "name": "<=>",
+        "arity": 1
+      },
+      {
+        "name": "asctime",
+        "arity": 0
+      },
+      {
+        "name": "ceil",
+        "arity": -1
+      },
+      {
+        "name": "ctime",
+        "arity": 0
+      },
+      {
+        "name": "day",
+        "arity": 0
+      },
+      {
+        "name": "deconstruct_keys",
+        "arity": 1
+      },
+      {
+        "name": "dst?",
+        "arity": 0
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "floor",
+        "arity": -1
+      },
+      {
+        "name": "friday?",
+        "arity": 0
+      },
+      {
+        "name": "getgm",
+        "arity": 0
+      },
+      {
+        "name": "getlocal",
+        "arity": -1
+      },
+      {
+        "name": "getutc",
+        "arity": 0
+      },
+      {
+        "name": "gmt?",
+        "arity": 0
+      },
+      {
+        "name": "gmt_offset",
+        "arity": 0
+      },
+      {
+        "name": "gmtime",
+        "arity": 0
+      },
+      {
+        "name": "gmtoff",
+        "arity": 0
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "hour",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "isdst",
+        "arity": 0
+      },
+      {
+        "name": "localtime",
+        "arity": -1
+      },
+      {
+        "name": "mday",
+        "arity": 0
+      },
+      {
+        "name": "min",
+        "arity": 0
+      },
+      {
+        "name": "mon",
+        "arity": 0
+      },
+      {
+        "name": "monday?",
+        "arity": 0
+      },
+      {
+        "name": "month",
+        "arity": 0
+      },
+      {
+        "name": "nsec",
+        "arity": 0
+      },
+      {
+        "name": "round",
+        "arity": -1
+      },
+      {
+        "name": "saturday?",
+        "arity": 0
+      },
+      {
+        "name": "sec",
+        "arity": 0
+      },
+      {
+        "name": "strftime",
+        "arity": 1
+      },
+      {
+        "name": "subsec",
+        "arity": 0
+      },
+      {
+        "name": "sunday?",
+        "arity": 0
+      },
+      {
+        "name": "thursday?",
+        "arity": 0
+      },
+      {
+        "name": "to_a",
+        "arity": 0
+      },
+      {
+        "name": "to_f",
+        "arity": 0
+      },
+      {
+        "name": "to_i",
+        "arity": 0
+      },
+      {
+        "name": "to_r",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "tuesday?",
+        "arity": 0
+      },
+      {
+        "name": "tv_nsec",
+        "arity": 0
+      },
+      {
+        "name": "tv_sec",
+        "arity": 0
+      },
+      {
+        "name": "tv_usec",
+        "arity": 0
+      },
+      {
+        "name": "usec",
+        "arity": 0
+      },
+      {
+        "name": "utc",
+        "arity": 0
+      },
+      {
+        "name": "utc?",
+        "arity": 0
+      },
+      {
+        "name": "utc_offset",
+        "arity": 0
+      },
+      {
+        "name": "wday",
+        "arity": 0
+      },
+      {
+        "name": "wednesday?",
+        "arity": 0
+      },
+      {
+        "name": "yday",
+        "arity": 0
+      },
+      {
+        "name": "year",
+        "arity": 0
+      },
+      {
+        "name": "zone",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "at",
+        "arity": -2
+      },
+      {
+        "name": "gm",
+        "arity": -1
+      },
+      {
+        "name": "local",
+        "arity": -1
+      },
+      {
+        "name": "mktime",
+        "arity": -1
+      },
+      {
+        "name": "now",
+        "arity": -1
+      },
+      {
+        "name": "utc",
+        "arity": -1
+      }
+    ],
+    "constants": [
+
+    ]
+  },
+  "Comparable": {
+    "public_instance_methods": [
+      {
+        "name": "<",
+        "arity": 1
+      },
+      {
+        "name": "<=",
+        "arity": 1
+      },
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": ">",
+        "arity": 1
+      },
+      {
+        "name": ">=",
+        "arity": 1
+      },
+      {
+        "name": "between?",
+        "arity": 2
+      },
+      {
+        "name": "clamp",
+        "arity": -1
+      }
+    ],
+    "singleton_methods": [
+
+    ],
+    "constants": [
+
+    ]
+  },
+  "Enumerable": {
+    "public_instance_methods": [
+      {
+        "name": "all?",
+        "arity": -1
+      },
+      {
+        "name": "any?",
+        "arity": -1
+      },
+      {
+        "name": "chain",
+        "arity": -1
+      },
+      {
+        "name": "chunk",
+        "arity": 0
+      },
+      {
+        "name": "chunk_while",
+        "arity": 0
+      },
+      {
+        "name": "collect",
+        "arity": 0
+      },
+      {
+        "name": "collect_concat",
+        "arity": 0
+      },
+      {
+        "name": "compact",
+        "arity": 0
+      },
+      {
+        "name": "count",
+        "arity": -1
+      },
+      {
+        "name": "cycle",
+        "arity": -1
+      },
+      {
+        "name": "detect",
+        "arity": -1
+      },
+      {
+        "name": "drop",
+        "arity": 1
+      },
+      {
+        "name": "drop_while",
+        "arity": 0
+      },
+      {
+        "name": "each_cons",
+        "arity": 1
+      },
+      {
+        "name": "each_entry",
+        "arity": -1
+      },
+      {
+        "name": "each_slice",
+        "arity": 1
+      },
+      {
+        "name": "each_with_index",
+        "arity": -1
+      },
+      {
+        "name": "each_with_object",
+        "arity": 1
+      },
+      {
+        "name": "entries",
+        "arity": -1
+      },
+      {
+        "name": "filter",
+        "arity": 0
+      },
+      {
+        "name": "filter_map",
+        "arity": 0
+      },
+      {
+        "name": "find",
+        "arity": -1
+      },
+      {
+        "name": "find_all",
+        "arity": 0
+      },
+      {
+        "name": "find_index",
+        "arity": -1
+      },
+      {
+        "name": "first",
+        "arity": -1
+      },
+      {
+        "name": "flat_map",
+        "arity": 0
+      },
+      {
+        "name": "grep",
+        "arity": 1
+      },
+      {
+        "name": "grep_v",
+        "arity": 1
+      },
+      {
+        "name": "group_by",
+        "arity": 0
+      },
+      {
+        "name": "include?",
+        "arity": 1
+      },
+      {
+        "name": "inject",
+        "arity": -1
+      },
+      {
+        "name": "lazy",
+        "arity": 0
+      },
+      {
+        "name": "map",
+        "arity": 0
+      },
+      {
+        "name": "max",
+        "arity": -1
+      },
+      {
+        "name": "max_by",
+        "arity": -1
+      },
+      {
+        "name": "member?",
+        "arity": 1
+      },
+      {
+        "name": "min",
+        "arity": -1
+      },
+      {
+        "name": "min_by",
+        "arity": -1
+      },
+      {
+        "name": "minmax",
+        "arity": 0
+      },
+      {
+        "name": "minmax_by",
+        "arity": 0
+      },
+      {
+        "name": "none?",
+        "arity": -1
+      },
+      {
+        "name": "one?",
+        "arity": -1
+      },
+      {
+        "name": "partition",
+        "arity": 0
+      },
+      {
+        "name": "reduce",
+        "arity": -1
+      },
+      {
+        "name": "reject",
+        "arity": 0
+      },
+      {
+        "name": "reverse_each",
+        "arity": -1
+      },
+      {
+        "name": "select",
+        "arity": 0
+      },
+      {
+        "name": "slice_after",
+        "arity": -1
+      },
+      {
+        "name": "slice_before",
+        "arity": -1
+      },
+      {
+        "name": "slice_when",
+        "arity": 0
+      },
+      {
+        "name": "sort",
+        "arity": 0
+      },
+      {
+        "name": "sort_by",
+        "arity": 0
+      },
+      {
+        "name": "sum",
+        "arity": -1
+      },
+      {
+        "name": "take",
+        "arity": 1
+      },
+      {
+        "name": "take_while",
+        "arity": 0
+      },
+      {
+        "name": "tally",
+        "arity": -1
+      },
+      {
+        "name": "to_a",
+        "arity": -1
+      },
+      {
+        "name": "to_h",
+        "arity": -1
+      },
+      {
+        "name": "to_set",
+        "arity": -1
+      },
+      {
+        "name": "uniq",
+        "arity": 0
+      },
+      {
+        "name": "zip",
+        "arity": -1
+      }
+    ],
+    "singleton_methods": [
+
+    ],
+    "constants": [
+
+    ]
+  },
+  "Symbol": {
+    "public_instance_methods": [
+      {
+        "name": "<=>",
+        "arity": 1
+      },
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "===",
+        "arity": 1
+      },
+      {
+        "name": "=~",
+        "arity": 1
+      },
+      {
+        "name": "[]",
+        "arity": -1
+      },
+      {
+        "name": "capitalize",
+        "arity": -1
+      },
+      {
+        "name": "casecmp",
+        "arity": 1
+      },
+      {
+        "name": "casecmp?",
+        "arity": 1
+      },
+      {
+        "name": "downcase",
+        "arity": -1
+      },
+      {
+        "name": "empty?",
+        "arity": 0
+      },
+      {
+        "name": "encoding",
+        "arity": 0
+      },
+      {
+        "name": "end_with?",
+        "arity": -1
+      },
+      {
+        "name": "id2name",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "intern",
+        "arity": 0
+      },
+      {
+        "name": "length",
+        "arity": 0
+      },
+      {
+        "name": "match",
+        "arity": -1
+      },
+      {
+        "name": "match?",
+        "arity": -1
+      },
+      {
+        "name": "name",
+        "arity": 0
+      },
+      {
+        "name": "next",
+        "arity": 0
+      },
+      {
+        "name": "size",
+        "arity": 0
+      },
+      {
+        "name": "slice",
+        "arity": -1
+      },
+      {
+        "name": "start_with?",
+        "arity": -1
+      },
+      {
+        "name": "succ",
+        "arity": 0
+      },
+      {
+        "name": "swapcase",
+        "arity": -1
+      },
+      {
+        "name": "to_proc",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "to_sym",
+        "arity": 0
+      },
+      {
+        "name": "upcase",
+        "arity": -1
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "all_symbols",
+        "arity": 0
+      }
+    ],
+    "constants": [
+
+    ]
+  },
+  "Numeric": {
+    "public_instance_methods": [
+      {
+        "name": "%",
+        "arity": 1
+      },
+      {
+        "name": "+@",
+        "arity": 0
+      },
+      {
+        "name": "-@",
+        "arity": 0
+      },
+      {
+        "name": "<=>",
+        "arity": 1
+      },
+      {
+        "name": "abs",
+        "arity": 0
+      },
+      {
+        "name": "abs2",
+        "arity": 0
+      },
+      {
+        "name": "angle",
+        "arity": 0
+      },
+      {
+        "name": "arg",
+        "arity": 0
+      },
+      {
+        "name": "ceil",
+        "arity": -1
+      },
+      {
+        "name": "clone",
+        "arity": -1
+      },
+      {
+        "name": "coerce",
+        "arity": 1
+      },
+      {
+        "name": "conj",
+        "arity": 0
+      },
+      {
+        "name": "conjugate",
+        "arity": 0
+      },
+      {
+        "name": "denominator",
+        "arity": 0
+      },
+      {
+        "name": "div",
+        "arity": 1
+      },
+      {
+        "name": "divmod",
+        "arity": 1
+      },
+      {
+        "name": "dup",
+        "arity": 0
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "fdiv",
+        "arity": 1
+      },
+      {
+        "name": "finite?",
+        "arity": 0
+      },
+      {
+        "name": "floor",
+        "arity": -1
+      },
+      {
+        "name": "i",
+        "arity": 0
+      },
+      {
+        "name": "imag",
+        "arity": 0
+      },
+      {
+        "name": "imaginary",
+        "arity": 0
+      },
+      {
+        "name": "infinite?",
+        "arity": 0
+      },
+      {
+        "name": "integer?",
+        "arity": 0
+      },
+      {
+        "name": "magnitude",
+        "arity": 0
+      },
+      {
+        "name": "modulo",
+        "arity": 1
+      },
+      {
+        "name": "negative?",
+        "arity": 0
+      },
+      {
+        "name": "nonzero?",
+        "arity": 0
+      },
+      {
+        "name": "numerator",
+        "arity": 0
+      },
+      {
+        "name": "phase",
+        "arity": 0
+      },
+      {
+        "name": "polar",
+        "arity": 0
+      },
+      {
+        "name": "positive?",
+        "arity": 0
+      },
+      {
+        "name": "quo",
+        "arity": 1
+      },
+      {
+        "name": "real",
+        "arity": 0
+      },
+      {
+        "name": "real?",
+        "arity": 0
+      },
+      {
+        "name": "rect",
+        "arity": 0
+      },
+      {
+        "name": "rectangular",
+        "arity": 0
+      },
+      {
+        "name": "remainder",
+        "arity": 1
+      },
+      {
+        "name": "round",
+        "arity": -1
+      },
+      {
+        "name": "singleton_method_added",
+        "arity": 1
+      },
+      {
+        "name": "step",
+        "arity": -1
+      },
+      {
+        "name": "to_c",
+        "arity": 0
+      },
+      {
+        "name": "to_int",
+        "arity": 0
+      },
+      {
+        "name": "truncate",
+        "arity": -1
+      },
+      {
+        "name": "zero?",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+
+    ],
+    "constants": [
+
+    ]
+  },
+  "Regexp": {
+    "public_instance_methods": [
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "===",
+        "arity": 1
+      },
+      {
+        "name": "=~",
+        "arity": 1
+      },
+      {
+        "name": "casefold?",
+        "arity": 0
+      },
+      {
+        "name": "encoding",
+        "arity": 0
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "fixed_encoding?",
+        "arity": 0
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "match",
+        "arity": -1
+      },
+      {
+        "name": "match?",
+        "arity": -1
+      },
+      {
+        "name": "named_captures",
+        "arity": 0
+      },
+      {
+        "name": "names",
+        "arity": 0
+      },
+      {
+        "name": "options",
+        "arity": 0
+      },
+      {
+        "name": "source",
+        "arity": 0
+      },
+      {
+        "name": "timeout",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "~",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "compile",
+        "arity": -1
+      },
+      {
+        "name": "escape",
+        "arity": 1
+      },
+      {
+        "name": "last_match",
+        "arity": -1
+      },
+      {
+        "name": "linear_time?",
+        "arity": -1
+      },
+      {
+        "name": "quote",
+        "arity": 1
+      },
+      {
+        "name": "timeout",
+        "arity": 0
+      },
+      {
+        "name": "timeout=",
+        "arity": 1
+      },
+      {
+        "name": "try_convert",
+        "arity": 1
+      },
+      {
+        "name": "union",
+        "arity": -1
+      }
+    ],
+    "constants": [
+      "EXTENDED",
+      "FIXEDENCODING",
+      "IGNORECASE",
+      "MULTILINE",
+      "NOENCODING",
+      "TimeoutError"
+    ]
+  },
+  "MatchData": {
+    "public_instance_methods": [
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "[]",
+        "arity": -1
+      },
+      {
+        "name": "begin",
+        "arity": 1
+      },
+      {
+        "name": "byteoffset",
+        "arity": 1
+      },
+      {
+        "name": "captures",
+        "arity": 0
+      },
+      {
+        "name": "deconstruct",
+        "arity": 0
+      },
+      {
+        "name": "deconstruct_keys",
+        "arity": 1
+      },
+      {
+        "name": "end",
+        "arity": 1
+      },
+      {
+        "name": "eql?",
+        "arity": 1
+      },
+      {
+        "name": "hash",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "length",
+        "arity": 0
+      },
+      {
+        "name": "match",
+        "arity": 1
+      },
+      {
+        "name": "match_length",
+        "arity": 1
+      },
+      {
+        "name": "named_captures",
+        "arity": 0
+      },
+      {
+        "name": "names",
+        "arity": 0
+      },
+      {
+        "name": "offset",
+        "arity": 1
+      },
+      {
+        "name": "post_match",
+        "arity": 0
+      },
+      {
+        "name": "pre_match",
+        "arity": 0
+      },
+      {
+        "name": "regexp",
+        "arity": 0
+      },
+      {
+        "name": "size",
+        "arity": 0
+      },
+      {
+        "name": "string",
+        "arity": 0
+      },
+      {
+        "name": "to_a",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "values_at",
+        "arity": -1
+      }
+    ],
+    "singleton_methods": [
+
+    ],
+    "constants": [
+
+    ]
+  },
+  "File": {
+    "public_instance_methods": [
+      {
+        "name": "atime",
+        "arity": 0
+      },
+      {
+        "name": "birthtime",
+        "arity": 0
+      },
+      {
+        "name": "chmod",
+        "arity": 1
+      },
+      {
+        "name": "chown",
+        "arity": 2
+      },
+      {
+        "name": "ctime",
+        "arity": 0
+      },
+      {
+        "name": "flock",
+        "arity": 1
+      },
+      {
+        "name": "lstat",
+        "arity": 0
+      },
+      {
+        "name": "mtime",
+        "arity": 0
+      },
+      {
+        "name": "size",
+        "arity": 0
+      },
+      {
+        "name": "truncate",
+        "arity": 1
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "absolute_path",
+        "arity": -1
+      },
+      {
+        "name": "absolute_path?",
+        "arity": 1
+      },
+      {
+        "name": "atime",
+        "arity": 1
+      },
+      {
+        "name": "basename",
+        "arity": -1
+      },
+      {
+        "name": "birthtime",
+        "arity": 1
+      },
+      {
+        "name": "blockdev?",
+        "arity": 1
+      },
+      {
+        "name": "chardev?",
+        "arity": 1
+      },
+      {
+        "name": "chmod",
+        "arity": -1
+      },
+      {
+        "name": "chown",
+        "arity": -1
+      },
+      {
+        "name": "ctime",
+        "arity": 1
+      },
+      {
+        "name": "delete",
+        "arity": -1
+      },
+      {
+        "name": "directory?",
+        "arity": 1
+      },
+      {
+        "name": "dirname",
+        "arity": -1
+      },
+      {
+        "name": "empty?",
+        "arity": 1
+      },
+      {
+        "name": "executable?",
+        "arity": 1
+      },
+      {
+        "name": "executable_real?",
+        "arity": 1
+      },
+      {
+        "name": "exist?",
+        "arity": 1
+      },
+      {
+        "name": "expand_path",
+        "arity": -1
+      },
+      {
+        "name": "extname",
+        "arity": 1
+      },
+      {
+        "name": "file?",
+        "arity": 1
+      },
+      {
+        "name": "fnmatch",
+        "arity": -1
+      },
+      {
+        "name": "fnmatch?",
+        "arity": -1
+      },
+      {
+        "name": "ftype",
+        "arity": 1
+      },
+      {
+        "name": "grpowned?",
+        "arity": 1
+      },
+      {
+        "name": "identical?",
+        "arity": 2
+      },
+      {
+        "name": "join",
+        "arity": -1
+      },
+      {
+        "name": "lchmod",
+        "arity": -1
+      },
+      {
+        "name": "lchown",
+        "arity": -1
+      },
+      {
+        "name": "link",
+        "arity": 2
+      },
+      {
+        "name": "lstat",
+        "arity": 1
+      },
+      {
+        "name": "lutime",
+        "arity": -1
+      },
+      {
+        "name": "mkfifo",
+        "arity": -1
+      },
+      {
+        "name": "mtime",
+        "arity": 1
+      },
+      {
+        "name": "owned?",
+        "arity": 1
+      },
+      {
+        "name": "path",
+        "arity": 1
+      },
+      {
+        "name": "pipe?",
+        "arity": 1
+      },
+      {
+        "name": "readable?",
+        "arity": 1
+      },
+      {
+        "name": "readable_real?",
+        "arity": 1
+      },
+      {
+        "name": "readlink",
+        "arity": 1
+      },
+      {
+        "name": "realdirpath",
+        "arity": -1
+      },
+      {
+        "name": "realpath",
+        "arity": -1
+      },
+      {
+        "name": "rename",
+        "arity": 2
+      },
+      {
+        "name": "setgid?",
+        "arity": 1
+      },
+      {
+        "name": "setuid?",
+        "arity": 1
+      },
+      {
+        "name": "size",
+        "arity": 1
+      },
+      {
+        "name": "size?",
+        "arity": 1
+      },
+      {
+        "name": "socket?",
+        "arity": 1
+      },
+      {
+        "name": "split",
+        "arity": 1
+      },
+      {
+        "name": "stat",
+        "arity": 1
+      },
+      {
+        "name": "sticky?",
+        "arity": 1
+      },
+      {
+        "name": "symlink",
+        "arity": 2
+      },
+      {
+        "name": "symlink?",
+        "arity": 1
+      },
+      {
+        "name": "truncate",
+        "arity": 2
+      },
+      {
+        "name": "umask",
+        "arity": -1
+      },
+      {
+        "name": "unlink",
+        "arity": -1
+      },
+      {
+        "name": "utime",
+        "arity": -1
+      },
+      {
+        "name": "world_readable?",
+        "arity": 1
+      },
+      {
+        "name": "world_writable?",
+        "arity": 1
+      },
+      {
+        "name": "writable?",
+        "arity": 1
+      },
+      {
+        "name": "writable_real?",
+        "arity": 1
+      },
+      {
+        "name": "zero?",
+        "arity": 1
+      }
+    ],
+    "constants": [
+      "ALT_SEPARATOR",
+      "Constants",
+      "PATH_SEPARATOR",
+      "SEPARATOR",
+      "Separator",
+      "Stat"
+    ]
+  },
+  "IO": {
+    "public_instance_methods": [
+      {
+        "name": "<<",
+        "arity": 1
+      },
+      {
+        "name": "advise",
+        "arity": -1
+      },
+      {
+        "name": "autoclose=",
+        "arity": 1
+      },
+      {
+        "name": "autoclose?",
+        "arity": 0
+      },
+      {
+        "name": "binmode",
+        "arity": 0
+      },
+      {
+        "name": "binmode?",
+        "arity": 0
+      },
+      {
+        "name": "close",
+        "arity": 0
+      },
+      {
+        "name": "close_on_exec=",
+        "arity": 1
+      },
+      {
+        "name": "close_on_exec?",
+        "arity": 0
+      },
+      {
+        "name": "close_read",
+        "arity": 0
+      },
+      {
+        "name": "close_write",
+        "arity": 0
+      },
+      {
+        "name": "closed?",
+        "arity": 0
+      },
+      {
+        "name": "each",
+        "arity": -1
+      },
+      {
+        "name": "each_byte",
+        "arity": 0
+      },
+      {
+        "name": "each_char",
+        "arity": 0
+      },
+      {
+        "name": "each_codepoint",
+        "arity": 0
+      },
+      {
+        "name": "each_line",
+        "arity": -1
+      },
+      {
+        "name": "eof",
+        "arity": 0
+      },
+      {
+        "name": "eof?",
+        "arity": 0
+      },
+      {
+        "name": "external_encoding",
+        "arity": 0
+      },
+      {
+        "name": "fcntl",
+        "arity": -1
+      },
+      {
+        "name": "fdatasync",
+        "arity": 0
+      },
+      {
+        "name": "fileno",
+        "arity": 0
+      },
+      {
+        "name": "flush",
+        "arity": 0
+      },
+      {
+        "name": "fsync",
+        "arity": 0
+      },
+      {
+        "name": "getbyte",
+        "arity": 0
+      },
+      {
+        "name": "getc",
+        "arity": 0
+      },
+      {
+        "name": "gets",
+        "arity": -1
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "internal_encoding",
+        "arity": 0
+      },
+      {
+        "name": "ioctl",
+        "arity": -1
+      },
+      {
+        "name": "isatty",
+        "arity": 0
+      },
+      {
+        "name": "lineno",
+        "arity": 0
+      },
+      {
+        "name": "lineno=",
+        "arity": 1
+      },
+      {
+        "name": "path",
+        "arity": 0
+      },
+      {
+        "name": "pid",
+        "arity": 0
+      },
+      {
+        "name": "pos",
+        "arity": 0
+      },
+      {
+        "name": "pos=",
+        "arity": 1
+      },
+      {
+        "name": "pread",
+        "arity": -1
+      },
+      {
+        "name": "print",
+        "arity": -1
+      },
+      {
+        "name": "printf",
+        "arity": -1
+      },
+      {
+        "name": "putc",
+        "arity": 1
+      },
+      {
+        "name": "puts",
+        "arity": -1
+      },
+      {
+        "name": "pwrite",
+        "arity": 2
+      },
+      {
+        "name": "read",
+        "arity": -1
+      },
+      {
+        "name": "read_nonblock",
+        "arity": -2
+      },
+      {
+        "name": "readbyte",
+        "arity": 0
+      },
+      {
+        "name": "readchar",
+        "arity": 0
+      },
+      {
+        "name": "readline",
+        "arity": -1
+      },
+      {
+        "name": "readlines",
+        "arity": -1
+      },
+      {
+        "name": "readpartial",
+        "arity": -1
+      },
+      {
+        "name": "reopen",
+        "arity": -1
+      },
+      {
+        "name": "rewind",
+        "arity": 0
+      },
+      {
+        "name": "seek",
+        "arity": -1
+      },
+      {
+        "name": "set_encoding",
+        "arity": -1
+      },
+      {
+        "name": "set_encoding_by_bom",
+        "arity": 0
+      },
+      {
+        "name": "stat",
+        "arity": 0
+      },
+      {
+        "name": "sync",
+        "arity": 0
+      },
+      {
+        "name": "sync=",
+        "arity": 1
+      },
+      {
+        "name": "sysread",
+        "arity": -1
+      },
+      {
+        "name": "sysseek",
+        "arity": -1
+      },
+      {
+        "name": "syswrite",
+        "arity": 1
+      },
+      {
+        "name": "tell",
+        "arity": 0
+      },
+      {
+        "name": "timeout",
+        "arity": 0
+      },
+      {
+        "name": "timeout=",
+        "arity": 1
+      },
+      {
+        "name": "to_i",
+        "arity": 0
+      },
+      {
+        "name": "to_io",
+        "arity": 0
+      },
+      {
+        "name": "to_path",
+        "arity": 0
+      },
+      {
+        "name": "tty?",
+        "arity": 0
+      },
+      {
+        "name": "ungetbyte",
+        "arity": 1
+      },
+      {
+        "name": "ungetc",
+        "arity": 1
+      },
+      {
+        "name": "wait",
+        "arity": -1
+      },
+      {
+        "name": "wait_priority",
+        "arity": -1
+      },
+      {
+        "name": "wait_readable",
+        "arity": -1
+      },
+      {
+        "name": "wait_writable",
+        "arity": -1
+      },
+      {
+        "name": "write",
+        "arity": -1
+      },
+      {
+        "name": "write_nonblock",
+        "arity": -2
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "binread",
+        "arity": -1
+      },
+      {
+        "name": "binwrite",
+        "arity": -1
+      },
+      {
+        "name": "copy_stream",
+        "arity": -1
+      },
+      {
+        "name": "for_fd",
+        "arity": -1
+      },
+      {
+        "name": "foreach",
+        "arity": -1
+      },
+      {
+        "name": "new",
+        "arity": -1
+      },
+      {
+        "name": "open",
+        "arity": -1
+      },
+      {
+        "name": "pipe",
+        "arity": -1
+      },
+      {
+        "name": "popen",
+        "arity": -1
+      },
+      {
+        "name": "read",
+        "arity": -1
+      },
+      {
+        "name": "readlines",
+        "arity": -1
+      },
+      {
+        "name": "select",
+        "arity": -1
+      },
+      {
+        "name": "sysopen",
+        "arity": -1
+      },
+      {
+        "name": "try_convert",
+        "arity": 1
+      },
+      {
+        "name": "write",
+        "arity": -1
+      }
+    ],
+    "constants": [
+      "Buffer",
+      "EAGAINWaitReadable",
+      "EAGAINWaitWritable",
+      "EINPROGRESSWaitReadable",
+      "EINPROGRESSWaitWritable",
+      "EWOULDBLOCKWaitReadable",
+      "EWOULDBLOCKWaitWritable",
+      "PRIORITY",
+      "READABLE",
+      "SEEK_CUR",
+      "SEEK_DATA",
+      "SEEK_END",
+      "SEEK_HOLE",
+      "SEEK_SET",
+      "TimeoutError",
+      "WRITABLE",
+      "WaitReadable",
+      "WaitWritable"
+    ]
+  },
+  "Dir": {
+    "public_instance_methods": [
+      {
+        "name": "children",
+        "arity": 0
+      },
+      {
+        "name": "close",
+        "arity": 0
+      },
+      {
+        "name": "each",
+        "arity": 0
+      },
+      {
+        "name": "each_child",
+        "arity": 0
+      },
+      {
+        "name": "fileno",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "path",
+        "arity": 0
+      },
+      {
+        "name": "pos",
+        "arity": 0
+      },
+      {
+        "name": "pos=",
+        "arity": 1
+      },
+      {
+        "name": "read",
+        "arity": 0
+      },
+      {
+        "name": "rewind",
+        "arity": 0
+      },
+      {
+        "name": "seek",
+        "arity": 1
+      },
+      {
+        "name": "tell",
+        "arity": 0
+      },
+      {
+        "name": "to_path",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "[]",
+        "arity": -1
+      },
+      {
+        "name": "chdir",
+        "arity": -1
+      },
+      {
+        "name": "children",
+        "arity": -1
+      },
+      {
+        "name": "chroot",
+        "arity": 1
+      },
+      {
+        "name": "delete",
+        "arity": 1
+      },
+      {
+        "name": "each_child",
+        "arity": -1
+      },
+      {
+        "name": "empty?",
+        "arity": 1
+      },
+      {
+        "name": "entries",
+        "arity": -1
+      },
+      {
+        "name": "exist?",
+        "arity": 1
+      },
+      {
+        "name": "foreach",
+        "arity": -1
+      },
+      {
+        "name": "getwd",
+        "arity": 0
+      },
+      {
+        "name": "glob",
+        "arity": -2
+      },
+      {
+        "name": "home",
+        "arity": -1
+      },
+      {
+        "name": "mkdir",
+        "arity": -1
+      },
+      {
+        "name": "open",
+        "arity": -2
+      },
+      {
+        "name": "pwd",
+        "arity": 0
+      },
+      {
+        "name": "rmdir",
+        "arity": 1
+      },
+      {
+        "name": "unlink",
+        "arity": 1
+      }
+    ],
+    "constants": [
+
+    ]
+  },
+  "Process": {
+    "public_instance_methods": [
+
+    ],
+    "singleton_methods": [
+      {
+        "name": "_fork",
+        "arity": 0
+      },
+      {
+        "name": "abort",
+        "arity": -1
+      },
+      {
+        "name": "argv0",
+        "arity": 0
+      },
+      {
+        "name": "clock_getres",
+        "arity": -1
+      },
+      {
+        "name": "clock_gettime",
+        "arity": -1
+      },
+      {
+        "name": "daemon",
+        "arity": -1
+      },
+      {
+        "name": "detach",
+        "arity": 1
+      },
+      {
+        "name": "egid",
+        "arity": 0
+      },
+      {
+        "name": "egid=",
+        "arity": 1
+      },
+      {
+        "name": "euid",
+        "arity": 0
+      },
+      {
+        "name": "euid=",
+        "arity": 1
+      },
+      {
+        "name": "exec",
+        "arity": -1
+      },
+      {
+        "name": "exit",
+        "arity": -1
+      },
+      {
+        "name": "exit!",
+        "arity": -1
+      },
+      {
+        "name": "fork",
+        "arity": 0
+      },
+      {
+        "name": "getpgid",
+        "arity": 1
+      },
+      {
+        "name": "getpgrp",
+        "arity": 0
+      },
+      {
+        "name": "getpriority",
+        "arity": 2
+      },
+      {
+        "name": "getrlimit",
+        "arity": 1
+      },
+      {
+        "name": "getsid",
+        "arity": -1
+      },
+      {
+        "name": "gid",
+        "arity": 0
+      },
+      {
+        "name": "gid=",
+        "arity": 1
+      },
+      {
+        "name": "groups",
+        "arity": 0
+      },
+      {
+        "name": "groups=",
+        "arity": 1
+      },
+      {
+        "name": "initgroups",
+        "arity": 2
+      },
+      {
+        "name": "kill",
+        "arity": -1
+      },
+      {
+        "name": "last_status",
+        "arity": 0
+      },
+      {
+        "name": "maxgroups",
+        "arity": 0
+      },
+      {
+        "name": "maxgroups=",
+        "arity": 1
+      },
+      {
+        "name": "pid",
+        "arity": 0
+      },
+      {
+        "name": "ppid",
+        "arity": 0
+      },
+      {
+        "name": "setpgid",
+        "arity": 2
+      },
+      {
+        "name": "setpgrp",
+        "arity": 0
+      },
+      {
+        "name": "setpriority",
+        "arity": 3
+      },
+      {
+        "name": "setproctitle",
+        "arity": 1
+      },
+      {
+        "name": "setrlimit",
+        "arity": -1
+      },
+      {
+        "name": "setsid",
+        "arity": 0
+      },
+      {
+        "name": "spawn",
+        "arity": -1
+      },
+      {
+        "name": "times",
+        "arity": 0
+      },
+      {
+        "name": "uid",
+        "arity": 0
+      },
+      {
+        "name": "uid=",
+        "arity": 1
+      },
+      {
+        "name": "wait",
+        "arity": -1
+      },
+      {
+        "name": "wait2",
+        "arity": -1
+      },
+      {
+        "name": "waitall",
+        "arity": 0
+      },
+      {
+        "name": "waitpid",
+        "arity": -1
+      },
+      {
+        "name": "waitpid2",
+        "arity": -1
+      }
+    ],
+    "constants": [
+      "CLOCK_BOOTTIME",
+      "CLOCK_BOOTTIME_ALARM",
+      "CLOCK_MONOTONIC",
+      "CLOCK_MONOTONIC_COARSE",
+      "CLOCK_MONOTONIC_RAW",
+      "CLOCK_PROCESS_CPUTIME_ID",
+      "CLOCK_REALTIME",
+      "CLOCK_REALTIME_ALARM",
+      "CLOCK_REALTIME_COARSE",
+      "CLOCK_TAI",
+      "CLOCK_THREAD_CPUTIME_ID",
+      "GID",
+      "PRIO_PGRP",
+      "PRIO_PROCESS",
+      "PRIO_USER",
+      "RLIMIT_AS",
+      "RLIMIT_CORE",
+      "RLIMIT_CPU",
+      "RLIMIT_DATA",
+      "RLIMIT_FSIZE",
+      "RLIMIT_MEMLOCK",
+      "RLIMIT_MSGQUEUE",
+      "RLIMIT_NICE",
+      "RLIMIT_NOFILE",
+      "RLIMIT_NPROC",
+      "RLIMIT_RSS",
+      "RLIMIT_RTPRIO",
+      "RLIMIT_RTTIME",
+      "RLIMIT_SIGPENDING",
+      "RLIMIT_STACK",
+      "RLIM_INFINITY",
+      "RLIM_SAVED_CUR",
+      "RLIM_SAVED_MAX",
+      "Status",
+      "Sys",
+      "Tms",
+      "UID",
+      "WNOHANG",
+      "WUNTRACED",
+      "Waiter"
+    ]
+  },
+  "Thread": {
+    "public_instance_methods": [
+      {
+        "name": "[]",
+        "arity": 1
+      },
+      {
+        "name": "[]=",
+        "arity": 2
+      },
+      {
+        "name": "abort_on_exception",
+        "arity": 0
+      },
+      {
+        "name": "abort_on_exception=",
+        "arity": 1
+      },
+      {
+        "name": "add_trace_func",
+        "arity": 1
+      },
+      {
+        "name": "alive?",
+        "arity": 0
+      },
+      {
+        "name": "backtrace",
+        "arity": -1
+      },
+      {
+        "name": "backtrace_locations",
+        "arity": -1
+      },
+      {
+        "name": "exit",
+        "arity": 0
+      },
+      {
+        "name": "fetch",
+        "arity": -1
+      },
+      {
+        "name": "group",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "join",
+        "arity": -1
+      },
+      {
+        "name": "key?",
+        "arity": 1
+      },
+      {
+        "name": "keys",
+        "arity": 0
+      },
+      {
+        "name": "kill",
+        "arity": 0
+      },
+      {
+        "name": "name",
+        "arity": 0
+      },
+      {
+        "name": "name=",
+        "arity": 1
+      },
+      {
+        "name": "native_thread_id",
+        "arity": 0
+      },
+      {
+        "name": "pending_interrupt?",
+        "arity": -1
+      },
+      {
+        "name": "priority",
+        "arity": 0
+      },
+      {
+        "name": "priority=",
+        "arity": 1
+      },
+      {
+        "name": "raise",
+        "arity": -1
+      },
+      {
+        "name": "report_on_exception",
+        "arity": 0
+      },
+      {
+        "name": "report_on_exception=",
+        "arity": 1
+      },
+      {
+        "name": "run",
+        "arity": 0
+      },
+      {
+        "name": "set_trace_func",
+        "arity": 1
+      },
+      {
+        "name": "status",
+        "arity": 0
+      },
+      {
+        "name": "stop?",
+        "arity": 0
+      },
+      {
+        "name": "terminate",
+        "arity": 0
+      },
+      {
+        "name": "thread_variable?",
+        "arity": 1
+      },
+      {
+        "name": "thread_variable_get",
+        "arity": 1
+      },
+      {
+        "name": "thread_variable_set",
+        "arity": 2
+      },
+      {
+        "name": "thread_variables",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "value",
+        "arity": 0
+      },
+      {
+        "name": "wakeup",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "abort_on_exception",
+        "arity": 0
+      },
+      {
+        "name": "abort_on_exception=",
+        "arity": 1
+      },
+      {
+        "name": "current",
+        "arity": 0
+      },
+      {
+        "name": "each_caller_location",
+        "arity": 0
+      },
+      {
+        "name": "exit",
+        "arity": 0
+      },
+      {
+        "name": "fork",
+        "arity": -1
+      },
+      {
+        "name": "handle_interrupt",
+        "arity": 1
+      },
+      {
+        "name": "ignore_deadlock",
+        "arity": 0
+      },
+      {
+        "name": "ignore_deadlock=",
+        "arity": 1
+      },
+      {
+        "name": "kill",
+        "arity": 1
+      },
+      {
+        "name": "list",
+        "arity": 0
+      },
+      {
+        "name": "main",
+        "arity": 0
+      },
+      {
+        "name": "new",
+        "arity": -1
+      },
+      {
+        "name": "pass",
+        "arity": 0
+      },
+      {
+        "name": "pending_interrupt?",
+        "arity": -1
+      },
+      {
+        "name": "report_on_exception",
+        "arity": 0
+      },
+      {
+        "name": "report_on_exception=",
+        "arity": 1
+      },
+      {
+        "name": "start",
+        "arity": -1
+      },
+      {
+        "name": "stop",
+        "arity": 0
+      }
+    ],
+    "constants": [
+      "Backtrace",
+      "ConditionVariable",
+      "Mutex",
+      "Queue",
+      "SizedQueue"
+    ]
+  },
+  "Fiber": {
+    "public_instance_methods": [
+      {
+        "name": "alive?",
+        "arity": 0
+      },
+      {
+        "name": "backtrace",
+        "arity": -1
+      },
+      {
+        "name": "backtrace_locations",
+        "arity": -1
+      },
+      {
+        "name": "blocking?",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "raise",
+        "arity": -1
+      },
+      {
+        "name": "resume",
+        "arity": -1
+      },
+      {
+        "name": "storage",
+        "arity": 0
+      },
+      {
+        "name": "storage=",
+        "arity": 1
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      },
+      {
+        "name": "transfer",
+        "arity": -1
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "[]",
+        "arity": 1
+      },
+      {
+        "name": "[]=",
+        "arity": 2
+      },
+      {
+        "name": "blocking",
+        "arity": 0
+      },
+      {
+        "name": "blocking?",
+        "arity": 0
+      },
+      {
+        "name": "current",
+        "arity": 0
+      },
+      {
+        "name": "current_scheduler",
+        "arity": 0
+      },
+      {
+        "name": "schedule",
+        "arity": -1
+      },
+      {
+        "name": "scheduler",
+        "arity": 0
+      },
+      {
+        "name": "set_scheduler",
+        "arity": 1
+      },
+      {
+        "name": "yield",
+        "arity": -1
+      }
+    ],
+    "constants": [
+
+    ]
+  },
+  "Ractor": {
+    "public_instance_methods": [
+      {
+        "name": "<<",
+        "arity": -2
+      },
+      {
+        "name": "[]",
+        "arity": 1
+      },
+      {
+        "name": "[]=",
+        "arity": 2
+      },
+      {
+        "name": "close_incoming",
+        "arity": 0
+      },
+      {
+        "name": "close_outgoing",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "name",
+        "arity": 0
+      },
+      {
+        "name": "send",
+        "arity": -2
+      },
+      {
+        "name": "take",
+        "arity": 0
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "count",
+        "arity": 0
+      },
+      {
+        "name": "current",
+        "arity": 0
+      },
+      {
+        "name": "main",
+        "arity": 0
+      },
+      {
+        "name": "make_shareable",
+        "arity": -2
+      },
+      {
+        "name": "new",
+        "arity": -1
+      },
+      {
+        "name": "receive",
+        "arity": 0
+      },
+      {
+        "name": "receive_if",
+        "arity": 0
+      },
+      {
+        "name": "recv",
+        "arity": 0
+      },
+      {
+        "name": "select",
+        "arity": -1
+      },
+      {
+        "name": "shareable?",
+        "arity": 1
+      },
+      {
+        "name": "yield",
+        "arity": -2
+      }
+    ],
+    "constants": [
+      "ClosedError",
+      "Error",
+      "IsolationError",
+      "MovedError",
+      "MovedObject",
+      "RemoteError",
+      "UnsafeError"
+    ]
+  },
+  "Encoding": {
+    "public_instance_methods": [
+      {
+        "name": "_dump",
+        "arity": -1
+      },
+      {
+        "name": "ascii_compatible?",
+        "arity": 0
+      },
+      {
+        "name": "dummy?",
+        "arity": 0
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "name",
+        "arity": 0
+      },
+      {
+        "name": "names",
+        "arity": 0
+      },
+      {
+        "name": "replicate",
+        "arity": 1
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "_load",
+        "arity": 1
+      },
+      {
+        "name": "aliases",
+        "arity": 0
+      },
+      {
+        "name": "compatible?",
+        "arity": 2
+      },
+      {
+        "name": "default_external",
+        "arity": 0
+      },
+      {
+        "name": "default_external=",
+        "arity": 1
+      },
+      {
+        "name": "default_internal",
+        "arity": 0
+      },
+      {
+        "name": "default_internal=",
+        "arity": 1
+      },
+      {
+        "name": "find",
+        "arity": 1
+      },
+      {
+        "name": "list",
+        "arity": 0
+      },
+      {
+        "name": "locale_charmap",
+        "arity": 0
+      },
+      {
+        "name": "name_list",
+        "arity": 0
+      }
+    ],
+    "constants": [
+      "ANSI_X3_4_1968",
+      "ASCII",
+      "ASCII_8BIT",
+      "BIG5",
+      "BIG5_HKSCS",
+      "BIG5_HKSCS_2008",
+      "BIG5_UAO",
+      "BINARY",
+      "Big5",
+      "Big5_HKSCS",
+      "Big5_HKSCS_2008",
+      "Big5_UAO",
+      "CESU_8",
+      "CP1250",
+      "CP1251",
+      "CP1252",
+      "CP1253",
+      "CP1254",
+      "CP1255",
+      "CP1256",
+      "CP1257",
+      "CP1258",
+      "CP437",
+      "CP50220",
+      "CP50221",
+      "CP51932",
+      "CP65000",
+      "CP65001",
+      "CP720",
+      "CP737",
+      "CP775",
+      "CP850",
+      "CP852",
+      "CP855",
+      "CP857",
+      "CP860",
+      "CP861",
+      "CP862",
+      "CP863",
+      "CP864",
+      "CP865",
+      "CP866",
+      "CP869",
+      "CP874",
+      "CP878",
+      "CP932",
+      "CP936",
+      "CP949",
+      "CP950",
+      "CP951",
+      "CSWINDOWS31J",
+      "CompatibilityError",
+      "Converter",
+      "ConverterNotFoundError",
+      "CsWindows31J",
+      "EBCDIC_CP_US",
+      "EMACS_MULE",
+      "EUCCN",
+      "EUCJP",
+      "EUCJP_MS",
+      "EUCKR",
+      "EUCTW",
+      "EUC_CN",
+      "EUC_JISX0213",
+      "EUC_JIS_2004",
+      "EUC_JP",
+      "EUC_JP_MS",
+      "EUC_KR",
+      "EUC_TW",
+      "Emacs_Mule",
+      "EucCN",
+      "EucJP",
+      "EucJP_ms",
+      "EucKR",
+      "EucTW",
+      "GB12345",
+      "GB18030",
+      "GB1988",
+      "GB2312",
+      "GBK",
+      "IBM037",
+      "IBM437",
+      "IBM720",
+      "IBM737",
+      "IBM775",
+      "IBM850",
+      "IBM852",
+      "IBM855",
+      "IBM857",
+      "IBM860",
+      "IBM861",
+      "IBM862",
+      "IBM863",
+      "IBM864",
+      "IBM865",
+      "IBM866",
+      "IBM869",
+      "ISO2022_JP",
+      "ISO2022_JP2",
+      "ISO8859_1",
+      "ISO8859_10",
+      "ISO8859_11",
+      "ISO8859_13",
+      "ISO8859_14",
+      "ISO8859_15",
+      "ISO8859_16",
+      "ISO8859_2",
+      "ISO8859_3",
+      "ISO8859_4",
+      "ISO8859_5",
+      "ISO8859_6",
+      "ISO8859_7",
+      "ISO8859_8",
+      "ISO8859_9",
+      "ISO_2022_JP",
+      "ISO_2022_JP_2",
+      "ISO_2022_JP_KDDI",
+      "ISO_8859_1",
+      "ISO_8859_10",
+      "ISO_8859_11",
+      "ISO_8859_13",
+      "ISO_8859_14",
+      "ISO_8859_15",
+      "ISO_8859_16",
+      "ISO_8859_2",
+      "ISO_8859_3",
+      "ISO_8859_4",
+      "ISO_8859_5",
+      "ISO_8859_6",
+      "ISO_8859_7",
+      "ISO_8859_8",
+      "ISO_8859_9",
+      "InvalidByteSequenceError",
+      "KOI8_R",
+      "KOI8_U",
+      "MACCENTEURO",
+      "MACCROATIAN",
+      "MACCYRILLIC",
+      "MACGREEK",
+      "MACICELAND",
+      "MACJAPAN",
+      "MACJAPANESE",
+      "MACROMAN",
+      "MACROMANIA",
+      "MACTHAI",
+      "MACTURKISH",
+      "MACUKRAINE",
+      "MacCentEuro",
+      "MacCroatian",
+      "MacCyrillic",
+      "MacGreek",
+      "MacIceland",
+      "MacJapan",
+      "MacJapanese",
+      "MacRoman",
+      "MacRomania",
+      "MacThai",
+      "MacTurkish",
+      "MacUkraine",
+      "PCK",
+      "SHIFT_JIS",
+      "SJIS",
+      "SJIS_DOCOMO",
+      "SJIS_DoCoMo",
+      "SJIS_KDDI",
+      "SJIS_SOFTBANK",
+      "SJIS_SoftBank",
+      "STATELESS_ISO_2022_JP",
+      "STATELESS_ISO_2022_JP_KDDI",
+      "Shift_JIS",
+      "Stateless_ISO_2022_JP",
+      "Stateless_ISO_2022_JP_KDDI",
+      "TIS_620",
+      "UCS_2BE",
+      "UCS_4BE",
+      "UCS_4LE",
+      "US_ASCII",
+      "UTF8_DOCOMO",
+      "UTF8_DoCoMo",
+      "UTF8_KDDI",
+      "UTF8_MAC",
+      "UTF8_SOFTBANK",
+      "UTF8_SoftBank",
+      "UTF_16",
+      "UTF_16BE",
+      "UTF_16LE",
+      "UTF_32",
+      "UTF_32BE",
+      "UTF_32LE",
+      "UTF_7",
+      "UTF_8",
+      "UTF_8_HFS",
+      "UTF_8_MAC",
+      "UndefinedConversionError",
+      "WINDOWS_1250",
+      "WINDOWS_1251",
+      "WINDOWS_1252",
+      "WINDOWS_1253",
+      "WINDOWS_1254",
+      "WINDOWS_1255",
+      "WINDOWS_1256",
+      "WINDOWS_1257",
+      "WINDOWS_1258",
+      "WINDOWS_31J",
+      "WINDOWS_874",
+      "Windows_1250",
+      "Windows_1251",
+      "Windows_1252",
+      "Windows_1253",
+      "Windows_1254",
+      "Windows_1255",
+      "Windows_1256",
+      "Windows_1257",
+      "Windows_1258",
+      "Windows_31J",
+      "Windows_874"
+    ]
+  },
+  "Exception": {
+    "public_instance_methods": [
+      {
+        "name": "==",
+        "arity": 1
+      },
+      {
+        "name": "backtrace",
+        "arity": 0
+      },
+      {
+        "name": "backtrace_locations",
+        "arity": 0
+      },
+      {
+        "name": "cause",
+        "arity": 0
+      },
+      {
+        "name": "detailed_message",
+        "arity": -1
+      },
+      {
+        "name": "exception",
+        "arity": -1
+      },
+      {
+        "name": "full_message",
+        "arity": -1
+      },
+      {
+        "name": "inspect",
+        "arity": 0
+      },
+      {
+        "name": "message",
+        "arity": 0
+      },
+      {
+        "name": "respond_to?",
+        "arity": -1
+      },
+      {
+        "name": "set_backtrace",
+        "arity": 1
+      },
+      {
+        "name": "to_s",
+        "arity": 0
+      }
+    ],
+    "singleton_methods": [
+      {
+        "name": "exception",
+        "arity": -1
+      },
+      {
+        "name": "to_tty?",
+        "arity": 0
+      }
+    ],
+    "constants": [
+
+    ]
+  }
+}

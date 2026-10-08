@@ -1,0 +1,29 @@
+{
+  "ruby_version": "3.2.3",
+  "platform": "x86_64-linux-gnu",
+  "sizes": {
+    "value_size": 8,
+    "fixnum_max": 4611686018427387903,
+    "fixnum_min": -4611686018427387904,
+    "float_size": 8,
+    "endianness": "little"
+  },
+  "symbols": [
+    "rb_ary_new",
+    "rb_define_class",
+    "rb_define_method",
+    "rb_define_module",
+    "rb_define_singleton_method",
+    "rb_float_new",
+    "rb_funcall",
+    "rb_hash_new",
+    "rb_int2big",
+    "rb_raise",
+    "rb_str_new",
+    "rb_struct_define",
+    "ruby_cleanup",
+    "ruby_init",
+    "ruby_options",
+    "ruby_run_node"
+  ]
+}

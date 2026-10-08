@@ -1,0 +1,86 @@
+{
+  "COMPATIBILITY.md": {
+    "exists": true,
+    "lines": 38,
+    "sha256": "2f2e1bcc4ac686c561419ddac6f17ad73b2914096bafa0eef9c79e93f17b210f",
+    "headers": [
+      "# Ruby on Rust Behavioral Compatibility Matrix",
+      "## Executive Compatibility Summary",
+      "## Core Class Fuzzing Coverage Matrix",
+      "## Lock & Integrity Invariants"
+    ]
+  },
+  "PORTING.md": {
+    "exists": true,
+    "lines": 308,
+    "sha256": "7ffe9b54fc6b3fe257cb3e43a266ea8da43bab596d41f982567da05cc5ab6e8b",
+    "headers": [
+      "# C-to-Rust Porting Ledger",
+      "## Summary Statistics",
+      "## Migration Progress by Subsystem",
+      "### JIT Compiler",
+      "### Core Data Structures",
+      "### Virtual Machine & Execution",
+      "### Memory & Garbage Collection",
+      "### Concurrency & Threads",
+      "### Parser & AST",
+      "### IO & Filesystem",
+      "### Encoding & Regex",
+      "### Utilities & Support",
+      "### Platform & Miscellaneous",
+      "## Complete C Source File Ledger"
+    ]
+  },
+  "README.md": {
+    "exists": true,
+    "lines": 96,
+    "sha256": "837fbf3df2573376cc43705c3085e52fe99f5e0cdeb2f1810c4ed001069640c4",
+    "headers": [
+      "# What is Ruby?",
+      "## Features of Ruby",
+      "## How to get Ruby",
+      "### Download with Git",
+      "## How to build",
+      "## Ruby home page",
+      "## Documentation",
+      "## Mailing list",
+      "## Copying",
+      "## Feedback",
+      "## Contributing",
+      "## The Author"
+    ]
+  },
+  "AGENTS.md": {
+    "exists": true,
+    "lines": 187,
+    "sha256": "a60c05372fe1aa5499fe80b17bb34ea3c2460c95d321980f2db90baa7c3b00cb",
+    "headers": [
+      "# Developer & AI Agent Guidelines (AGENTS.md)",
+      "## 1. Architecture & Cargo Setup",
+      "## 2. Build Commands",
+      "### Rust Workspace Build",
+      "# Build debug artifacts across all workspace crates",
+      "# Build optimized release artifacts",
+      "### Full Ruby Build Workflow",
+      "# 1. Generate configure script (if needed)",
+      "# 2. Configure build environment (enabling desired Rust JIT engines)",
+      "# 3. Build Ruby executable and static library",
+      "## 3. Test Workflows",
+      "### Rust Unit & Integration Tests",
+      "### Ruby Test Suites",
+      "# Fast bootstrap test suite",
+      "# Full Ruby unit test suite",
+      "# Ruby specification suite (ruby/spec)",
+      "### Porting Ledger Drift Verification",
+      "## 4. C-to-Rust Porting Workflow",
+      "## 5. Rules & Guardrails for AI Agents",
+      "## 6. Core Rust Architecture (standing decisions)",
+      "## 7. Scope Discipline",
+      "## 8. CI Integrity (non-negotiable)",
+      "## 9. Definition of Done and Required Evidence",
+      "## 10. Reproducing CI Failures Locally",
+      "## 11. When You Are Stuck",
+      "## 12. Upstream (ruby/ruby)"
+    ]
+  }
+}
