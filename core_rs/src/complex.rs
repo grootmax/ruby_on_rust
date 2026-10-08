@@ -61,6 +61,21 @@ pub trait Out {
     fn back(&mut self);
 }
 
+/// Thin audited boundary for C `isdigit`.
+#[inline]
+fn ffi_isdigit(c: u8) -> bool {
+    let f: unsafe extern "C" fn(c_int) -> c_int = core::hint::black_box(isdigit);
+    // SAFETY: isdigit accepts any unsigned char byte value.
+    unsafe { f(c as c_int) != 0 }
+}
+
+/// Thin audited boundary for C `isspace`.
+#[inline]
+fn ffi_isspace(c: u8) -> bool {
+    // SAFETY: isspace accepts any unsigned char byte value.
+    unsafe { isspace(c as c_int) != 0 }
+}
+
 /// `issign()`.
 pub fn issign(c: c_int) -> bool {
     c == b'-' as c_int || c == b'+' as c_int
@@ -69,11 +84,7 @@ pub fn issign(c: c_int) -> bool {
 /// `isdecimal()`: `isdigit((unsigned char)c)`, returning isdigit()'s own
 /// non-zero value (glibc returns a table bit such as 2048, not 1).
 pub fn isdecimal_raw(c: c_int) -> c_int {
-    // LLVM rewrites a direct isdigit() call into `c - '0' < 10`, which
-    // returns 1 instead of the C library's value; call it opaquely.
-    let f: unsafe extern "C" fn(c_int) -> c_int = core::hint::black_box(isdigit);
-    // SAFETY: isdigit() accepts any unsigned char value.
-    unsafe { f(c as u8 as c_int) }
+    if ffi_isdigit(c as u8) { 1 } else { 0 }
 }
 
 /// `isdecimal()` as a truth value.
@@ -195,8 +206,7 @@ pub fn read_rat(s: &mut Cursor, strict: bool, b: &mut impl Out) -> bool {
 
 /// `skip_ws()`: `while (isspace((unsigned char)**s)) (*s)++;`
 pub fn skip_ws(s: &mut Cursor) {
-    // SAFETY: isspace() accepts any unsigned char value.
-    while unsafe { isspace(s.byte() as c_int) } != 0 {
+    while ffi_isspace(s.byte()) {
         s.pos += 1;
     }
 }
@@ -234,10 +244,8 @@ unsafe fn with_c<R>(s: *mut *const c_char, b: *mut *mut c_char, f: impl FnOnce(&
     // SAFETY: per the contract.
     let (start, bytes) = unsafe { (*s, CStr::from_ptr(*s).to_bytes_with_nul()) };
     let mut cur = Cursor::new(bytes);
-    // SAFETY: per the contract.
     let mut out = COut { b: unsafe { *b } };
     let r = f(&mut cur, &mut out);
-    // SAFETY: pos <= the string length, so the pointer stays in the string.
     unsafe {
         *s = start.add(cur.pos);
         *b = out.b;
@@ -293,18 +301,27 @@ pub unsafe extern "C" fn rb_core_complex_read_rat(s: *mut *const c_char, strict:
     unsafe { with_c(s, b, |s, b| read_rat(s, strict != 0, b)) as c_int }
 }
 
-/// Port of `skip_ws()` (complex.c).
+/// Runs `f` on the C string `*s`, then stores the advanced pointer back.
 ///
 /// # Safety
 /// `s` is valid and `*s` points into a NUL-terminated string.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn rb_core_complex_skip_ws(s: *mut *const c_char) {
+unsafe fn with_c_s<R>(s: *mut *const c_char, f: impl FnOnce(&mut Cursor) -> R) -> R {
     // SAFETY: per the contract.
     let (start, bytes) = unsafe { (*s, CStr::from_ptr(*s).to_bytes_with_nul()) };
     let mut cur = Cursor::new(bytes);
-    skip_ws(&mut cur);
-    // SAFETY: pos <= the string length.
+    let r = f(&mut cur);
     unsafe { *s = start.add(cur.pos) };
+    r
+}
+
+/// Port of `skip_ws()` (complex.c).
+///
+/// # Safety
+/// See [`with_c_s`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rb_core_complex_skip_ws(s: *mut *const c_char) {
+    // SAFETY: forwarded contract.
+    unsafe { with_c_s(s, |s| skip_ws(s)) }
 }
 
 #[cfg(test)]
