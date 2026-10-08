@@ -165,7 +165,9 @@ jobs:
         working-directory: src
 
       - name: Porting ledger is current
-        run: ruby tool/generate_porting_ledger.rb --check
+        run: |
+          ruby tool/generate_porting_ledger.rb --check
+          ruby tool/generate_porting_ledger.rb --check-kits
         working-directory: src
 
       - name: core_rs inventory check

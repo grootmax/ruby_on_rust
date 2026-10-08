@@ -78,6 +78,182 @@ files:
     target: "core_rs::complex"
     subsystem: "Core Data Structures"
     notes: "Ported (complex-A-01, string scanner statics): issign, read_sign, isdecimal, read_rat_nos, read_rat, isimagunit, skip_ws and helpers. Remaining: Complex class methods"
+    units:
+      - id: complex-C-01
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - f_add
+          - f_div
+          - f_gt_p
+          - f_mul
+          - f_sub
+          - f_abs
+          - f_arg
+          - f_numerator
+          - f_denominator
+          - f_negate
+          - f_real_p
+          - f_eqeq_p
+        notes: "Wave C kit"
+      - id: complex-C-02
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - f_quo
+          - f_negative_p
+          - f_kind_of_p
+          - k_numeric_p
+          - nucomp_s_new_internal
+          - nucomp_s_alloc
+          - f_complex_new_bang1
+          - f_complex_new_bang2
+          - nucomp_real_check
+          - nucomp_s_canonicalize_internal
+          - nucomp_s_new
+          - f_complex_new2
+        notes: "Wave C kit"
+      - id: complex-C-03
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - nucomp_f_complex
+          - m_sin
+          - f_complex_polar_real
+          - f_complex_polar
+          - nucomp_s_polar
+          - safe_mul
+          - comp_mul
+          - f_divide
+          - nucomp_fdiv
+          - f_reciprocal
+          - zero_for
+          - complex_pow_for_special_angle
+        notes: "Wave C kit"
+      - id: complex-C-04
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - rb_complex_pow
+          - nucomp_eqeq_p
+          - nucomp_real_p
+          - nucomp_cmp
+          - nucomp_coerce
+          - nucomp_abs2
+          - nucomp_polar
+          - nucomp_denominator
+          - nucomp_numerator
+          - nucomp_eql_p
+          - f_signbit
+          - f_tpositive_p
+        notes: "Wave C kit"
+      - id: complex-C-05
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - f_format
+          - nucomp_to_s
+          - nucomp_inspect
+          - str2num
+          - read_comp
+          - parse_comp
+          - string_to_c_strict
+          - string_to_c
+          - to_complex
+          - nucomp_convert
+          - nucomp_s_convert
+          - numeric_abs2
+        notes: "Wave C kit"
+      - id: complex-C-06
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - numeric_arg
+          - numeric_polar
+          - float_arg
+          - Init_Complex
+        notes: "Wave C kit"
+      - id: complex-C-07
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - f_to_i
+          - f_to_f
+          - f_fdiv
+          - always_finite_type_p
+          - f_finite_p
+          - f_infinite_p
+          - imp1
+          - rb_dbl_complex_new_polar_pi
+          - rb_complex_finite_p
+          - rb_complex_infinite_p
+          - nucomp_to_i
+          - nucomp_to_f
+        notes: "Wave C kit"
+      - id: complex-C-08
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - nucomp_rect
+          - nucomp_real_p_m
+          - rb_complex_hash
+          - nucomp_hash
+          - nucomp_dumper
+          - nucomp_loader
+          - nucomp_marshal_dump
+          - nucomp_marshal_load
+          - nucomp_to_r
+          - nucomp_rationalize
+          - nucomp_to_c
+          - numeric_to_c
+        notes: "Wave C kit"
+      - id: complex-C-09
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - numeric_rect
+        notes: "Wave C kit"
+      - id: complex-B-01
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - rb_complex_real
+          - rb_complex_imag
+          - rb_complex_uminus
+          - rb_complex_plus
+          - rb_complex_minus
+          - rb_complex_mul
+          - rb_complex_div
+          - rb_complex_abs
+          - rb_complex_arg
+          - rb_complex_conjugate
+          - rb_complex_raw
+          - rb_dbl_complex_new
+        notes: "Wave B kit"
+      - id: complex-B-02
+        status: Not Started
+        target: core_rs::complex
+        functions:
+          - rb_complex_new
+          - rb_complex_new_polar
+          - rb_Complex
+        notes: "Wave B kit"
+      - id: complex-A-01
+        status: Ported
+        target: core_rs::complex
+        functions:
+          - issign
+          - read_sign
+          - isdecimal
+          - read_digits
+          - islettere
+          - read_num
+          - read_den
+          - read_rat_nos
+          - read_rat
+          - isimagunit
+          - skip_ws
+        notes: "Wave A kit"
   enum.c:
     status: Not Started
     target: "crate::enum"
@@ -447,6 +623,35 @@ files:
     target: "core_rs::util"
     subsystem: "Utilities & Support"
     notes: "Ported: ruby_scan_digits, ruby_scan_oct, ruby_scan_hex, ruby_strtoul, ruby_each_words. Remaining: qsort, getcwd, dtoa/strtod"
+    units:
+      - id: util-A-01
+        status: In Progress
+        target: core_rs::util
+        functions:
+          - ruby_scan_oct
+          - ruby_scan_hex
+          - ruby_scan_digits
+          - ruby_strtoul
+          - cmp_bsd_qsort
+          - ruby_qsort
+          - mmswap_
+          - mmrot3_
+          - ruby_each_words
+        notes: "Wave A kit"
+      - id: util-B-01
+        status: Not Started
+        target: core_rs::util
+        functions:
+          - ruby_strdup
+          - ruby_getcwd
+        notes: "Wave B kit"
+      - id: util-C-01
+        status: Not Started
+        target: core_rs::util
+        functions:
+          - getcwd_strdup
+          - getcwd_free
+        notes: "Wave C kit"
   variable.c:
     status: Not Started
     target: "crate::variable"

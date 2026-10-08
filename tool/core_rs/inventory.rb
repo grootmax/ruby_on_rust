@@ -367,64 +367,66 @@ end
 
 # ---- CLI ----------------------------------------------------------------------------
 
-opts = { format: "tsv" }
-OptionParser.new do |o|
-  o.banner = "usage: #{$0} [--list|--units|--kit ID|--check] [--wave W] [--file F] [--open] [--format tsv|json]"
-  o.on("--list") { opts[:mode] = :list }
-  o.on("--units") { opts[:mode] = :units }
-  o.on("--kit ID") { |v| opts[:mode] = :kit; opts[:id] = v }
-  o.on("--check") { opts[:mode] = :check }
-  o.on("--wave W") { |v| opts[:wave] = v.upcase }
-  o.on("--file F") { |v| opts[:file] = v }
-  o.on("--open", "units with at least one function left to port") { opts[:open] = true }
-  o.on("--format F") { |v| opts[:format] = v }
-end.parse!
+if __FILE__ == $0
+  opts = { format: "tsv" }
+  OptionParser.new do |o|
+    o.banner = "usage: #{$0} [--list|--units|--kit ID|--check] [--wave W] [--file F] [--open] [--format tsv|json]"
+    o.on("--list") { opts[:mode] = :list }
+    o.on("--units") { opts[:mode] = :units }
+    o.on("--kit ID") { |v| opts[:mode] = :kit; opts[:id] = v }
+    o.on("--check") { opts[:mode] = :check }
+    o.on("--wave W") { |v| opts[:wave] = v.upcase }
+    o.on("--file F") { |v| opts[:file] = v }
+    o.on("--open", "units with at least one function left to port") { opts[:open] = true }
+    o.on("--format F") { |v| opts[:format] = v }
+  end.parse!
 
-funcs = inventory
-funcs = funcs.select { |f| f.file == opts[:file] } if opts[:file]
+  funcs = inventory
+  funcs = funcs.select { |f| f.file == opts[:file] } if opts[:file]
 
-case opts[:mode]
-when :list
-  sel = opts[:wave] ? funcs.select { |f| f.wave == opts[:wave] } : funcs
-  if opts[:format] == "json"
-    puts JSON.pretty_generate(sel.map(&:to_h))
+  case opts[:mode]
+  when :list
+    sel = opts[:wave] ? funcs.select { |f| f.wave == opts[:wave] } : funcs
+    if opts[:format] == "json"
+      puts JSON.pretty_generate(sel.map(&:to_h))
+    else
+      puts %w[wave file name lines loc static public ported].join("\t")
+      sel.each { |f| puts [f.wave, f.file, f.name, f.range, f.loc, f.static, f.public, f.ported].join("\t") }
+    end
+  when :units
+    us = units(funcs)
+    us = us.select { |u| u[:wave] == opts[:wave] } if opts[:wave]
+    us = us.select { |u| u[:funcs].any? { |f| !f.ported } } if opts[:open]
+    puts %w[unit wave file functions to_port loc first last].join("\t")
+    us.each do |u|
+      puts [u[:id], u[:wave], u[:file], u[:funcs].size, u[:funcs].count { |f| !f.ported },
+            u[:funcs].sum(&:loc), u[:funcs].first.first, u[:funcs].last.last].join("\t")
+    end
+  when :kit
+    u = units(inventory).find { |x| x[:id] == opts[:id] } or abort "no unit #{opts[:id]} (see --units)"
+    puts kit(u)
+  when :check
+    errs = check(inventory)
+    errs.each { |e| warn e }
+    puts errs.empty? ? "core_rs inventory check: OK" : "core_rs inventory check: #{errs.size} problem(s)"
+    exit(errs.empty? ? 0 : 1)
   else
-    puts %w[wave file name lines loc static public ported].join("\t")
-    sel.each { |f| puts [f.wave, f.file, f.name, f.range, f.loc, f.static, f.public, f.ported].join("\t") }
-  end
-when :units
-  us = units(funcs)
-  us = us.select { |u| u[:wave] == opts[:wave] } if opts[:wave]
-  us = us.select { |u| u[:funcs].any? { |f| !f.ported } } if opts[:open]
-  puts %w[unit wave file functions to_port loc first last].join("\t")
-  us.each do |u|
-    puts [u[:id], u[:wave], u[:file], u[:funcs].size, u[:funcs].count { |f| !f.ported },
-          u[:funcs].sum(&:loc), u[:funcs].first.first, u[:funcs].last.last].join("\t")
-  end
-when :kit
-  u = units(inventory).find { |x| x[:id] == opts[:id] } or abort "no unit #{opts[:id]} (see --units)"
-  puts kit(u)
-when :check
-  errs = check(inventory)
-  errs.each { |e| warn e }
-  puts errs.empty? ? "core_rs inventory check: OK" : "core_rs inventory check: #{errs.size} problem(s)"
-  exit(errs.empty? ? 0 : 1)
-else
-  puts "Wave  Functions  LOC      Ported  Ported LOC  Public  Static"
-  %w[A B C D X].each do |w|
-    fs = funcs.select { |f| f.wave == w }
-    p = fs.select(&:ported)
-    printf("%-4s  %9d  %7d  %6d  %10d  %6d  %6d\n", w, fs.size, fs.sum(&:loc), p.size, p.sum(&:loc),
-           fs.count(&:public), fs.count(&:static))
-  end
-  printf("all   %9d  %7d  %6d  %10d\n", funcs.size, funcs.sum(&:loc), funcs.count(&:ported), funcs.select(&:ported).sum(&:loc))
-  puts
-  puts "Phase 1 exit criteria (claude/migration-strategy.md): Wave A >= 90% ported, Wave B >= 25% ported"
-  { "A" => 0.90, "B" => 0.25 }.each do |w, goal|
-    fs = funcs.select { |f| f.wave == w }
-    done = fs.count(&:ported)
-    need = (fs.size * goal).ceil
-    printf("  Wave %s: %d / %d ported (%.1f%%), target %d: %s\n", w, done, fs.size, 100.0 * done / [fs.size, 1].max, need,
-           done >= need ? "met" : "#{need - done} to go")
+    puts "Wave  Functions  LOC      Ported  Ported LOC  Public  Static"
+    %w[A B C D X].each do |w|
+      fs = funcs.select { |f| f.wave == w }
+      p = fs.select(&:ported)
+      printf("%-4s  %9d  %7d  %6d  %10d  %6d  %6d\n", w, fs.size, fs.sum(&:loc), p.size, p.sum(&:loc),
+             fs.count(&:public), fs.count(&:static))
+    end
+    printf("all   %9d  %7d  %6d  %10d\n", funcs.size, funcs.sum(&:loc), funcs.count(&:ported), funcs.select(&:ported).sum(&:loc))
+    puts
+    puts "Phase 1 exit criteria (claude/migration-strategy.md): Wave A >= 90% ported, Wave B >= 25% ported"
+    { "A" => 0.90, "B" => 0.25 }.each do |w, goal|
+      fs = funcs.select { |f| f.wave == w }
+      done = fs.count(&:ported)
+      need = (fs.size * goal).ceil
+      printf("  Wave %s: %d / %d ported (%.1f%%), target %d: %s\n", w, done, fs.size, 100.0 * done / [fs.size, 1].max, need,
+             done >= need ? "met" : "#{need - done} to go")
+    end
   end
 end
