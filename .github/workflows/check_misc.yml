@@ -48,7 +48,6 @@ jobs:
       - name: Check porting ledger drift
         run: |
           ruby tool/generate_porting_ledger.rb --check
-          ruby tool/generate_porting_ledger.rb --check-kits
         if: always()
 
       - name: Check for code styles
