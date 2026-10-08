@@ -1,47 +1,26 @@
 //! This module is responsible for marking/moving objects on GC.
 
-use std::ptr::null;
 use std::{ffi::c_void, ops::Range};
 use crate::{cruby::*, state::ZJITState, stats::with_time_stat, virtualmem::CodePtr};
-use crate::payload::{IseqPayload, IseqVersionRef, get_iseq_payload_ptr};
+use crate::payload::{IseqPayload, IseqPayloadHandle, IseqVersionRef};
 use crate::stats::Counter::gc_time_ns;
 
 /// GC callback for marking GC objects in the per-ISEQ payload.
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_iseq_mark(payload: *mut c_void) {
-    let payload = if payload.is_null() {
+    let Some(handle) = IseqPayloadHandle::from_raw_void(payload) else {
         return; // nothing to mark
-    } else {
-        // SAFETY: The GC takes the VM lock while marking, which
-        // we assert, so we should be synchronized and data race free.
-        //
-        // For aliasing, having the VM lock hopefully also implies that no one
-        // else has an overlapping &mut IseqPayload.
-        unsafe {
-            rb_assert_holding_vm_lock();
-            &*(payload as *const IseqPayload)
-        }
     };
-    with_time_stat(gc_time_ns, || iseq_mark(payload));
+    with_time_stat(gc_time_ns, || iseq_mark(&handle));
 }
 
 /// GC callback for updating GC objects in the per-ISEQ payload.
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_iseq_update_references(payload: *mut c_void) {
-    let payload = if payload.is_null() {
+    let Some(mut handle) = IseqPayloadHandle::from_raw_void(payload) else {
         return; // nothing to update
-    } else {
-        // SAFETY: The GC takes the VM lock while marking, which
-        // we assert, so we should be synchronized and data race free.
-        //
-        // For aliasing, having the VM lock hopefully also implies that no one
-        // else has an overlapping &mut IseqPayload.
-        unsafe {
-            rb_assert_holding_vm_lock();
-            &mut *(payload as *mut IseqPayload)
-        }
     };
-    with_time_stat(gc_time_ns, || iseq_update_references(payload));
+    with_time_stat(gc_time_ns, || iseq_update_references(&mut handle));
 }
 
 /// GC callback for finalizing an ISEQ
@@ -53,24 +32,7 @@ pub extern "C" fn rb_zjit_iseq_free(iseq: IseqPtr) {
 
     ZJITState::get_invariants().forget_iseq(iseq);
 
-    // If ZJIT has never created a payload for this ISEQ, do nothing.
-    let payload_ptr = get_iseq_payload_ptr(iseq);
-    if payload_ptr.is_null() {
-        return;
-    }
-
-    // Take ownership of the payload and unset it from the ISEQ.
-    let payload = unsafe { Box::from_raw(payload_ptr) };
-    unsafe { rb_iseq_clear_jit_payload(iseq) };
-
-    // Clear IseqVersion references. Patch points may hold raw pointers to them, so
-    // they have to outlive the ISEQ. They're dropped when the assumption is broken.
-    for &version in payload.versions.iter() {
-        unsafe { (*version.as_ptr()).iseq = null() };
-    }
-
-    // Free the IseqPayload.
-    drop(payload);
+    IseqPayloadHandle::free_for_iseq(iseq);
 }
 
 /// GC callback for finalizing a CME

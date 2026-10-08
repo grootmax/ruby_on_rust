@@ -30,7 +30,7 @@ macro_rules! compile_patch_points {
                     invalidate_iseq_version($cb, iseq, &mut version);
                     // Remember NoSingletonClass busts on the payload
                     if is_no_singleton_class!($cause) {
-                        let payload = get_or_create_iseq_payload(iseq);
+                        let mut payload = get_or_create_iseq_payload(iseq);
                         payload.was_invalidated_for_singleton_class_creation = true;
                     }
                 }
@@ -454,7 +454,7 @@ pub extern "C" fn rb_zjit_tracing_invalidate_all() {
         debug!("Invalidating all ZJIT compiled code due to TracePoint");
 
         for_each_iseq(|iseq| {
-            let payload = get_or_create_iseq_payload(iseq);
+            let mut payload = get_or_create_iseq_payload(iseq);
 
             if let Some(version) = payload.versions.last_mut() {
                 unsafe { version.as_mut() }.status = IseqStatus::Invalidated;

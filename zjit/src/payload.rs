@@ -100,45 +100,91 @@ pub enum IseqStatus {
     Invalidated,
 }
 
-/// Get a pointer to the payload object associated with an ISEQ. Create one if none exists.
-pub fn get_or_create_iseq_payload_ptr(iseq: IseqPtr) -> *mut IseqPayload {
-    type VoidPtr = *mut c_void;
+/// Lifetime-bounded encapsulation of an `IseqPayload` raw pointer.
+///
+/// Ensures VM lock acquisition checks and encapsulates raw FFI pointer conversions,
+/// lookup, creation, and deallocation logic.
+#[derive(Debug)]
+pub struct IseqPayloadHandle<'a> {
+    ptr: NonNull<IseqPayload>,
+    _marker: std::marker::PhantomData<&'a mut IseqPayload>,
+}
 
-    unsafe {
-        let payload = rb_iseq_get_jit_payload(iseq);
-        if payload.is_null() {
-            // Allocate a new payload with Box and transfer ownership to the GC.
-            // We drop the payload with Box::from_raw when the GC frees the ISEQ and calls us.
-            // NOTE(alan): Sometimes we read from an ISEQ without ever writing to it.
-            // We allocate in those cases anyways.
-            let new_payload = IseqPayload::new();
-            let new_payload = Box::into_raw(Box::new(new_payload));
-            rb_iseq_set_jit_payload(iseq, new_payload as VoidPtr);
+impl<'a> IseqPayloadHandle<'a> {
+    /// Wrap a raw C void pointer from GC callbacks into a lifetime-bounded payload handle.
+    /// Performs null validation and asserts VM lock acquisition before returning.
+    pub fn from_raw_void(ptr: *mut c_void) -> Option<Self> {
+        let non_null = NonNull::new(ptr as *mut IseqPayload)?;
+        unsafe {
+            rb_assert_holding_vm_lock();
+        }
+        Some(Self {
+            ptr: non_null,
+            _marker: std::marker::PhantomData,
+        })
+    }
 
-            new_payload
-        } else {
-            payload as *mut IseqPayload
+    /// Get the payload handle for an ISEQ, creating a new payload if none exists.
+    pub fn get_or_create(iseq: IseqPtr) -> Self {
+        type VoidPtr = *mut c_void;
+        unsafe {
+            let payload = rb_iseq_get_jit_payload(iseq);
+            let ptr = if payload.is_null() {
+                let new_payload = Box::into_raw(Box::new(IseqPayload::new()));
+                rb_iseq_set_jit_payload(iseq, new_payload as VoidPtr);
+                NonNull::new(new_payload).expect("non-null from Box")
+            } else {
+                NonNull::new(payload as *mut IseqPayload).expect("non-null payload")
+            };
+            Self {
+                ptr,
+                _marker: std::marker::PhantomData,
+            }
+        }
+    }
+
+    /// Get the payload handle for an ISEQ if it exists, or None if not allocated.
+    pub fn get(iseq: IseqPtr) -> Option<Self> {
+        unsafe {
+            let payload = rb_iseq_get_jit_payload(iseq);
+            let ptr = NonNull::new(payload as *mut IseqPayload)?;
+            Some(Self {
+                ptr,
+                _marker: std::marker::PhantomData,
+            })
+        }
+    }
+
+    /// Free the payload associated with an ISEQ and nullify version references.
+    pub fn free_for_iseq(iseq: IseqPtr) {
+        if let Some(handle) = Self::get(iseq) {
+            unsafe {
+                rb_iseq_clear_jit_payload(iseq);
+                for &version in handle.versions.iter() {
+                    (*version.as_ptr()).iseq = std::ptr::null();
+                }
+                let payload = Box::from_raw(handle.ptr.as_ptr());
+                drop(payload);
+            }
         }
     }
 }
 
-/// Get a pointer to the payload object associated with an ISEQ, or null if never allocated.
-pub fn get_iseq_payload_ptr(iseq: IseqPtr) -> *mut IseqPayload {
-    unsafe { rb_iseq_get_jit_payload(iseq) as *mut IseqPayload }
+impl<'a> std::ops::Deref for IseqPayloadHandle<'a> {
+    type Target = IseqPayload;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { self.ptr.as_ref() }
+    }
 }
 
-/// Get the payload object associated with an ISEQ. Create one if none exists.
-pub fn get_or_create_iseq_payload(iseq: IseqPtr) -> &'static mut IseqPayload {
-    let payload_non_null = get_or_create_iseq_payload_ptr(iseq);
-    payload_ptr_as_mut(payload_non_null)
+impl<'a> std::ops::DerefMut for IseqPayloadHandle<'a> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { self.ptr.as_mut() }
+    }
 }
 
-/// Convert an IseqPayload pointer to a mutable reference. Only one reference
-/// should be kept at a time.
-pub fn payload_ptr_as_mut(payload_ptr: *mut IseqPayload) -> &'static mut IseqPayload {
-    // SAFETY: we should have the VM lock and all other Ruby threads should be asleep. So we have
-    // exclusive mutable access.
-    // Hmm, nothing seems to stop calling this on the same
-    // iseq twice, though, which violates aliasing rules.
-    unsafe { payload_ptr.as_mut() }.unwrap()
+/// Get the payload handle associated with an ISEQ. Create one if none exists.
+pub fn get_or_create_iseq_payload<'a>(iseq: IseqPtr) -> IseqPayloadHandle<'a> {
+    IseqPayloadHandle::get_or_create(iseq)
 }
