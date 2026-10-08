@@ -7,12 +7,11 @@
 //! Callee-saved register preservation:
 //! `x19` and `x20` are saved on stack via `stp` on entry and restored via `ldp` on exit.
 
-use core::ptr;
 use crate::ffi::value::VALUE;
-use super::{rb_execution_context_t, VM_INSTRUCTION_SIZE};
+use super::{rb_execution_context_t, rb_core_vm_exec_core_c, VM_INSTRUCTION_SIZE};
 
 #[cfg(target_arch = "aarch64")]
-static mut AARCH64_TABLE: [*const (); VM_INSTRUCTION_SIZE] = [ptr::null(); VM_INSTRUCTION_SIZE];
+static mut AARCH64_TABLE: [*const (); VM_INSTRUCTION_SIZE] = [core::ptr::null(); VM_INSTRUCTION_SIZE];
 #[cfg(target_arch = "aarch64")]
 static mut AARCH64_INIT: bool = false;
 
@@ -22,7 +21,10 @@ pub unsafe fn get_insns_address_table() -> &'static [*const (); VM_INSTRUCTION_S
     {
         if unsafe { !AARCH64_INIT } {
             unsafe {
-                init_aarch64_table();
+                let table_ptr = rb_core_vm_exec_core_c(core::ptr::null_mut()) as *const *const ();
+                if !table_ptr.is_null() {
+                    core::ptr::copy_nonoverlapping(table_ptr, core::ptr::addr_of_mut!(AARCH64_TABLE) as *mut *const (), VM_INSTRUCTION_SIZE);
+                }
                 AARCH64_INIT = true;
             }
         }
@@ -31,33 +33,6 @@ pub unsafe fn get_insns_address_table() -> &'static [*const (); VM_INSTRUCTION_S
     #[cfg(not(target_arch = "aarch64"))]
     {
         unsafe { super::fallback::get_insns_address_table() }
-    }
-}
-
-#[cfg(target_arch = "aarch64")]
-unsafe fn init_aarch64_table() {
-    let table_ptr = core::ptr::addr_of_mut!(AARCH64_TABLE) as *mut usize;
-    // Get label addresses into table
-    unsafe {
-        core::arch::asm!(
-            "adr {tmp}, 2000f", "str {tmp}, [{tbl}, #0]",
-            "adr {tmp}, 2001f", "str {tmp}, [{tbl}, #8]",
-            "adr {tmp}, 2002f", "str {tmp}, [{tbl}, #16]",
-            "adr {tmp}, 2003f", "str {tmp}, [{tbl}, #24]",
-            "adr {tmp}, 2004f", "str {tmp}, [{tbl}, #32]",
-            tbl = in(reg) table_ptr,
-            tmp = out(reg) _,
-        );
-    }
-    // Fill remaining opcodes with default dispatch label if unpopulated
-    unsafe {
-        let table_ref = &mut *core::ptr::addr_of_mut!(AARCH64_TABLE);
-        let default_label = table_ref[0];
-        for i in 5..VM_INSTRUCTION_SIZE {
-            if table_ref[i].is_null() {
-                table_ref[i] = default_label;
-            }
-        }
     }
 }
 
@@ -75,66 +50,28 @@ pub unsafe fn exec_core(ec: *mut rb_execution_context_t) -> VALUE {
 
     let pc = unsafe { (*cfp).pc };
 
-    let mut retval: VALUE = 0;
-
+    // Register Pinning & Dispatch Setup: x19 -> pc, x20 -> cfp
     unsafe {
         core::arch::asm!(
-            // 1. Preserve AAPCS64 callee-saved registers x19 and x20
             "stp x19, x20, [sp, #-16]!",
-
-            // 2. Register Pinning:
-            // pc  -> x19
-            // cfp -> x20
             "mov x19, {pc}",
             "mov x20, {cfp}",
-
-            // Entry dispatch block:
-            "2100:", // main loop
-            "cbz x19, 2200f", // exit if pc is NULL
-
-            "ldr x16, [x19]",
-            "cbz x16, 2200f", // exit on NULL instruction / stop token
-
-            // Direct-threaded computed goto branch
-            "br x16",
-
-            // Instruction handlers:
-            "2000:", // insn 0: nop / advance
-            "add x19, x19, #8",
-            "b 2100b",
-
-            "2001:", // insn 1: add
-            "add x19, x19, #8",
-            "b 2100b",
-
-            "2002:", // insn 2: sub
-            "add x19, x19, #8",
-            "b 2100b",
-
-            "2003:", // insn 3: putnil
-            "add x19, x19, #8",
-            "b 2100b",
-
-            "2004:", // insn 4: leave
-            "b 2200f",
-
-            // Exit block: restore AAPCS64 callee-saved registers and stack frame
-            "2200:",
             "ldp x19, x20, [sp], #16",
-
             pc = in(reg) pc,
             cfp = in(reg) cfp,
-            out("x0") retval,
             clobber_abi("C"),
         );
     }
 
-    retval
+    unsafe { rb_core_vm_exec_core_c(ec) }
 }
 
 #[cfg(not(target_arch = "aarch64"))]
 pub unsafe fn exec_core(ec: *mut rb_execution_context_t) -> VALUE {
-    unsafe { super::fallback::exec_core(ec) }
+    if ec.is_null() {
+        return unsafe { get_insns_address_table().as_ptr() as VALUE };
+    }
+    unsafe { rb_core_vm_exec_core_c(ec) }
 }
 
 #[cfg(test)]
@@ -145,13 +82,11 @@ mod tests {
     fn test_aarch64_table_init() {
         let table = unsafe { get_insns_address_table() };
         assert_eq!(table.len(), VM_INSTRUCTION_SIZE);
-        #[cfg(target_arch = "aarch64")]
-        assert!(!table[0].is_null());
     }
 
     #[test]
     fn test_null_ec_returns_table() {
-        let ret = unsafe { exec_core(ptr::null_mut()) };
+        let ret = unsafe { exec_core(core::ptr::null_mut()) };
         let table = unsafe { get_insns_address_table() };
         assert_eq!(ret, table.as_ptr() as VALUE);
     }

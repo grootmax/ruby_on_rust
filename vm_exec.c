@@ -55,9 +55,12 @@ vm_exec_core(rb_execution_context_t *ec)
     return rb_vm_exec_core_rs(ec);
 }
 
-#elif !OPT_CALL_THREADED_CODE
+VALUE
+rb_core_vm_exec_core_c(rb_execution_context_t *ec)
+#else
 static VALUE
 vm_exec_core(rb_execution_context_t *ec)
+#endif
 {
 #if defined(__GNUC__) && defined(__i386__)
     DECL_SC_REG(const VALUE *, pc, "di");
@@ -116,46 +119,10 @@ vm_exec_core(rb_execution_context_t *ec)
     goto first;
 }
 
+#if !USE_RUST_PORTS
 const void **
 rb_vm_get_insns_address_table(void)
 {
     return (const void **)vm_exec_core(0);
-}
-
-#else /* OPT_CALL_THREADED_CODE */
-
-#include "vm.inc"
-#include "vmtc.inc"
-
-const void **
-rb_vm_get_insns_address_table(void)
-{
-    return (const void **)insns_address_table;
-}
-
-static VALUE
-vm_exec_core(rb_execution_context_t *ec)
-{
-    register rb_control_frame_t *reg_cfp = ec->cfp;
-    rb_thread_t *th;
-
-    while (1) {
-        reg_cfp = ((rb_insn_func_t) (*GET_PC()))(ec, reg_cfp);
-
-        if (UNLIKELY(reg_cfp == 0)) {
-            break;
-        }
-    }
-
-    if (!UNDEF_P((th = rb_ec_thread_ptr(ec))->retval)) {
-        VALUE ret = th->retval;
-        th->retval = Qundef;
-        return ret;
-    }
-    else {
-        VALUE err = ec->errinfo;
-        ec->errinfo = Qnil;
-        return err;
-    }
 }
 #endif

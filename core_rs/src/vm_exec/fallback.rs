@@ -4,7 +4,7 @@
 
 use core::ptr;
 use crate::ffi::value::VALUE;
-use super::{rb_execution_context_t, VM_INSTRUCTION_SIZE};
+use super::{rb_execution_context_t, rb_core_vm_exec_core_c, VM_INSTRUCTION_SIZE};
 
 static mut FALLBACK_TABLE: [*const (); VM_INSTRUCTION_SIZE] = [ptr::null(); VM_INSTRUCTION_SIZE];
 static mut FALLBACK_INIT: bool = false;
@@ -13,9 +13,9 @@ static mut FALLBACK_INIT: bool = false;
 pub unsafe fn get_insns_address_table() -> &'static [*const (); VM_INSTRUCTION_SIZE] {
     if unsafe { !FALLBACK_INIT } {
         unsafe {
-            let table_ref = &mut *core::ptr::addr_of_mut!(FALLBACK_TABLE);
-            for i in 0..VM_INSTRUCTION_SIZE {
-                table_ref[i] = i as *const ();
+            let table_ptr = rb_core_vm_exec_core_c(ptr::null_mut()) as *const *const ();
+            if !table_ptr.is_null() {
+                core::ptr::copy_nonoverlapping(table_ptr, core::ptr::addr_of_mut!(FALLBACK_TABLE) as *mut *const (), VM_INSTRUCTION_SIZE);
             }
             FALLBACK_INIT = true;
         }
@@ -29,35 +29,7 @@ pub unsafe fn exec_core(ec: *mut rb_execution_context_t) -> VALUE {
         return unsafe { get_insns_address_table().as_ptr() as VALUE };
     }
 
-    let cfp = unsafe { (*ec).cfp };
-    if cfp.is_null() {
-        return 0; // Qnil
-    }
-
-    let mut reg_pc = unsafe { (*cfp).pc };
-
-    while !reg_pc.is_null() {
-        let insn_raw = unsafe { *reg_pc };
-        if insn_raw == 0 {
-            // Stop / return condition
-            break;
-        }
-
-        let insn_id = insn_raw as usize % VM_INSTRUCTION_SIZE;
-        match insn_id {
-            0 => {
-                // NOP / default insn
-                reg_pc = unsafe { reg_pc.add(1) };
-            }
-            1..=258 => {
-                // Token instruction dispatch
-                reg_pc = unsafe { reg_pc.add(1) };
-            }
-            _ => break,
-        }
-    }
-
-    0 // Qnil
+    unsafe { rb_core_vm_exec_core_c(ec) }
 }
 
 #[cfg(test)]
@@ -68,7 +40,5 @@ mod tests {
     fn test_fallback_table_init() {
         let table = unsafe { get_insns_address_table() };
         assert_eq!(table.len(), VM_INSTRUCTION_SIZE);
-        assert_eq!(table[0], ptr::null());
-        assert_eq!(table[1], 1 as *const ());
     }
 }

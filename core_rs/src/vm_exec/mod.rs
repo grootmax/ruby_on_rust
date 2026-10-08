@@ -35,6 +35,18 @@ pub struct rb_execution_context_t {
     pub cfp: *mut rb_control_frame_t,
 }
 
+#[cfg(not(test))]
+unsafe extern "C" {
+    pub fn rb_core_vm_exec_core_c(ec: *mut rb_execution_context_t) -> VALUE;
+}
+
+#[cfg(test)]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rb_core_vm_exec_core_c(_ec: *mut rb_execution_context_t) -> VALUE {
+    static DUMMY_TABLE: [usize; VM_INSTRUCTION_SIZE] = [0; VM_INSTRUCTION_SIZE];
+    DUMMY_TABLE.as_ptr() as VALUE
+}
+
 /// Get the instruction address table for current architecture.
 pub unsafe fn get_insns_address_table() -> &'static [*const (); VM_INSTRUCTION_SIZE] {
     #[cfg(target_arch = "x86_64")]

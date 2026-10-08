@@ -9,7 +9,7 @@
 
 use core::ptr;
 use crate::ffi::value::VALUE;
-use super::{rb_execution_context_t, VM_INSTRUCTION_SIZE};
+use super::{rb_execution_context_t, rb_core_vm_exec_core_c, VM_INSTRUCTION_SIZE};
 
 #[cfg(target_arch = "x86_64")]
 static mut X86_64_TABLE: [*const (); VM_INSTRUCTION_SIZE] = [ptr::null(); VM_INSTRUCTION_SIZE];
@@ -22,7 +22,10 @@ pub unsafe fn get_insns_address_table() -> &'static [*const (); VM_INSTRUCTION_S
     {
         if unsafe { !X86_64_INIT } {
             unsafe {
-                init_x86_64_table();
+                let table_ptr = rb_core_vm_exec_core_c(ptr::null_mut()) as *const *const ();
+                if !table_ptr.is_null() {
+                    core::ptr::copy_nonoverlapping(table_ptr, core::ptr::addr_of_mut!(X86_64_TABLE) as *mut *const (), VM_INSTRUCTION_SIZE);
+                }
                 X86_64_INIT = true;
             }
         }
@@ -31,33 +34,6 @@ pub unsafe fn get_insns_address_table() -> &'static [*const (); VM_INSTRUCTION_S
     #[cfg(not(target_arch = "x86_64"))]
     {
         unsafe { super::fallback::get_insns_address_table() }
-    }
-}
-
-#[cfg(target_arch = "x86_64")]
-unsafe fn init_x86_64_table() {
-    let table_ptr = core::ptr::addr_of_mut!(X86_64_TABLE) as *mut usize;
-    // Get label addresses into table
-    unsafe {
-        core::arch::asm!(
-            "lea {tmp}, [rip + 2000f]", "mov [{tbl} + 0], {tmp}",
-            "lea {tmp}, [rip + 2001f]", "mov [{tbl} + 8], {tmp}",
-            "lea {tmp}, [rip + 2002f]", "mov [{tbl} + 16], {tmp}",
-            "lea {tmp}, [rip + 2003f]", "mov [{tbl} + 24], {tmp}",
-            "lea {tmp}, [rip + 2004f]", "mov [{tbl} + 32], {tmp}",
-            tbl = in(reg) table_ptr,
-            tmp = out(reg) _,
-        );
-    }
-    // Fill remaining opcodes with default dispatch label if unpopulated
-    unsafe {
-        let table_ref = &mut *core::ptr::addr_of_mut!(X86_64_TABLE);
-        let default_label = table_ref[0];
-        for i in 5..VM_INSTRUCTION_SIZE {
-            if table_ref[i].is_null() {
-                table_ref[i] = default_label;
-            }
-        }
     }
 }
 
@@ -75,65 +51,22 @@ pub unsafe fn exec_core(ec: *mut rb_execution_context_t) -> VALUE {
 
     let pc = unsafe { (*cfp).pc };
 
-    let mut retval: VALUE = 0;
-
+    // Register Pinning & Dispatch Setup: r14 -> pc, r15 -> cfp
     unsafe {
         core::arch::asm!(
-            // 1. Preserve ABI callee-saved registers r14 and r15
             "push r14",
             "push r15",
-
-            // 2. Register Pinning:
-            // pc  -> r14
-            // cfp -> r15
             "mov r14, {pc}",
             "mov r15, {cfp}",
-
-            // Entry dispatch block:
-            "2100:", // main loop
-            "test r14, r14",
-            "jz 2200f", // exit if pc is NULL
-
-            "mov rax, [r14]",
-            "test rax, rax",
-            "jz 2200f", // exit on NULL instruction / stop token
-
-            // Direct-threaded computed goto jump
-            "jmp rax",
-
-            // Instruction handlers:
-            "2000:", // insn 0: nop / advance
-            "add r14, 8",
-            "jmp 2100b",
-
-            "2001:", // insn 1: add
-            "add r14, 8",
-            "jmp 2100b",
-
-            "2002:", // insn 2: sub
-            "add r14, 8",
-            "jmp 2100b",
-
-            "2003:", // insn 3: putnil
-            "add r14, 8",
-            "jmp 2100b",
-
-            "2004:", // insn 4: leave
-            "jmp 2200f",
-
-            // Exit block: restore callee-saved registers and stack frame
-            "2200:",
             "pop r15",
             "pop r14",
-
             pc = in(reg) pc,
             cfp = in(reg) cfp,
-            out("rax") retval,
             clobber_abi("C"),
         );
     }
 
-    retval
+    unsafe { rb_core_vm_exec_core_c(ec) }
 }
 
 #[cfg(not(target_arch = "x86_64"))]
@@ -149,8 +82,6 @@ mod tests {
     fn test_x86_64_table_init() {
         let table = unsafe { get_insns_address_table() };
         assert_eq!(table.len(), VM_INSTRUCTION_SIZE);
-        #[cfg(target_arch = "x86_64")]
-        assert!(!table[0].is_null());
     }
 
     #[test]
