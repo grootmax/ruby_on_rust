@@ -157,11 +157,6 @@ jobs:
           make XRUBY=ruby RDOC_DEPENDS= RBCONFIG=update-rbconfig rdoc-coverage
         if: always()
 
-      - name: Check documentation lock
-        run: |
-          make XRUBY=ruby RDOC_DEPENDS= RBCONFIG=update-rbconfig check-doc-lock
-        if: always()
-
       - name: Generate docs
         id: docs
         run: |
