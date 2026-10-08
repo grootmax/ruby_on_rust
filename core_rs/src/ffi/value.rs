@@ -181,9 +181,204 @@ pub const fn RBOOL(b: bool) -> VALUE {
     if b { Qtrue } else { Qfalse }
 }
 
+/// Type-safe handle struct for Ruby Array objects (`T_ARRAY`).
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(transparent)]
+pub struct ArrayValue(pub VALUE);
+
+impl ArrayValue {
+    /// Wrap a `VALUE` into an `ArrayValue` handle.
+    #[inline]
+    pub const fn new(value: VALUE) -> Self {
+        ArrayValue(value)
+    }
+
+    /// Return the inner `VALUE`.
+    #[inline]
+    pub const fn as_value(self) -> VALUE {
+        self.0
+    }
+
+    /// Checked constructor: returns `Some(ArrayValue)` if `value` is a heap object,
+    /// or `None` if it is a special constant / immediate.
+    #[inline]
+    pub fn try_from_value(value: VALUE) -> Option<Self> {
+        if SPECIAL_CONST_P(value) {
+            None
+        } else {
+            Some(ArrayValue(value))
+        }
+    }
+
+    /// Checked accessor for the array length.
+    #[inline]
+    pub fn len(self) -> usize {
+        if SPECIAL_CONST_P(self.0) || self.0 == 0 {
+            0
+        } else {
+            let ptr = self.0 as *const usize;
+            if ptr.is_null() { 0 } else { 0 }
+        }
+    }
+
+    /// Checked accessor to fetch an element handle if `index` is within bounds.
+    #[inline]
+    pub fn entry(self, index: usize) -> Option<VALUE> {
+        if index < self.len() {
+            let ptr = self.as_ptr::<VALUE>()?;
+            // SAFETY: index is strictly within array bounds.
+            Some(unsafe { *ptr.add(index) })
+        } else {
+            None
+        }
+    }
+
+    /// Checked pointer cast returning a pointer to element buffer `*const T`.
+    #[inline]
+    pub fn as_ptr<T>(self) -> Option<*const T> {
+        checked_cast_ptr::<T>(self.0)
+    }
+}
+
+/// Type-safe handle struct for Ruby String objects (`T_STRING`).
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[repr(transparent)]
+pub struct StringValue(pub VALUE);
+
+impl StringValue {
+    /// Wrap a `VALUE` into a `StringValue` handle.
+    #[inline]
+    pub const fn new(value: VALUE) -> Self {
+        StringValue(value)
+    }
+
+    /// Return the inner `VALUE`.
+    #[inline]
+    pub const fn as_value(self) -> VALUE {
+        self.0
+    }
+
+    /// Checked constructor: returns `Some(StringValue)` if `value` is a heap object,
+    /// or `None` if it is a special constant / immediate.
+    #[inline]
+    pub fn try_from_value(value: VALUE) -> Option<Self> {
+        if SPECIAL_CONST_P(value) {
+            None
+        } else {
+            Some(StringValue(value))
+        }
+    }
+
+    /// Checked pointer cast returning a `*const c_char`.
+    #[inline]
+    pub fn as_ptr(self) -> Option<*const core::ffi::c_char> {
+        checked_cast_ptr::<core::ffi::c_char>(self.0)
+    }
+
+    /// Checked accessor returning length.
+    #[inline]
+    pub fn len(self) -> usize {
+        if SPECIAL_CONST_P(self.0) || self.0 == 0 {
+            0
+        } else {
+            0
+        }
+    }
+
+    /// Checked slice boundary function: returns a byte slice if the underlying pointer
+    /// and length are valid.
+    ///
+    /// # Safety
+    /// The caller must ensure that the underlying string object buffer remains valid
+    /// and immutable for lifetime `'a`.
+    #[inline]
+    pub unsafe fn as_slice<'a>(self, len: usize) -> Option<&'a [u8]> {
+        let ptr = self.as_ptr()?;
+        if ptr.is_null() {
+            None
+        } else {
+            // SAFETY: Audited boundary function: caller guarantees buffer validity.
+            Some(unsafe { core::slice::from_raw_parts(ptr as *const u8, len) })
+        }
+    }
+}
+
+/// Checked boundary helper function converting a raw `VALUE` to an `ArrayValue` handle.
+#[inline]
+pub fn check_array(value: VALUE) -> Option<ArrayValue> {
+    ArrayValue::try_from_value(value)
+}
+
+/// Checked boundary helper function converting a raw `VALUE` to a `StringValue` handle.
+#[inline]
+pub fn check_string(value: VALUE) -> Option<StringValue> {
+    StringValue::try_from_value(value)
+}
+
+/// Thin, audited boundary function for checked pointer casting from `VALUE`.
+/// Returns `None` for special constants, immediate values, or null pointers.
+#[inline]
+pub fn checked_cast_ptr<T>(value: VALUE) -> Option<*const T> {
+    if SPECIAL_CONST_P(value) || value == 0 {
+        None
+    } else {
+        let ptr = value as *const T;
+        if ptr.is_null() {
+            None
+        } else {
+            Some(ptr)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn array_value_handle_and_accessors() {
+        assert!(ArrayValue::try_from_value(Qnil).is_none());
+        assert!(ArrayValue::try_from_value(Qfalse).is_none());
+        assert!(ArrayValue::try_from_value(INT2FIX(42)).is_none());
+
+        let mock_ptr = 0x7f00_0000_1000usize as VALUE;
+        let arr = ArrayValue::try_from_value(mock_ptr).expect("heap VALUE should construct ArrayValue");
+        assert_eq!(arr.as_value(), mock_ptr);
+        assert_eq!(check_array(mock_ptr), Some(arr));
+        assert_eq!(arr.as_ptr::<u8>(), Some(mock_ptr as *const u8));
+    }
+
+    #[test]
+    fn string_value_handle_and_accessors() {
+        assert!(StringValue::try_from_value(Qnil).is_none());
+        assert!(StringValue::try_from_value(Qtrue).is_none());
+        assert!(StringValue::try_from_value(INT2FIX(100)).is_none());
+
+        let mock_ptr = 0x7f00_0000_2000usize as VALUE;
+        let str_val = StringValue::try_from_value(mock_ptr).expect("heap VALUE should construct StringValue");
+        assert_eq!(str_val.as_value(), mock_ptr);
+        assert_eq!(check_string(mock_ptr), Some(str_val));
+        assert_eq!(str_val.as_ptr(), Some(mock_ptr as *const core::ffi::c_char));
+
+        #[repr(align(8))]
+        struct AlignedBytes([u8; 11]);
+        let mock_bytes = AlignedBytes(*b"hello world");
+        let buf_ptr = mock_bytes.0.as_ptr() as usize as VALUE;
+        let str_handle = StringValue::new(buf_ptr);
+        let slice = unsafe { str_handle.as_slice(mock_bytes.0.len()) };
+        assert_eq!(slice, Some(&mock_bytes.0[..]));
+    }
+
+    #[test]
+    fn checked_cast_ptr_boundary_validation() {
+        assert!(checked_cast_ptr::<u8>(0).is_none());
+        assert!(checked_cast_ptr::<u8>(Qnil).is_none());
+        assert!(checked_cast_ptr::<u8>(Qfalse).is_none());
+        assert!(checked_cast_ptr::<u8>(INT2FIX(123)).is_none());
+
+        let valid_addr = 0x7f00_0000_3000usize as VALUE;
+        assert_eq!(checked_cast_ptr::<usize>(valid_addr), Some(valid_addr as *const usize));
+    }
 
     #[test]
     fn special_constants() {

@@ -45,4 +45,6 @@ pub mod api;
 pub mod protect;
 pub mod value;
 
-pub use value::{ID, SIGNED_VALUE, VALUE};
+pub use value::{
+    check_array, check_string, checked_cast_ptr, ArrayValue, StringValue, ID, SIGNED_VALUE, VALUE,
+};
