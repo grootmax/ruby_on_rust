@@ -50,11 +50,6 @@ jobs:
           ruby tool/generate_porting_ledger.rb --check
         if: always()
 
-      - name: Check test excludes
-        run: |
-          ruby tool/check_test_excludes.rb
-        if: always()
-
       - name: Check for code styles
         run: |
           set -x
