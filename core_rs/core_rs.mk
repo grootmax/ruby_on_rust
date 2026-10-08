@@ -11,13 +11,21 @@
 # Keep in sync with core_rs/src/.
 CORE_RS_SRCS = $(srcdir)/core_rs/src/lib.rs \
 	$(srcdir)/core_rs/src/complex.rs \
+	$(srcdir)/core_rs/src/gc.rs \
+	$(srcdir)/core_rs/src/vm.rs \
 	$(srcdir)/core_rs/src/ffi/mod.rs \
 	$(srcdir)/core_rs/src/ffi/api.rs \
+	$(srcdir)/core_rs/src/ffi/boundary.rs \
 	$(srcdir)/core_rs/src/ffi/protect.rs \
 	$(srcdir)/core_rs/src/ffi/value.rs \
+	$(srcdir)/core_rs/src/macro_tests.rs \
 	$(srcdir)/core_rs/src/re.rs \
 	$(srcdir)/core_rs/src/util.rs \
 	$(empty)
+
+CORE_RS_MACROS_SRCS = $(srcdir)/core_rs/macros/src/lib.rs
+CORE_RS_SOEXT = $(or $(DLEXT),so)
+CORE_RS_MACROS_LIB = $(TOP_BUILD_DIR)/target/core_rs/libcore_rs_macros.$(CORE_RS_SOEXT)
 
 # rustc --cfg options that mirror the C configuration core_rs/src/ffi/
 # depends on.  They are taken from the C preprocessor with the same flags as
@@ -28,10 +36,17 @@ CORE_RS_CFG = $(CPP) $(XCFLAGS) $(CPPFLAGS) $(srcdir)/core_rs/cfg.c | \
 	sed -n -e 's/^core_rs_cfg_use_flonum 1$$/--cfg core_rs_flonum/p' \
 	       -e 's/^core_rs_cfg_use_flonum 0$$/--cfg core_rs_no_flonum/p'
 
-$(CORE_RS_LIB): $(CORE_RS_SRCS) $(srcdir)/core_rs/cfg.c
+$(CORE_RS_MACROS_LIB): $(CORE_RS_MACROS_SRCS)
+	$(ECHO) 'building core_rs_macros'
+	$(Q) $(MAKEDIRS) $(TOP_BUILD_DIR)/target/core_rs
+	$(Q) $(RUSTC) --crate-name=core_rs_macros --crate-type=proc-macro --edition=2024 \
+	    -o $@ $(srcdir)/core_rs/macros/src/lib.rs
+
+$(CORE_RS_LIB): $(CORE_RS_SRCS) $(CORE_RS_MACROS_LIB) $(srcdir)/core_rs/cfg.c
 	$(ECHO) 'building core_rs (Rust ports)'
 	$(Q) $(MAKEDIRS) $(TOP_BUILD_DIR)/target/core_rs
 	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=core_rs --crate-type=staticlib --edition=2024 \
+	    --extern core_rs_macros=$(CORE_RS_MACROS_LIB) \
 	    $(CORE_RS_RUSTC_FLAGS) `$(CORE_RS_CFG)` \
 	    -o $(CORE_RS_LIB) \
 	    $(srcdir)/core_rs/src/lib.rs
@@ -44,9 +59,10 @@ core-rs: $(CORE_RS_OBJ)
 
 # Unit tests for the pure parts of core_rs (needs only rustc; std is used
 # by the test harness, the library itself stays no_std).
-core-rs-test:
+core-rs-test: $(CORE_RS_MACROS_LIB)
 	$(Q) $(MAKEDIRS) $(TOP_BUILD_DIR)/target/core_rs
 	$(Q) $(RUSTC) --crate-name=core_rs --edition=2024 --test \
+	    --extern core_rs_macros=$(CORE_RS_MACROS_LIB) \
 	    `$(CORE_RS_CFG)` \
 	    -o $(TOP_BUILD_DIR)/target/core_rs/core_rs-test \
 	    $(srcdir)/core_rs/src/lib.rs

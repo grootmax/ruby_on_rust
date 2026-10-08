@@ -20,10 +20,18 @@
 #![cfg_attr(not(test), no_std)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
+extern crate core_rs_macros;
+
 pub mod complex;
 pub mod ffi;
+pub mod gc;
+#[cfg(test)]
+pub mod macro_tests;
 pub mod re;
 pub mod util;
+pub mod vm;
+
+pub use core_rs_macros::{gc_write_barrier, ruby_exception_boundary, ruby_gc_struct};
 
 /// C runtime pieces that `no_std` code needs.
 mod libc {

@@ -42,6 +42,7 @@
 //! thread that holds the GVL, with the VM initialised.
 
 pub mod api;
+pub mod boundary;
 pub mod protect;
 pub mod value;
 
