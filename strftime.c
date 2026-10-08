@@ -108,13 +108,23 @@
 
 #if !defined __STDC__ && !defined _WIN32
 #define const	/**/
+#if !USE_RUST_PORTS
 static int weeknumber();
 adddecl(static int iso8601wknum();)
+#else
+# define iso8601wknum(timeptr) rb_core_strftime_iso8601wknum(timeptr)
+# define weeknumber(timeptr, firstweekday) rb_core_strftime_weeknumber((timeptr), (firstweekday))
+#endif
 static int weeknumber_v();
 adddecl(static int iso8601wknum_v();)
 #else
+#if !USE_RUST_PORTS
 static int weeknumber(const struct tm *timeptr, int firstweekday);
 adddecl(static int iso8601wknum(const struct tm *timeptr);)
+#else
+# define iso8601wknum(timeptr) rb_core_strftime_iso8601wknum(timeptr)
+# define weeknumber(timeptr, firstweekday) rb_core_strftime_weeknumber((timeptr), (firstweekday))
+#endif
 static int weeknumber_v(const struct vtm *vtm, int firstweekday);
 adddecl(static int iso8601wknum_v(const struct vtm *vtm);)
 #endif
@@ -1129,8 +1139,6 @@ iso8601wknum(const struct tm *timeptr)
 
 	return weeknum;
 }
-#else
-# define iso8601wknum(timeptr) rb_core_strftime_iso8601wknum(timeptr)
 #endif
 
 static int
@@ -1165,8 +1173,6 @@ weeknumber(const struct tm *timeptr, int firstweekday)
 		ret = 0;
 	return ret;
 }
-#else
-# define weeknumber(timeptr, firstweekday) rb_core_strftime_weeknumber((timeptr), (firstweekday))
 #endif
 
 static int

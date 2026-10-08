@@ -35,8 +35,13 @@
 
 #define BIT_DIGITS(N)   (((N)*146)/485 + 1)  /* log2(10) =~ 146/485 */
 
+#if !USE_RUST_PORTS
 static char *fmt_setup(char*,size_t,int,int,int,int);
 static char *ruby_ultoa(unsigned long val, char *endp, int base, int octzero);
+#else
+# define fmt_setup(buf, size, c, flags, width, prec) rb_core_sprintf_fmt_setup((buf), (size), (c), (flags), (width), (prec))
+# define ruby_ultoa(val, endp, base, flags) rb_core_sprintf_ruby_ultoa((val), (endp), (base), (flags))
+#endif
 
 #if !USE_RUST_PORTS /* ported to core_rs/src/sprintf.rs */
 static char
@@ -1006,8 +1011,6 @@ fmt_setup(char *buf, size_t size, int c, int flags, int width, int prec)
     *--buf = '%';
     return buf;
 }
-#else
-# define fmt_setup(buf, size, c, flags, width, prec) rb_core_sprintf_fmt_setup((buf), (size), (c), (flags), (width), (prec))
 #endif
 
 #undef FILE
@@ -1046,8 +1049,6 @@ ruby_ultoa(unsigned long val, char *endp, int base, int flags)
     int octzero = flags & FSHARP;
     return BSD__ultoa(val, endp, base, octzero, xdigs);
 }
-#else
-# define ruby_ultoa(val, endp, base, flags) rb_core_sprintf_ruby_ultoa((val), (endp), (base), (flags))
 #endif
 
 static int ruby_do_vsnprintf(char *str, size_t n, const char *fmt, va_list ap);

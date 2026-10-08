@@ -7,9 +7,9 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 317,524 | 100.0% |
+| **Total C Source Files** | 113 | 317,531 | 100.0% |
 | **Not Started** | 100 | 303,956 | 95.7% |
-| **In Progress** | 6 | 13,222 | 4.2% |
+| **In Progress** | 6 | 13,229 | 4.2% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
 | **N/A** | 7 | 346 | 0.1% |
@@ -167,9 +167,9 @@ _Internal utility functions, tables, and system helpers_
 | `mini_builtin.c` | 118 | Not Started | `crate::mini_builtin` | Miniruby builtin features |
 | `miniinit.c` | 109 | Not Started | `crate::miniinit` | Miniruby initializers |
 | `siphash.c` | 493 | Not Started | `crate::siphash` | SipHash hashing algorithm |
-| `sprintf.c` | 1,296 | In Progress | `crate::sprintf` | Kernel#sprintf formatting |
+| `sprintf.c` | 1,297 | In Progress | `crate::sprintf` | Kernel#sprintf formatting |
 | `st.c` | 3,396 | Not Started | `crate::st` | Symbol table / hash table internal implementation |
-| `strftime.c` | 1,317 | In Progress | `crate::strftime` | Date/time formatting |
+| `strftime.c` | 1,323 | In Progress | `crate::strftime` | Date/time formatting |
 | `util.c` | 622 | In Progress | `core_rs::util` | Ported: ruby_scan_digits, ruby_scan_oct, ruby_scan_hex, ruby_strtoul, ruby_each_words. Remaining: qsort, getcwd, dtoa/strtod |
 | `variable.c` | 4,725 | Not Started | `crate::variable` | Global and instance variable access |
 | `version.c` | 306 | Not Started | `crate::version` | Ruby version constants |
@@ -273,9 +273,9 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `signal.c` | Concurrency & Threads | 1,641 | Not Started | `crate::signal` | Signal handling |
 | `siphash.c` | Utilities & Support | 493 | Not Started | `crate::siphash` | SipHash hashing algorithm |
 | `sparc.c` | Platform & Miscellaneous | 40 | N/A | `N/A` | SPARC architecture assembly helper |
-| `sprintf.c` | Utilities & Support | 1,296 | In Progress | `crate::sprintf` | Kernel#sprintf formatting |
+| `sprintf.c` | Utilities & Support | 1,297 | In Progress | `crate::sprintf` | Kernel#sprintf formatting |
 | `st.c` | Utilities & Support | 3,396 | Not Started | `crate::st` | Symbol table / hash table internal implementation |
-| `strftime.c` | Utilities & Support | 1,317 | In Progress | `crate::strftime` | Date/time formatting |
+| `strftime.c` | Utilities & Support | 1,323 | In Progress | `crate::strftime` | Date/time formatting |
 | `string.c` | Core Data Structures | 14,476 | Not Started | `crate::string` | String object implementation |
 | `struct.c` | Core Data Structures | 2,352 | Not Started | `crate::struct` | Struct class implementation |
 | `symbol.c` | Core Data Structures | 1,467 | Not Started | `crate::symbol` | Symbol management |

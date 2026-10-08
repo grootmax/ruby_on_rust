@@ -118,7 +118,7 @@ class TestRustPorts < Test::Unit::TestCase
     assert_equal([0x12345678], [0x12345678].pack("L>").unpack("L>"))
     assert_equal([0x12345678], [0x12345678].pack("L<").unpack("L<"))
     assert_equal([12345], [12345].pack("s!").unpack("s!"))
-    assert_equal([255, 0], "ff00".unpack("H*")[0].unpack("C*"))
+    assert_equal([255, 0], ["ff00"].pack("H*").unpack("C*"))
     # skip_to_eol via # comment in pack format string
     fmt = "c # comment line\nc"
     assert_equal([10, 20], [10, 20].pack(fmt).unpack(fmt))
@@ -130,11 +130,11 @@ class TestRustPorts < Test::Unit::TestCase
     assert_equal("0X1234", sprintf("0X%X", 0x1234))
     assert_equal("..f8000", sprintf("%x", -0x8000))
     assert_equal("..F8000", sprintf("%X", -0x8000))
-    assert_equal("..77770", sprintf("%o", -8))
-    assert_equal("..11110", sprintf("%b", -2))
+    assert_equal("..70", sprintf("%o", -8))
+    assert_equal("..10", sprintf("%b", -2))
     assert_equal("   +123", sprintf("%+7d", 123))
     assert_equal("00123", sprintf("%05d", 123))
-    assert_equal("#0x123", sprintf("%#07x", 0x123))
+    assert_equal("0x00123", sprintf("%#07x", 0x123))
   end
 
   # strftime ports: min, max, case_conv, strftime_size_limit, isleap, iso8601wknum, weeknumber
