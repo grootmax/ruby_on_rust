@@ -7,7 +7,7 @@ fn main() {
     if let Some(ruby_build_dir) = option_env!("RUBY_BUILD_DIR") {
         // Link against libminiruby.a
         println!("cargo:rustc-link-search=native={ruby_build_dir}");
-        println!("cargo:rustc-link-lib=static=miniruby");
+        println!("cargo:rustc-link-lib=static:-bundle=miniruby");
         // Re-link when libminiruby.a changes
         println!("cargo:rerun-if-changed={ruby_build_dir}/libminiruby.a");
 
