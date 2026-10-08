@@ -159,10 +159,10 @@ fn rb_bug_panic_hook() {
 /// If jit_exception is true, compile JIT code for handling exceptions.
 /// See jit_compile_exception() for details.
 #[no_mangle]
-pub extern "C" fn rb_yjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exception: bool) -> *mut u8 {
+pub extern "C" fn rb_yjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exception: bool) -> *const u8 {
     // Don't compile when there is insufficient native stack space
     if unsafe { rb_ec_stack_check(ec as _) } != 0 {
-        return std::ptr::null_mut();
+        return std::ptr::null();
     }
 
     // Reject ISEQs with very large temp stacks,
@@ -170,7 +170,7 @@ pub extern "C" fn rb_yjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exc
     let stack_max = unsafe { rb_get_iseq_body_stack_max(iseq) };
     if stack_max >= i8::MAX as u32 {
         incr_counter!(iseq_stack_too_large);
-        return std::ptr::null_mut();
+        return std::ptr::null();
     }
 
     // Reject ISEQs that are too long,
@@ -179,14 +179,14 @@ pub extern "C" fn rb_yjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exc
     let iseq_size = unsafe { get_iseq_encoded_size(iseq) };
     if iseq_size >= u16::MAX as u32 {
         incr_counter!(iseq_too_long);
-        return std::ptr::null_mut();
+        return std::ptr::null();
     }
 
     // In case of exceptional entry, reject escaped environment.
     // This allows us to use the fact that new frames generally start with an on-stack environment.
     if jit_exception && unsafe { cfp_env_has_escaped(get_ec_cfp(ec)) } {
         incr_counter!(exceptional_entry_escaped_env);
-        return std::ptr::null_mut();
+        return std::ptr::null();
     }
 
     // If a custom call threshold was not specified on the command-line and
@@ -207,7 +207,7 @@ pub extern "C" fn rb_yjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exc
         }
     }
 
-    maybe_code_ptr.map(|p| p.cast_mut()).unwrap_or(std::ptr::null_mut())
+    maybe_code_ptr.unwrap_or(std::ptr::null())
 }
 
 /// Free and recompile all existing JIT code
@@ -301,13 +301,13 @@ pub extern "C" fn rb_yjit_simulate_oom_bang(_ec: EcPtr, _ruby_self: VALUE) -> VA
 /// This is called from rb_raise() (at rb_exc_new_str()) and other functions
 /// that may make a method call (e.g. rb_to_int()).
 #[no_mangle]
-pub extern "C" fn rb_yjit_lazy_push_frame(pc: *const VALUE) {
+pub extern "C" fn rb_yjit_lazy_push_frame(pc: *mut VALUE) {
     if !yjit_enabled_p() {
         return;
     }
 
     incr_counter!(num_lazy_frame_check);
-    if let Some(&(cme, recv_idx)) = CodegenGlobals::get_pc_to_cfunc().get(&(pc as *mut VALUE)) {
+    if let Some(&(cme, recv_idx)) = CodegenGlobals::get_pc_to_cfunc().get(&pc) {
         incr_counter!(num_lazy_frame_push);
         unsafe { rb_vm_push_cfunc_frame(cme, recv_idx as i32) }
     }

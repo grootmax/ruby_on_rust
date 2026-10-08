@@ -185,11 +185,11 @@ fn update_self_is_heap_object(iseq: IseqPtr, cfp: CfpPtr) {
 /// If jit_exception is true, compile JIT code for handling exceptions.
 /// See jit_compile_exception() for details.
 #[unsafe(no_mangle)]
-pub extern "C" fn rb_zjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exception: bool) -> *mut u8 {
+pub extern "C" fn rb_zjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exception: bool) -> *const u8 {
     // Don't compile when there is insufficient native stack space
     if unsafe { rb_ec_stack_check(ec as _) } != 0 {
         incr_counter!(skipped_native_stack_full);
-        return std::ptr::null_mut();
+        return std::ptr::null();
     }
 
     // Take a lock to avoid writing to ISEQ in parallel with Ractors.
@@ -228,7 +228,7 @@ pub extern "C" fn rb_zjit_iseq_gen_entry_point(iseq: IseqPtr, ec: EcPtr, jit_exc
         // We need to do this even if code_ptr is None because gen_iseq() may have already used asm.compile().
         cb.mark_all_executable();
 
-        code_ptr.map_or(std::ptr::null_mut(), |ptr| ptr.raw_ptr(cb) as *mut u8)
+        code_ptr.map_or(std::ptr::null(), |ptr| ptr.raw_ptr(cb))
     })
 }
 
