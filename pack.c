@@ -17,6 +17,7 @@
 #include <sys/types.h>
 
 #include "internal.h"
+#include "internal/core_rs.h"
 #include "internal/array.h"
 #include "internal/bits.h"
 #include "internal/numeric.h"
@@ -57,12 +58,16 @@ static const char endstr[] = "sSiIlLqQjJ";
 #ifdef DYNAMIC_ENDIAN
 /* for universal binary of MacOS X */
 /* useless since autoconf 2.63? */
+#if !USE_RUST_PORTS /* ported to core_rs/src/pack.rs */
 static int
 is_bigendian(void)
 {
     static const union {int i; char b[1];} endian_value = {1};
     return !endian_value.b[0];
 }
+#else
+# define is_bigendian() rb_core_pack_is_bigendian()
+#endif
 # define BIGENDIAN_P() (is_bigendian())
 #elif defined(WORDS_BIGENDIAN)
 # define BIGENDIAN_P() 1
@@ -201,12 +206,16 @@ str_expand_fill(VALUE res, int c, long len)
     rb_str_set_len(res, olen + len);
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/pack.rs */
 static char *
 skip_to_eol(const char *p, const char *pend)
 {
     p = memchr(p, '\n', pend - p);
     return (char *)(p ? p + 1 : pend);
 }
+#else
+# define skip_to_eol(p, pend) rb_core_pack_skip_to_eol((p), (pend))
+#endif
 
 #define skip_blank(p, type) \
     (ISSPACE(type) || (type == '#' && (p = skip_to_eol(p, pend), 1)))
@@ -250,6 +259,7 @@ pack_modifiers(const char *p, const char *pend, char type, int *natint, int *exp
 #ifndef NATINT_PACK
 # define pack_alignof(t, n) pack_alignof(t)
 #endif
+#if !USE_RUST_PORTS /* ported to core_rs/src/pack.rs */
 static size_t
 pack_alignof(char type, int natint)
 {
@@ -282,6 +292,9 @@ pack_alignof(char type, int natint)
         return 0;
     }
 }
+#else
+# define pack_alignof(type, natint) rb_core_pack_pack_alignof((type), (natint))
+#endif
 
 static long
 pack_align_pad(long pos, long base, size_t alignment)
@@ -1055,6 +1068,7 @@ qpencode(VALUE str, VALUE from, long len)
     }
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/pack.rs */
 static inline int
 hex2num(char c)
 {
@@ -1064,6 +1078,9 @@ hex2num(char c)
         n = -1;
     return n;
 }
+#else
+# define hex2num(c) rb_core_pack_hex2num(c)
+#endif
 
 #define PACK_LENGTH_ADJUST_SIZE(sz) do {	\
     tmp_len = 0;				\

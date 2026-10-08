@@ -110,4 +110,46 @@ class TestRustPorts < Test::Unit::TestCase
     assert_in_out_err(["--disable", " gems ,, did_you_mean ", "-e", "p(defined?(Gem))"], "", ["nil"], [])
     assert_in_out_err(%w[--enable=frozen-string-literal --disable=gems -e p("a".frozen?)], "", ["true"], [])
   end
+
+  # pack ports: is_bigendian, skip_to_eol, pack_alignof, hex2num
+  def test_pack_and_unpack
+    # Directive directives, alignment modifiers, comments and hex unpack
+    assert_equal([1, 2, 3], "\x01\x02\x03".unpack("c3"))
+    assert_equal([0x12345678], [0x12345678].pack("L>").unpack("L>"))
+    assert_equal([0x12345678], [0x12345678].pack("L<").unpack("L<"))
+    assert_equal([12345], [12345].pack("s!").unpack("s!"))
+    assert_equal([255, 0], "ff00".unpack("H*")[0].unpack("C*"))
+    # skip_to_eol via # comment in pack format string
+    fmt = "c # comment line\nc"
+    assert_equal([10, 20], [10, 20].pack(fmt).unpack(fmt))
+  end
+
+  # sprintf ports: sign_bits, fmt_setup, ruby_ultoa
+  def test_sprintf_formatting
+    assert_equal("0x1234", sprintf("0x%x", 0x1234))
+    assert_equal("0X1234", sprintf("0X%X", 0x1234))
+    assert_equal("..f8000", sprintf("%x", -0x8000))
+    assert_equal("..F8000", sprintf("%X", -0x8000))
+    assert_equal("..77770", sprintf("%o", -8))
+    assert_equal("..11110", sprintf("%b", -2))
+    assert_equal("   +123", sprintf("%+7d", 123))
+    assert_equal("00123", sprintf("%05d", 123))
+    assert_equal("#0x123", sprintf("%#07x", 0x123))
+  end
+
+  # strftime ports: min, max, case_conv, strftime_size_limit, isleap, iso8601wknum, weeknumber
+  def test_strftime_formatting
+    t_leap = Time.utc(2020, 2, 29) # 2020 is leap
+    t_nonleap = Time.utc(2021, 2, 28) # 2021 is not leap
+    assert_equal("2020-02-29", t_leap.strftime("%Y-%m-%d"))
+    assert_equal("2021-02-28", t_nonleap.strftime("%Y-%m-%d"))
+    # ISO 8601 week number %V and week numbers %U, %W
+    t_jan1 = Time.utc(2023, 1, 1)
+    assert_equal("52", t_jan1.strftime("%V"))
+    assert_equal("01", t_jan1.strftime("%U"))
+    assert_equal("00", t_jan1.strftime("%W"))
+    # Case conversion %^a, %^B
+    assert_equal("SUN", t_jan1.strftime("%^a"))
+    assert_equal("JANUARY", t_jan1.strftime("%^B"))
+  end
 end

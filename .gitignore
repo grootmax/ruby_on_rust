@@ -251,6 +251,7 @@ lcov*.info
 
 # Rust
 /target
+/fuzz/target
 
 # /wasm/
 /wasm/tests/*.wasm

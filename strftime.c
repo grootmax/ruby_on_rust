@@ -66,6 +66,7 @@
 #include <math.h>
 
 #include "internal.h"
+#include "internal/core_rs.h"
 #include "internal/encoding.h"
 #include "internal/string.h"
 #include "internal/vm.h"
@@ -134,21 +135,29 @@ extern char *strchr();
 
 /* min --- return minimum of two numbers */
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/strftime.rs */
 static inline int
 min(int a, int b)
 {
 	return (a < b ? a : b);
 }
+#else
+# define min(a, b) rb_core_strftime_min((a), (b))
+#endif
 
 #undef max	/* also, just in case */
 
 /* max --- return maximum of two numbers */
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/strftime.rs */
 static inline int
 max(int a, int b)
 {
 	return (a > b ? a : b);
 }
+#else
+# define max(a, b) rb_core_strftime_max((a), (b))
+#endif
 
 #ifdef NO_STRING_LITERAL_CONCATENATION
 #error No string literal concatenation
@@ -198,6 +207,7 @@ buffer_size_check(const char *s,
 	}
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/strftime.rs */
 static char *
 case_conv(char *s, ptrdiff_t i, int flags)
 {
@@ -218,6 +228,9 @@ case_conv(char *s, ptrdiff_t i, int flags)
 	}
 	return s;
 }
+#else
+# define case_conv(s, i, flags) rb_core_strftime_case_conv((s), (i), (flags))
+#endif
 
 static VALUE
 format_value(VALUE val, int base)
@@ -912,6 +925,7 @@ err:
         return 0;
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/strftime.rs */
 static size_t
 strftime_size_limit(size_t format_len)
 {
@@ -920,6 +934,9 @@ strftime_size_limit(size_t format_len)
 	else if (limit < 1024) limit = 1024;
 	return limit;
 }
+#else
+# define strftime_size_limit(format_len) rb_core_strftime_strftime_size_limit(format_len)
+#endif
 
 static VALUE
 create_buffer(rb_encoding *enc)
@@ -966,11 +983,15 @@ rb_strftime_limit(const char *format, size_t format_len, rb_encoding *enc,
 
 /* isleap --- is a year a leap year? */
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/strftime.rs */
 static int
 isleap(long year)
 {
 	return ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0);
 }
+#else
+# define isleap(year) rb_core_strftime_isleap(year)
+#endif
 
 
 static void
@@ -1001,6 +1022,7 @@ vtm2tm_noyear(const struct vtm *vtm, struct tm *result)
 #ifdef POSIX2_DATE
 /* iso8601wknum --- compute week number according to ISO 8601 */
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/strftime.rs */
 static int
 iso8601wknum(const struct tm *timeptr)
 {
@@ -1107,6 +1129,9 @@ iso8601wknum(const struct tm *timeptr)
 
 	return weeknum;
 }
+#else
+# define iso8601wknum(timeptr) rb_core_strftime_iso8601wknum(timeptr)
+#endif
 
 static int
 iso8601wknum_v(const struct vtm *vtm)
@@ -1122,6 +1147,7 @@ iso8601wknum_v(const struct vtm *vtm)
 
 /* With thanks and tip of the hatlo to ado@elsie.nci.nih.gov */
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/strftime.rs */
 static int
 weeknumber(const struct tm *timeptr, int firstweekday)
 {
@@ -1139,6 +1165,9 @@ weeknumber(const struct tm *timeptr, int firstweekday)
 		ret = 0;
 	return ret;
 }
+#else
+# define weeknumber(timeptr, firstweekday) rb_core_strftime_weeknumber((timeptr), (firstweekday))
+#endif
 
 static int
 weeknumber_v(const struct vtm *vtm, int firstweekday)

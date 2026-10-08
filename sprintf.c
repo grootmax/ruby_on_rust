@@ -22,6 +22,7 @@
 
 #include "id.h"
 #include "internal.h"
+#include "internal/core_rs.h"
 #include "internal/error.h"
 #include "internal/hash.h"
 #include "internal/numeric.h"
@@ -37,6 +38,7 @@
 static char *fmt_setup(char*,size_t,int,int,int,int);
 static char *ruby_ultoa(unsigned long val, char *endp, int base, int octzero);
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/sprintf.rs */
 static char
 sign_bits(int base, const char *p)
 {
@@ -54,6 +56,9 @@ sign_bits(int base, const char *p)
     }
     return c;
 }
+#else
+# define sign_bits(base, p) rb_core_sprintf_sign_bits((base), (p))
+#endif
 
 #define FNONE  0
 #define FSHARP 1
@@ -976,6 +981,7 @@ rb_str_format(int argc, const VALUE *argv, VALUE fmt)
     return rb_str_format_ary(argc, argv, fmt, Qfalse);
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/sprintf.rs */
 static char *
 fmt_setup(char *buf, size_t size, int c, int flags, int width, int prec)
 {
@@ -1000,6 +1006,9 @@ fmt_setup(char *buf, size_t size, int c, int flags, int width, int prec)
     *--buf = '%';
     return buf;
 }
+#else
+# define fmt_setup(buf, size, c, flags, width, prec) rb_core_sprintf_fmt_setup((buf), (size), (c), (flags), (width), (prec))
+#endif
 
 #undef FILE
 #define FILE rb_printf_buffer
@@ -1029,6 +1038,7 @@ fmt_setup(char *buf, size_t size, int c, int flags, int width, int prec)
 #define upper_hexdigits (ruby_hexdigits+16)
 #include "vsnprintf.c"
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/sprintf.rs */
 static char *
 ruby_ultoa(unsigned long val, char *endp, int base, int flags)
 {
@@ -1036,6 +1046,9 @@ ruby_ultoa(unsigned long val, char *endp, int base, int flags)
     int octzero = flags & FSHARP;
     return BSD__ultoa(val, endp, base, octzero, xdigs);
 }
+#else
+# define ruby_ultoa(val, endp, base, flags) rb_core_sprintf_ruby_ultoa((val), (endp), (base), (flags))
+#endif
 
 static int ruby_do_vsnprintf(char *str, size_t n, const char *fmt, va_list ap);
 

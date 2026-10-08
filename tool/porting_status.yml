@@ -104,7 +104,7 @@ files:
     subsystem: "Core Data Structures"
     notes: "Object class methods and operations"
   pack.c:
-    status: Not Started
+    status: In Progress
     target: "crate::pack"
     subsystem: "Core Data Structures"
     notes: "Array#pack and String#unpack"
@@ -458,12 +458,12 @@ files:
     subsystem: "Utilities & Support"
     notes: "Ruby version constants"
   sprintf.c:
-    status: Not Started
+    status: In Progress
     target: "crate::sprintf"
     subsystem: "Utilities & Support"
     notes: "Kernel#sprintf formatting"
   strftime.c:
-    status: Not Started
+    status: In Progress
     target: "crate::strftime"
     subsystem: "Utilities & Support"
     notes: "Date/time formatting"

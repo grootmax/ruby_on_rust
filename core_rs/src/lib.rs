@@ -17,12 +17,15 @@
 //! * Ports that handle Ruby objects (Wave B) use the C API bindings in
 //!   [`ffi`] and follow its exception-safety rule.
 
-#![cfg_attr(not(test), no_std)]
+#![cfg_attr(not(any(test, feature = "std")), no_std)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
 pub mod complex;
 pub mod ffi;
+pub mod pack;
 pub mod re;
+pub mod sprintf;
+pub mod strftime;
 pub mod util;
 
 /// C runtime pieces that `no_std` code needs.
@@ -63,7 +66,7 @@ mod libc {
 /// A Rust panic in core_rs is a bug.  Report it through rb_bug() so that it
 /// produces Ruby's usual crash report (backtraces, `ruby -v` output) instead
 /// of a silent abort.
-#[cfg(not(test))]
+#[cfg(not(any(test, feature = "std")))]
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
     use core::ffi::{c_char, c_int, c_uint};

@@ -60,6 +60,27 @@ int rb_core_complex_read_rat_nos(const char **s, int strict, char **b);
 int rb_core_complex_read_rat(const char **s, int strict, char **b);
 void rb_core_complex_skip_ws(const char **s);
 
+/* pack.c (core_rs/src/pack.rs) */
+int rb_core_pack_is_bigendian(void);
+char *rb_core_pack_skip_to_eol(const char *p, const char *pend);
+int rb_core_pack_pack_alignof(char type, int natint);
+int rb_core_pack_hex2num(char c);
+
+/* sprintf.c (core_rs/src/sprintf.rs) */
+char rb_core_sprintf_sign_bits(int base, const char *p);
+char *rb_core_sprintf_fmt_setup(char *buf, size_t size, int c, int flags, int width, int prec);
+char *rb_core_sprintf_ruby_ultoa(unsigned long val, char *endp, int base, int flags);
+
+/* strftime.c (core_rs/src/strftime.rs) */
+int rb_core_strftime_min(int a, int b);
+int rb_core_strftime_max(int a, int b);
+char *rb_core_strftime_case_conv(char *s, ptrdiff_t i, int flags);
+size_t rb_core_strftime_strftime_size_limit(size_t format_len);
+int rb_core_strftime_isleap(long year);
+struct tm;
+int rb_core_strftime_iso8601wknum(const struct tm *timeptr);
+int rb_core_strftime_weeknumber(const struct tm *timeptr, int firstweekday);
+
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop
 #endif

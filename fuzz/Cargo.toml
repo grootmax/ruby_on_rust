@@ -1,0 +1,32 @@
+[package]
+name = "ruby-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[workspace]
+
+[dependencies]
+libfuzzer-sys = "0.4"
+core_rs = { path = "../core_rs" }
+
+[[bin]]
+name = "pack"
+path = "fuzz_targets/pack.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "sprintf"
+path = "fuzz_targets/sprintf.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "strftime"
+path = "fuzz_targets/strftime.rs"
+test = false
+doc = false
