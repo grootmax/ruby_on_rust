@@ -183,8 +183,8 @@ module SyncDefaultGems
       ["test/.excludes-mmtk", "test/.excludes-mmtk"],
       ["test/mmtk", "test/mmtk"],
     ]),
-    open3: lib("ruby/open3", gemspec_in_subdir: true).tap {
-      it.exclude << "lib/open3/jruby_windows.rb"
+    open3: lib("ruby/open3", gemspec_in_subdir: true).tap { |r|
+      r.exclude << "lib/open3/jruby_windows.rb"
     },
     openssl: repo("ruby/openssl", [
       ["ext/openssl", "ext/openssl"],
@@ -196,8 +196,8 @@ module SyncDefaultGems
     ], exclude: [
       "test/openssl/envutil.rb",
     ]),
-    optparse: lib("ruby/optparse", gemspec_in_subdir: true).tap {
-      it.mappings << ["doc/optparse", "doc/optparse"]
+    optparse: lib("ruby/optparse", gemspec_in_subdir: true).tap { |r|
+      r.mappings << ["doc/optparse", "doc/optparse"]
     },
     pp: lib("ruby/pp"),
     prettyprint: lib("ruby/prettyprint"),

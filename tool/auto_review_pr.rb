@@ -41,6 +41,9 @@ class AutoReviewPR
   REDMINE_TICKET_PATTERN = /\[(Bug|Feature|Misc)\s*#(\d+)\]/
   REDMINE_COMMENT_PREFIX = 'This pull request references the following Redmine tickets:'
 
+  PARITY_COMMENT_PREFIX = 'Rule 16 Benchmark Parity:'
+  DEFAULT_PARITY_THRESHOLD = 1.00
+
   FORK_COMMENT_PREFIX = 'It looks like this pull request was filed from a branch in ruby/ruby.'
   FORK_COMMENT_BODY = <<~COMMENT
     #{FORK_COMMENT_PREFIX}
@@ -64,13 +67,14 @@ class AutoReviewPR
     review_non_fork_branch(pr_number, pr, existing_comments)
     review_upstream_repos(pr_number, existing_comments)
     review_redmine_links(pr_number, pr, existing_comments)
+    review_benchmark_parity(pr_number, pr, existing_comments)
   end
 
   private
 
   def fetch_existing_comments(pr_number)
     comments = @client.get("/repos/#{REPO}/issues/#{pr_number}/comments")
-    comments.map { [it.fetch(:user).fetch(:login), it.fetch(:body)] }
+    comments.map { |c| [c.fetch(:user).fetch(:login), c.fetch(:body)] }
   end
 
   def already_commented?(existing_comments, prefix)
@@ -111,7 +115,7 @@ class AutoReviewPR
       return
     end
 
-    changed_files = @client.get("/repos/#{REPO}/pulls/#{pr_number}/files").map { it.fetch(:filename) }
+    changed_files = @client.get("/repos/#{REPO}/pulls/#{pr_number}/files").map { |f| f.fetch(:filename) }
 
     upstream_repos = SyncDefaultGems::Repository.group(changed_files)
     upstream_repos.delete(nil)
@@ -166,9 +170,148 @@ class AutoReviewPR
     comment << "\n#{UPSTREAM_COMMENT_SUFFIX}"
     comment
   end
+
+  def review_benchmark_parity(pr_number, pr, existing_comments)
+    if already_commented?(existing_comments, PARITY_COMMENT_PREFIX)
+      puts "Skipped: The PR ##{pr_number} already has a Rule 16 benchmark parity comment."
+      return
+    end
+
+    body = pr[:body] || ''
+    tables = extract_markdown_tables(body)
+    parity_tables = tables.select { |tbl| benchmark_parity_table?(tbl) }
+
+    issues = []
+
+    if parity_tables.empty?
+      if port_pr?(pr_number, pr)
+        issues << "No Rule 16 performance parity benchmark table was found in the PR description."
+      end
+    else
+      parity_tables.each do |table|
+        check_table_metrics(table, issues)
+      end
+    end
+
+    if issues.empty?
+      puts "Skipped: The PR ##{pr_number} benchmark parity checks passed."
+      return
+    end
+
+    post_comment(pr_number, format_parity_comment(issues))
+  end
+
+  def extract_markdown_tables(body)
+    tables = []
+    current_table = []
+
+    body.each_line do |line|
+      stripped = line.strip
+      if stripped.start_with?('|') && stripped.end_with?('|')
+        current_table << stripped
+      else
+        unless current_table.empty?
+          tables << current_table
+          current_table = []
+        end
+      end
+    end
+    tables << current_table unless current_table.empty?
+    tables
+  end
+
+  def benchmark_parity_table?(table)
+    return false if table.size < 2
+
+    header = table[0].downcase
+    header.include?('benchmark') || header.include?('ratio') || header.include?('parity') ||
+      header.include?('compare-ruby') || header.include?('built-ruby') ||
+      table.any? { |row| row =~ /\|?\s*\d+(\.\d+)?x\b/i || row =~ /\b(PASS|FAIL)\b/ }
+  end
+
+  def check_table_metrics(table, issues)
+    headers = table[0].split('|').map(&:strip).map(&:downcase).reject(&:empty?)
+    ratio_idx = headers.index { |h| h.include?('ratio') || h.include?('parity') }
+    bench_idx = headers.index { |h| h.include?('benchmark') || h.include?('method') || h.include?('item') } || 0
+    status_idx = headers.index { |h| h.include?('status') }
+
+    table.each_with_index do |row, idx|
+      next if idx.zero?
+      next if row =~ /^\|?\s*:?-+:?\s*\|/
+
+      cells = row.split('|').map(&:strip).reject(&:empty?)
+      next if cells.empty?
+
+      bench_name = (bench_idx && cells[bench_idx]) ? cells[bench_idx] : "row #{idx}"
+
+      ratio = nil
+      if ratio_idx && cells[ratio_idx]
+        ratio = parse_ratio(cells[ratio_idx])
+      else
+        cells.each do |cell|
+          parsed = parse_ratio(cell)
+          if parsed
+            ratio = parsed
+            break
+          end
+        end
+      end
+
+      status_cell = (status_idx && cells[status_idx]) ? cells[status_idx].upcase : nil
+
+      if ratio && ratio < DEFAULT_PARITY_THRESHOLD
+        issues << "Benchmark '#{bench_name}' reported parity ratio #{sprintf('%.2f', ratio)}x is below required threshold (#{sprintf('%.2f', DEFAULT_PARITY_THRESHOLD)}x)."
+      elsif status_cell == 'FAIL' && (!ratio || ratio >= DEFAULT_PARITY_THRESHOLD)
+        issues << "Benchmark '#{bench_name}' is marked as FAIL in the performance table."
+      end
+    end
+  end
+
+  def parse_ratio(cell_str)
+    return nil if cell_str.nil? || cell_str.empty?
+    cleaned = cell_str.gsub(/[\*`\s]/, '')
+
+    if cleaned =~ /([\d\.]+)x/i
+      $1.to_f
+    elsif cleaned =~ /([\d\.]+)%/
+      $1.to_f / 100.0
+    elsif cleaned =~ /^[\d\.]+$/
+      val = cleaned.to_f
+      val if val > 0
+    else
+      nil
+    end
+  end
+
+  def port_pr?(pr_number, pr)
+    text = "#{pr[:title]}\n#{pr[:body]}"
+    return true if text =~ /rule\s*16|conversion\s*rule|port(ed|ing)?\b/i
+
+    changed_files = fetch_changed_files(pr_number)
+    changed_files.any? { |f| f.start_with?('core_rs/') || f == 'tool/porting_status.yml' || (f.end_with?('.rs') && !f.start_with?('yjit/', 'zjit/')) }
+  rescue => _e
+    false
+  end
+
+  def fetch_changed_files(pr_number)
+    files = @client.get("/repos/#{REPO}/pulls/#{pr_number}/files")
+    files.map { |f| f.fetch(:filename) }
+  end
+
+  def format_parity_comment(issues)
+    comment = +"#{PARITY_COMMENT_PREFIX}\n\n"
+    comment << "The following Rule 16 performance parity issue(s) were found:\n\n"
+    issues.each do |issue|
+      comment << "* #{issue}\n"
+    end
+    comment << "\nConversion Rule 16 requires ported methods to demonstrate performance parity (>= #{sprintf('%.2f', DEFAULT_PARITY_THRESHOLD)}x) against C baselines in PR descriptions."
+    comment
+  end
 end
 
-pr_number = ARGV[0] || abort("Usage: #{$0} <pr_number>")
-client = GitHubAPIClient.new(ENV.fetch('GITHUB_TOKEN'))
+if __FILE__ == $0
+  pr_number = ARGV[0] || abort("Usage: #{$0} <pr_number>")
+  client = GitHubAPIClient.new(ENV.fetch('GITHUB_TOKEN'))
 
-AutoReviewPR.new(client).review(pr_number)
+  AutoReviewPR.new(client).review(pr_number)
+end
