@@ -27,43 +27,9 @@ struct OnigEncodingHead {
     min_enc_len: c_int,
 }
 
-impl OnigEncodingHead {
-    /// Reads `min_enc_len` from an encoding pointer.
-    ///
-    /// # Safety
-    /// `ptr` must point to a valid `OnigEncodingHead` structure.
-    #[inline]
-    pub unsafe fn min_enc_len(ptr: *const c_void) -> c_int {
-        // SAFETY: caller guarantees ptr points to a valid encoding structure.
-        unsafe { (*(ptr as *const OnigEncodingHead)).min_enc_len }
-    }
-}
-
-/// Thin, audited boundary function to safely convert raw C pointers and length to a byte slice.
-///
-/// # Safety
-/// `ptr` must be valid for `len` byte reads.
-#[inline]
-pub unsafe fn raw_byte_slice<'a>(ptr: *const c_void, len: usize) -> &'a [u8] {
-    // SAFETY: guaranteed by the caller's contract.
-    unsafe { core::slice::from_raw_parts(ptr as *const u8, len) }
-}
-
-#[cfg(not(test))]
 unsafe extern "C" {
     fn rb_utf8_encoding() -> *const c_void;
     #[cfg(not(target_vendor = "apple"))]
-    fn memmem(haystack: *const c_void, hlen: usize, needle: *const c_void, nlen: usize) -> *mut c_void;
-}
-
-#[cfg(test)]
-unsafe fn rb_utf8_encoding() -> *const c_void {
-    core::ptr::null()
-}
-
-#[cfg(test)]
-#[cfg(not(target_vendor = "apple"))]
-unsafe extern "C" {
     fn memmem(haystack: *const c_void, hlen: usize, needle: *const c_void, nlen: usize) -> *mut c_void;
 }
 
@@ -101,7 +67,9 @@ pub unsafe extern "C" fn rb_memcicmp(x: *const c_void, y: *const c_void, len: c_
     }
     let len = len as usize;
     // SAFETY: readable for `len` bytes per the contract.
-    let (x, y) = unsafe { (raw_byte_slice(x, len), raw_byte_slice(y, len)) };
+    let (x, y) = unsafe {
+        (core::slice::from_raw_parts(x as *const u8, len), core::slice::from_raw_parts(y as *const u8, len))
+    };
     memcicmp(x, y)
 }
 
@@ -250,7 +218,12 @@ pub unsafe extern "C" fn rb_memsearch(
             return 0; // memcmp of zero bytes
         }
         // SAFETY: both readable for m == n bytes.
-        let (x, y) = unsafe { (raw_byte_slice(x0, m as usize), raw_byte_slice(y0, n as usize)) };
+        let (x, y) = unsafe {
+            (
+                core::slice::from_raw_parts(x0 as *const u8, m as usize),
+                core::slice::from_raw_parts(y0 as *const u8, n as usize),
+            )
+        };
         return if x == y { 0 } else { -1 };
     }
     if m < 1 {
@@ -258,7 +231,12 @@ pub unsafe extern "C" fn rb_memsearch(
     }
     // Here 1 <= m < n.
     // SAFETY: readable for m and n bytes per the contract.
-    let (x, y) = unsafe { (raw_byte_slice(x0, m as usize), raw_byte_slice(y0, n as usize)) };
+    let (x, y) = unsafe {
+        (
+            core::slice::from_raw_parts(x0 as *const u8, m as usize),
+            core::slice::from_raw_parts(y0 as *const u8, n as usize),
+        )
+    };
     if m == 1 {
         return match y.iter().position(|&b| b == x[0]) {
             Some(i) => i as c_long,
@@ -266,7 +244,7 @@ pub unsafe extern "C" fn rb_memsearch(
         };
     }
     // SAFETY: `enc` points to an encoding; only its public head is read.
-    let mbminlen = unsafe { OnigEncodingHead::min_enc_len(enc) };
+    let mbminlen = unsafe { (*(enc as *const OnigEncodingHead)).min_enc_len };
     match mbminlen {
         1 => {
             if x.len() <= VALUE_BYTES {
