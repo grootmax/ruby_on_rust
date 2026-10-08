@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
 
       - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
         with:
@@ -26,13 +26,17 @@ jobs:
           ruby tool/ruby_on_rust/update_compatibility.rb
 
       - name: Publish COMPATIBILITY.md
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           if ! git diff --quiet COMPATIBILITY.md; then
             git add COMPATIBILITY.md
             git commit -m "Update COMPATIBILITY.md [skip ci]"
-            git push origin HEAD:${{ github.ref_name || 'master' }} || true
+            TARGET_BRANCH="${REF_NAME:-master}"
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${TARGET_BRANCH}" || true
           fi
 
   dispatch:
