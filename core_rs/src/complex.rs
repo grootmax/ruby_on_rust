@@ -35,9 +35,6 @@ impl<'a> Cursor<'a> {
         Cursor { s, pos: 0 }
     }
 
-    /// Number of bytes consumed since the start.
-    
-
     /// `**s` as a C `char` promoted to `int` (sign extended where `char`
     /// is signed, exactly like the C).  Past the terminator it reads NUL,
     /// which the C never does because nothing consumes the terminator.
@@ -323,7 +320,7 @@ mod tests {
         }
     }
 
-    /// (accepted, bytes consumed, bytes copied)
+    /// `(accepted, bytes consumed, bytes copied)`
     fn rat(input: &str, strict: bool) -> (bool, usize, &'static str) {
         let mut v = Vec::from(input.as_bytes());
         v.push(0);
@@ -331,7 +328,7 @@ mod tests {
         let mut out = VecOut { buf: [0; 64], len: 0 };
         let ok = read_rat(&mut s, strict, &mut out);
         let copied = String::from_utf8(out.buf[..out.len].to_vec()).unwrap();
-        (ok, s.pos(), Box::leak(copied.into_boxed_str()))
+        (ok, s.pos, Box::leak(copied.into_boxed_str()))
     }
 
     #[test]
@@ -360,6 +357,6 @@ mod tests {
         let v = b" \t\n1\0";
         let mut s = Cursor::new(v);
         skip_ws(&mut s);
-        assert_eq!(s.pos(), 3);
+        assert_eq!(s.pos, 3);
     }
 }
