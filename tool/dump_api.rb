@@ -1,12 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "json"
-require "optparse"
-require "open3"
-require "rbconfig"
-require "yaml"
-
 module CoreApiDumper
   CATEGORY_MAP = {
     method: "methods",
@@ -14,6 +8,24 @@ module CoreApiDumper
     constant: "constants",
     ancestors: "ancestors"
   }.freeze
+
+  EXCLUDED_PREFIXES = %w[
+    CoreApiDumper
+    JSON
+    Psych
+    OptionParser
+    Open3
+    RbConfig
+    YAML
+    PP
+    PrettyPrint
+    Gem
+    Bundler
+    DidYouMean
+    ErrorHighlight
+    SyntaxSuggest
+    RDoc
+  ].freeze
 
   class Dumper
     def self.dump_core_api
@@ -23,10 +35,11 @@ module CoreApiDumper
         next if mod.singleton_class?
         name = mod.name
         next if name.nil? || name.empty? || name.start_with?("#<") || name.include?(":#<")
+        next if EXCLUDED_PREFIXES.any? { |prefix| name == prefix || name.start_with?("#{prefix}::") }
 
         anc = mod.ancestors.map(&:name).compact.reject { |n| n.empty? || n.start_with?("#<") }.sort
 
-        consts = mod.constants(false).map do |c|
+        consts = mod.constants(false).reject { |c| EXCLUDED_PREFIXES.include?(c.to_s) }.map do |c|
           begin
             old_v = $VERBOSE
             $VERBOSE = nil
@@ -55,6 +68,7 @@ module CoreApiDumper
         hash[key] = modules[key]
       end
 
+      require "json" unless defined?(JSON)
       JSON.pretty_generate(sorted_modules)
     end
 
@@ -284,6 +298,12 @@ module CoreApiDumper
 
   class Runner
     def self.run(argv = ARGV)
+      require "optparse"
+      require "open3"
+      require "rbconfig"
+      require "json"
+      require "yaml"
+
       options = {
         check: false,
         lockfile: "spec/core_api_lock.json",
