@@ -272,8 +272,8 @@ end
 
 WAVE_B_RULES = <<~MD
   ### Ruby objects and exceptions (Wave B, AGENTS.md §6.9)
-  - Use `crate::ffi` for `VALUE`, `Qnil`/`Qtrue`/`Qfalse`, `INT2FIX`/`FIX2LONG`, `RTEST`, `UnwindGuard`, `assert_trivial_drop`, and the C API. If a public C API function you need is missing, add it to `core_rs/src/ffi/api.rs` with its prototype copied from `include/ruby/` (this file is in scope). Never declare internal functions.
-  - Exception safety: no Rust frame may hold a `Drop` value across a call that can raise (`rb_raise`, `rb_funcallv`, conversions, allocation). Use `UnwindGuard` and explicitly flush owned objects (`guard.flush()`) before calling raw raising C APIs. If complex cleanup is needed, call the raising code through `ffi::protect::protect` and re-raise with `ffi::protect::jump_tag`, as the C does with `rb_protect`/`rb_jump_tag`.
+  - Use `crate::ffi` for `VALUE`, `Qnil`/`Qtrue`/`Qfalse`, `INT2FIX`/`FIX2LONG`, `RTEST` and the C API. If a public C API function you need is missing, add it to `core_rs/src/ffi/api.rs` with its prototype copied from `include/ruby/` (this file is in scope). Never declare internal functions.
+  - Exception safety: no Rust frame may hold a `Drop` value across a call that can raise (`rb_raise`, `rb_funcallv`, conversions, allocation). If cleanup is needed, call the raising code through `ffi::protect::protect` and re-raise with `ffi::protect::jump_tag`, as the C does with `rb_protect`/`rb_jump_tag`.
   - Raise the same exception class with the same message at the same point as the C. The fuzz unit must compare raised exceptions too (run both sides under `rb_protect` and compare `rb_errinfo()` class and message).
 
 MD
