@@ -131,7 +131,6 @@ class Exports::Mswin < Exports
           if noprefix or /^[@_]/ =~ l
             next if /(?!^)@.*@/ =~ l || /@[[:xdigit:]]{8,32}$/ =~ l ||
                     /^_?#{PrivateNames}/o =~ l
-            next if /^_*(?:rust_|rd_|ZN|R[0-9a-zA-Z]|anon\.)/ =~ l
             l.sub!(/^[@_]/, '') if /@\d+$/ !~ l
           elsif !l.sub!(/^(\S+) \([^@?\`\']*\)$/, '\1')
             next
