@@ -46,3 +46,4 @@ pub mod protect;
 pub mod value;
 
 pub use value::{ID, SIGNED_VALUE, VALUE};
+pub use crate::ruby_macros::{ruby_value_type, ValueHelpers};

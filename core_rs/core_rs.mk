@@ -16,6 +16,7 @@ CORE_RS_SRCS = $(srcdir)/core_rs/src/lib.rs \
 	$(srcdir)/core_rs/src/ffi/protect.rs \
 	$(srcdir)/core_rs/src/ffi/value.rs \
 	$(srcdir)/core_rs/src/re.rs \
+	$(srcdir)/core_rs/src/ruby_macros.rs \
 	$(srcdir)/core_rs/src/util.rs \
 	$(empty)
 
