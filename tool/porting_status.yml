@@ -1,14 +1,6 @@
 # C-to-Rust Porting Status Configuration
 # Managed by developers; processed by tool/generate_porting_ledger.rb
-# Valid statuses: "Not Started", "In Progress", "Ported", "Hardened", "Blocked", "N/A"
-
-valid_statuses:
-  - "Not Started"
-  - "In Progress"
-  - "Ported"
-  - "Hardened"
-  - "Blocked"
-  - "N/A"
+# Valid statuses: "Not Started", "In Progress", "Ported", "Blocked", "N/A"
 
 subsystems:
   "JIT Compiler":
