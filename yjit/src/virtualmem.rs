@@ -116,28 +116,6 @@ pub enum WriteError {
 
 use WriteError::*;
 
-/// Thin, audited boundary function to write a single byte to a raw pointer.
-#[inline]
-fn safe_raw_write(dst: *mut u8, byte: u8) {
-    // SAFETY: Audited boundary. `dst` is bounds checked within the mapped region before invocation.
-    unsafe { dst.write(byte) };
-}
-
-/// Thin, audited boundary function to initialize allocated memory with trap instructions.
-#[inline]
-fn safe_init_allocated_memory(ptr: *mut u8, len: usize) {
-    if cfg!(target_arch = "x86_64") {
-        // SAFETY: Audited boundary. `ptr` points to freshly mapped memory of size `len`.
-        unsafe {
-            std::slice::from_raw_parts_mut(ptr, len).fill(0x1E);
-        }
-    } else if cfg!(target_arch = "aarch64") {
-        // In aarch64, all zeros encodes UDF, so it's already what we want.
-    } else {
-        unreachable!("unknown arch");
-    }
-}
-
 impl<A: Allocator> VirtualMemory<A> {
     /// Bring a part of the address space under management.
     pub fn new(
@@ -193,11 +171,6 @@ impl<A: Allocator> VirtualMemory<A> {
         self.page_size_bytes
     }
 
-    /// Acquire a RAII [`VirtualMemGuard`] to safely manage page protection toggles and bounded writes.
-    pub fn write_guard(&self) -> VirtualMemGuard<'_, A> {
-        VirtualMemGuard::new(self)
-    }
-
     /// Write a single byte. The first write to a page makes it readable.
     pub fn write_byte(&self, write_ptr: CodePtr, byte: u8) -> Result<(), WriteError> {
         let mut mutable = self.mutable.borrow_mut();
@@ -242,10 +215,21 @@ impl<A: Allocator> VirtualMemory<A> {
 
                 // Allocate new chunk
                 let alloc_size_u32: u32 = alloc_size.try_into().unwrap();
-                if !alloc.mark_writable(mapped_region_end.cast(), alloc_size_u32) {
-                    return Err(FailedPageMapping);
+                unsafe {
+                    if !alloc.mark_writable(mapped_region_end.cast(), alloc_size_u32) {
+                        return Err(FailedPageMapping);
+                    }
+                    if cfg!(target_arch = "x86_64") {
+                        // Fill new memory with PUSH DS (0x1E) so that executing uninitialized memory
+                        // will fault with #UD in 64-bit mode. On Linux it becomes SIGILL and use the
+                        // usual Ruby crash reporter.
+                        std::slice::from_raw_parts_mut(mapped_region_end, alloc_size).fill(0x1E);
+                    } else if cfg!(target_arch = "aarch64") {
+                        // In aarch64, all zeros encodes UDF, so it's already what we want.
+                    } else {
+                        unreachable!("unknown arch");
+                    }
                 }
-                safe_init_allocated_memory(mapped_region_end, alloc_size);
                 mutable.mapped_region_bytes = mutable.mapped_region_bytes + alloc_size;
 
                 mutable.current_write_page = Some(page_addr);
@@ -255,7 +239,7 @@ impl<A: Allocator> VirtualMemory<A> {
         }
 
         // We have permission to write if we get here
-        safe_raw_write(raw, byte);
+        unsafe { raw.write(byte) };
 
         Ok(())
     }
@@ -274,7 +258,7 @@ impl<A: Allocator> VirtualMemory<A> {
         if !mutable.allocator.mark_writable(region_start.as_ptr(), mapped_region_bytes) {
             panic!("Cannot make memory region writable: {:?}-{:?}",
                 region_start.as_ptr(),
-                region_start.as_ptr().wrapping_add(mapped_region_bytes as usize)
+                unsafe { region_start.as_ptr().add(mapped_region_bytes as usize)}
             );
         }
     }
@@ -311,58 +295,6 @@ impl<A: Allocator> VirtualMemory<A> {
 
         let mut mutable = self.mutable.borrow_mut();
         mutable.allocator.mark_unused(start_ptr.raw_ptr(self), size);
-    }
-}
-
-/// RAII guard for managing page protection toggles and performing safe bounded writes to [`VirtualMemory`].
-///
-/// When created, it marks the virtual memory region writable. When dropped or finished,
-/// it restores protection by marking the region executable.
-pub struct VirtualMemGuard<'a, A: Allocator> {
-    mem: &'a VirtualMemory<A>,
-    active: bool,
-}
-
-impl<'a, A: Allocator> VirtualMemGuard<'a, A> {
-    /// Create a new guard, toggling virtual memory page protection to writable.
-    pub fn new(mem: &'a VirtualMemory<A>) -> Self {
-        mem.mark_all_writeable();
-        Self { mem, active: true }
-    }
-
-    /// Safely write a single byte into virtual memory at `write_ptr` with bounds checking.
-    pub fn write_byte(&self, write_ptr: CodePtr, byte: u8) -> Result<(), WriteError> {
-        self.mem.write_byte(write_ptr, byte)
-    }
-
-    /// Safely write a slice of bytes into virtual memory starting at `start_ptr` with bounds checking.
-    pub fn write_bytes(&self, start_ptr: CodePtr, bytes: &[u8]) -> Result<(), WriteError> {
-        for (i, &byte) in bytes.iter().enumerate() {
-            let ptr = start_ptr.add_bytes(i);
-            self.mem.write_byte(ptr, byte)?;
-        }
-        Ok(())
-    }
-
-    /// Access the underlying virtual memory reference.
-    pub fn virtual_mem(&self) -> &'a VirtualMemory<A> {
-        self.mem
-    }
-
-    /// Explicitly mark memory executable and finish writing prior to guard drop.
-    pub fn finish(mut self) {
-        if self.active {
-            self.mem.mark_all_executable();
-            self.active = false;
-        }
-    }
-}
-
-impl<'a, A: Allocator> Drop for VirtualMemGuard<'a, A> {
-    fn drop(&mut self) {
-        if self.active {
-            self.mem.mark_all_executable();
-        }
     }
 }
 
@@ -571,29 +503,6 @@ pub mod tests {
                     MarkUnused { start_idx: 0, length: TWO_PAGES },
                 ]
             ),
-        );
-    }
-
-    #[test]
-    fn virtual_mem_guard_raii_protection_and_bounded_writes() {
-        use super::WriteError::*;
-        let virt = new_dummy_virt_mem();
-        {
-            let guard = virt.write_guard();
-            guard.write_byte(guard.virtual_mem().start_ptr(), 0xAA).unwrap();
-            guard.write_bytes(guard.virtual_mem().start_ptr().add_bytes(1), &[0xBB, 0xCC]).unwrap();
-
-            // Out-of-bounds write via guard fails properly
-            let out_of_bounds = guard.virtual_mem().start_ptr().add_bytes(virt.virtual_region_size());
-            assert_eq!(Err(OutOfBounds), guard.write_byte(out_of_bounds, 0xFF));
-        }
-
-        // Verify that upon guard drop, mark_all_executable was called automatically
-        assert!(
-            matches!(
-                virt.mutable.borrow().allocator.requests.last(),
-                Some(MarkExecutable { .. })
-            )
         );
     }
 }
