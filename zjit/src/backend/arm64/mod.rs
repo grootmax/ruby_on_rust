@@ -1657,7 +1657,7 @@ impl Assembler {
             let mut intervals = trace_compile_phase("build_intervals", || asm.build_intervals(live_in));
 
             // Dump live intervals if requested
-            if let Some(dump_lirs) = crate::options::get_options().read().unwrap().dump_lir.as_ref() {
+            if let Some(crate::options::Options { dump_lir: Some(dump_lirs), .. }) = unsafe { crate::options::OPTIONS.as_ref() } {
                 if dump_lirs.contains(&crate::options::DumpLIR::live_intervals) {
                     println!("LIR live_intervals:\n{}", crate::backend::lir::debug_intervals(&asm, &intervals));
                 }
@@ -1671,7 +1671,7 @@ impl Assembler {
             let stack_slot_count = asm.stack_state.stack_slot_count();
 
             // Dump vreg-to-physical-register mapping if requested
-            if let Some(dump_lirs) = crate::options::get_options().read().unwrap().dump_lir.as_ref() {
+            if let Some(crate::options::Options { dump_lir: Some(dump_lirs), .. }) = unsafe { crate::options::OPTIONS.as_ref() } {
                 if dump_lirs.contains(&crate::options::DumpLIR::alloc_regs) {
                     println!("LIR live_intervals:\n{}", crate::backend::lir::debug_intervals(&asm, &intervals));
 

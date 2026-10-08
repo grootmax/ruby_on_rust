@@ -429,7 +429,11 @@ pub mod tests {
     // Fictional architecture where each page is 4 bytes long
     const PAGE_SIZE: usize = 4;
     fn new_dummy_virt_mem() -> VirtualMemory<TestingAllocator> {
-        crate::options::rb_zjit_prepare_options();
+        unsafe {
+            if crate::options::OPTIONS.is_none() {
+                crate::options::OPTIONS = Some(crate::options::Options::default());
+            }
+        }
 
         let mem_size = PAGE_SIZE * 10;
         let alloc = TestingAllocator::new(mem_size);

@@ -1639,7 +1639,7 @@ impl Assembler
         if let Some(dump_disasm) = get_option_ref!(dump_disasm) {
             use crate::disasm::dump_disasm_addr_range;
             let end_addr = cb.get_write_ptr();
-            dump_disasm_addr_range(cb, start_addr, end_addr, &dump_disasm)
+            dump_disasm_addr_range(cb, start_addr, end_addr, dump_disasm)
         }
         ret
     }

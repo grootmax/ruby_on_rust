@@ -41,9 +41,9 @@ _Built-in data types, objects, and core classes_
 | `enumerator.c` | 4,794 | Not Started | `crate::enumerator` | Enumerator class |
 | `hash.c` | 7,993 | Not Started | `crate::hash` | Hash map implementation |
 | `numeric.c` | 6,813 | Not Started | `crate::numeric` | Numeric base classes and operations |
-| `object.c` | 4,741 | Not Started | `crate::object` | Object class methods and operations |
+| `object.c` | 4,740 | Not Started | `crate::object` | Object class methods and operations |
 | `pack.c` | 1,936 | Not Started | `crate::pack` | Array#pack and String#unpack |
-| `proc.c` | 5,543 | Not Started | `crate::proc` | Proc, Method, and Binding objects |
+| `proc.c` | 5,538 | Not Started | `crate::proc` | Proc, Method, and Binding objects |
 | `range.c` | 3,006 | Not Started | `crate::range` | Range object implementation |
 | `rational.c` | 2,847 | Not Started | `crate::rational` | Rational number implementation |
 | `set.c` | 2,677 | Not Started | `crate::set` | Core Set class support |
@@ -62,10 +62,10 @@ _Interpreter VM loop, instruction helpers, and evaluation_
 | `eval.c` | 2,344 | Not Started | `crate::eval` | Top-level evaluation entry points |
 | `eval_error.c` | 588 | Not Started | `crate::eval::error` | Evaluation error handling |
 | `eval_jump.c` | 144 | Not Started | `crate::eval::jump` | Control flow jumps (throw, break, return) |
-| `vm.c` | 5,451 | Not Started | `crate::vm` | Core virtual machine engine |
-| `vm_args.c` | 1,226 | Not Started | `crate::vm::args` | Method argument passing |
+| `vm.c` | 5,420 | Not Started | `crate::vm` | Core virtual machine engine |
+| `vm_args.c` | 1,219 | Not Started | `crate::vm::args` | Method argument passing |
 | `vm_backtrace.c` | 2,406 | Not Started | `crate::vm::backtrace` | Backtrace generation |
-| `vm_dump.c` | 1,651 | Not Started | `crate::vm::dump` | VM state dump utilities |
+| `vm_dump.c` | 1,660 | Not Started | `crate::vm::dump` | VM state dump utilities |
 | `vm_eval.c` | 2,966 | Not Started | `crate::vm::eval` | Method dispatch and evaluation |
 | `vm_exec.c` | 146 | Not Started | `crate::vm::exec` | VM loop execution |
 | `vm_insnhelper.c` | 7,802 | Not Started | `crate::vm::insnhelper` | Instruction execution helpers |
@@ -78,7 +78,7 @@ _Garbage collector, object allocator, and memory views_
 
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `gc.c` | 7,115 | Not Started | `gc::mmtk` | MMTk support is upstream modular GC, not a port by this project |
+| `gc.c` | 7,106 | Not Started | `gc::mmtk` | MMTk support is upstream modular GC, not a port by this project |
 | `imemo.c` | 726 | Not Started | `crate::imemo` | Internal memo objects |
 | `memory_view.c` | 902 | Not Started | `crate::memory_view` | Memory view interface |
 | `shape.c` | 1,716 | Not Started | `crate::shape` | Object shape / property layout tracking |
@@ -92,10 +92,10 @@ _Threading, ractors, synchronization, and scheduling_
 | `ractor.c` | 4,321 | Not Started | `crate::ractor` | Ractor actor model implementation |
 | `ractor_sync.c` | 1,940 | Not Started | `crate::ractor::sync` | Ractor synchronization |
 | `scheduler.c` | 1,395 | Not Started | `crate::scheduler` | Fiber scheduler interface |
-| `signal.c` | 1,641 | Not Started | `crate::signal` | Signal handling |
+| `signal.c` | 1,646 | Not Started | `crate::signal` | Signal handling |
 | `thread.c` | 6,759 | Not Started | `crate::thread` | Thread management core |
 | `thread_none.c` | 385 | Not Started | `crate::thread::none` | No-threads platform stubs |
-| `thread_pthread.c` | 1,620 | Not Started | `crate::thread::pthread` | POSIX threads implementation |
+| `thread_pthread.c` | 1,648 | Not Started | `crate::thread::pthread` | POSIX threads implementation |
 | `thread_sched.c` | 2,686 | Not Started | `crate::thread::sched` | Thread scheduler |
 | `thread_sched_mn.c` | 1,931 | Not Started | `crate::thread::sched_mn` | M:N thread scheduler |
 | `thread_sync.c` | 1,547 | Not Started | `crate::thread::sync` | Thread synchronization primitives |
@@ -110,7 +110,7 @@ _Syntax parser, AST nodes, and Prism integration_
 | `node.c` | 447 | Not Started | `crate::parser::node` | AST node construction |
 | `node_dump.c` | 1,325 | Not Started | `crate::parser::node_dump` | AST dump utilities |
 | `parser_st.c` | 173 | Not Started | `crate::parser::parser_st` | Parser symbol table |
-| `prism_compile.c` | 11,336 | Not Started | `crate::parser::prism_compile` | Prism AST compiler |
+| `prism_compile.c` | 11,349 | Not Started | `crate::parser::prism_compile` | Prism AST compiler |
 | `prism_init.c` | 9 | Not Started | `crate::parser::prism_init` | Prism initialization |
 | `ruby_parser.c` | 1,151 | Not Started | `crate::parser::ruby_parser` | Ruby parser driver |
 | `universal_parser.c` | 215 | Not Started | `crate::parser::universal_parser` | Universal parser interface |
@@ -121,8 +121,8 @@ _Input/Output operations, files, directories, and processes_
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `dir.c` | 4,197 | Not Started | `crate::dir` | Directory operations |
-| `file.c` | 9,503 | Not Started | `crate::file` | File system operations |
-| `io.c` | 16,324 | Not Started | `crate::io` | IO class operations |
+| `file.c` | 9,477 | Not Started | `crate::file` | File system operations |
+| `io.c` | 16,334 | Not Started | `crate::io` | IO class operations |
 | `io_buffer.c` | 5,060 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
 | `pathname.c` | 457 | Not Started | `crate::pathname` | Pathname standard helper |
 | `process.c` | 9,651 | Not Started | `crate::process` | Process management |
@@ -155,7 +155,7 @@ _Internal utility functions, tables, and system helpers_
 | `debug_counter.c` | 150 | Not Started | `crate::debug_counter` | Performance debug counters |
 | `dln.c` | 540 | Not Started | `crate::dln` | Dynamic linking loader |
 | `dln_find.c` | 294 | Not Started | `crate::dln_find` | Dynamic loading path search |
-| `error.c` | 4,406 | Not Started | `crate::error` | Exception and error handling |
+| `error.c` | 4,422 | Not Started | `crate::error` | Exception and error handling |
 | `id_table.c` | 573 | Not Started | `crate::id_table` | ID lookup table |
 | `inits.c` | 116 | Not Started | `crate::inits` | Subsystem initializers |
 | `load.c` | 1,828 | Not Started | `crate::load` | Require and load mechanism |
@@ -169,7 +169,7 @@ _Internal utility functions, tables, and system helpers_
 | `siphash.c` | 493 | Not Started | `crate::siphash` | SipHash hashing algorithm |
 | `sprintf.c` | 1,283 | Not Started | `crate::sprintf` | Kernel#sprintf formatting |
 | `st.c` | 3,396 | Not Started | `crate::st` | Symbol table / hash table internal implementation |
-| `strftime.c` | 1,288 | Not Started | `crate::strftime` | Date/time formatting |
+| `strftime.c` | 1,286 | Not Started | `crate::strftime` | Date/time formatting |
 | `util.c` | 622 | In Progress | `core_rs::util` | Ported: ruby_scan_digits, ruby_scan_oct, ruby_scan_hex, ruby_strtoul, ruby_each_words. Remaining: qsort, getcwd, dtoa/strtod |
 | `variable.c` | 4,725 | Not Started | `crate::variable` | Global and instance variable access |
 | `version.c` | 306 | Not Started | `crate::version` | Ruby version constants |
@@ -216,18 +216,18 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `encoding.c` | Encoding & Regex | 2,105 | Not Started | `crate::encoding` | String encoding support |
 | `enum.c` | Core Data Structures | 5,310 | Not Started | `crate::enum` | Enumerable module |
 | `enumerator.c` | Core Data Structures | 4,794 | Not Started | `crate::enumerator` | Enumerator class |
-| `error.c` | Utilities & Support | 4,406 | Not Started | `crate::error` | Exception and error handling |
+| `error.c` | Utilities & Support | 4,422 | Not Started | `crate::error` | Exception and error handling |
 | `eval.c` | Virtual Machine & Execution | 2,344 | Not Started | `crate::eval` | Top-level evaluation entry points |
 | `eval_error.c` | Virtual Machine & Execution | 588 | Not Started | `crate::eval::error` | Evaluation error handling |
 | `eval_jump.c` | Virtual Machine & Execution | 144 | Not Started | `crate::eval::jump` | Control flow jumps (throw, break, return) |
-| `file.c` | IO & Filesystem | 9,503 | Not Started | `crate::file` | File system operations |
-| `gc.c` | Memory & Garbage Collection | 7,115 | Not Started | `gc::mmtk` | MMTk support is upstream modular GC, not a port by this project |
+| `file.c` | IO & Filesystem | 9,477 | Not Started | `crate::file` | File system operations |
+| `gc.c` | Memory & Garbage Collection | 7,106 | Not Started | `gc::mmtk` | MMTk support is upstream modular GC, not a port by this project |
 | `goruby.c` | Platform & Miscellaneous | 68 | N/A | `N/A` | Golf Ruby executable wrapper |
 | `hash.c` | Core Data Structures | 7,993 | Not Started | `crate::hash` | Hash map implementation |
 | `id_table.c` | Utilities & Support | 573 | Not Started | `crate::id_table` | ID lookup table |
 | `imemo.c` | Memory & Garbage Collection | 726 | Not Started | `crate::imemo` | Internal memo objects |
 | `inits.c` | Utilities & Support | 116 | Not Started | `crate::inits` | Subsystem initializers |
-| `io.c` | IO & Filesystem | 16,324 | Not Started | `crate::io` | IO class operations |
+| `io.c` | IO & Filesystem | 16,334 | Not Started | `crate::io` | IO class operations |
 | `io_buffer.c` | IO & Filesystem | 5,060 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
 | `iseq.c` | JIT Compiler | 4,735 | Not Started | `crate::iseq` | Instruction sequences |
 | `jit.c` | JIT Compiler | 965 | Not Started | `jit` | C helpers shared by upstream YJIT/ZJIT |
@@ -243,13 +243,13 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `node.c` | Parser & AST | 447 | Not Started | `crate::parser::node` | AST node construction |
 | `node_dump.c` | Parser & AST | 1,325 | Not Started | `crate::parser::node_dump` | AST dump utilities |
 | `numeric.c` | Core Data Structures | 6,813 | Not Started | `crate::numeric` | Numeric base classes and operations |
-| `object.c` | Core Data Structures | 4,741 | Not Started | `crate::object` | Object class methods and operations |
+| `object.c` | Core Data Structures | 4,740 | Not Started | `crate::object` | Object class methods and operations |
 | `pack.c` | Core Data Structures | 1,936 | Not Started | `crate::pack` | Array#pack and String#unpack |
 | `parser_st.c` | Parser & AST | 173 | Not Started | `crate::parser::parser_st` | Parser symbol table |
 | `pathname.c` | IO & Filesystem | 457 | Not Started | `crate::pathname` | Pathname standard helper |
-| `prism_compile.c` | Parser & AST | 11,336 | Not Started | `crate::parser::prism_compile` | Prism AST compiler |
+| `prism_compile.c` | Parser & AST | 11,349 | Not Started | `crate::parser::prism_compile` | Prism AST compiler |
 | `prism_init.c` | Parser & AST | 9 | Not Started | `crate::parser::prism_init` | Prism initialization |
-| `proc.c` | Core Data Structures | 5,543 | Not Started | `crate::proc` | Proc, Method, and Binding objects |
+| `proc.c` | Core Data Structures | 5,538 | Not Started | `crate::proc` | Proc, Method, and Binding objects |
 | `process.c` | IO & Filesystem | 9,651 | Not Started | `crate::process` | Process management |
 | `ractor.c` | Concurrency & Threads | 4,321 | Not Started | `crate::ractor` | Ractor actor model implementation |
 | `ractor_sync.c` | Concurrency & Threads | 1,940 | Not Started | `crate::ractor::sync` | Ractor synchronization |
@@ -270,18 +270,18 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `scheduler.c` | Concurrency & Threads | 1,395 | Not Started | `crate::scheduler` | Fiber scheduler interface |
 | `set.c` | Core Data Structures | 2,677 | Not Started | `crate::set` | Core Set class support |
 | `shape.c` | Memory & Garbage Collection | 1,716 | Not Started | `crate::shape` | Object shape / property layout tracking |
-| `signal.c` | Concurrency & Threads | 1,641 | Not Started | `crate::signal` | Signal handling |
+| `signal.c` | Concurrency & Threads | 1,646 | Not Started | `crate::signal` | Signal handling |
 | `siphash.c` | Utilities & Support | 493 | Not Started | `crate::siphash` | SipHash hashing algorithm |
 | `sparc.c` | Platform & Miscellaneous | 40 | N/A | `N/A` | SPARC architecture assembly helper |
 | `sprintf.c` | Utilities & Support | 1,283 | Not Started | `crate::sprintf` | Kernel#sprintf formatting |
 | `st.c` | Utilities & Support | 3,396 | Not Started | `crate::st` | Symbol table / hash table internal implementation |
-| `strftime.c` | Utilities & Support | 1,288 | Not Started | `crate::strftime` | Date/time formatting |
+| `strftime.c` | Utilities & Support | 1,286 | Not Started | `crate::strftime` | Date/time formatting |
 | `string.c` | Core Data Structures | 14,476 | Not Started | `crate::string` | String object implementation |
 | `struct.c` | Core Data Structures | 2,352 | Not Started | `crate::struct` | Struct class implementation |
 | `symbol.c` | Core Data Structures | 1,467 | Not Started | `crate::symbol` | Symbol management |
 | `thread.c` | Concurrency & Threads | 6,759 | Not Started | `crate::thread` | Thread management core |
 | `thread_none.c` | Concurrency & Threads | 385 | Not Started | `crate::thread::none` | No-threads platform stubs |
-| `thread_pthread.c` | Concurrency & Threads | 1,620 | Not Started | `crate::thread::pthread` | POSIX threads implementation |
+| `thread_pthread.c` | Concurrency & Threads | 1,648 | Not Started | `crate::thread::pthread` | POSIX threads implementation |
 | `thread_sched.c` | Concurrency & Threads | 2,686 | Not Started | `crate::thread::sched` | Thread scheduler |
 | `thread_sched_mn.c` | Concurrency & Threads | 1,931 | Not Started | `crate::thread::sched_mn` | M:N thread scheduler |
 | `thread_sync.c` | Concurrency & Threads | 1,547 | Not Started | `crate::thread::sync` | Thread synchronization primitives |
@@ -292,10 +292,10 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `util.c` | Utilities & Support | 622 | In Progress | `core_rs::util` | Ported: ruby_scan_digits, ruby_scan_oct, ruby_scan_hex, ruby_strtoul, ruby_each_words. Remaining: qsort, getcwd, dtoa/strtod |
 | `variable.c` | Utilities & Support | 4,725 | Not Started | `crate::variable` | Global and instance variable access |
 | `version.c` | Utilities & Support | 306 | Not Started | `crate::version` | Ruby version constants |
-| `vm.c` | Virtual Machine & Execution | 5,451 | Not Started | `crate::vm` | Core virtual machine engine |
-| `vm_args.c` | Virtual Machine & Execution | 1,226 | Not Started | `crate::vm::args` | Method argument passing |
+| `vm.c` | Virtual Machine & Execution | 5,420 | Not Started | `crate::vm` | Core virtual machine engine |
+| `vm_args.c` | Virtual Machine & Execution | 1,219 | Not Started | `crate::vm::args` | Method argument passing |
 | `vm_backtrace.c` | Virtual Machine & Execution | 2,406 | Not Started | `crate::vm::backtrace` | Backtrace generation |
-| `vm_dump.c` | Virtual Machine & Execution | 1,651 | Not Started | `crate::vm::dump` | VM state dump utilities |
+| `vm_dump.c` | Virtual Machine & Execution | 1,660 | Not Started | `crate::vm::dump` | VM state dump utilities |
 | `vm_eval.c` | Virtual Machine & Execution | 2,966 | Not Started | `crate::vm::eval` | Method dispatch and evaluation |
 | `vm_exec.c` | Virtual Machine & Execution | 146 | Not Started | `crate::vm::exec` | VM loop execution |
 | `vm_insnhelper.c` | Virtual Machine & Execution | 7,802 | Not Started | `crate::vm::insnhelper` | Instruction execution helpers |

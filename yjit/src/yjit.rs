@@ -234,7 +234,9 @@ pub extern "C" fn rb_yjit_enable(_ec: EcPtr, _ruby_self: VALUE, gen_stats: VALUE
         if !mem_size.nil_p() {
             let mem_size_mb = mem_size.as_isize() >> 1;
             let mem_size_bytes = mem_size_mb * 1024 * 1024;
-            crate::options::get_options().write().unwrap().mem_size = mem_size_bytes as usize;
+            unsafe {
+                OPTIONS.mem_size = mem_size_bytes as usize;
+            }
         }
 
         if !call_threshold.nil_p() {
@@ -246,20 +248,22 @@ pub extern "C" fn rb_yjit_enable(_ec: EcPtr, _ruby_self: VALUE, gen_stats: VALUE
 
         // Initialize and enable YJIT
         if gen_stats.test() {
-            let mut opts = crate::options::get_options().write().unwrap();
-            opts.gen_stats = gen_stats.test();
-            opts.print_stats = print_stats.test();
+            unsafe {
+                OPTIONS.gen_stats = gen_stats.test();
+                OPTIONS.print_stats = print_stats.test();
+            }
         }
 
         if gen_log.test() {
-            let mut opts = crate::options::get_options().write().unwrap();
-            if print_log.test() {
-                opts.log = Some(LogOutput::Stderr);
-            } else {
-                opts.log = Some(LogOutput::MemoryOnly);
-            }
+            unsafe {
+                if print_log.test() {
+                    OPTIONS.log = Some(LogOutput::Stderr);
+                } else {
+                    OPTIONS.log = Some(LogOutput::MemoryOnly);
+                }
 
-            Log::init();
+                Log::init();
+            }
         }
 
         yjit_init();

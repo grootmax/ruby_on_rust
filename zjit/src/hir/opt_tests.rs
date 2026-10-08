@@ -24312,15 +24312,9 @@ mod hir_opt_tests {
     #[track_caller]
     fn hir_string_with_inlining(method: &str) -> String {
         let old_threshold = get_option!(inline_threshold);
-        {
-            let mut opts = crate::options::get_options().write().unwrap();
-            opts.inline_threshold = 30;
-        }
+        unsafe { OPTIONS.as_mut().unwrap().inline_threshold = 30; }
         let result = hir_string(method);
-        {
-            let mut opts = crate::options::get_options().write().unwrap();
-            opts.inline_threshold = old_threshold;
-        }
+        unsafe { OPTIONS.as_mut().unwrap().inline_threshold = old_threshold; }
         result
     }
 
@@ -24545,16 +24539,14 @@ mod hir_opt_tests {
 
         let old_threshold = get_option!(inline_threshold);
         let old_max_iterations = get_option!(inline_max_iterations);
-        {
-            let mut opts = crate::options::get_options().write().unwrap();
-            opts.inline_threshold = 30;
-            opts.inline_max_iterations = 1;
+        unsafe {
+            OPTIONS.as_mut().unwrap().inline_threshold = 30;
+            OPTIONS.as_mut().unwrap().inline_max_iterations = 1;
         }
         let result = hir_string("test");
-        {
-            let mut opts = crate::options::get_options().write().unwrap();
-            opts.inline_threshold = old_threshold;
-            opts.inline_max_iterations = old_max_iterations;
+        unsafe {
+            OPTIONS.as_mut().unwrap().inline_threshold = old_threshold;
+            OPTIONS.as_mut().unwrap().inline_max_iterations = old_max_iterations;
         }
 
         assert!(result.contains("PushInlineFrame"),
@@ -24614,16 +24606,14 @@ mod hir_opt_tests {
 
         let old_threshold = get_option!(inline_threshold);
         let old_budget = get_option!(inline_budget);
-        {
-            let mut opts = crate::options::get_options().write().unwrap();
-            opts.inline_threshold = 30;
-            opts.inline_budget = 1;
+        unsafe {
+            OPTIONS.as_mut().unwrap().inline_threshold = 30;
+            OPTIONS.as_mut().unwrap().inline_budget = 1;
         }
         let result = hir_string("test");
-        {
-            let mut opts = crate::options::get_options().write().unwrap();
-            opts.inline_threshold = old_threshold;
-            opts.inline_budget = old_budget;
+        unsafe {
+            OPTIONS.as_mut().unwrap().inline_threshold = old_threshold;
+            OPTIONS.as_mut().unwrap().inline_budget = old_budget;
         }
 
         let budget_rejects_after = counters.inline_reject_budget_exceeded;
@@ -24895,14 +24885,12 @@ mod hir_opt_tests {
         let inline_count_before = counters.inline_method_count;
 
         let old_deny = get_option!(inline_deny).clone();
-        {
-            let mut opts = crate::options::get_options().write().unwrap();
-            opts.inline_deny.insert("Object#add_one".to_string());
+        unsafe {
+            OPTIONS.as_mut().unwrap().inline_deny.insert("Object#add_one".to_string());
         }
         let result = hir_string_with_inlining("test");
-        {
-            let mut opts = crate::options::get_options().write().unwrap();
-            opts.inline_deny = old_deny;
+        unsafe {
+            OPTIONS.as_mut().unwrap().inline_deny = old_deny;
         }
 
         let denied_rejects_after = counters.inline_reject_denied;

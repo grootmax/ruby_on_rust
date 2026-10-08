@@ -284,9 +284,9 @@ impl ZJITState {
     /// Log the name of a compiled ISEQ to the file specified in options.log_compiled_iseqs
     pub fn log_compile(iseq_name: String) {
         assert!(ZJITState::should_log_compiled_iseqs());
-        let Some(filename) = get_option!(log_compiled_iseqs) else { return };
+        let filename = get_option!(log_compiled_iseqs).as_ref().unwrap();
         use std::io::Write;
-        let mut file = match std::fs::OpenOptions::new().create(true).append(true).open(&filename) {
+        let mut file = match std::fs::OpenOptions::new().create(true).append(true).open(filename) {
             Ok(f) => f,
             Err(e) => {
                 eprintln!("ZJIT: Failed to create file '{}': {}", filename.display(), e);

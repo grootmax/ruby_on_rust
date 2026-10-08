@@ -2,7 +2,6 @@
 
 use std::{ffi::{CStr, CString}, fs::File, ptr::null};
 use std::os::raw::{c_char, c_int, c_uint};
-use std::sync::{OnceLock, RwLock};
 use crate::cruby::*;
 use crate::stats::Counter;
 use std::collections::HashSet;
@@ -68,13 +67,9 @@ pub static mut rb_zjit_profile_threshold: CallThreshold = DEFAULT_CALL_THRESHOLD
 #[allow(non_upper_case_globals)]
 pub static mut rb_zjit_call_threshold: CallThreshold = DEFAULT_CALL_THRESHOLD;
 
-/// ZJIT command-line options container initialized with OnceLock.
-static OPTIONS: OnceLock<RwLock<Options>> = OnceLock::new();
-
-/// Return a static reference to the synchronized ZJIT options RwLock.
-pub fn get_options() -> &'static RwLock<Options> {
-    OPTIONS.get_or_init(|| RwLock::new(Options::default()))
-}
+/// ZJIT command-line options. This is set before rb_zjit_init() sets
+/// ZJITState so that we can query some options while loading builtins.
+pub static mut OPTIONS: Option<Options> = None;
 
 #[derive(Clone, Debug)]
 pub struct Options {
@@ -338,8 +333,8 @@ const MAX_MEM_MIB: usize = 1024 * 1024;
 /// Macro to dump LIR if --zjit-dump-lir is specified
 macro_rules! asm_dump {
     ($asm:expr, $target:ident) => {
-        if let Some(dump_lirs) = $crate::options::get_options().read().unwrap().dump_lir.as_ref() {
-            if dump_lirs.contains(&$crate::options::DumpLIR::$target) {
+        if let Some(crate::options::Options { dump_lir: Some(dump_lirs), .. }) = unsafe { crate::options::OPTIONS.as_ref() } {
+            if dump_lirs.contains(&crate::options::DumpLIR::$target) {
                 println!("LIR {}:\n{}", stringify!($target), $asm);
             }
         }
@@ -349,11 +344,13 @@ pub(crate) use asm_dump;
 
 /// Macro to get an option value by name
 macro_rules! get_option {
+    // Unsafe is ok here because options are initialized
+    // once before any Ruby code executes
     ($option_name:ident) => {
-        $crate::options::get_options().read().unwrap().$option_name.clone()
+        unsafe { crate::options::OPTIONS.as_ref() }.unwrap().$option_name
     };
     ($option_name:ident, $default:expr) => {
-        $crate::options::get_options().read().unwrap().$option_name.clone()
+        unsafe { crate::options::OPTIONS.as_ref() }.map(|opts| opts.$option_name).unwrap_or($default)
     };
 }
 pub(crate) use get_option;
@@ -361,15 +358,20 @@ pub(crate) use get_option;
 /// Macro to reference an option value by name.
 macro_rules! get_option_ref {
     ($option_name:ident) => {
-        $crate::options::get_options().read().unwrap().$option_name.clone()
+        unsafe { crate::options::OPTIONS.as_ref() }.unwrap().$option_name.as_ref()
     };
 }
 pub(crate) use get_option_ref;
 
-/// Set default values to ZJIT options.
+/// Set default values to ZJIT options. Setting Some to OPTIONS will make `#with_jit`
+/// enable the JIT hook while not enabling compilation yet.
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_prepare_options() {
-    get_options();
+    // rb_zjit_prepare_options() could be called for feature flags or $RUBY_ZJIT_ENABLE
+    // after rb_zjit_parse_option() is called, so we need to handle the already-initialized case.
+    if unsafe { OPTIONS.is_none() } {
+        unsafe { OPTIONS = Some(Options::default()); }
+    }
 }
 
 /// Parse a --zjit* command-line flag
@@ -403,7 +405,7 @@ fn parse_jit_list(path_like: &str) -> HashSet<String> {
 /// they pass exact "--zjit-".
 fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
     rb_zjit_prepare_options();
-    let mut options = get_options().write().unwrap();
+    let options = unsafe { OPTIONS.as_mut().unwrap() };
 
     let c_str: &CStr = unsafe { CStr::from_ptr(str_ptr) };
     let opt_str: &str = c_str.to_str().ok()?;
@@ -439,7 +441,7 @@ fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
         ("call-threshold", _) => match opt_val.parse() {
             Ok(n) => {
                 unsafe { rb_zjit_call_threshold = n; }
-                update_profile_threshold_with(&options);
+                update_profile_threshold();
             },
             Err(_) => return None,
         },
@@ -447,7 +449,7 @@ fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
         ("num-profiles", _) => match opt_val.parse() {
             Ok(n) => {
                 options.num_profiles = n;
-                update_profile_threshold_with(&options);
+                update_profile_threshold();
             },
             Err(_) => return None,
         },
@@ -675,20 +677,15 @@ fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
 }
 
 /// Update rb_zjit_profile_threshold based on rb_zjit_call_threshold and options.num_profiles
-fn update_profile_threshold_with(options: &Options) {
+fn update_profile_threshold() {
     if unsafe { rb_zjit_call_threshold == 1 } {
         // If --zjit-call-threshold=1, never rewrite ISEQs to profile instructions.
         unsafe { rb_zjit_profile_threshold = 0; }
     } else {
         // Otherwise, profile instructions at least once.
-        let num_profiles = options.num_profiles;
+        let num_profiles = get_option!(num_profiles);
         unsafe { rb_zjit_profile_threshold = rb_zjit_call_threshold.saturating_sub(num_profiles.into()).max(1) };
     }
-}
-
-fn update_profile_threshold() {
-    let options = get_options().read().unwrap();
-    update_profile_threshold_with(&options);
 }
 
 /// Update --zjit-call-threshold for testing
@@ -703,28 +700,28 @@ pub fn set_call_threshold(call_threshold: CallThreshold) {
 #[cfg(test)]
 pub fn set_num_exits_until_invalidate(num_exits_until_invalidate: NumExits) {
     rb_zjit_prepare_options();
-    get_options().write().unwrap().num_exits_until_invalidate = num_exits_until_invalidate;
+    unsafe { OPTIONS.as_mut().unwrap().num_exits_until_invalidate = num_exits_until_invalidate; }
 }
 
 /// Update --zjit-max-versions for testing
 #[cfg(test)]
 pub fn set_max_versions(max_versions: usize) {
     rb_zjit_prepare_options();
-    get_options().write().unwrap().max_versions = max_versions;
+    unsafe { OPTIONS.as_mut().unwrap().max_versions = max_versions; }
 }
 
 /// Update --zjit-inline-threshold for testing
 #[cfg(test)]
 pub fn set_inline_threshold(inline_threshold: InlineThreshold) {
     rb_zjit_prepare_options();
-    get_options().write().unwrap().inline_threshold = inline_threshold;
+    unsafe { OPTIONS.as_mut().unwrap().inline_threshold = inline_threshold; }
 }
 
 /// Update --zjit-num-profiles for testing
 #[cfg(test)]
 pub fn set_num_profiles(num_profiles: NumProfiles) {
     rb_zjit_prepare_options();
-    get_options().write().unwrap().num_profiles = num_profiles;
+    unsafe { OPTIONS.as_mut().unwrap().num_profiles = num_profiles; }
     update_profile_threshold();
 }
 
@@ -732,14 +729,14 @@ pub fn set_num_profiles(num_profiles: NumProfiles) {
 #[cfg(test)]
 pub fn set_mem_bytes(mem_bytes: usize) {
     rb_zjit_prepare_options();
-    get_options().write().unwrap().mem_bytes = mem_bytes;
+    unsafe { OPTIONS.as_mut().unwrap().mem_bytes = mem_bytes; }
 }
 
 /// Enable --zjit-stats for testing
 #[cfg(test)]
 pub fn enable_zjit_stats() {
     rb_zjit_prepare_options();
-    get_options().write().unwrap().stats = true;
+    unsafe { OPTIONS.as_mut() }.unwrap().stats = true;
 }
 
 /// Print ZJIT options for `ruby --help`. `width` is width of option parts, and
@@ -770,14 +767,18 @@ pub(crate) use debug;
 /// Return true if ZJIT should be enabled at boot.
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_option_enable() -> bool {
-    !get_options().read().unwrap().disable
+    if unsafe { OPTIONS.as_ref() }.is_some_and(|opts| !opts.disable) {
+        true
+    } else {
+        false
+    }
 }
 
 /// Return Qtrue if --zjit-stats has been specified.
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_stats_enabled_p(_ec: EcPtr, _self: VALUE) -> VALUE {
     // Builtin zjit.rb calls this even if ZJIT is disabled, so OPTIONS may not be set.
-    if get_options().read().unwrap().stats {
+    if unsafe { OPTIONS.as_ref() }.is_some_and(|opts| opts.stats) {
         Qtrue
     } else {
         Qfalse
@@ -788,8 +789,7 @@ pub extern "C" fn rb_zjit_stats_enabled_p(_ec: EcPtr, _self: VALUE) -> VALUE {
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_print_stats_p(_ec: EcPtr, _self: VALUE) -> VALUE {
     // Builtin zjit.rb calls this even if ZJIT is disabled, so OPTIONS may not be set.
-    let opts = get_options().read().unwrap();
-    if opts.stats && opts.print_stats {
+    if unsafe { OPTIONS.as_ref() }.is_some_and(|opts| opts.stats && opts.print_stats) {
         Qtrue
     } else {
         Qfalse
@@ -799,9 +799,10 @@ pub extern "C" fn rb_zjit_print_stats_p(_ec: EcPtr, _self: VALUE) -> VALUE {
 /// Return path if stats should be printed at exit to a specified file, else Qnil.
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_get_stats_file_path_p(_ec: EcPtr, _self: VALUE) -> VALUE {
-    let opts = get_options().read().unwrap();
-    if let Some(ref path) = opts.print_stats_file {
-        return rust_str_to_ruby(path.as_os_str().to_str().unwrap());
+    if let Some(opts) = unsafe { OPTIONS.as_ref() } {
+        if let Some(ref path) = opts.print_stats_file {
+            return rust_str_to_ruby(path.as_os_str().to_str().unwrap());
+        }
     }
     Qnil
 }
@@ -812,14 +813,14 @@ mod tests {
 
     #[test]
     fn parse_dump_hir_path() {
-        rb_zjit_prepare_options();
+        unsafe { OPTIONS = Some(Options::default()); }
 
         let path = std::path::PathBuf::from("/tmp");
         let option = CString::new(format!("dump-hir={}", path.display())).unwrap();
 
         assert!(parse_option(option.as_ptr()).is_some());
 
-        let options = get_options().read().unwrap();
+        let options = unsafe { OPTIONS.as_ref() }.unwrap();
         // parse_option canonicalizes the path, so canonicalize the expectation too
         let expected = std::fs::canonicalize(&path).unwrap().join(format!("hir-{}", std::process::id()));
         assert_eq!(options.dump_hir_file, Some(expected.clone()));
@@ -831,7 +832,7 @@ mod tests {
 
     #[test]
     fn parse_dump_hir_path_keeps_format() {
-        rb_zjit_prepare_options();
+        unsafe { OPTIONS = Some(Options::default()); }
 
         let path = std::path::PathBuf::from(".");
         let all = CString::new("dump-hir=all").unwrap();
@@ -840,7 +841,7 @@ mod tests {
         assert!(parse_option(all.as_ptr()).is_some());
         assert!(parse_option(file.as_ptr()).is_some());
 
-        let options = get_options().read().unwrap();
+        let options = unsafe { OPTIONS.as_ref() }.unwrap();
         // parse_option canonicalizes the path, so canonicalize the expectation too
         let expected = std::fs::canonicalize(&path).unwrap().join(format!("hir-{}", std::process::id()));
         assert_eq!(options.dump_hir_file, Some(expected.clone()));
@@ -852,7 +853,7 @@ mod tests {
 
     #[test]
     fn parse_dump_disasm_path() {
-        rb_zjit_prepare_options();
+        unsafe { OPTIONS = Some(Options::default()); }
 
         let dir = std::env::temp_dir();
         let expected_path = dir.join(format!("zjit_{}.log", std::process::id()));
@@ -860,7 +861,7 @@ mod tests {
 
         assert!(parse_option(option.as_ptr()).is_some());
 
-        let options = get_options().read().unwrap();
+        let options = unsafe { OPTIONS.as_ref() }.unwrap();
         match options.dump_disasm {
             Some(DumpDisasm::File(fd)) => assert!(fd >= 0),
             _ => panic!("expected dump-disasm file output"),
