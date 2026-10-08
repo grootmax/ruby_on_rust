@@ -9,123 +9,44 @@ use crate::distribution::{Distribution, DistributionSummary};
 use crate::stats::Counter::profile_time_ns;
 use crate::stats::with_time_stat;
 
-/// Safe visitor trait for extracting frame snapshot state during instruction profiling.
-pub trait FrameVisitor {
-    fn iseq(&self) -> IseqPtr;
-    fn insn_idx(&self) -> YarvInsnIdx;
-    fn insn_opnd(&self, idx: usize) -> VALUE;
-    fn peek_at_stack(&self, n: isize) -> VALUE;
-    fn peek_at_self(&self) -> VALUE;
-    fn peek_at_block_handler(&self) -> VALUE;
-    fn frame_method_entry(&self) -> *const rb_callable_method_entry_t;
-}
-
-/// Immutable snapshot of an execution frame captured during profiling.
-pub struct FrameSnapshot {
+/// Ephemeral state for profiling runtime information
+struct Profiler {
+    cfp: CfpPtr,
     iseq: IseqPtr,
     insn_idx: YarvInsnIdx,
-    self_val: VALUE,
-    block_handler: VALUE,
-    method_entry: *const rb_callable_method_entry_t,
-    insn_opnds: [VALUE; 8],
-    stack_opnds: [VALUE; 64],
 }
 
-impl FrameVisitor for FrameSnapshot {
-    fn iseq(&self) -> IseqPtr {
-        self.iseq
-    }
-
-    fn insn_idx(&self) -> YarvInsnIdx {
-        self.insn_idx
-    }
-
-    fn insn_opnd(&self, idx: usize) -> VALUE {
-        if idx < self.insn_opnds.len() {
-            self.insn_opnds[idx]
-        } else {
-            VALUE(0)
+impl Profiler {
+    fn new(ec: EcPtr) -> Self {
+        let cfp = unsafe { get_ec_cfp(ec) };
+        let iseq = unsafe { get_cfp_iseq(cfp) };
+        Profiler {
+            cfp,
+            iseq,
+            insn_idx: unsafe { get_cfp_pc(cfp).offset_from(get_iseq_body_iseq_encoded(iseq)) as usize },
         }
     }
 
+    // Get an instruction operand that sits next to the opcode at PC.
+    fn insn_opnd(&self, idx: usize) -> VALUE {
+        unsafe { get_cfp_pc(self.cfp).add(1 + idx).read() }
+    }
+
+    // Peek at the nth topmost value on the Ruby stack.
+    // Returns the topmost value when n == 0.
     fn peek_at_stack(&self, n: isize) -> VALUE {
-        if n >= 0 && (n as usize) < self.stack_opnds.len() {
-            self.stack_opnds[n as usize]
-        } else {
-            VALUE(0)
+        unsafe {
+            let sp: *mut VALUE = get_cfp_sp(self.cfp);
+            *(sp.offset(-1 - n))
         }
     }
 
     fn peek_at_self(&self) -> VALUE {
-        self.self_val
+        unsafe { rb_get_cfp_self(self.cfp) }
     }
 
     fn peek_at_block_handler(&self) -> VALUE {
-        self.block_handler
-    }
-
-    fn frame_method_entry(&self) -> *const rb_callable_method_entry_t {
-        self.method_entry
-    }
-}
-
-/// Profiling context that captures frame snapshots during profiling passes.
-pub struct ProfilingContext {
-    snapshot: FrameSnapshot,
-}
-
-impl ProfilingContext {
-    /// Capture an immutable frame snapshot from the execution context.
-    ///
-    /// Unsafe frame pointer reads are strictly isolated to this capture step.
-    pub fn capture(ec: EcPtr) -> Self {
-        let snapshot = unsafe {
-            let cfp = get_ec_cfp(ec);
-            let iseq = get_cfp_iseq(cfp);
-            let pc = get_cfp_pc(cfp);
-            let encoded_pc = get_iseq_body_iseq_encoded(iseq);
-            let insn_idx = pc.offset_from(encoded_pc) as usize;
-            let self_val = rb_get_cfp_self(cfp);
-            let block_handler = rb_vm_get_untagged_block_handler(cfp);
-            let method_entry = rb_vm_frame_method_entry(cfp);
-
-            let mut insn_opnds = [VALUE(0); 8];
-            if !iseq.is_null() {
-                let iseq_size = get_iseq_encoded_size(iseq) as usize;
-                for i in 0..8 {
-                    if insn_idx + 1 + i < iseq_size {
-                        insn_opnds[i] = pc.add(1 + i).read();
-                    }
-                }
-            }
-
-            let sp = get_cfp_sp(cfp);
-            let bp = get_cfp_bp(cfp);
-            let mut stack_opnds = [VALUE(0); 64];
-            if !bp.is_null() && sp > bp {
-                let avail = sp.offset_from(bp) as usize;
-                let copy_len = avail.min(64);
-                for i in 0..copy_len {
-                    stack_opnds[i] = *sp.offset(-1 - i as isize);
-                }
-            }
-
-            FrameSnapshot {
-                iseq,
-                insn_idx,
-                self_val,
-                block_handler,
-                method_entry,
-                insn_opnds,
-                stack_opnds,
-            }
-        };
-
-        ProfilingContext { snapshot }
-    }
-
-    pub fn snapshot(&self) -> &FrameSnapshot {
-        &self.snapshot
+        unsafe { rb_vm_get_untagged_block_handler(self.cfp) }
     }
 }
 
@@ -140,47 +61,47 @@ pub extern "C" fn rb_zjit_profile_insn(bare_opcode: u32, ec: EcPtr) {
 /// Profile a YARV instruction
 fn profile_insn_sample(
     bare_opcode: ruby_vminsn_type,
-    visitor: &impl FrameVisitor,
+    profiler: &mut Profiler,
     profile: &mut IseqProfile,
 ) -> bool {
     match bare_opcode {
-        YARVINSN_opt_nil_p => profile_operands(visitor, profile, 1),
-        YARVINSN_opt_plus  => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_minus => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_mult  => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_div   => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_mod   => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_eq    => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_neq   => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_lt    => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_le    => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_gt    => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_ge    => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_and   => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_or    => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_empty_p => profile_operands(visitor, profile, 1),
-        YARVINSN_opt_aref  => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_ltlt  => profile_operands(visitor, profile, 2),
-        YARVINSN_opt_aset  => profile_operands(visitor, profile, 3),
-        YARVINSN_opt_not   => profile_operands(visitor, profile, 1),
-        YARVINSN_getinstancevariable => profile_self(visitor, profile),
-        YARVINSN_setinstancevariable => profile_self(visitor, profile),
-        YARVINSN_definedivar   => profile_self(visitor, profile),
-        YARVINSN_opt_regexpmatch2    => profile_operands(visitor, profile, 2),
-        YARVINSN_objtostring   => profile_operands(visitor, profile, 1),
-        YARVINSN_opt_length    => profile_operands(visitor, profile, 1),
-        YARVINSN_opt_size      => profile_operands(visitor, profile, 1),
-        YARVINSN_opt_succ      => profile_operands(visitor, profile, 1),
-        YARVINSN_invokeblock   => profile_block_handler(visitor, profile),
-        YARVINSN_invokesuper   => profile_invokesuper(visitor, profile),
+        YARVINSN_opt_nil_p => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_plus  => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_minus => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_mult  => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_div   => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_mod   => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_eq    => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_neq   => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_lt    => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_le    => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_gt    => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_ge    => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_and   => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_or    => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_empty_p => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_aref  => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_ltlt  => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_aset  => profile_operands(profiler, profile, 3),
+        YARVINSN_opt_not   => profile_operands(profiler, profile, 1),
+        YARVINSN_getinstancevariable => profile_self(profiler, profile),
+        YARVINSN_setinstancevariable => profile_self(profiler, profile),
+        YARVINSN_definedivar   => profile_self(profiler, profile),
+        YARVINSN_opt_regexpmatch2    => profile_operands(profiler, profile, 2),
+        YARVINSN_objtostring   => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_length    => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_size      => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_succ      => profile_operands(profiler, profile, 1),
+        YARVINSN_invokeblock   => profile_block_handler(profiler, profile),
+        YARVINSN_invokesuper   => profile_invokesuper(profiler, profile),
         YARVINSN_opt_send_without_block | YARVINSN_send => {
-            let cd: *const rb_call_data = visitor.insn_opnd(0).as_ptr();
+            let cd: *const rb_call_data = profiler.insn_opnd(0).as_ptr();
             let argc = num_arguments_on_stack(cd);
             // Profile all the arguments and self (+1).
-            profile_operands(visitor, profile, argc + 1);
-            profile_splat_length(visitor, profile, unsafe { (*cd).ci });
+            profile_operands(profiler, profile, argc + 1);
+            profile_splat_length(profiler, profile, unsafe { (*cd).ci });
         }
-        YARVINSN_splatkw => profile_operands(visitor, profile, 2),
+        YARVINSN_splatkw => profile_operands(profiler, profile, 2),
         _ => return false,
     }
 
@@ -189,16 +110,15 @@ fn profile_insn_sample(
 
 /// Profile a YARV instruction
 fn profile_insn(bare_opcode: ruby_vminsn_type, ec: EcPtr) {
-    let context = ProfilingContext::capture(ec);
-    let visitor = context.snapshot();
-    let profile = &mut get_or_create_iseq_payload(visitor.iseq()).profile;
-    let _ = profile_insn_sample(bare_opcode, visitor, profile);
+    let profiler = &mut Profiler::new(ec);
+    let profile = &mut get_or_create_iseq_payload(profiler.iseq).profile;
+    let _ = profile_insn_sample(bare_opcode, profiler, profile);
 
     // Once we profile the instruction enough times, we stop profiling it.
-    let entry = profile.entry_mut(visitor.insn_idx());
+    let entry = profile.entry_mut(profiler.insn_idx);
     entry.profiles_remaining = entry.profiles_remaining.saturating_sub(1);
     if entry.profiles_remaining == 0 {
-        unsafe { rb_zjit_iseq_insn_set(visitor.iseq(), visitor.insn_idx() as u32, bare_opcode); }
+        unsafe { rb_zjit_iseq_insn_set(profiler.iseq, profiler.insn_idx as u32, bare_opcode); }
     }
 }
 
@@ -237,8 +157,8 @@ pub type SplatLengthDistribution = Distribution<Option<SplatLength>, DISTRIBUTIO
 pub type SplatLengthDistributionSummary = DistributionSummary<Option<SplatLength>, DISTRIBUTION_SIZE>;
 
 /// Profile the Type of top-`n` stack operands
-fn profile_operands(visitor: &impl FrameVisitor, profile: &mut IseqProfile, n: usize) {
-    let entry = profile.entry_mut(visitor.insn_idx());
+fn profile_operands(profiler: &mut Profiler, profile: &mut IseqProfile, n: usize) {
+    let entry = profile.entry_mut(profiler.insn_idx);
     if entry.opnd_types.is_empty() {
         // Allocate exactly `n` distributions. A plain `resize` on an empty Vec rounds the capacity
         // up to 4 elements, which might waste space.
@@ -246,16 +166,16 @@ fn profile_operands(visitor: &impl FrameVisitor, profile: &mut IseqProfile, n: u
     }
 
     for (i, profile_type) in entry.opnd_types.iter_mut().enumerate() {
-        let obj = visitor.peek_at_stack((n - i - 1) as isize);
+        let obj = profiler.peek_at_stack((n - i - 1) as isize);
         // TODO(max): Handle GC-hidden classes like Array, Hash, etc and make them look normal or
         // drop them or something
         let ty = ProfiledType::new(obj);
-        VALUE::from(visitor.iseq()).write_barrier(ty.class());
+        VALUE::from(profiler.iseq).write_barrier(ty.class());
         profile_type.observe(ty);
     }
 }
 
-fn profile_splat_length(visitor: &impl FrameVisitor, profile: &mut IseqProfile, ci: *const rb_callinfo) {
+fn profile_splat_length(profiler: &mut Profiler, profile: &mut IseqProfile, ci: *const rb_callinfo) {
     let flags = unsafe { rb_vm_ci_flag(ci) };
     // Only call sites with VM_CALL_ARGS_SPLAT have a splat array on the stack.
     if flags & VM_CALL_ARGS_SPLAT == 0 {
@@ -269,54 +189,54 @@ fn profile_splat_length(visitor: &impl FrameVisitor, profile: &mut IseqProfile, 
     let splat_pos = usize::from(flags & VM_CALL_ARGS_BLOCKARG != 0)
         + usize::from(flags & VM_CALL_KW_SPLAT != 0)
         + caller_kw_count;
-    let splat_array = visitor.peek_at_stack(splat_pos as isize);
+    let splat_array = profiler.peek_at_stack(splat_pos as isize);
     let length = if unsafe { RB_TYPE_P(splat_array, RUBY_T_ARRAY) } {
         SplatLength::try_from(unsafe { rb_jit_array_len(splat_array) }).ok()
     } else {
         None
     };
-    profile.splat_lengths.entry(visitor.insn_idx())
+    profile.splat_lengths.entry(profiler.insn_idx)
         .or_insert_with(SplatLengthDistribution::new).observe(length);
 }
 
-fn profile_self(visitor: &impl FrameVisitor, profile: &mut IseqProfile) {
-    let entry = profile.entry_mut(visitor.insn_idx());
+fn profile_self(profiler: &mut Profiler, profile: &mut IseqProfile) {
+    let entry = profile.entry_mut(profiler.insn_idx);
     if entry.opnd_types.is_empty() {
         entry.opnd_types = vec![TypeDistribution::new()];
     }
-    let obj = visitor.peek_at_self();
+    let obj = profiler.peek_at_self();
     // TODO(max): Handle GC-hidden classes like Array, Hash, etc and make them look normal or
     // drop them or something
     let ty = ProfiledType::new(obj);
-    VALUE::from(visitor.iseq()).write_barrier(ty.class());
+    VALUE::from(profiler.iseq).write_barrier(ty.class());
     entry.opnd_types[0].observe(ty);
 }
 
-fn profile_block_handler(visitor: &impl FrameVisitor, profile: &mut IseqProfile) {
-    let entry = profile.entry_mut(visitor.insn_idx());
+fn profile_block_handler(profiler: &mut Profiler, profile: &mut IseqProfile) {
+    let entry = profile.entry_mut(profiler.insn_idx);
     if entry.opnd_types.is_empty() {
         entry.opnd_types = vec![TypeDistribution::new()];
     }
-    let ty = ProfiledType::block_handler(visitor.peek_at_block_handler());
-    VALUE::from(visitor.iseq()).write_barrier(ty.class());
+    let ty = ProfiledType::block_handler(profiler.peek_at_block_handler());
+    VALUE::from(profiler.iseq).write_barrier(ty.class());
     entry.opnd_types[0].observe(ty);
 }
 
-fn profile_invokesuper(visitor: &impl FrameVisitor, profile: &mut IseqProfile) {
-    let cme = visitor.frame_method_entry();
+fn profile_invokesuper(profiler: &mut Profiler, profile: &mut IseqProfile) {
+    let cme = unsafe { rb_vm_frame_method_entry(profiler.cfp) };
     let cme_value = VALUE(cme as usize);  // CME is a T_IMEMO, which is a VALUE
 
-    profile.super_cme.entry(visitor.insn_idx())
+    profile.super_cme.entry(profiler.insn_idx)
         .or_insert_with(|| TypeDistribution::new()).observe(ProfiledType::object(cme_value));
 
-    unsafe { rb_gc_writebarrier(visitor.iseq().into(), cme_value) };
+    unsafe { rb_gc_writebarrier(profiler.iseq.into(), cme_value) };
 
-    let cd: *const rb_call_data = visitor.insn_opnd(0).as_ptr();
+    let cd: *const rb_call_data = profiler.insn_opnd(0).as_ptr();
     let argc = num_arguments_on_stack(cd);
 
     // Profile all the arguments and self (+1).
-    profile_operands(visitor, profile, (argc + 1) as usize);
-    profile_splat_length(visitor, profile, unsafe { (*cd).ci });
+    profile_operands(profiler, profile, (argc + 1) as usize);
+    profile_splat_length(profiler, profile, unsafe { (*cd).ci });
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

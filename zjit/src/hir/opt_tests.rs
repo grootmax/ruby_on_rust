@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod hir_opt_tests {
     use crate::hir::*;
-    use std::sync::atomic::Ordering;
 
     use crate::hir::tests::hir_build_tests::assert_contains_opcode;
     use crate::{hir_strings, options::*};
@@ -24602,8 +24601,8 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let budget_rejects_before = counters.inline_reject_budget_exceeded.load(Ordering::Relaxed);
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let budget_rejects_before = counters.inline_reject_budget_exceeded;
+        let inline_count_before = counters.inline_method_count;
 
         let old_threshold = get_option!(inline_threshold);
         let old_budget = get_option!(inline_budget);
@@ -24617,8 +24616,8 @@ mod hir_opt_tests {
             OPTIONS.as_mut().unwrap().inline_budget = old_budget;
         }
 
-        let budget_rejects_after = counters.inline_reject_budget_exceeded.load(Ordering::Relaxed);
-        let inline_count_after = counters.inline_method_count.load(Ordering::Relaxed);
+        let budget_rejects_after = counters.inline_reject_budget_exceeded;
+        let inline_count_after = counters.inline_method_count;
 
         assert!(budget_rejects_after > budget_rejects_before,
             "Expected inline_reject_budget_exceeded to increment, but it stayed at {budget_rejects_before}");
@@ -24648,11 +24647,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_opts to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -24704,11 +24703,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_opts to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -24824,11 +24823,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected maybe_rescue to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -24882,8 +24881,8 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let denied_rejects_before = counters.inline_reject_denied.load(Ordering::Relaxed);
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let denied_rejects_before = counters.inline_reject_denied;
+        let inline_count_before = counters.inline_method_count;
 
         let old_deny = get_option!(inline_deny).clone();
         unsafe {
@@ -24894,8 +24893,8 @@ mod hir_opt_tests {
             OPTIONS.as_mut().unwrap().inline_deny = old_deny;
         }
 
-        let denied_rejects_after = counters.inline_reject_denied.load(Ordering::Relaxed);
-        let inline_count_after = counters.inline_method_count.load(Ordering::Relaxed);
+        let denied_rejects_after = counters.inline_reject_denied;
+        let inline_count_after = counters.inline_method_count;
 
         assert!(denied_rejects_after > denied_rejects_before,
             "Expected inline_reject_denied to increment for Object#add_one, but it stayed at {denied_rejects_before}");
@@ -24923,11 +24922,11 @@ mod hir_opt_tests {
             test(child)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected Child#greet to be inlined, but inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in HIR when inlining a super-containing callee:\n{result}");
@@ -24986,11 +24985,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_opts to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25043,11 +25042,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_opt_post to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25098,11 +25097,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_lead_opt_post to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25151,11 +25150,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_kw to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25203,11 +25202,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_optkw to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25255,11 +25254,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_optkw to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25308,11 +25307,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_kws to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25367,11 +25366,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_optkw_dyn to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25433,11 +25432,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected add_lead_opt_post to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25490,11 +25489,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected with_yield to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25546,11 +25545,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected with_block_param to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
@@ -25642,11 +25641,11 @@ mod hir_opt_tests {
             test(1)
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected callee to be inlined despite forwarding its block.\nHIR:\n{result}");
         assert_eq!(result.matches("PushInlineFrame").count(), 1,
             "Expected only `callee` to be inlined, not `inner`:\n{result}");
@@ -25743,11 +25742,11 @@ mod hir_opt_tests {
             test
         ");
         let counters = crate::state::ZJITState::get_counters();
-        let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
+        let inline_count_before = counters.inline_method_count;
 
         let result = hir_string_with_inlining("test");
 
-        assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
+        assert!(counters.inline_method_count > inline_count_before,
             "Expected Point#initialize / Point#== to be inlined, inline_method_count did not increment.\nHIR:\n{result}");
         assert!(result.contains("PushInlineFrame"),
             "Expected PushInlineFrame in inlined HIR:\n{result}");
