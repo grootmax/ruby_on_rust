@@ -9,6 +9,7 @@ require 'pathname'
 require 'tempfile'
 require 'timeout'
 require 'rbconfig'
+require 'shellwords'
 
 module RubyOnRust
   class DiffRunner
@@ -135,7 +136,7 @@ module RubyOnRust
       exit_status = 0
       err_msg = nil
 
-      cmd = [ruby_bin, tmp_wrapper.path, file]
+      cmd = Shellwords.split(ruby_bin) + [tmp_wrapper.path, file]
       begin
         Timeout.timeout(options[:timeout]) do
           stdout_raw, stderr_raw, status = Open3.capture3(*cmd)

@@ -165,7 +165,7 @@ jobs:
         working-directory: src
 
       - name: Differential runner (test snippets)
-        run: ruby tool/ruby_on_rust/diff_runner.rb --ref-ruby ../build-c/miniruby --ror-ruby ./miniruby test/ruby_on_rust/
+        run: ruby tool/ruby_on_rust/diff_runner.rb --ref-ruby ../build-c/miniruby --ror-ruby ../build/miniruby test/ruby_on_rust/
         working-directory: src
 
       - name: Porting ledger is current
