@@ -25,6 +25,38 @@ $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 
 require 'test/unit'
 
+module Test
+  module Unit
+    module RubyOnRustOption
+      RUBY_ON_RUST_TEST_PATTERN = %r{(?:\A|/)test/ruby_on_rust(?:/|\z)|\Aruby_on_rust(?:/|\z)}
+
+      def setup_options(parser, options)
+        super
+        parser.separator "ruby_on_rust options:"
+        parser.on '--ruby-on-rust', 'Run only Ruby on Rust tests' do
+          options[:ruby_on_rust] = true
+        end
+        parser.on '--exclude-ruby-on-rust', 'Exclude Ruby on Rust tests' do
+          options[:exclude_ruby_on_rust] = true
+        end
+      end
+
+      def non_options(files, options)
+        return false if !super
+        if options.delete(:ruby_on_rust)
+          files.select! { |f| RUBY_ON_RUST_TEST_PATTERN.match?(f) }
+        end
+        if options.delete(:exclude_ruby_on_rust)
+          files.reject! { |f| RUBY_ON_RUST_TEST_PATTERN.match?(f) }
+        end
+        true
+      end
+    end
+
+    Runner.prepend RubyOnRustOption
+  end
+end
+
 require "profile_test_all" if ENV.key?('RUBY_TEST_ALL_PROFILE')
 require "tracepointchecker"
 require "zombie_hunter"
