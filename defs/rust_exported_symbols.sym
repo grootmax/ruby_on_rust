@@ -1,0 +1,5 @@
+# Allowed global symbol export prefix patterns for Rust static libraries and partial linking
+rb_*
+ruby_*
+Init_*
+rust_eh_personality

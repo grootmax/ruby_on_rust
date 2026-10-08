@@ -4162,7 +4162,8 @@ AS_CASE(["$rb_rust_ports"], [no], [], [
                 AC_MSG_CHECKING([whether ${LD}, ${NM} and ${OBJCOPY} can partially link core_rs])
                 AS_CASE(["$target_os"],
                 [darwin*], [
-                    AS_IF([echo _rb_conftest_core_rs > "$rb_rust_ports_conftest/syms" &&
+                    AS_IF([$NM --defined-only --extern-only "$rb_rust_ports_conftest/libconftest.a" 2>/dev/null |
+                           $BASERUBY "$srcdir/tool/gen_symbol_filter.rb" --format=symbols "$srcdir/defs/rust_exported_symbols.sym" > "$rb_rust_ports_conftest/syms" &&
                            $CC -nodefaultlibs -r -o "$rb_rust_ports_conftest/core_rs.o" \
                                -exported_symbols_list "$rb_rust_ports_conftest/syms" \
                                "$rb_rust_ports_conftest/libconftest.a" >&AS_MESSAGE_LOG_FD 2>&1],
@@ -4171,9 +4172,10 @@ AS_CASE(["$rb_rust_ports"], [no], [], [
                     AS_IF([test "$OBJCOPY" != ":" &&
                            $NM --defined-only --extern-only "$rb_rust_ports_conftest/libconftest.a" 2>/dev/null |
                                grep 'T rb_conftest_core_rs' >/dev/null &&
-                           $LD -r -o "$rb_rust_ports_conftest/core_rs.o" -u rb_conftest_core_rs \
+                           $LD -r -o "$rb_rust_ports_conftest/core_rs.o" \
+                               $($NM --defined-only --extern-only "$rb_rust_ports_conftest/libconftest.a" 2>/dev/null | $BASERUBY "$srcdir/tool/gen_symbol_filter.rb" --format=ld-u "$srcdir/defs/rust_exported_symbols.sym") \
                                "$rb_rust_ports_conftest/libconftest.a" >&AS_MESSAGE_LOG_FD 2>&1 &&
-                           $OBJCOPY --wildcard --keep-global-symbol="rb_*" --keep-global-symbol="ruby_*" \
+                           $OBJCOPY --wildcard $($BASERUBY "$srcdir/tool/gen_symbol_filter.rb" --format=objcopy "$srcdir/defs/rust_exported_symbols.sym") \
                                "$rb_rust_ports_conftest/core_rs.o" >&AS_MESSAGE_LOG_FD 2>&1 &&
                            $NM "$rb_rust_ports_conftest/core_rs.o" 2>/dev/null | grep 'T rb_conftest_core_rs' >/dev/null],
                         [], [rb_rust_ports_ok=no])
@@ -4217,9 +4219,9 @@ AS_IF([test "$rb_rust_ports_ok" = yes && test "$rb_rust_ports" != no], [
         # rb_core_* are internal C<->Rust entry points (internal/core_rs.h):
         # linkable inside libruby, never exported from it.
         LIBRUBY_DLDFLAGS="$LIBRUBY_DLDFLAGS "'-Wl,-unexported_symbol,_rb_core_*'
-        CORE_RS_PARTIAL_LINK='$(tooldir)/darwin-ar $(NM) --defined-only --extern-only $(CORE_RS_LIB) | sed -n -e "s/.* //" -e "/^$(SYMBOL_PREFIX)rb_/p" -e "/^$(SYMBOL_PREFIX)ruby_/p" > $(CORE_RS_LIB:.a=.symbols) && $(CC) -nodefaultlibs -r -o $@ -exported_symbols_list $(CORE_RS_LIB:.a=.symbols) $(CORE_RS_LIB)'
+        CORE_RS_PARTIAL_LINK='$(tooldir)/darwin-ar $(NM) --defined-only --extern-only $(CORE_RS_LIB) | $(BASERUBY) $(tooldir)/gen_symbol_filter.rb --format=symbols --prefix=$(SYMBOL_PREFIX) $(srcdir)/defs/rust_exported_symbols.sym > $(CORE_RS_LIB:.a=.symbols) && $(CC) -nodefaultlibs -r -o $@ -exported_symbols_list $(CORE_RS_LIB:.a=.symbols) $(CORE_RS_LIB)'
     ], [
-        CORE_RS_PARTIAL_LINK='$(LD) -r -o $@ $$($(NM) --defined-only --extern-only $(CORE_RS_LIB) 2>/dev/null | sed -n -e "s/.* T \\($(SYMBOL_PREFIX)rb_.*\\)/-u \\1/p" -e "s/.* T \\($(SYMBOL_PREFIX)ruby_.*\\)/-u \\1/p") $(CORE_RS_LIB) && $(OBJCOPY) --wildcard --keep-global-symbol="$(SYMBOL_PREFIX)rb_*" --keep-global-symbol="$(SYMBOL_PREFIX)ruby_*" $@'
+        CORE_RS_PARTIAL_LINK='$(LD) -r -o $@ $$($(NM) --defined-only --extern-only $(CORE_RS_LIB) 2>/dev/null | $(BASERUBY) $(tooldir)/gen_symbol_filter.rb --format=ld-u --prefix=$(SYMBOL_PREFIX) $(srcdir)/defs/rust_exported_symbols.sym) $(CORE_RS_LIB) && $(OBJCOPY) --wildcard $$($(BASERUBY) $(tooldir)/gen_symbol_filter.rb --format=objcopy --prefix=$(SYMBOL_PREFIX) $(srcdir)/defs/rust_exported_symbols.sym) $@'
     ])
 ])
 AC_DEFINE_UNQUOTED(USE_RUST_PORTS, $USE_RUST_PORTS)

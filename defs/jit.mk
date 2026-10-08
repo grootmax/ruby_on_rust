@@ -71,7 +71,7 @@ ifneq ($(findstring darwin,$(target_os)),)
 	$(Q) $(CC) -nodefaultlibs -r -o $@ -exported_symbols_list $(RUST_LIB_SYMBOLS) $(RUST_LIB)
 else
 	$(Q) $(LD) -r -o $@ --whole-archive $(RUST_LIB)
-	-$(Q) $(OBJCOPY) --wildcard --keep-global-symbol='$(SYMBOL_PREFIX)rb_*' $(@)
+	-$(Q) $(OBJCOPY) --wildcard $$($(BASERUBY) $(tooldir)/gen_symbol_filter.rb --format=objcopy --prefix=$(SYMBOL_PREFIX) $(srcdir)/defs/rust_exported_symbols.sym) $(@)
 endif
 
 rust-libobj: $(RUST_LIBOBJ)
@@ -99,8 +99,7 @@ target/.rustc-version: PHONY
 ifneq ($(findstring darwin,$(target_os)),)
 $(RUST_LIB_SYMBOLS): $(RUST_LIB)
 	$(Q) $(tooldir)/darwin-ar $(NM) --defined-only --extern-only $(RUST_LIB) | \
-	sed -n -e 's/.* //' -e '/^$(SYMBOL_PREFIX)rb_/p' \
-	-e '/^$(SYMBOL_PREFIX)rust_eh_personality/p' \
+	$(BASERUBY) $(tooldir)/gen_symbol_filter.rb --format=symbols --prefix=$(SYMBOL_PREFIX) $(srcdir)/defs/rust_exported_symbols.sym \
 	> $@
 
 $(RUST_LIBOBJ): $(RUST_LIB_SYMBOLS)
