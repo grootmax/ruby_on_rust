@@ -103,12 +103,36 @@ class AutoReviewPR
       if !sections_content.key?(title)
         missing << title
       else
-        cleaned = sections_content[title].gsub(/<!--.*?-->/m, '').strip
+        cleaned = strip_html_comments(sections_content[title]).strip
         missing << title if cleaned.empty?
       end
     end
 
     missing
+  end
+
+  def strip_html_comments(text)
+    return '' if text.nil? || text.empty?
+
+    result = +''
+    i = 0
+    len = text.length
+
+    while i < len
+      if text[i..].start_with?('<!--')
+        close_idx = text.index('-->', i + 4)
+        if close_idx
+          i = close_idx + 3
+        else
+          break
+        end
+      else
+        result << text[i]
+        i += 1
+      end
+    end
+
+    result
   end
 
   def porting_pr?(pr_number, changed_files = nil)

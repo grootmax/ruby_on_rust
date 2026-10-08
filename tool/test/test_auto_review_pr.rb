@@ -92,6 +92,12 @@ class TestAutoReviewPR < Test::Unit::TestCase
     assert_equal AutoReviewPR::RULE_16_SECTIONS.map { |s| s[:title] }, @auto_review.check_missing_rule_16_sections('')
   end
 
+  def test_strip_html_comments
+    assert_equal '', @auto_review.strip_html_comments('<!-- comment -->').strip
+    assert_equal 'hello', @auto_review.strip_html_comments('<!-- comment -->hello<!-- comment2 -->').strip
+    assert_equal 'hello world', @auto_review.strip_html_comments("hello <!-- comment\nmulti line -->world").strip
+  end
+
   def test_porting_pr_detection
     assert_true @auto_review.porting_pr?(1, ['PORTING.md'])
     assert_true @auto_review.porting_pr?(1, ['tool/porting_status.yml'])
