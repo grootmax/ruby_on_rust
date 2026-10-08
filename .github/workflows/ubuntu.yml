@@ -1,17 +1,12 @@
 name: Ubuntu
+# Ruby on Rust: upstream's full matrix runs nightly and on demand instead of
+# on every push and pull request, so the CI queue keeps up with the porting
+# PRs (owner decision 2026-10-07; see UPSTREAM.md). The per-PR gate is the
+# `Rust ports` workflow. Upstream's original triggers are in git history.
 on:
-  push:
-    paths-ignore:
-      - 'doc/**'
-      - '**/man/*'
-      - '**.md'
-      - '**.rdoc'
-      - '**/.document'
-      - '.*.yml'
-  pull_request:
-    # Do not use paths-ignore for required status checks
-    # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks#handling-skipped-but-required-checks
-  merge_group:
+  schedule:
+    - cron: '17 20 * * *'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }} / ${{ startsWith(github.event_name, 'pull') && github.ref_name || github.sha }}

@@ -3,18 +3,11 @@ name: bundled_gems
 env:
   UPDATE_ENABLED: true
 
+# Ruby on Rust: upstream's full matrix runs nightly and on demand instead of
+# on every push and pull request, so the CI queue keeps up with the porting
+# PRs (owner decision 2026-10-07; see UPSTREAM.md). The per-PR gate is the
+# `Rust ports` workflow. Upstream's original triggers are in git history.
 on:
-  push:
-    branches: ['master']
-    paths:
-      - '.github/workflows/bundled_gems.yml'
-      - 'gems/bundled_gems'
-  pull_request:
-    branches: ['master']
-    paths:
-      - '.github/workflows/bundled_gems.yml'
-      - 'gems/bundled_gems'
-  merge_group:
   schedule:
     - cron: '45 6 * * *'
   workflow_dispatch:
