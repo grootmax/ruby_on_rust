@@ -19,11 +19,20 @@ CORE_RS_SRCS = $(srcdir)/core_rs/src/lib.rs \
 	$(srcdir)/core_rs/src/util.rs \
 	$(empty)
 
-$(CORE_RS_LIB): $(CORE_RS_SRCS)
+# rustc --cfg options that mirror the C configuration core_rs/src/ffi/
+# depends on.  They are taken from the C preprocessor with the same flags as
+# the C sources (core_rs/cfg.c), so overrides such as cppflags=-DUSE_FLONUM=0
+# reach the Rust side too.  Prints nothing (and the rustc build then stops
+# with a compile_error!) if the preprocessor fails.
+CORE_RS_CFG = $(CPP) $(XCFLAGS) $(CPPFLAGS) $(srcdir)/core_rs/cfg.c | \
+	sed -n -e 's/^core_rs_cfg_use_flonum 1$$/--cfg core_rs_flonum/p' \
+	       -e 's/^core_rs_cfg_use_flonum 0$$/--cfg core_rs_no_flonum/p'
+
+$(CORE_RS_LIB): $(CORE_RS_SRCS) $(srcdir)/core_rs/cfg.c
 	$(ECHO) 'building core_rs (Rust ports)'
 	$(Q) $(MAKEDIRS) $(TOP_BUILD_DIR)/target/core_rs
 	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=core_rs --crate-type=staticlib --edition=2024 \
-	    $(CORE_RS_RUSTC_FLAGS) \
+	    $(CORE_RS_RUSTC_FLAGS) `$(CORE_RS_CFG)` \
 	    -o $(CORE_RS_LIB) \
 	    $(srcdir)/core_rs/src/lib.rs
 
@@ -38,6 +47,7 @@ core-rs: $(CORE_RS_OBJ)
 core-rs-test:
 	$(Q) $(MAKEDIRS) $(TOP_BUILD_DIR)/target/core_rs
 	$(Q) $(RUSTC) --crate-name=core_rs --edition=2024 --test \
+	    `$(CORE_RS_CFG)` \
 	    -o $(TOP_BUILD_DIR)/target/core_rs/core_rs-test \
 	    $(srcdir)/core_rs/src/lib.rs
 	$(Q) $(TOP_BUILD_DIR)/target/core_rs/core_rs-test

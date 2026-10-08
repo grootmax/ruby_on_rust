@@ -6,10 +6,11 @@
 //! formula of the C inline function it is named after.
 //!
 //! The constants depend on `USE_FLONUM`, which the C headers set to
-//! `SIZEOF_VALUE >= SIZEOF_DOUBLE`, i.e. 1 on 64-bit targets.  core_rs
-//! derives it from the pointer width; `internal/core_rs.h` asserts at C
-//! compile time that the C build agrees (so a build with `-DUSE_FLONUM=0` on
-//! a 64-bit target fails to compile instead of corrupting objects).
+//! `SIZEOF_VALUE >= SIZEOF_DOUBLE` (1 on 64-bit targets) unless the build
+//! overrides it, e.g. with `cppflags=-DUSE_FLONUM=0`.  core_rs/core_rs.mk
+//! asks the C preprocessor for the value the C sources see (core_rs/cfg.c)
+//! and passes it to rustc as `--cfg core_rs_flonum` or
+//! `--cfg core_rs_no_flonum`, so both sides always agree.
 
 #![allow(non_camel_case_types, non_upper_case_globals, non_snake_case)]
 
@@ -26,10 +27,17 @@ pub type ID = usize;
 // `long` has the width of a pointer.  The fixnum helpers rely on it.
 const _: () = assert!(core::mem::size_of::<c_long>() == core::mem::size_of::<VALUE>());
 
-/// `USE_FLONUM`.
-pub const USE_FLONUM: bool = cfg!(target_pointer_width = "64");
+#[cfg(not(any(core_rs_flonum, core_rs_no_flonum)))]
+compile_error!("build core_rs through core_rs/core_rs.mk: it passes --cfg core_rs_flonum or --cfg core_rs_no_flonum");
+#[cfg(all(core_rs_flonum, core_rs_no_flonum))]
+compile_error!("--cfg core_rs_flonum and --cfg core_rs_no_flonum are exclusive");
+#[cfg(all(core_rs_flonum, not(target_pointer_width = "64")))]
+compile_error!("USE_FLONUM needs a 64-bit VALUE");
 
-#[cfg(target_pointer_width = "64")]
+/// `USE_FLONUM`, as the C build sees it.
+pub const USE_FLONUM: bool = cfg!(core_rs_flonum);
+
+#[cfg(core_rs_flonum)]
 mod consts {
     use super::VALUE;
     pub const Qfalse: VALUE = 0x00;
@@ -43,7 +51,7 @@ mod consts {
     pub const SYMBOL_FLAG: VALUE = 0x0c;
 }
 
-#[cfg(not(target_pointer_width = "64"))]
+#[cfg(not(core_rs_flonum))]
 mod consts {
     use super::VALUE;
     pub const Qfalse: VALUE = 0x00;
