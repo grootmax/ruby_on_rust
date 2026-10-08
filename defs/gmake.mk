@@ -38,6 +38,7 @@ TEST_TARGETS := $(patsubst test,test-short,$(TEST_TARGETS))
 TEST_DEPENDS := $(filter-out test $(TEST_TARGETS),$(TEST_DEPENDS))
 TEST_TARGETS := $(patsubst test-short,btest-ruby test-knownbug test-basic,$(TEST_TARGETS))
 TEST_TARGETS := $(patsubst test-basic,test-basic test-leaked-globals,$(TEST_TARGETS))
+TEST_TARGETS := $(patsubst test-leaked-globals,test-leaked-globals $(CORE_RS_CHECK_HIDDEN),$(TEST_TARGETS))
 TEST_TARGETS := $(patsubst test-bundled-gems,test-bundled-gems-spec test-bundled-gems-run,$(TEST_TARGETS))
 TEST_TARGETS := $(patsubst test-bundled-gems-run,test-bundled-gems-run $(PREPARE_BUNDLED_GEMS),$(TEST_TARGETS))
 TEST_TARGETS := $(patsubst test-bundled-gems-prepare,test-bundled-gems-prepare $(PRECHECK_BUNDLED_GEMS) test-bundled-gems-fetch,$(TEST_TARGETS))
@@ -92,7 +93,7 @@ $(addprefix yes-,$(TEST_TARGETS)): $(TEST_DEPENDS)
 endif
 
 ORDERED_TEST_TARGETS := $(filter $(TEST_TARGETS), \
-	btest-ruby test-knownbug test-leaked-globals test-basic \
+	btest-ruby test-knownbug test-leaked-globals core-rs-check-hidden test-basic \
 	test-testframework test-tool test-ruby test-all \
 	test-spec test-syntax-suggest-prepare test-syntax-suggest \
 	test-bundler-prepare test-bundler test-bundler-parallel \

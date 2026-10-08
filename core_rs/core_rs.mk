@@ -52,11 +52,20 @@ core-rs-test:
 	    $(srcdir)/core_rs/src/lib.rs
 	$(Q) $(TOP_BUILD_DIR)/target/core_rs/core_rs-test
 
+.PHONY: core-rs core-rs-test core-rs-check-hidden
+
+CORE_RS_CHECK_HIDDEN_DEP = $(enable_shared:yes=$(LIBRUBY_SO))
+
 # Internal (rb_core_*) exports of core_rs must stay out of libruby's dynamic
 # symbol table (internal/core_rs.h).  Fails if any of them is visible.
-core-rs-check-hidden: $(LIBRUBY_SO)
-	$(Q) if $(NM) -D --defined-only $(LIBRUBY_SO) | grep ' rb_core_'; then \
+core-rs-check-hidden: $(CORE_RS_CHECK_HIDDEN_DEP)
+	$(Q) if [ "$(ENABLE_SHARED)" != "yes" ] || [ -z "$(LIBRUBY_SO)" ] || [ ! -f "$(LIBRUBY_SO)" ]; then \
+	    echo 'core_rs: skipping check-hidden (shared library $(LIBRUBY_SO) not found or shared build disabled)'; \
+	elif ! $(NM) -D --defined-only $(LIBRUBY_SO) >/dev/null 2>&1; then \
+	    echo 'core_rs: skipping check-hidden ($(NM) -D is not supported on this platform)'; \
+	elif $(NM) -D --defined-only $(LIBRUBY_SO) | grep ' rb_core_'; then \
 	    echo 'core_rs: rb_core_* symbols are exported from $(LIBRUBY_SO); declare them in internal/core_rs.h' >&2; \
 	    exit 1; \
+	else \
+	    echo 'core_rs: no rb_core_* symbol is exported from $(LIBRUBY_SO)'; \
 	fi
-	$(Q) echo 'core_rs: no rb_core_* symbol is exported from $(LIBRUBY_SO)'
