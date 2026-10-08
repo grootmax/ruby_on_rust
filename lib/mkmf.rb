@@ -246,8 +246,9 @@ module MakeMakefile
     $top_srcdir = $hdrdir
     $arch_hdrdir = RbConfig::CONFIG["rubyarchhdrdir"]
   elsif File.exist?(($hdrdir = ($top_srcdir ||= topdir) + "/include")  + "/ruby.h")
-    $topdir ||= RbConfig::CONFIG["topdir"]
-    $arch_hdrdir = "$(extout)/include/$(arch)"
+    $topdir = File.expand_path($topdir || RbConfig::CONFIG["topdir"] || topdir)
+    $top_srcdir = File.expand_path($top_srcdir)
+    $arch_hdrdir = $extout ? "$(extout)/include/$(arch)" : "$(topdir)/.ext/include/$(arch)"
   else
     abort <<MESSAGE
 mkmf.rb can't find header files for ruby at #{$hdrdir}/ruby.h
@@ -2790,7 +2791,7 @@ site-install-rb: install-rb
     $LIBRUBYARG = ""
     $LIBRUBYARG_STATIC = config['LIBRUBYARG_STATIC']
     $LIBRUBYARG_SHARED = config['LIBRUBYARG_SHARED']
-    $DEFLIBPATH = [$extmk ? "$(topdir)" : "$(#{config["libdirname"] || "libdir"})"]
+    $DEFLIBPATH = [$extmk || File.exist?(File.join(($topdir || topdir).to_s, (RbConfig::CONFIG['LIBRUBY_A'] || "libruby-static.a").to_s)) ? "$(topdir)" : "$(#{config["libdirname"] || "libdir"})"]
     $DEFLIBPATH.unshift(".")
     $LIBPATH = []
     $INSTALLFILES = []
@@ -2880,9 +2881,9 @@ MESSAGE
   else
     curdir = $curdir = "."
   end
-  unless File.expand_path(RbConfig::CONFIG["topdir"]) == File.expand_path(curdir)
-    CONFIG["topdir"] = $curdir
-    RbConfig::CONFIG["topdir"] = curdir
+  unless File.expand_path(RbConfig::CONFIG["topdir"].to_s) == File.expand_path(curdir)
+    CONFIG["topdir"] = $extmk ? $curdir : ($topdir || $curdir)
+    RbConfig::CONFIG["topdir"] = CONFIG["topdir"]
   end
   $configure_args["--topdir"] ||= $curdir
   $ruby = arg_config("--ruby", File.join(RbConfig::CONFIG["bindir"], CONFIG["ruby_install_name"]))

@@ -7,5 +7,12 @@
 #       reason: <description of known issue or flakiness>
 #       non_blocking: true
 
-allowed_failures: []
+allowed_failures:
+  - gem: nokogiri
+    reason: "Missing test dependencies (minitest/mock) and uninstalled bindir path in test_version.rb"
+    non_blocking: true
+  - gem: puma
+    reason: "Missing optional test gem dependency (localhost/authority) in standalone fallback runner"
+    non_blocking: true
+
 

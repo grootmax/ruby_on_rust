@@ -8,6 +8,7 @@ require 'open3'
 require 'rbconfig'
 require 'etc'
 require 'set'
+require 'rubygems'
 
 # Standalone Differential C Extension Gem Test Harness for Ruby on Rust
 #
@@ -195,7 +196,8 @@ class CExtensionGemHarness
       '/usr/local/include',
       '/usr/include/x86_64-linux-gnu',
       '/usr/include/aarch64-linux-gnu',
-      '/usr/include/postgresql'
+      '/usr/include/postgresql',
+      '/usr/include/libxml2'
     ]
 
     headers.each do |hdr|
@@ -304,6 +306,22 @@ class CExtensionGemHarness
     build_log = []
     test_log = []
 
+    target_rubylib = [
+      @options[:root_dir],
+      File.join(@options[:root_dir], 'lib'),
+      File.join(@options[:root_dir], '.ext', 'common'),
+      *Dir.glob(File.join(@options[:root_dir], '.ext', '*')),
+      *Dir.glob(File.join(@options[:root_dir], '.bundle', 'gems', '*', 'lib')),
+      *ENV['RUBYLIB']&.split(File::PATH_SEPARATOR)
+    ].compact.select { |p| File.directory?(p) rescue false }.uniq
+
+    target_rubylib_str = target_rubylib.join(File::PATH_SEPARATOR)
+
+    target_gem_path = [
+      File.join(@options[:root_dir], '.bundle'),
+      *ENV['GEM_PATH']&.split(File::PATH_SEPARATOR)
+    ].compact.select { |p| File.directory?(p) rescue false }.uniq.join(File::PATH_SEPARATOR)
+
     extconf_files = discover_extconf_files(build_dir)
     compile_success = true
 
@@ -320,24 +338,34 @@ class CExtensionGemHarness
           extconf_cmd.concat(gem_def['extconf_args'].split)
         end
 
-        extconf_env = { 'USE_SYSTEM_LIBRARIES' => '1' }
+        extconf_env = {
+          'USE_SYSTEM_LIBRARIES' => '1',
+          'NOKOGIRI_USE_SYSTEM_LIBRARIES' => '1',
+          'RUBYLIB' => target_rubylib_str,
+          'GEM_PATH' => target_gem_path
+        }
         out1, err1, status1 = run_cmd(extconf_cmd, chdir: ext_dir, env: extconf_env)
         build_log << "=== extconf.rb (#{ext_rel}) ==="
         build_log << out1 << err1
 
         unless status1.success?
           puts "extconf.rb failed for #{ext_rel} (exit code #{status1.exitstatus})"
+          puts out1 unless out1.nil? || out1.empty?
+          puts err1 unless err1.nil? || err1.empty?
           compile_success = false
           break
         end
 
         make_bin = ENV['MAKE'] || 'make'
-        out2, err2, status2 = run_cmd([make_bin], chdir: ext_dir)
+        make_env = { 'RUBYLIB' => target_rubylib_str, 'GEM_PATH' => target_gem_path }
+        out2, err2, status2 = run_cmd([make_bin], chdir: ext_dir, env: make_env)
         build_log << "=== make (#{ext_rel}) ==="
         build_log << out2 << err2
 
         unless status2.success?
           puts "make failed for #{ext_rel} (exit code #{status2.exitstatus})"
+          puts out2 unless out2.nil? || out2.empty?
+          puts err2 unless err2.nil? || err2.empty?
           compile_success = false
           break
         end
@@ -352,6 +380,29 @@ class CExtensionGemHarness
       compile_success = false
     end
 
+    if compile_success
+      # Copy compiled shared objects into lib/ and lib/<target_prefix> for require resolution
+      lib_dir = File.join(build_dir, 'lib')
+      FileUtils.mkdir_p(lib_dir) if File.exist?(build_dir)
+      so_files.each do |so_path|
+        so_name = File.basename(so_path)
+        FileUtils.cp(so_path, File.join(lib_dir, so_name)) rescue nil
+        ext_dir = File.dirname(so_path)
+        makefile_path = File.join(ext_dir, 'Makefile')
+        if File.exist?(makefile_path)
+          makefile_content = File.read(makefile_path)
+          if makefile_content =~ /^target_prefix\s*=\s*(.+)$/
+            prefix = $1.strip.sub(/^\//, '')
+            unless prefix.empty?
+              target_dir = File.join(lib_dir, prefix)
+              FileUtils.mkdir_p(target_dir)
+              FileUtils.cp(so_path, File.join(target_dir, so_name)) rescue nil
+            end
+          end
+        end
+      end
+    end
+
     test_success = false
     test_exit_code = -1
 
@@ -361,20 +412,34 @@ class CExtensionGemHarness
         File.join(build_dir, 'lib'),
         File.join(build_dir, 'ext'),
         *so_dirs,
-        ENV['RUBYLIB']
+        *target_rubylib
       ].compact.select { |p| File.directory?(p) rescue false }.uniq.join(File::PATH_SEPARATOR)
 
       env = {
         'RUBYLIB' => rubylib_paths,
+        'GEM_PATH' => target_gem_path,
         'RUBY' => ruby_bin
       }
 
       # Primary test run via configured command or rake
       rake_bin = File.expand_path('../../.bundle/bin/rake', __dir__)
-      test_cmd = if File.exist?(rake_bin)
+      test_cmd = if gem_def['test_command']
+                   cmd_parts = gem_def['test_command'].split
+                   if cmd_parts.first == 'bundle'
+                     bundle_bin = File.expand_path('../../libexec/bundle', __dir__)
+                     bundle_bin = File.expand_path('../../.bundle/bin/bundle', __dir__) unless File.exist?(bundle_bin)
+                     if File.exist?(bundle_bin)
+                       [ruby_bin, '-r', 'rubygems', bundle_bin, *cmd_parts[1..]]
+                     else
+                       [ruby_bin, '-r', 'rubygems', '-S', *cmd_parts]
+                     end
+                   elsif cmd_parts.first == 'rake' && File.exist?(rake_bin)
+                     [ruby_bin, rake_bin, *cmd_parts[1..]]
+                   else
+                     cmd_parts
+                   end
+                 elsif File.exist?(rake_bin)
                    [ruby_bin, rake_bin, 'test']
-                 elsif gem_def['test_command']
-                   gem_def['test_command'].split
                  else
                    [ruby_bin, '-S', 'rake', 'test']
                  end
@@ -403,6 +468,14 @@ class CExtensionGemHarness
         puts "Test suite passed for #{gem_name} (#{mode})."
       else
         puts "Test suite failed for #{gem_name} (#{mode}) with exit code #{test_exit_code}."
+        puts "=== Primary Test Log ==="
+        puts out3 unless out3.nil? || out3.empty?
+        puts err3 unless err3.nil? || err3.empty?
+        if defined?(out4)
+          puts "=== Fallback Test Log ==="
+          puts out4 unless out4.nil? || out4.empty?
+          puts err4 unless err4.nil? || err4.empty?
+        end
       end
     else
       puts "Skipping test execution due to compilation failure."
