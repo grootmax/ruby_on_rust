@@ -23,7 +23,7 @@ use std::mem;
 /// about the state of the virtual machine.
 pub struct Invariants {
     /// Tracks block assumptions about callable method entry validity.
-    cme_validity: HashMap<*const rb_callable_method_entry_t, HashSet<BlockRef>>,
+    cme_validity: HashMap<CmeHandle, HashSet<BlockRef>>,
 
     /// A map from a class and its associated basic operator to a set of blocks
     /// that are assuming that that operator is not redefined. This is used for
@@ -137,7 +137,7 @@ pub fn track_method_lookup_stability_assumption(
 ) {
     Invariants::get_instance()
         .cme_validity
-        .entry(callee_cme)
+        .entry(CmeHandle::from_raw(callee_cme))
         .or_default()
         .insert(uninit_block);
 }
@@ -248,11 +248,8 @@ pub fn track_stable_constant_names_assumption(uninit_block: BlockRef, idlist: *c
     }
 
 
-    for i in 0.. {
-        match unsafe { *idlist.offset(i) } {
-            0 => break, // End of NULL terminated list
-            id => assume_stable_constant_name(uninit_block, id),
-        }
+    for id in IdSlice::new(idlist) {
+        assume_stable_constant_name(uninit_block, id);
     }
 }
 
@@ -290,8 +287,9 @@ pub extern "C" fn rb_yjit_cme_invalidate(callee_cme: *const rb_callable_method_e
         return;
     }
 
+    let handle = CmeHandle::from_raw(callee_cme);
     with_vm_lock(src_loc!(), || {
-        if let Some(blocks) = Invariants::get_instance().cme_validity.remove(&callee_cme) {
+        if let Some(blocks) = Invariants::get_instance().cme_validity.remove(&handle) {
             for block in blocks.iter() {
                 invalidate_block_version(block);
                 incr_counter!(invalidate_method_lookup);
@@ -366,9 +364,7 @@ pub extern "C" fn rb_yjit_root_mark() {
 
     // Mark CME imemos
     for cme in invariants.cme_validity.keys() {
-        let cme: VALUE = (*cme).into();
-
-        unsafe { rb_gc_mark(cme) };
+        cme.mark_gc();
     }
 }
 
@@ -402,11 +398,12 @@ pub fn block_assumptions_free(blockref: BlockRef) {
 
         // For each method lookup dependency
         for dep in block.iter_cme_deps() {
+            let handle = CmeHandle::from(dep);
             // Remove tracking for cme validity
-            if let Some(blockset) = invariants.cme_validity.get_mut(&dep) {
+            if let Some(blockset) = invariants.cme_validity.get_mut(&handle) {
                 blockset.remove(&blockref);
                 if blockset.is_empty() {
-                    invariants.cme_validity.remove(&dep);
+                    invariants.cme_validity.remove(&handle);
                 }
             }
         }
@@ -484,6 +481,8 @@ pub extern "C" fn rb_yjit_constant_ic_update(iseq: *const rb_iseq_t, ic: IC, ins
         return;
     }
 
+    let ic = IcHandle::from_raw(ic);
+
     // Try to downcast the iseq index
     let insn_idx: IseqIdx = if let Ok(idx) = insn_idx.try_into() {
         idx
@@ -493,7 +492,7 @@ pub extern "C" fn rb_yjit_constant_ic_update(iseq: *const rb_iseq_t, ic: IC, ins
         return;
     };
 
-    if !unsafe { (*(*ic).entry).ic_cref }.is_null() || unsafe { rb_jit_multi_ractor_p() } {
+    if ic.has_cref() || unsafe { rb_jit_multi_ractor_p() } {
         // We can't generate code in these situations, so no need to invalidate.
         // See gen_opt_getinlinecache.
         return;
@@ -512,7 +511,7 @@ pub extern "C" fn rb_yjit_constant_ic_update(iseq: *const rb_iseq_t, ic: IC, ins
         assert_eq!(
             unsafe {
                 let opcode_pc = code.add(insn_idx.as_usize());
-                let translated_opcode: VALUE = opcode_pc.read();
+                let translated_opcode: VALUE = *opcode_pc;
                 rb_vm_insn_decode(translated_opcode)
             },
             YARVINSN_opt_getconstant_path.try_into().unwrap()
@@ -522,7 +521,7 @@ pub extern "C" fn rb_yjit_constant_ic_update(iseq: *const rb_iseq_t, ic: IC, ins
         // RUBY_ASSERT(insn_op_type(BIN(opt_getinlinecache), 1) == TS_IC);
 
         let ic_pc = unsafe { code.add(insn_idx.as_usize() + 1) };
-        let ic_operand: IC = unsafe { ic_pc.read() }.as_mut_ptr();
+        let ic_operand = IcHandle::read_from_pc(ic_pc);
 
         if ic == ic_operand {
             for block in take_version_list(BlockId {

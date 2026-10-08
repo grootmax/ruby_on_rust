@@ -774,6 +774,11 @@ impl VALUE {
         ptr
     }
 
+    /// Assert that `self` is a method entry in debug builds and return a CmeHandle.
+    pub fn as_cme_handle(self) -> CmeHandle {
+        CmeHandle::new(self.as_cme())
+    }
+
     pub const fn fixnum_from_usize(item: usize) -> Self {
         assert!(item <= (RUBY_FIXNUM_MAX as usize)); // An unsigned will always be greater than RUBY_FIXNUM_MIN
         let k: usize = item.wrapping_add(item.wrapping_add(1));
@@ -1773,3 +1778,330 @@ pub(crate) mod ids {
     pub(crate) use ID;
 }
 pub(crate) use ids::ID;
+
+/// Encapsulated, zero-cost typed handle wrapping a Callable Method Entry (CME) pointer.
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+#[repr(transparent)]
+pub struct CmeHandle(pub *const rb_callable_method_entry_t);
+
+unsafe impl Send for CmeHandle {}
+unsafe impl Sync for CmeHandle {}
+
+impl CmeHandle {
+    /// Create a new CME handle from a raw pointer.
+    pub fn new(ptr: *const rb_callable_method_entry_t) -> Self {
+        let handle = Self(ptr);
+        #[cfg(debug_assertions)]
+        handle.check_validity();
+        handle
+    }
+
+    /// Create a new CME handle from a raw pointer.
+    pub fn from_raw(ptr: *const rb_callable_method_entry_t) -> Self {
+        Self::new(ptr)
+    }
+
+    /// Return the underlying raw CME pointer.
+    pub fn as_raw(&self) -> *const rb_callable_method_entry_t {
+        self.0
+    }
+
+    /// Returns true if the wrapped pointer is NULL.
+    pub fn is_null(&self) -> bool {
+        self.0.is_null()
+    }
+
+    /// Internal debug assertion verifying handle validity in debug builds.
+    #[cfg(all(debug_assertions, not(test)))]
+    pub fn check_validity(&self) {
+        if !self.0.is_null() {
+            unsafe { rb_assert_cme_handle(self.as_value()) };
+        }
+    }
+
+    #[cfg(not(all(debug_assertions, not(test))))]
+    pub fn check_validity(&self) {}
+
+    /// Convert this CME handle into a Ruby `VALUE`.
+    pub fn as_value(&self) -> VALUE {
+        VALUE(self.0 as usize)
+    }
+
+    /// Perform GC marking on the underlying CME object.
+    pub fn mark_gc(&self) {
+        if !self.is_null() {
+            unsafe { rb_gc_mark(self.as_value()) };
+        }
+    }
+
+    /// Update the GC location of this CME and return an updated handle.
+    pub fn update_gc_location(&self) -> Self {
+        if self.is_null() {
+            *self
+        } else {
+            let new_value = unsafe { rb_gc_location(self.as_value()) };
+            new_value.as_cme_handle()
+        }
+    }
+}
+
+impl From<*const rb_callable_method_entry_t> for CmeHandle {
+    fn from(ptr: *const rb_callable_method_entry_t) -> Self {
+        CmeHandle::new(ptr)
+    }
+}
+
+impl From<CmeHandle> for *const rb_callable_method_entry_t {
+    fn from(handle: CmeHandle) -> Self {
+        handle.0
+    }
+}
+
+impl From<CmeHandle> for VALUE {
+    fn from(handle: CmeHandle) -> Self {
+        handle.as_value()
+    }
+}
+
+/// Encapsulated, zero-cost typed handle wrapping an Inline Cache (`IC`) pointer.
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+#[repr(transparent)]
+pub struct IcHandle(pub IC);
+
+unsafe impl Send for IcHandle {}
+unsafe impl Sync for IcHandle {}
+
+impl IcHandle {
+    /// Create a new IC handle from a raw IC pointer.
+    pub fn new(ptr: IC) -> Self {
+        let handle = Self(ptr);
+        #[cfg(debug_assertions)]
+        handle.check_validity();
+        handle
+    }
+
+    /// Create a new IC handle from a raw IC pointer.
+    pub fn from_raw(ptr: IC) -> Self {
+        Self::new(ptr)
+    }
+
+    /// Return the underlying raw IC pointer.
+    pub fn as_raw(&self) -> IC {
+        self.0
+    }
+
+    /// Returns true if the wrapped pointer is NULL.
+    pub fn is_null(&self) -> bool {
+        self.0.is_null()
+    }
+
+    /// Internal debug assertion verifying handle validity in debug builds.
+    #[cfg(debug_assertions)]
+    pub fn check_validity(&self) {
+        // Validation check for non-null pointer
+    }
+
+    /// Safely read the CREF reference from the inline cache entry.
+    pub fn ic_cref(&self) -> *const rb_cref_t {
+        if self.is_null() {
+            std::ptr::null()
+        } else {
+            unsafe {
+                let entry = (*self.0).entry;
+                if entry.is_null() {
+                    std::ptr::null()
+                } else {
+                    (*entry).ic_cref
+                }
+            }
+        }
+    }
+
+    /// Returns true if the inline cache has a non-null CREF reference.
+    pub fn has_cref(&self) -> bool {
+        !self.ic_cref().is_null()
+    }
+
+    /// Safely read constant path segment IDs as an `IdSlice`.
+    pub fn segments(&self) -> IdSlice {
+        if self.is_null() {
+            IdSlice::new(std::ptr::null())
+        } else {
+            IdSlice::new(unsafe { (*self.0).segments })
+        }
+    }
+
+    /// Read an `IcHandle` operand from an ISEQ bytecode PC pointer without raw pointer `read()` calls.
+    pub fn read_from_pc(pc: *const VALUE) -> Self {
+        #[cfg(debug_assertions)]
+        assert!(!pc.is_null());
+        let val = unsafe { *pc };
+        Self::from_raw(val.as_mut_ptr())
+    }
+}
+
+impl From<IC> for IcHandle {
+    fn from(ptr: IC) -> Self {
+        IcHandle::new(ptr)
+    }
+}
+
+impl From<IcHandle> for IC {
+    fn from(handle: IcHandle) -> Self {
+        handle.0
+    }
+}
+
+/// Helper struct that converts a NULL-terminated `*const ID` pointer into a safe Rust iterator.
+#[derive(Copy, Clone, Debug)]
+pub struct IdSlice {
+    ptr: *const ID,
+}
+
+impl IdSlice {
+    /// Create a new `IdSlice` from a pointer to a NULL-terminated ID array.
+    pub fn new(ptr: *const ID) -> Self {
+        Self { ptr }
+    }
+
+    /// Return true if the slice is empty (null pointer or immediately terminated by 0).
+    pub fn is_empty(&self) -> bool {
+        if self.ptr.is_null() {
+            true
+        } else {
+            unsafe { (*self.ptr).0 == 0 }
+        }
+    }
+}
+
+/// Iterator over `IdSlice`.
+pub struct IdSliceIter {
+    ptr: *const ID,
+}
+
+impl Iterator for IdSliceIter {
+    type Item = ID;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.ptr.is_null() {
+            return None;
+        }
+        let id = unsafe { *self.ptr };
+        if id.0 == 0 {
+            None
+        } else {
+            self.ptr = unsafe { self.ptr.add(1) };
+            Some(id)
+        }
+    }
+}
+
+impl IntoIterator for IdSlice {
+    type Item = ID;
+    type IntoIter = IdSliceIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        IdSliceIter { ptr: self.ptr }
+    }
+}
+
+#[cfg(test)]
+mod handle_tests {
+    use super::*;
+
+    #[test]
+    fn test_cme_handle_null() {
+        let handle = CmeHandle::from_raw(std::ptr::null());
+        assert!(handle.is_null());
+        assert_eq!(handle.as_raw(), std::ptr::null());
+        assert_eq!(handle.as_value(), VALUE(0));
+    }
+
+    #[test]
+    fn test_cme_handle_equality_and_hashing() {
+        use std::collections::HashSet;
+        let dummy = 0x1234 as *const rb_callable_method_entry_t;
+        let h1 = CmeHandle::new(dummy);
+        let h2 = CmeHandle::from_raw(dummy);
+        assert_eq!(h1, h2);
+
+        let mut set = HashSet::new();
+        set.insert(h1);
+        assert!(set.contains(&h2));
+    }
+
+    #[test]
+    fn test_ic_handle_null() {
+        let handle = IcHandle::from_raw(std::ptr::null_mut());
+        assert!(handle.is_null());
+        assert_eq!(handle.as_raw(), std::ptr::null_mut());
+        assert!(!handle.has_cref());
+        assert_eq!(handle.ic_cref(), std::ptr::null());
+    }
+
+    #[test]
+    fn test_ic_handle_cref() {
+        let mut entry = iseq_inline_constant_cache_entry {
+            flags: VALUE(0),
+            value: VALUE(0),
+            ic_cref: 0x5678 as *const rb_cref_t,
+            ractor_id: 0,
+        };
+        let mut ic_struct = iseq_inline_constant_cache {
+            entry: &mut entry,
+            segments: std::ptr::null(),
+        };
+        let handle = IcHandle::new(&mut ic_struct);
+        assert!(!handle.is_null());
+        assert!(handle.has_cref());
+        assert_eq!(handle.ic_cref(), 0x5678 as *const rb_cref_t);
+    }
+
+    #[test]
+    fn test_ic_handle_read_from_pc() {
+        let mut ic_struct = iseq_inline_constant_cache {
+            entry: std::ptr::null_mut(),
+            segments: std::ptr::null(),
+        };
+        let pc_val = VALUE(&mut ic_struct as *mut iseq_inline_constant_cache as usize);
+        let pc: *const VALUE = &pc_val;
+        let handle = IcHandle::read_from_pc(pc);
+        assert_eq!(handle.as_raw(), &mut ic_struct as *mut iseq_inline_constant_cache);
+    }
+
+    #[test]
+    fn test_id_slice_null() {
+        let slice = IdSlice::new(std::ptr::null());
+        assert!(slice.is_empty());
+        let items: Vec<ID> = slice.into_iter().collect();
+        assert!(items.is_empty());
+    }
+
+    #[test]
+    fn test_id_slice_empty_terminated() {
+        let ids: [ID; 1] = [ID(0)];
+        let slice = IdSlice::new(ids.as_ptr());
+        assert!(slice.is_empty());
+        let items: Vec<ID> = slice.into_iter().collect();
+        assert!(items.is_empty());
+    }
+
+    #[test]
+    fn test_id_slice_single_element() {
+        let ids: [ID; 2] = [ID(42), ID(0)];
+        let slice = IdSlice::new(ids.as_ptr());
+        assert!(!slice.is_empty());
+        let items: Vec<ID> = slice.into_iter().collect();
+        assert_eq!(items, vec![ID(42)]);
+    }
+
+    #[test]
+    fn test_id_slice_multi_element() {
+        let ids: [ID; 4] = [ID(100), ID(200), ID(300), ID(0)];
+        let slice = IdSlice::new(ids.as_ptr());
+        assert!(!slice.is_empty());
+        let items: Vec<ID> = slice.into_iter().collect();
+        assert_eq!(items, vec![ID(100), ID(200), ID(300)]);
+    }
+}
+

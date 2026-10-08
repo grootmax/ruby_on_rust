@@ -2,7 +2,7 @@
 
 use std::{collections::{HashMap, HashSet}, mem};
 
-use crate::{backend::lir::{Assembler, asm_comment}, cruby::{ID, IseqPtr, RedefinitionFlag, VALUE, iseq_name, rb_callable_method_entry_t, rb_gc_location, ruby_basic_operators, src_loc, with_vm_lock}, hir::Invariant, options::debug, state::{ZJITState, zjit_enabled_p, trace_invalidation}, virtualmem::CodePtr};
+use crate::{backend::lir::{Assembler, asm_comment}, cruby::{CmeHandle, IcHandle, IdSlice, ID, IseqPtr, RedefinitionFlag, VALUE, iseq_name, rb_callable_method_entry_t, rb_gc_location, ruby_basic_operators, src_loc, with_vm_lock}, hir::Invariant, options::debug, state::{ZJITState, zjit_enabled_p, trace_invalidation}, virtualmem::CodePtr};
 use crate::payload::{IseqVersionRef, get_or_create_iseq_payload};
 use crate::codegen::invalidate_iseq_version;
 use crate::cruby::{rb_iseq_reset_jit_func, rb_jit_iseq_ep_escape_recorded_p, rb_jit_iseq_mark_ep_escape_recorded};
@@ -77,7 +77,7 @@ pub struct Invariants {
     bop_patch_points: HashMap<(RedefinitionFlag, ruby_basic_operators), HashSet<PatchPoint>>,
 
     /// Map from CME to patch points that assume the method hasn't been redefined
-    cme_patch_points: HashMap<*const rb_callable_method_entry_t, HashSet<PatchPoint>>,
+    cme_patch_points: HashMap<CmeHandle, HashSet<PatchPoint>>,
 
     /// Map from constant ID to patch points that assume the constant hasn't been redefined
     constant_state_patch_points: HashMap<ID, HashSet<PatchPoint>>,
@@ -122,7 +122,7 @@ impl Invariants {
 
     /// Forget a CME when freeing it. See [Self::forget_iseq] for reasoning.
     pub fn forget_cme(&mut self, cme: *const rb_callable_method_entry_t) {
-        self.cme_patch_points.remove(&cme);
+        self.cme_patch_points.remove(&CmeHandle::from_raw(cme));
     }
 
     /// Forget a class when freeing it. See [Self::forget_iseq] for reasoning.
@@ -146,8 +146,8 @@ impl Invariants {
         let updated_cme_patch_points = std::mem::take(&mut self.cme_patch_points)
             .into_iter()
             .map(|(cme, patch_points)| {
-                let new_cme = unsafe { rb_gc_location(cme.into()) };
-                (new_cme.as_cme(), patch_points)
+                let new_cme = cme.update_gc_location();
+                (new_cme, patch_points)
             })
             .collect();
         self.cme_patch_points = updated_cme_patch_points;
@@ -299,7 +299,7 @@ pub fn track_cme_assumption(
     version: IseqVersionRef,
 ) {
     let invariants = ZJITState::get_invariants();
-    invariants.cme_patch_points.entry(cme).or_default().insert(PatchPoint::new(
+    invariants.cme_patch_points.entry(CmeHandle::from_raw(cme)).or_default().insert(PatchPoint::new(
         patch_point_ptr,
         side_exit_ptr,
         version,
@@ -315,20 +315,12 @@ pub fn track_stable_constant_names_assumption(
 ) {
     let invariants = ZJITState::get_invariants();
 
-    let mut idx = 0;
-    loop {
-        let id = unsafe { *idlist.wrapping_add(idx) };
-        if id.0 == 0 {
-            break;
-        }
-
+    for id in IdSlice::new(idlist) {
         invariants.constant_state_patch_points.entry(id).or_default().insert(PatchPoint::new(
             patch_point_ptr,
             side_exit_ptr,
             version,
         ));
-
-        idx += 1;
     }
 }
 
@@ -355,10 +347,11 @@ pub extern "C" fn rb_zjit_cme_invalidate(cme: *const rb_callable_method_entry_t)
         return;
     }
 
+    let handle = CmeHandle::from_raw(cme);
     with_vm_lock(src_loc!(), || {
         let invariants = ZJITState::get_invariants();
         // Get the CMD's jumps and remove the entry from the map as it has been invalidated
-        if let Some(patch_points) = invariants.cme_patch_points.remove(&cme) {
+        if let Some(patch_points) = invariants.cme_patch_points.remove(&handle) {
             let cb = ZJITState::get_code_block();
             debug!("CME is invalidated: {:?}", cme);
 
