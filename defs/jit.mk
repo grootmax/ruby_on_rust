@@ -33,14 +33,17 @@ $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	$(gnumake_recursive)$(Q)CARGO_TARGET_DIR='$(CARGO_TARGET_DIR)' \
 	    CARGO_TERM_PROGRESS_WHEN='never' \
 	    MACOSX_DEPLOYMENT_TARGET=11.0 \
+	    RUSTFLAGS='$(RUSTFLAGS)' \
+	    RUSTC_BOOTSTRAP=1 \
 	    $(CARGO) $(CARGO_VERBOSE) build --manifest-path '$(top_srcdir)/Cargo.toml' $(CARGO_BUILD_ARGS)
 	$(RUST_LIB_TOUCH)
 else ifneq ($(strip $(RLIB_DIR)),) # combo build
 
 $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	$(ECHO) 'building $(@F)'
-	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
+	$(gnumake_recursive)$(Q) RUSTC_BOOTSTRAP=1 $(RUSTC) --edition=2024 \
 	    $(RUSTC_FLAGS) \
+	    $(RUSTFLAGS) \
 	    '-L$(@D)' \
 	    --extern=yjit \
 	    --extern=zjit \
@@ -56,10 +59,11 @@ $(YJIT_RLIB): $(JIT_RLIB)
 $(ZJIT_RLIB): $(JIT_RLIB)
 $(JIT_RLIB): $(top_srcdir)/jit/src/lib.rs target/.rustc-version
 	$(ECHO) 'building $(@F)'
-	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=jit \
+	$(gnumake_recursive)$(Q) RUSTC_BOOTSTRAP=1 $(RUSTC) --crate-name=jit \
 	    --edition=2024 \
 	    $(JIT_RUST_FLAGS) \
 	    $(RUSTC_FLAGS) \
+	    $(RUSTFLAGS) \
 	    '--out-dir=$(@D)' \
 	    '$(top_srcdir)/jit/src/lib.rs'
 endif # ifneq ($(JIT_CARGO_SUPPORT),no)

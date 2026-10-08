@@ -31,8 +31,8 @@ CORE_RS_CFG = $(CPP) $(XCFLAGS) $(CPPFLAGS) $(srcdir)/core_rs/cfg.c | \
 $(CORE_RS_LIB): $(CORE_RS_SRCS) $(srcdir)/core_rs/cfg.c
 	$(ECHO) 'building core_rs (Rust ports)'
 	$(Q) $(MAKEDIRS) $(TOP_BUILD_DIR)/target/core_rs
-	$(gnumake_recursive)$(Q) $(RUSTC) --crate-name=core_rs --crate-type=staticlib --edition=2024 \
-	    $(CORE_RS_RUSTC_FLAGS) `$(CORE_RS_CFG)` \
+	$(gnumake_recursive)$(Q) RUSTC_BOOTSTRAP=1 $(RUSTC) --crate-name=core_rs --crate-type=staticlib --edition=2024 \
+	    $(CORE_RS_RUSTC_FLAGS) $(RUSTFLAGS) `$(CORE_RS_CFG)` \
 	    -o $(CORE_RS_LIB) \
 	    $(srcdir)/core_rs/src/lib.rs
 
@@ -46,8 +46,8 @@ core-rs: $(CORE_RS_OBJ)
 # by the test harness, the library itself stays no_std).
 core-rs-test:
 	$(Q) $(MAKEDIRS) $(TOP_BUILD_DIR)/target/core_rs
-	$(Q) $(RUSTC) --crate-name=core_rs --edition=2024 --test \
-	    `$(CORE_RS_CFG)` \
+	$(Q) RUSTC_BOOTSTRAP=1 $(RUSTC) --crate-name=core_rs --edition=2024 --test \
+	    $(RUSTFLAGS) `$(CORE_RS_CFG)` \
 	    -o $(TOP_BUILD_DIR)/target/core_rs/core_rs-test \
 	    $(srcdir)/core_rs/src/lib.rs
 	$(Q) $(TOP_BUILD_DIR)/target/core_rs/core_rs-test

@@ -289,6 +289,7 @@ MAKE_LINK = $(MINIRUBY) -rfileutils -e "include FileUtils::Verbose" \
 YJIT_RUSTC_ARGS = --crate-name=yjit \
 	$(JIT_RUST_FLAGS) \
 	$(RUSTC_FLAGS) \
+	$(RUSTFLAGS) \
 	--edition=2021 \
 	'--out-dir=$(CARGO_TARGET_DIR)/release/' \
 	'$(top_srcdir)/yjit/src/lib.rs'
@@ -296,6 +297,7 @@ YJIT_RUSTC_ARGS = --crate-name=yjit \
 ZJIT_RUSTC_ARGS = --crate-name=zjit \
 	$(JIT_RUST_FLAGS) \
 	$(RUSTC_FLAGS) \
+	$(RUSTFLAGS) \
 	--edition=2024 \
 	'--out-dir=$(CARGO_TARGET_DIR)/release/' \
 	'$(top_srcdir)/zjit/src/lib.rs'

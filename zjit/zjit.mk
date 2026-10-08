@@ -22,14 +22,14 @@ BUILD_ZJIT_LIBS = $(TOP_BUILD_DIR)/$(ZJIT_LIBS)
 ifneq ($(strip $(ZJIT_LIBS)),)
 $(BUILD_ZJIT_LIBS): $(ZJIT_SRC_FILES) target/.rustc-version
 	$(ECHO) 'building Rust ZJIT (release mode)'
-	$(gnumake_recursive)$(Q) $(RUSTC) $(ZJIT_RUSTC_ARGS)
+	$(gnumake_recursive)$(Q) RUSTC_BOOTSTRAP=1 $(RUSTC) $(ZJIT_RUSTC_ARGS)
 else ifneq ($(strip $(RLIB_DIR)),) # combo build
 # Absolute path to avoid VPATH ambiguity
 ZJIT_RLIB = $(TOP_BUILD_DIR)/$(RLIB_DIR)/libzjit.rlib
 
 $(ZJIT_RLIB): $(ZJIT_SRC_FILES) target/.rustc-version
 	$(ECHO) 'building $(@F)'
-	$(gnumake_recursive)$(Q) $(RUSTC) '-L$(@D)' --extern=jit $(ZJIT_RUSTC_ARGS)
+	$(gnumake_recursive)$(Q) RUSTC_BOOTSTRAP=1 $(RUSTC) '-L$(@D)' --extern=jit $(ZJIT_RUSTC_ARGS)
 
 $(RUST_LIB): $(ZJIT_RLIB)
 endif # ifneq ($(strip $(ZJIT_LIBS)),)
@@ -68,7 +68,9 @@ zjit-bindgen: zjit.$(OBJEXT)
 ZJIT_NEXTEST_ENV := RUBY_BUILD_DIR='$(TOP_BUILD_DIR)' \
     RUBY_LD_FLAGS='$(LDFLAGS) $(XLDFLAGS) $(MAINLIBS)' \
     MACOSX_DEPLOYMENT_TARGET=11.0 \
-    CARGO_TARGET_DIR='$(CARGO_TARGET_DIR)'
+    CARGO_TARGET_DIR='$(CARGO_TARGET_DIR)' \
+    RUSTFLAGS='$(RUSTFLAGS)' \
+    RUSTC_BOOTSTRAP=1
 
 # We need `cargo nextest` for its one-process-per execution execution model
 # since we can only boot the VM once per process. Normal `cargo test`

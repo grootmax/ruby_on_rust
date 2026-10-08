@@ -4085,10 +4085,61 @@ AS_IF([test -n "$RUST_LIB"], [
     RUST_LIB='$(TOP_BUILD_DIR)'/"${RUST_LIB}"
 ])
 
+sanitizer=no
+AC_ARG_ENABLE(sanitizer,
+    AS_HELP_STRING([--enable-sanitizer=address|thread|memory|leak],
+                   [enable sanitizer instrumentation (address, thread, memory, or leak)]),
+    [sanitizer=$enableval], [sanitizer=no])
+
+AS_IF([test "x$sanitizer" != xno], [
+    AS_CASE(["$sanitizer"],
+    [yes], [
+        sanitizer=address
+    ],
+    [address|thread|memory|leak], [],
+    [
+        AC_MSG_ERROR([unsupported sanitizer: $sanitizer (supported: address, thread, memory, leak)])
+    ])
+
+    AC_MSG_CHECKING([whether $CC supports -fsanitize=$sanitizer])
+    save_CFLAGS="$CFLAGS"
+    save_LDFLAGS="$LDFLAGS"
+    CFLAGS="$CFLAGS -fsanitize=$sanitizer"
+    LDFLAGS="$LDFLAGS -fsanitize=$sanitizer"
+    c_sanitizer_ok=no
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])], [c_sanitizer_ok=yes])
+    CFLAGS="$save_CFLAGS"
+    LDFLAGS="$save_LDFLAGS"
+    AC_MSG_RESULT($c_sanitizer_ok)
+    AS_IF([test "$c_sanitizer_ok" = no], [
+        AC_MSG_ERROR([C compiler ($CC) does not support -fsanitize=$sanitizer])
+    ])
+
+    AS_IF([test "$RUSTC" = "no"], [
+        AC_MSG_ERROR([rustc is required for --enable-sanitizer])
+    ], [
+        AC_MSG_CHECKING([whether $RUSTC supports -Z sanitizer=$sanitizer])
+        rust_sanitizer_ok=no
+        AS_IF([RUSTC_BOOTSTRAP=1 $RUSTC -Z sanitizer=$sanitizer --print target-cpus >/dev/null 2>&1], [
+            rust_sanitizer_ok=yes
+        ])
+        AC_MSG_RESULT($rust_sanitizer_ok)
+        AS_IF([test "$rust_sanitizer_ok" = no], [
+            AC_MSG_ERROR([rustc ($RUSTC) does not support -Z sanitizer=$sanitizer])
+        ])
+    ])
+
+    CFLAGS="$CFLAGS -fsanitize=$sanitizer"
+    LDFLAGS="$LDFLAGS -fsanitize=$sanitizer"
+    RUSTC_FLAGS="$RUSTC_FLAGS -Z sanitizer=$sanitizer -C unsafe-allow-abi-mismatch=sanitizer"
+    RUSTFLAGS="$RUSTFLAGS -Z sanitizer=$sanitizer -C unsafe-allow-abi-mismatch=sanitizer"
+])
+
 dnl These variables end up in ::RbConfig::CONFIG
 AC_SUBST(RUSTC)dnl Rust compiler command
 AC_SUBST(JIT_RUST_FLAGS)dnl the common rustc flags for JIT crates such as zjit
 AC_SUBST(RUSTC_FLAGS)dnl user-configurable rustc compiler flags
+AC_SUBST(RUSTFLAGS)dnl user-configurable or sanitizer rust flags
 AC_SUBST(CARGO)dnl Cargo command for Rust builds
 AC_SUBST(CARGO_BUILD_ARGS)dnl for selecting Rust build profiles
 AC_SUBST(YJIT_SUPPORT)dnl what flavor of YJIT the Ruby build includes
@@ -4224,6 +4275,9 @@ AS_IF([test "$rb_rust_ports_ok" = yes && test "$rb_rust_ports" != no], [
 ])
 AC_DEFINE_UNQUOTED(USE_RUST_PORTS, $USE_RUST_PORTS)
 CORE_RS_RUSTC_FLAGS='-g -C opt-level=3 -C lto -C codegen-units=1 -C panic=abort -C overflow-checks=on'
+AS_IF([test "x$sanitizer" != xno -a "x$sanitizer" != x], [
+    CORE_RS_RUSTC_FLAGS="$CORE_RS_RUSTC_FLAGS -Z sanitizer=$sanitizer"
+])
 AC_SUBST(USE_RUST_PORTS)dnl 1 when core functions are built from their Rust ports
 AC_SUBST(CORE_RS_RUSTC_FLAGS)dnl rustc flags for the core_rs crate
 AC_SUBST(X_CORE_RS_LIB, [$CORE_RS_LIB])dnl the core_rs staticlib
