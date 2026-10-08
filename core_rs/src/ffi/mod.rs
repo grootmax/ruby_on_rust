@@ -16,6 +16,8 @@
 //!   needs one is out of Wave B.
 //! * [`protect`]: [`protect::protect`] around `rb_protect()`, and
 //!   [`protect::jump_tag`] to re-raise.
+//! * [`unwind_guard`]: [`UnwindGuard`] for explicit pre-unwind resource
+//!   flushing and trivial `Drop` assertions before C `longjmp` calls.
 //!
 //! # Exception safety (AGENTS.md §6.9)
 //!
@@ -29,7 +31,8 @@
 //!    `Drop` value at the call**, and neither does any Rust frame between it
 //!    and the C caller.  core_rs is `no_std` without allocation, so in
 //!    practice this means no guards, no `RefCell` borrows and no types with
-//!    `impl Drop` across such calls.
+//!    `impl Drop` across such calls. Use [`UnwindGuard`] to flush any owned
+//!    resources before calling raw raising C API functions.
 //! 2. **Otherwise, call the raising code through [`protect::protect`]**,
 //!    finish the cleanup, then re-raise with [`protect::jump_tag`].  This is
 //!    the C idiom `rb_protect()` + `rb_jump_tag()`.
@@ -43,6 +46,9 @@
 
 pub mod api;
 pub mod protect;
+pub mod unwind_guard;
 pub mod value;
 
+pub use api::*;
+pub use unwind_guard::{assert_trivial_drop, ensure_trivial_drop, is_trivial_drop, UnwindGuard};
 pub use value::{ID, SIGNED_VALUE, VALUE};
