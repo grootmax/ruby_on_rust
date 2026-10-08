@@ -13,7 +13,13 @@
 #include "internal/core_rs.h"
 #include "insns.inc"
 
-#if USE_RUST_PORTS
+#if !USE_RUST_PORTS
+size_t
+rb_vm_exec_batch_rs(rb_execution_context_t *ec)
+{
+    return 0;
+}
+#else
 struct rb_vm_insn_opcodes_struct rb_vm_insn_opcodes = {
     .nop = BIN(nop),
     .putnil = BIN(putnil),
