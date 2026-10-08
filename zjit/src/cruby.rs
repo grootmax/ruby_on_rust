@@ -1159,35 +1159,46 @@ where
 /// In case we want to start doing fancier exception handling with panic=unwind,
 /// we can revisit this later. For now, this helps to get us good bug reports.
 pub fn rb_bug_panic_hook() {
-    use std::env;
-    use std::panic;
+    init_panic_hook();
+}
+
+pub fn init_panic_hook() {
     use std::io::{stderr, Write};
+    use std::panic;
+    use std::sync::atomic::{AtomicBool, Ordering};
 
-    // Probably the default hook. We do this very early during process boot.
-    let previous_hook = panic::take_hook();
+    static HOOK_SET: AtomicBool = AtomicBool::new(false);
+    if HOOK_SET.swap(true, Ordering::SeqCst) {
+        return;
+    }
 
-    panic::set_hook(Box::new(move |panic_info| {
-        // Not using `eprintln` to avoid double panic.
-        let _ = stderr().write_all(b"ruby: ZJIT has panicked. More info to follow...\n");
+    panic::set_hook(Box::new(|panic_info| {
+        let mut err = stderr().lock();
+        let _ = writeln!(err, "ruby: Rust panic encountered!");
 
-        // Always show a Rust backtrace for release builds.
-        // You should set RUST_BACKTRACE=1 for dev builds.
-        let release_build = cfg!(not(debug_assertions));
-        if release_build {
-            unsafe { env::set_var("RUST_BACKTRACE", "1"); }
-        }
-        previous_hook(panic_info);
-
-        // Dump information about the interpreter for release builds.
-        // You may also use ZJIT_RB_BUG=1 to trigger this on dev builds.
-        if release_build || env::var("ZJIT_RB_BUG").is_ok() {
-            // Abort with rb_bug(). It has a length limit on the message.
-            let panic_message = &format!("{panic_info}")[..];
-            let len = std::cmp::min(0x100, panic_message.len()) as c_int;
-            unsafe { rb_bug(b"ZJIT: %*s\0".as_ref().as_ptr() as *const c_char, len, panic_message.as_ptr()); }
+        if let Some(location) = panic_info.location() {
+            let _ = writeln!(
+                err,
+                "Location: {}:{}:{}",
+                location.file(),
+                location.line(),
+                location.column()
+            );
         } else {
-            eprintln!("note: run with `ZJIT_RB_BUG=1` environment variable to display a Ruby backtrace");
+            let _ = writeln!(err, "Location: <unknown>");
         }
+
+        let msg = if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
+            s
+        } else if let Some(s) = panic_info.payload().downcast_ref::<String>() {
+            s.as_str()
+        } else {
+            "Box<dyn Any>"
+        };
+        let _ = writeln!(err, "Message: {}", msg);
+        let _ = err.flush();
+
+        std::process::abort();
     }));
 }
 

@@ -40,6 +40,7 @@ opt-level = 1 # On 0, functions use so much stack space that we get stray `Syste
 debug = true
 debug-assertions = true
 overflow-checks = true
+panic = "abort"
 
 [profile.test]
 inherits = "dev"
@@ -47,9 +48,11 @@ opt-level = 0
 
 [profile.dev_nodebug]
 inherits = "dev"
+panic = "abort"
 
 [profile.stats]
 inherits = "release"
+panic = "abort"
 
 [profile.release]
 # NOTE: --enable-yjit and zjit builds use `rustc` without going through Cargo. You
@@ -62,3 +65,4 @@ overflow-checks = true
 debug = true
 # Use ThinLTO. Much smaller output for a small amount of build time increase.
 lto = "thin"
+panic = "abort"

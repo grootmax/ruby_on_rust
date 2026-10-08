@@ -5,6 +5,8 @@
 # Without it, certain make version trigger a warning. It does not
 # add the prefix when `make --dry-run` so dry runs are indeed dry.
 
+RUSTC_FLAGS ?= -g -C lto=thin -C opt-level=3 -C panic=abort -C overflow-checks=on
+
 ifneq ($(JIT_CARGO_SUPPORT),no)
 
 # Show Cargo progress when doing `make V=1`

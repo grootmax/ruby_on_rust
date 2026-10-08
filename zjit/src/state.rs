@@ -402,6 +402,7 @@ pub extern "C" fn rb_zjit_init_builtin_cmes() {
 /// Initialize ZJIT at boot. This is called even if ZJIT is disabled.
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_init(zjit_enabled: bool) {
+    crate::cruby::rb_bug_panic_hook();
     // If --zjit, enable ZJIT immediately
     if zjit_enabled {
         zjit_enable();
