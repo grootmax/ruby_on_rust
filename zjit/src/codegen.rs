@@ -2248,9 +2248,10 @@ fn gen_string_copy(jit: &mut JITState, asm: &mut Assembler, function: &Function,
     // outside the loop, so we can keep the complexity out of the fast path
     // loop.
     let padded_size = byte_size.next_multiple_of(8);
-    let Some(src_bytes) = (unsafe { src.as_rstring_byte_slice() }) else {
+    let Some(rstr) = RString::from_value(src) else {
         return slow_path(asm);
     };
+    let src_bytes = rstr.as_bytes();
     debug_assert_eq!(src_bytes.len(), len as usize);
     let mut string_bytes = vec![0u8; padded_size];
     string_bytes[..src_bytes.len()].copy_from_slice(src_bytes);

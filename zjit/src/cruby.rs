@@ -646,17 +646,7 @@ impl VALUE {
         }
     }
 
-    /// Borrow the string contents of `self`. Rust unsafe because of possible mutation and GC
-    /// interactions.
-    pub unsafe fn as_rstring_byte_slice<'a>(self) -> Option<&'a [u8]> {
-        if !unsafe { RB_TYPE_P(self, RUBY_T_STRING) } {
-            None
-        } else {
-            let str_ptr = unsafe { rb_RSTRING_PTR(self) } as *const u8;
-            let str_len: usize = unsafe { rb_RSTRING_LEN(self) }.try_into().ok()?;
-            Some(unsafe { std::slice::from_raw_parts(str_ptr, str_len) })
-        }
-    }
+
 
     pub fn is_frozen(self) -> bool {
         unsafe { rb_obj_frozen_p(self) != VALUE(0) }
@@ -954,9 +944,9 @@ impl ID {
             if contents == Qfalse {
                 Cow::Borrowed("ID(0)")
             } else {
-                let slice = unsafe { contents.as_rstring_byte_slice() }
+                let rstr = RString::from_value(contents)
                     .expect("rb_id2str() returned truthy non-string");
-                String::from_utf8_lossy(slice)
+                Cow::Owned(rstr.to_string_lossy())
             }
         }
     }
@@ -1041,18 +1031,96 @@ pub fn iseq_get_location(iseq: IseqPtr, pos: u32) -> String {
     s
 }
 
+/// Typed handle around a Ruby RString object with bounded lifetime borrows.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[repr(transparent)]
+pub struct RString(VALUE);
+
+impl RString {
+    /// Validates that `value` represents a valid Ruby String object (`RUBY_T_STRING`).
+    /// Returns `Some(RString)` if valid, `None` otherwise.
+    pub fn from_value(value: VALUE) -> Option<Self> {
+        if unsafe { RB_TYPE_P(value, RUBY_T_STRING) } {
+            Some(RString(value))
+        } else {
+            None
+        }
+    }
+
+    /// Construct `RString` without validating type tags.
+    ///
+    /// # Safety
+    /// Caller must guarantee `value` represents a valid Ruby string object.
+    pub unsafe fn from_value_unchecked(value: VALUE) -> Self {
+        RString(value)
+    }
+
+    /// Returns the underlying raw `VALUE`.
+    pub fn value(self) -> VALUE {
+        self.0
+    }
+
+    /// Returns the byte length of the Ruby string.
+    pub fn len(&self) -> usize {
+        let str_len = unsafe { rb_RSTRING_LEN(self.0) };
+        str_len.try_into().unwrap_or(0)
+    }
+
+    /// Returns true if the string is empty.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Borrows the string's byte slice with a lifetime bounded to `&'a self`.
+    pub fn as_bytes<'a>(&'a self) -> &'a [u8] {
+        let str_ptr = unsafe { rb_RSTRING_PTR(self.0) } as *const u8;
+        let str_len = self.len();
+        if str_ptr.is_null() {
+            &[]
+        } else {
+            unsafe { std::slice::from_raw_parts(str_ptr, str_len) }
+        }
+    }
+
+    /// Invokes closure `f` with a byte slice reference whose lifetime is strictly
+    /// bounded to the execution scope of the closure.
+    pub fn with_bytes<F, R>(&self, f: F) -> R
+    where
+        F: FnOnce(&[u8]) -> R,
+    {
+        f(self.as_bytes())
+    }
+
+    /// Converts the Ruby string into an owned Rust `String` if it is valid UTF-8.
+    pub fn to_string_utf8(&self) -> Result<String, std::string::FromUtf8Error> {
+        String::from_utf8(self.as_bytes().to_vec())
+    }
+
+    /// Converts the Ruby string into an owned Rust `String`, replacing invalid UTF-8 sequences.
+    pub fn to_string_lossy(&self) -> String {
+        String::from_utf8_lossy(self.as_bytes()).into_owned()
+    }
+}
+
+impl TryFrom<VALUE> for RString {
+    type Error = ();
+
+    fn try_from(value: VALUE) -> Result<Self, Self::Error> {
+        RString::from_value(value).ok_or(())
+    }
+}
+
 pub fn ruby_str_to_rust_string_result(v: VALUE) -> Result<String, std::string::FromUtf8Error> {
-    let str_ptr = unsafe { rb_RSTRING_PTR(v) } as *mut u8;
-    let str_len: usize = unsafe { rb_RSTRING_LEN(v) }.try_into().unwrap();
-    let str_slice: &[u8] = unsafe { std::slice::from_raw_parts(str_ptr, str_len) };
-    String::from_utf8(str_slice.to_vec())
+    let rstr = RString::from_value(v)
+        .ok_or_else(|| String::from_utf8(vec![0xff]).unwrap_err())?;
+    rstr.to_string_utf8()
 }
 
 // Convert a CRuby UTF-8-encoded RSTRING into a Rust string.
 // This should work fine on ASCII strings and anything else
 // that is considered legal UTF-8, including embedded nulls.
 pub fn ruby_str_to_rust_string(v: VALUE) -> String {
-    ruby_str_to_rust_string_result(v).unwrap_or_default()
+    RString::from_value(v).map(|s| s.to_string_lossy()).unwrap_or_default()
 }
 
 pub fn ruby_sym_to_rust_string(v: VALUE) -> String {
@@ -1773,3 +1841,35 @@ pub(crate) mod ids {
     pub(crate) use ID;
 }
 pub(crate) use ids::ID;
+
+#[cfg(test)]
+mod rstring_tests {
+    use super::*;
+
+    #[test]
+    fn test_rstring_type_validation_fail() {
+        // Non-string value (e.g. Qnil or Qfalse) should fail type validation
+        assert!(RString::from_value(Qnil).is_none());
+        assert!(RString::from_value(Qfalse).is_none());
+        assert!(RString::try_from(Qnil).is_err());
+    }
+
+    #[test]
+    fn test_rstring_borrow_lifetimes() {
+        // Unchecked constructor for unit testing handle invariants
+        let dummy_val = Qnil;
+        let rstr = unsafe { RString::from_value_unchecked(dummy_val) };
+
+        // Test with_bytes closure execution scope
+        rstr.with_bytes(|bytes| {
+            assert_eq!(bytes.len(), 0);
+        });
+
+        // Test as_bytes borrow tied to rstr lifetime
+        let bytes = rstr.as_bytes();
+        assert_eq!(bytes.len(), 0);
+
+        // Test owned conversion
+        assert_eq!(rstr.to_string_lossy(), "");
+    }
+}
