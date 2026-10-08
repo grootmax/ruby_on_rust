@@ -40,6 +40,9 @@ pub struct VirtualMemory<A: Allocator> {
     /// Used for changing protection to implement W^X.
     current_write_page: Option<usize>,
 
+    /// RAII guards for CRuby GC memory pressure tracking.
+    guards: Vec<jit::CRubyMemoryGuard>,
+
     /// Zero size member for making syscalls to get physical memory during normal operation.
     /// When testing this owns some memory.
     allocator: A,
@@ -155,6 +158,7 @@ impl<A: Allocator> VirtualMemory<A> {
             page_size_bytes,
             mapped_region_bytes: 0,
             current_write_page: None,
+            guards: Vec::new(),
             allocator,
         }
     }
@@ -253,6 +257,7 @@ impl<A: Allocator> VirtualMemory<A> {
                     }
                 }
                 self.mapped_region_bytes += alloc_size;
+                self.guards.push(jit::CRubyMemoryGuard::new(alloc_size));
 
                 self.current_write_page = Some(page_addr);
             } else {
@@ -316,6 +321,7 @@ impl<A: Allocator> VirtualMemory<A> {
         assert!(virtual_region.contains(&last_byte_to_free));
 
         self.allocator.mark_unused(start_ptr.raw_ptr(self), size);
+        jit::shrink_memory_guards(&mut self.guards, size as usize);
     }
 }
 

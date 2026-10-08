@@ -53,6 +53,9 @@ pub struct VirtualMemoryMut<A: Allocator> {
     /// Used for changing protection to implement W^X.
     current_write_page: Option<usize>,
 
+    /// RAII guards for CRuby GC memory pressure tracking.
+    guards: Vec<jit::CRubyMemoryGuard>,
+
     /// Zero size member for making syscalls to get physical memory during normal operation.
     /// When testing this owns some memory.
     allocator: A,
@@ -136,6 +139,7 @@ impl<A: Allocator> VirtualMemory<A> {
             mutable: RefCell::new(VirtualMemoryMut {
                 mapped_region_bytes: 0,
                 current_write_page: None,
+                guards: Vec::new(),
                 allocator,
             }),
         }
@@ -231,6 +235,7 @@ impl<A: Allocator> VirtualMemory<A> {
                     }
                 }
                 mutable.mapped_region_bytes = mutable.mapped_region_bytes + alloc_size;
+                mutable.guards.push(jit::CRubyMemoryGuard::new(alloc_size));
 
                 mutable.current_write_page = Some(page_addr);
             } else {
@@ -295,6 +300,7 @@ impl<A: Allocator> VirtualMemory<A> {
 
         let mut mutable = self.mutable.borrow_mut();
         mutable.allocator.mark_unused(start_ptr.raw_ptr(self), size);
+        jit::shrink_memory_guards(&mut mutable.guards, size as usize);
     }
 }
 
