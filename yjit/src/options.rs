@@ -90,28 +90,43 @@ pub struct Options {
     pub log: Option<LogOutput>,
 }
 
-// Initialize the options to default values
-pub static mut OPTIONS: Options = Options {
-    mem_size: 128 * 1024 * 1024,
-    exec_mem_size: None,
-    no_type_prop: false,
-    max_versions: 4,
-    num_temp_regs: TEMP_REGS.len(),
-    c_builtin: false,
-    gen_stats: false,
-    trace_exits: None,
-    print_stats: true,
-    trace_exits_sample_rate: 0,
-    disable: false,
-    dump_insns: false,
-    dump_disasm: None,
-    verify_ctx: false,
-    dump_iseq_disasm: None,
-    frame_pointer: false,
-    code_gc: false,
-    perf_map: None,
-    log: None,
-};
+use std::sync::{OnceLock, RwLock};
+
+/// Synchronized global options container initialized with OnceLock.
+#[allow(clippy::incompatible_msrv)]
+static OPTIONS: OnceLock<RwLock<Options>> = OnceLock::new();
+
+/// Return a static reference to the synchronized YJIT options RwLock.
+#[allow(clippy::incompatible_msrv)]
+pub fn get_options() -> &'static RwLock<Options> {
+    OPTIONS.get_or_init(|| RwLock::new(Options::default()))
+}
+
+impl Default for Options {
+    fn default() -> Self {
+        Options {
+            mem_size: 128 * 1024 * 1024,
+            exec_mem_size: None,
+            no_type_prop: false,
+            max_versions: 4,
+            num_temp_regs: TEMP_REGS.len(),
+            c_builtin: false,
+            gen_stats: false,
+            trace_exits: None,
+            print_stats: true,
+            trace_exits_sample_rate: 0,
+            disable: false,
+            dump_insns: false,
+            dump_disasm: None,
+            verify_ctx: false,
+            dump_iseq_disasm: None,
+            frame_pointer: false,
+            code_gc: false,
+            perf_map: None,
+            log: None,
+        }
+    }
+}
 
 /// YJIT option descriptions for `ruby --help`.
 /// Note that --help allows only 80 characters per line, including indentation.   80-character limit --> |
@@ -147,7 +162,7 @@ pub enum LogOutput {
     Stderr
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum DumpDisasm {
     // Dump to stdout
     Stdout,
@@ -166,25 +181,16 @@ pub enum PerfMap {
 
 /// Macro to get an option value by name
 macro_rules! get_option {
-    // Unsafe is ok here because options are initialized
-    // once before any Ruby code executes
     ($option_name:ident) => {
-        {
-            // Make this a statement since attributes on expressions are experimental
-            #[allow(unused_unsafe)]
-            let ret = unsafe { crate::options::OPTIONS.$option_name };
-            ret
-        }
+        $crate::options::get_options().read().unwrap().$option_name.clone()
     };
 }
 pub(crate) use get_option;
 
 /// Macro to reference an option value by name; we assume it's a cloneable type like String or an Option of same.
 macro_rules! get_option_ref {
-    // Unsafe is ok here because options are initialized
-    // once before any Ruby code executes
     ($option_name:ident) => {
-        unsafe { &($crate::options::OPTIONS.$option_name) }
+        $crate::options::get_options().read().unwrap().$option_name.clone()
     };
 }
 pub(crate) use get_option_ref;
@@ -201,6 +207,7 @@ const DEV_MODE_HINT: &str = if cfg!(windows) {
 /// Empty string means user passed only "--yjit". C code rejects when
 /// they pass exact "--yjit-".
 pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
+    let mut options = get_options().write().unwrap();
     let c_str: &CStr = unsafe { CStr::from_ptr(str_ptr) };
     let opt_str: &str = c_str.to_str().ok()?;
     //println!("{}", opt_str);
@@ -224,7 +231,7 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
                 }
 
                 // Convert from MiB to bytes internally for convenience
-                unsafe { OPTIONS.mem_size = n * 1024 * 1024 }
+                options.mem_size = n * 1024 * 1024;
             }
             Err(_) => {
                 return None;
@@ -238,7 +245,7 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
                 }
 
                 // Convert from MiB to bytes internally for convenience
-                unsafe { OPTIONS.exec_mem_size = Some(n * 1024 * 1024) }
+                options.exec_mem_size = Some(n * 1024 * 1024);
             }
             Err(_) => {
                 return None;
@@ -260,14 +267,14 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
         },
 
         ("max-versions", _) => match opt_val.parse() {
-            Ok(n) => unsafe { OPTIONS.max_versions = n },
+            Ok(n) => options.max_versions = n,
             Err(_) => {
                 return None;
             }
         },
 
-        ("disable", "") => unsafe {
-            OPTIONS.disable = true;
+        ("disable", "") => {
+            options.disable = true;
         },
 
         ("temp-regs", _) => match opt_val.parse() {
@@ -276,29 +283,29 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
                     eprintln!("--yjit-temp-regs must be <= {}", TEMP_REGS.len());
                     return None;
                 }
-                unsafe { OPTIONS.num_temp_regs = n }
+                options.num_temp_regs = n;
             }
             Err(_) => {
                 return None;
             }
         },
 
-        ("c-builtin", _) => unsafe {
-            OPTIONS.c_builtin = true;
+        ("c-builtin", _) => {
+            options.c_builtin = true;
         },
 
-        ("code-gc", _) => unsafe {
-            OPTIONS.code_gc = true;
+        ("code-gc", _) => {
+            options.code_gc = true;
         },
 
         ("perf", _) => {
             let perf_map = match opt_val {
                 "" => {
-                    unsafe { OPTIONS.frame_pointer = true };
+                    options.frame_pointer = true;
                     Some(PerfMap::ISEQ)
                 },
                 "fp" => {
-                    unsafe { OPTIONS.frame_pointer = true };
+                    options.frame_pointer = true;
                     None
                 },
                 "iseq" => Some(PerfMap::ISEQ),
@@ -311,7 +318,7 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
                 if cfg!(windows) {
                     eprintln!("WARNING: --yjit-perf does not write a perf map on Windows");
                 } else {
-                    unsafe { OPTIONS.perf_map = perf_map }
+                    options.perf_map = perf_map;
                 }
             }
         },
@@ -322,13 +329,13 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
             }
 
             match opt_val {
-                "" => unsafe { OPTIONS.dump_disasm = Some(DumpDisasm::Stdout) },
+                "" => options.dump_disasm = Some(DumpDisasm::Stdout),
                 directory => {
                     let path = format!("{directory}/yjit_{}.log", std::process::id());
                     match File::options().create(true).append(true).open(&path) {
                         Ok(file) => {
                             eprintln!("YJIT disasm dump: {path}");
-                            unsafe { OPTIONS.dump_disasm = Some(DumpDisasm::File(Box::leak(Box::new(file)))) }
+                            options.dump_disasm = Some(DumpDisasm::File(Box::leak(Box::new(file))))
                         }
                         Err(err) => eprintln!("Failed to create {path}: {err}"),
                     }
@@ -336,32 +343,32 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
             }
         },
 
-        ("dump-iseq-disasm", _) => unsafe {
+        ("dump-iseq-disasm", _) => {
             if !cfg!(feature = "disasm") {
                 eprintln!("WARNING: the {} option is only available when YJIT is built in dev mode, {}", opt_name, DEV_MODE_HINT);
             }
 
-            OPTIONS.dump_iseq_disasm = Some(opt_val.to_string());
+            options.dump_iseq_disasm = Some(opt_val.to_string());
         },
 
-        ("no-type-prop", "") => unsafe { OPTIONS.no_type_prop = true },
+        ("no-type-prop", "") => options.no_type_prop = true,
         ("stats", _) => match opt_val {
-            "" => unsafe { OPTIONS.gen_stats = true },
-            "quiet" => unsafe {
-                OPTIONS.gen_stats = true;
-                OPTIONS.print_stats = false;
+            "" => options.gen_stats = true,
+            "quiet" => {
+                options.gen_stats = true;
+                options.print_stats = false;
             },
             _ => {
                 return None;
             }
         },
         ("log", _) => match opt_val {
-            "" => unsafe {
-                OPTIONS.log = Some(LogOutput::Stderr);
+            "" => {
+                options.log = Some(LogOutput::Stderr);
                 Log::init();
             },
-            "quiet" => unsafe {
-                OPTIONS.log = Some(LogOutput::MemoryOnly);
+            "quiet" => {
+                options.log = Some(LogOutput::MemoryOnly);
                 Log::init();
             },
             arg_value => {
@@ -375,16 +382,16 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
                     Ok(file) => {
                         eprintln!("YJIT log: {log_file_path}");
 
-                        unsafe { OPTIONS.log = Some(LogOutput::File(Box::leak(Box::new(file)))) }
-                        Log::init()
+                        options.log = Some(LogOutput::File(Box::leak(Box::new(file))));
+                        Log::init();
                     }
                     Err(err) => panic!("Failed to create {log_file_path}: {err}"),
                 }
             }
         },
-        ("trace-exits", _) => unsafe {
-            OPTIONS.gen_stats = true;
-            OPTIONS.trace_exits = match opt_val {
+        ("trace-exits", _) => {
+            options.gen_stats = true;
+            options.trace_exits = match opt_val {
                 "" => Some(TraceExits::All),
                 name => match Counter::get(name) {
                     Some(counter) => Some(TraceExits::Counter(counter)),
@@ -392,15 +399,15 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
                 },
             };
         },
-        ("trace-exits-sample-rate", sample_rate) => unsafe {
-            OPTIONS.gen_stats = true;
-            if OPTIONS.trace_exits.is_none() {
-                OPTIONS.trace_exits = Some(TraceExits::All);
+        ("trace-exits-sample-rate", sample_rate) => {
+            options.gen_stats = true;
+            if options.trace_exits.is_none() {
+                options.trace_exits = Some(TraceExits::All);
             }
-            OPTIONS.trace_exits_sample_rate = sample_rate.parse().unwrap();
+            options.trace_exits_sample_rate = sample_rate.parse().unwrap();
         },
-        ("dump-insns", "") => unsafe { OPTIONS.dump_insns = true },
-        ("verify-ctx", "") => unsafe { OPTIONS.verify_ctx = true },
+        ("dump-insns", "") => options.dump_insns = true,
+        ("verify-ctx", "") => options.verify_ctx = true,
 
         // Option name not recognized
         _ => {
@@ -409,7 +416,7 @@ pub fn parse_option(str_ptr: *const std::os::raw::c_char) -> Option<()> {
     }
 
     // before we continue, check that sample_rate is either 0 or a prime number
-    let trace_sample_rate = unsafe { OPTIONS.trace_exits_sample_rate };
+    let trace_sample_rate = options.trace_exits_sample_rate;
     if trace_sample_rate > 1 {
         let mut i = 2;
         while i*i <= trace_sample_rate {

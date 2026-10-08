@@ -28,14 +28,13 @@ use crate::backend::lir::{self, Assembler, CArgLocation, C_ARG_OPNDS, C_RET_OPND
 use crate::hir::{self, iseq_to_hir, BlockId, Invariant, RangeType, SideExitReason::{self, *}, SpecialBackrefSymbol, SpecialObjectType};
 use crate::hir::{BlockHandler, CCallVariadicData, CCallWithFrameData, CondBranchHasTypeData, Const, FieldName, FrameState, Function, Insn, InsnId, Recompile, SendDirectData, SendFallbackReason, qualified_method_name};
 use crate::hir_type::{types, Type};
-use crate::options::{get_option, InlineDepth, DEFAULT_MAX_VERSIONS};
+use crate::options::{get_option, InlineDepth};
 use crate::cast::IntoUsize;
 
 /// Maximum number of compiled versions per ISEQ.
 /// Configurable via --zjit-max-versions.
 pub fn max_iseq_versions() -> usize {
-    unsafe { crate::options::OPTIONS.as_ref() }
-        .map_or(DEFAULT_MAX_VERSIONS, |opts| opts.max_versions)
+    crate::options::get_options().read().unwrap().max_versions
 }
 
 /// Sentinel program counter stored in C frames when runtime checks are enabled.

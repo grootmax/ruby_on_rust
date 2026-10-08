@@ -2,7 +2,6 @@
 
 use std::time::Instant;
 use std::sync::atomic::Ordering;
-use crate::options::OPTIONS;
 
 // test binaries always bring it in as a cargo dependency
 #[cfg(all(feature = "stats_allocator", not(test)))]
@@ -1270,8 +1269,7 @@ impl Drop for PerfettoTracer {
 /// Check if trace_exits generation is enabled.
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_trace_exit_locations_enabled_p(_ec: EcPtr, _ruby_self: VALUE) -> VALUE {
-    // Builtin zjit.rb calls this even if ZJIT is disabled, so OPTIONS may not be set.
-    if unsafe { OPTIONS.as_ref() }.is_some_and(|opts| opts.trace_side_exits.is_some()) {
+    if crate::options::get_options().read().unwrap().trace_side_exits.is_some() {
         Qtrue
     } else {
         Qfalse

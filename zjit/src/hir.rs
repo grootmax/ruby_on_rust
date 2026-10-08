@@ -2617,7 +2617,7 @@ fn print_hir_dump(label: &str, body: &dyn std::fmt::Display) {
     match crate::options::get_option_ref!(dump_hir_file) {
         Some(path) => {
             use std::io::Write;
-            let result = std::fs::OpenOptions::new().create(true).append(true).open(path)
+            let result = std::fs::OpenOptions::new().create(true).append(true).open(&path)
                 .and_then(|mut file| writeln!(file, "{label}:\n{body}"));
             if let Err(e) = result {
                 eprintln!("ZJIT: Failed to write HIR dump to '{}': {}", path.display(), e);
@@ -5811,12 +5811,12 @@ impl Function {
         // Unsafe deref of `cme` is safe here because `inline_methods` only calls
         // `should_inline` for `SendDirect` instructions, which carry a non-null cme.
         if !cme.is_null() {
-            let deny = unsafe { crate::options::OPTIONS.as_ref() }.map(|o| &o.inline_deny);
-            if deny.is_some_and(|d| !d.is_empty()) {
+            let opts = crate::options::get_options().read().unwrap();
+            if !opts.inline_deny.is_empty() {
                 let owner = unsafe { (*cme).owner };
                 let method_id = unsafe { get_def_original_id((*cme).def) };
                 let qualified = qualified_method_name(owner, method_id);
-                if deny.unwrap().contains(&qualified) {
+                if opts.inline_deny.contains(&qualified) {
                     incr_counter!(inline_reject_denied);
                     return false;
                 }
