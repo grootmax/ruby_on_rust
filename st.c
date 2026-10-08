@@ -112,6 +112,7 @@
 #include "internal/sanitizers.h"
 #include "internal/set_table.h"
 #include "internal/st.h"
+#include "internal/core_rs.h"
 #include "ruby_assert.h"
 #endif
 
@@ -186,6 +187,7 @@ static const struct st_hash_type type_strcasehash = {
 #define free_fixed_ptr(v) free(v)
 #endif
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/st.rs (port unit st-A-01) */
 /* Compare an entry's hash and key against given hash_val and key.
    Entry fields must be read into locals by the caller before passing
    them here, to avoid re-reading from potentially-freed memory after
@@ -210,6 +212,10 @@ ptr_equal_check(const st_table *tab, const st_table_entry *entry,
     *res = entry_equal(tab->type, entry->hash, entry->key, hash_val, key);
     *rebuilt_p = old_rebuilds_num != tab->rebuilds_num;
 }
+#else
+#define entry_equal rb_core_st_entry_equal
+#define ptr_equal_check rb_core_st_ptr_equal_check
+#endif /* !USE_RUST_PORTS */
 
 #define DO_PTR_EQUAL_CHECK(tab, ptr, hash_val, key, res, rebuilt_p) \
     ptr_equal_check((tab), (ptr), (hash_val), (key), &(res), &(rebuilt_p))
@@ -2491,6 +2497,7 @@ struct set_table_entry {
     st_data_t key;
 };
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/st.rs (port unit st-A-01) */
 static inline void
 set_ptr_equal_check(const set_table *tab, const set_table_entry *entry,
                     st_hash_t hash_val, st_data_t key,
@@ -2500,6 +2507,9 @@ set_ptr_equal_check(const set_table *tab, const set_table_entry *entry,
     *res = entry_equal(tab->type, entry->hash, entry->key, hash_val, key);
     *rebuilt_p = old_rebuilds_num != tab->rebuilds_num;
 }
+#else
+#define set_ptr_equal_check rb_core_st_set_ptr_equal_check
+#endif /* !USE_RUST_PORTS */
 
 #define SET_DO_PTR_EQUAL_CHECK(tab, ptr, hash_val, key, res, rebuilt_p) \
     set_ptr_equal_check((tab), (ptr), (hash_val), (key), &(res), &(rebuilt_p))

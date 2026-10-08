@@ -1,611 +1,610 @@
-# C-to-Rust Porting Status Configuration
-# Managed by developers; processed by tool/generate_porting_ledger.rb
-# Valid statuses: "Not Started", "In Progress", "Ported", "Blocked", "N/A"
-
+---
 subsystems:
-  "JIT Compiler":
-    description: "Just-In-Time compilers and execution machinery"
-  "Core Data Structures":
-    description: "Built-in data types, objects, and core classes"
-  "Virtual Machine & Execution":
-    description: "Interpreter VM loop, instruction helpers, and evaluation"
-  "Memory & Garbage Collection":
-    description: "Garbage collector, object allocator, and memory views"
-  "Concurrency & Threads":
-    description: "Threading, ractors, synchronization, and scheduling"
-  "Parser & AST":
-    description: "Syntax parser, AST nodes, and Prism integration"
-  "IO & Filesystem":
-    description: "Input/Output operations, files, directories, and processes"
-  "Encoding & Regex":
-    description: "String encodings, transcoding, and regular expressions"
-  "Utilities & Support":
-    description: "Internal utility functions, tables, and system helpers"
-  "Platform & Miscellaneous":
-    description: "Platform stubs, runner wrappers, and target-specific code"
-
+  JIT Compiler:
+    description: Just-In-Time compilers and execution machinery
+  Core Data Structures:
+    description: Built-in data types, objects, and core classes
+  Virtual Machine & Execution:
+    description: Interpreter VM loop, instruction helpers, and evaluation
+  Memory & Garbage Collection:
+    description: Garbage collector, object allocator, and memory views
+  Concurrency & Threads:
+    description: Threading, ractors, synchronization, and scheduling
+  Parser & AST:
+    description: Syntax parser, AST nodes, and Prism integration
+  IO & Filesystem:
+    description: Input/Output operations, files, directories, and processes
+  Encoding & Regex:
+    description: String encodings, transcoding, and regular expressions
+  Utilities & Support:
+    description: Internal utility functions, tables, and system helpers
+  Platform & Miscellaneous:
+    description: Platform stubs, runner wrappers, and target-specific code
 files:
-  # JIT Compiler
   yjit.c:
     status: Not Started
-    target: "yjit"
-    subsystem: "JIT Compiler"
-    notes: "yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project"
+    target: yjit
+    subsystem: JIT Compiler
+    notes: yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not
+      a port by this project
   zjit.c:
     status: Not Started
-    target: "zjit"
-    subsystem: "JIT Compiler"
-    notes: "zjit.c is the C side of upstream ZJIT; ZJIT itself is upstream Rust, not a port by this project"
+    target: zjit
+    subsystem: JIT Compiler
+    notes: zjit.c is the C side of upstream ZJIT; ZJIT itself is upstream Rust, not
+      a port by this project
   jit.c:
     status: Not Started
-    target: "jit"
-    subsystem: "JIT Compiler"
-    notes: "C helpers shared by upstream YJIT/ZJIT"
+    target: jit
+    subsystem: JIT Compiler
+    notes: C helpers shared by upstream YJIT/ZJIT
   compile.c:
     status: Not Started
-    target: "crate::compile"
-    subsystem: "JIT Compiler"
-    notes: "Bytecode compiler"
+    target: crate::compile
+    subsystem: JIT Compiler
+    notes: Bytecode compiler
   iseq.c:
     status: Not Started
-    target: "crate::iseq"
-    subsystem: "JIT Compiler"
-    notes: "Instruction sequences"
-
-  # Core Data Structures
+    target: crate::iseq
+    subsystem: JIT Compiler
+    notes: Instruction sequences
   array.c:
-    status: Not Started
-    target: "crate::array"
-    subsystem: "Core Data Structures"
-    notes: "Array object implementation"
+    status: Blocked
+    target: crate::array
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit array-A-01)'
   bignum.c:
-    status: Not Started
-    target: "crate::bignum"
-    subsystem: "Core Data Structures"
-    notes: "Big integer support"
+    status: Blocked
+    target: crate::bignum
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit bignum-A-05)'
   class.c:
-    status: Not Started
-    target: "crate::class"
-    subsystem: "Core Data Structures"
-    notes: "Class and module hierarchy"
+    status: Blocked
+    target: crate::class
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit class-A-01)'
   compar.c:
     status: Not Started
-    target: "crate::compar"
-    subsystem: "Core Data Structures"
-    notes: "Comparable mixin module"
+    target: crate::compar
+    subsystem: Core Data Structures
+    notes: Comparable mixin module
   complex.c:
     status: In Progress
-    target: "core_rs::complex"
-    subsystem: "Core Data Structures"
-    notes: "Ported (complex-A-01, string scanner statics): issign, read_sign, isdecimal, read_rat_nos, read_rat, isimagunit, skip_ws and helpers. Remaining: Complex class methods"
+    target: core_rs::complex
+    subsystem: Core Data Structures
+    notes: 'Ported (complex-A-01, string scanner statics): issign, read_sign, isdecimal,
+      read_rat_nos, read_rat, isimagunit, skip_ws and helpers. Remaining: Complex
+      class methods'
   enum.c:
-    status: Not Started
-    target: "crate::enum"
-    subsystem: "Core Data Structures"
-    notes: "Enumerable module"
+    status: Blocked
+    target: crate::enum
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit enum-A-01)'
   enumerator.c:
-    status: Not Started
-    target: "crate::enumerator"
-    subsystem: "Core Data Structures"
-    notes: "Enumerator class"
+    status: Blocked
+    target: crate::enumerator
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit enumerator-A-01)'
   hash.c:
-    status: Not Started
-    target: "crate::hash"
-    subsystem: "Core Data Structures"
-    notes: "Hash map implementation"
+    status: Blocked
+    target: crate::hash
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit hash-A-02)'
   numeric.c:
-    status: Not Started
-    target: "crate::numeric"
-    subsystem: "Core Data Structures"
-    notes: "Numeric base classes and operations"
+    status: Blocked
+    target: crate::numeric
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit numeric-A-02)'
   object.c:
-    status: Not Started
-    target: "crate::object"
-    subsystem: "Core Data Structures"
-    notes: "Object class methods and operations"
+    status: Blocked
+    target: crate::object
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit object-A-01)'
   pack.c:
-    status: Not Started
-    target: "crate::pack"
-    subsystem: "Core Data Structures"
-    notes: "Array#pack and String#unpack"
+    status: Blocked
+    target: crate::pack
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit pack-A-01)'
   proc.c:
-    status: Not Started
-    target: "crate::proc"
-    subsystem: "Core Data Structures"
-    notes: "Proc, Method, and Binding objects"
+    status: Blocked
+    target: crate::proc
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit proc-A-01)'
   range.c:
-    status: Not Started
-    target: "crate::range"
-    subsystem: "Core Data Structures"
-    notes: "Range object implementation"
+    status: Blocked
+    target: crate::range
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit range-A-01)'
   rational.c:
-    status: Not Started
-    target: "crate::rational"
-    subsystem: "Core Data Structures"
-    notes: "Rational number implementation"
+    status: Blocked
+    target: crate::rational
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit rational-A-01)'
   set.c:
-    status: Not Started
-    target: "crate::set"
-    subsystem: "Core Data Structures"
-    notes: "Core Set class support"
+    status: Blocked
+    target: crate::set
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit set-A-01)'
   string.c:
-    status: Not Started
-    target: "crate::string"
-    subsystem: "Core Data Structures"
-    notes: "String object implementation"
+    status: Blocked
+    target: crate::string
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit string-A-06)'
   struct.c:
-    status: Not Started
-    target: "crate::struct"
-    subsystem: "Core Data Structures"
-    notes: "Struct class implementation"
+    status: Blocked
+    target: crate::struct
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit struct-A-01)'
   symbol.c:
-    status: Not Started
-    target: "crate::symbol"
-    subsystem: "Core Data Structures"
-    notes: "Symbol management"
+    status: Blocked
+    target: crate::symbol
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit symbol-A-01)'
   time.c:
-    status: Not Started
-    target: "crate::time"
-    subsystem: "Core Data Structures"
-    notes: "Time class and operations"
+    status: Blocked
+    target: crate::time
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit time-A-04)'
   weakmap.c:
-    status: Not Started
-    target: "crate::weakmap"
-    subsystem: "Core Data Structures"
-    notes: "ObjectSpace::WeakMap"
-
-  # Virtual Machine & Execution
+    status: Blocked
+    target: crate::weakmap
+    subsystem: Core Data Structures
+    notes: 'Blocked: Verification build or test failure (unit weakmap-A-01)'
   vm.c:
     status: Not Started
-    target: "crate::vm"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Core virtual machine engine"
+    target: crate::vm
+    subsystem: Virtual Machine & Execution
+    notes: Core virtual machine engine
   vm_args.c:
     status: Not Started
-    target: "crate::vm::args"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Method argument passing"
+    target: crate::vm::args
+    subsystem: Virtual Machine & Execution
+    notes: Method argument passing
   vm_backtrace.c:
     status: Not Started
-    target: "crate::vm::backtrace"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Backtrace generation"
+    target: crate::vm::backtrace
+    subsystem: Virtual Machine & Execution
+    notes: Backtrace generation
   vm_dump.c:
     status: Not Started
-    target: "crate::vm::dump"
-    subsystem: "Virtual Machine & Execution"
-    notes: "VM state dump utilities"
+    target: crate::vm::dump
+    subsystem: Virtual Machine & Execution
+    notes: VM state dump utilities
   vm_eval.c:
     status: Not Started
-    target: "crate::vm::eval"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Method dispatch and evaluation"
+    target: crate::vm::eval
+    subsystem: Virtual Machine & Execution
+    notes: Method dispatch and evaluation
   vm_exec.c:
     status: Not Started
-    target: "crate::vm::exec"
-    subsystem: "Virtual Machine & Execution"
-    notes: "VM loop execution"
+    target: crate::vm::exec
+    subsystem: Virtual Machine & Execution
+    notes: VM loop execution
   vm_insnhelper.c:
     status: Not Started
-    target: "crate::vm::insnhelper"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Instruction execution helpers"
+    target: crate::vm::insnhelper
+    subsystem: Virtual Machine & Execution
+    notes: Instruction execution helpers
   vm_method.c:
     status: Not Started
-    target: "crate::vm::method"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Method table management"
+    target: crate::vm::method
+    subsystem: Virtual Machine & Execution
+    notes: Method table management
   vm_sync.c:
     status: Not Started
-    target: "crate::vm::sync"
-    subsystem: "Virtual Machine & Execution"
-    notes: "VM synchronization primitives"
+    target: crate::vm::sync
+    subsystem: Virtual Machine & Execution
+    notes: VM synchronization primitives
   vm_trace.c:
     status: Not Started
-    target: "crate::vm::trace"
-    subsystem: "Virtual Machine & Execution"
-    notes: "TracePoint and event hooks"
+    target: crate::vm::trace
+    subsystem: Virtual Machine & Execution
+    notes: TracePoint and event hooks
   eval.c:
-    status: Not Started
-    target: "crate::eval"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Top-level evaluation entry points"
+    status: Blocked
+    target: crate::eval
+    subsystem: Virtual Machine & Execution
+    notes: 'Blocked: Verification build or test failure (unit eval-A-01)'
   eval_error.c:
     status: Not Started
-    target: "crate::eval::error"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Evaluation error handling"
+    target: crate::eval::error
+    subsystem: Virtual Machine & Execution
+    notes: Evaluation error handling
   eval_jump.c:
     status: Not Started
-    target: "crate::eval::jump"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Control flow jumps (throw, break, return)"
+    target: crate::eval::jump
+    subsystem: Virtual Machine & Execution
+    notes: Control flow jumps (throw, break, return)
   cont.c:
-    status: Not Started
-    target: "crate::cont"
-    subsystem: "Virtual Machine & Execution"
-    notes: "Continuation and Fiber core"
-
-  # Memory & Garbage Collection
+    status: Blocked
+    target: crate::cont
+    subsystem: Virtual Machine & Execution
+    notes: 'Blocked: Verification build or test failure (unit cont-A-04)'
   gc.c:
     status: Not Started
-    target: "gc::mmtk"
-    subsystem: "Memory & Garbage Collection"
-    notes: "MMTk support is upstream modular GC, not a port by this project"
+    target: gc::mmtk
+    subsystem: Memory & Garbage Collection
+    notes: MMTk support is upstream modular GC, not a port by this project
   imemo.c:
-    status: Not Started
-    target: "crate::imemo"
-    subsystem: "Memory & Garbage Collection"
-    notes: "Internal memo objects"
+    status: Blocked
+    target: crate::imemo
+    subsystem: Memory & Garbage Collection
+    notes: 'Blocked: Verification build or test failure (unit imemo-A-01)'
   shape.c:
-    status: Not Started
-    target: "crate::shape"
-    subsystem: "Memory & Garbage Collection"
-    notes: "Object shape / property layout tracking"
+    status: Blocked
+    target: crate::shape
+    subsystem: Memory & Garbage Collection
+    notes: 'Blocked: Verification build or test failure (unit shape-A-02)'
   memory_view.c:
-    status: Not Started
-    target: "crate::memory_view"
-    subsystem: "Memory & Garbage Collection"
-    notes: "Memory view interface"
-
-  # Concurrency & Threads
+    status: Blocked
+    target: crate::memory_view
+    subsystem: Memory & Garbage Collection
+    notes: 'Blocked: Verification build or test failure (unit memory_view-A-01)'
   thread.c:
-    status: Not Started
-    target: "crate::thread"
-    subsystem: "Concurrency & Threads"
-    notes: "Thread management core"
+    status: Blocked
+    target: crate::thread
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit thread-A-02)'
   thread_none.c:
-    status: Not Started
-    target: "crate::thread::none"
-    subsystem: "Concurrency & Threads"
-    notes: "No-threads platform stubs"
+    status: Blocked
+    target: crate::thread::none
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit thread_none-A-03)'
   thread_pthread.c:
-    status: Not Started
-    target: "crate::thread::pthread"
-    subsystem: "Concurrency & Threads"
-    notes: "POSIX threads implementation"
+    status: Blocked
+    target: crate::thread::pthread
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit thread_pthread-A-04)'
   thread_sched.c:
-    status: Not Started
-    target: "crate::thread::sched"
-    subsystem: "Concurrency & Threads"
-    notes: "Thread scheduler"
+    status: Blocked
+    target: crate::thread::sched
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit thread_sched-A-01)'
   thread_sched_mn.c:
-    status: Not Started
-    target: "crate::thread::sched_mn"
-    subsystem: "Concurrency & Threads"
-    notes: "M:N thread scheduler"
+    status: Blocked
+    target: crate::thread::sched_mn
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit thread_sched_mn-A-02)'
   thread_sync.c:
-    status: Not Started
-    target: "crate::thread::sync"
-    subsystem: "Concurrency & Threads"
-    notes: "Thread synchronization primitives"
+    status: Blocked
+    target: crate::thread::sync
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit thread_sync-A-01)'
   thread_win32.c:
-    status: Not Started
-    target: "crate::thread::win32"
-    subsystem: "Concurrency & Threads"
-    notes: "Windows threads implementation"
+    status: Blocked
+    target: crate::thread::win32
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit thread_win32-A-03)'
   ractor.c:
-    status: Not Started
-    target: "crate::ractor"
-    subsystem: "Concurrency & Threads"
-    notes: "Ractor actor model implementation"
+    status: Blocked
+    target: crate::ractor
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit ractor-A-02)'
   ractor_sync.c:
-    status: Not Started
-    target: "crate::ractor::sync"
-    subsystem: "Concurrency & Threads"
-    notes: "Ractor synchronization"
+    status: Blocked
+    target: crate::ractor::sync
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit ractor_sync-A-03)'
   scheduler.c:
-    status: Not Started
-    target: "crate::scheduler"
-    subsystem: "Concurrency & Threads"
-    notes: "Fiber scheduler interface"
+    status: Blocked
+    target: crate::scheduler
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit scheduler-A-01)'
   signal.c:
-    status: Not Started
-    target: "crate::signal"
-    subsystem: "Concurrency & Threads"
-    notes: "Signal handling"
+    status: Blocked
+    target: crate::signal
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit signal-A-03)'
   concurrent_set.c:
-    status: Not Started
-    target: "crate::concurrent_set"
-    subsystem: "Concurrency & Threads"
-    notes: "Lock-free concurrent set"
-
-  # Parser & AST
+    status: Blocked
+    target: crate::concurrent_set
+    subsystem: Concurrency & Threads
+    notes: 'Blocked: Verification build or test failure (unit concurrent_set-A-01)'
   node.c:
     status: Not Started
-    target: "crate::parser::node"
-    subsystem: "Parser & AST"
-    notes: "AST node construction"
+    target: crate::parser::node
+    subsystem: Parser & AST
+    notes: AST node construction
   node_dump.c:
     status: Not Started
-    target: "crate::parser::node_dump"
-    subsystem: "Parser & AST"
-    notes: "AST dump utilities"
+    target: crate::parser::node_dump
+    subsystem: Parser & AST
+    notes: AST dump utilities
   ruby_parser.c:
     status: Not Started
-    target: "crate::parser::ruby_parser"
-    subsystem: "Parser & AST"
-    notes: "Ruby parser driver"
+    target: crate::parser::ruby_parser
+    subsystem: Parser & AST
+    notes: Ruby parser driver
   universal_parser.c:
     status: Not Started
-    target: "crate::parser::universal_parser"
-    subsystem: "Parser & AST"
-    notes: "Universal parser interface"
+    target: crate::parser::universal_parser
+    subsystem: Parser & AST
+    notes: Universal parser interface
   prism_compile.c:
     status: Not Started
-    target: "crate::parser::prism_compile"
-    subsystem: "Parser & AST"
-    notes: "Prism AST compiler"
+    target: crate::parser::prism_compile
+    subsystem: Parser & AST
+    notes: Prism AST compiler
   prism_init.c:
     status: Not Started
-    target: "crate::parser::prism_init"
-    subsystem: "Parser & AST"
-    notes: "Prism initialization"
+    target: crate::parser::prism_init
+    subsystem: Parser & AST
+    notes: Prism initialization
   ast.c:
     status: Not Started
-    target: "crate::parser::ast"
-    subsystem: "Parser & AST"
-    notes: "Ruby::AST module"
+    target: crate::parser::ast
+    subsystem: Parser & AST
+    notes: Ruby::AST module
   parser_st.c:
     status: Not Started
-    target: "crate::parser::parser_st"
-    subsystem: "Parser & AST"
-    notes: "Parser symbol table"
-
-  # IO & Filesystem
+    target: crate::parser::parser_st
+    subsystem: Parser & AST
+    notes: Parser symbol table
   io.c:
-    status: Not Started
-    target: "crate::io"
-    subsystem: "IO & Filesystem"
-    notes: "IO class operations"
+    status: Blocked
+    target: crate::io
+    subsystem: IO & Filesystem
+    notes: 'Blocked: Verification build or test failure (unit io-A-04)'
   io_buffer.c:
-    status: Not Started
-    target: "crate::io::buffer"
-    subsystem: "IO & Filesystem"
-    notes: "IO::Buffer implementation"
+    status: Blocked
+    target: crate::io::buffer
+    subsystem: IO & Filesystem
+    notes: 'Blocked: Verification build or test failure (unit io_buffer-A-03)'
   file.c:
-    status: Not Started
-    target: "crate::file"
-    subsystem: "IO & Filesystem"
-    notes: "File system operations"
+    status: Blocked
+    target: crate::file
+    subsystem: IO & Filesystem
+    notes: 'Blocked: Verification build or test failure (unit file-A-05)'
   dir.c:
-    status: Not Started
-    target: "crate::dir"
-    subsystem: "IO & Filesystem"
-    notes: "Directory operations"
+    status: Blocked
+    target: crate::dir
+    subsystem: IO & Filesystem
+    notes: 'Blocked: Verification build or test failure (unit dir-A-03)'
   process.c:
-    status: Not Started
-    target: "crate::process"
-    subsystem: "IO & Filesystem"
-    notes: "Process management"
+    status: Blocked
+    target: crate::process
+    subsystem: IO & Filesystem
+    notes: 'Blocked: Verification build or test failure (unit process-A-05)'
   pathname.c:
     status: Not Started
-    target: "crate::pathname"
-    subsystem: "IO & Filesystem"
-    notes: "Pathname standard helper"
+    target: crate::pathname
+    subsystem: IO & Filesystem
+    notes: Pathname standard helper
   random.c:
-    status: Not Started
-    target: "crate::random"
-    subsystem: "IO & Filesystem"
-    notes: "Random number generation"
-
-  # Encoding & Regex
+    status: Blocked
+    target: crate::random
+    subsystem: IO & Filesystem
+    notes: 'Blocked: Verification build or test failure (unit random-A-02)'
   encoding.c:
-    status: Not Started
-    target: "crate::encoding"
-    subsystem: "Encoding & Regex"
-    notes: "String encoding support"
+    status: Blocked
+    target: crate::encoding
+    subsystem: Encoding & Regex
+    notes: 'Blocked: Verification build or test failure (unit encoding-A-04)'
   transcode.c:
-    status: Not Started
-    target: "crate::transcode"
-    subsystem: "Encoding & Regex"
-    notes: "Character transcoding"
+    status: Blocked
+    target: crate::transcode
+    subsystem: Encoding & Regex
+    notes: 'Blocked: Verification build or test failure (unit transcode-A-02)'
   re.c:
-    status: In Progress
-    target: "core_rs::re"
-    subsystem: "Encoding & Regex"
-    notes: "Ported: rb_memsearch (all search algorithms), rb_memcicmp. Remaining: Regexp class interface"
+    status: Blocked
+    target: core_rs::re
+    subsystem: Encoding & Regex
+    notes: 'Blocked: Verification build or test failure (unit re-A-02)'
   regcomp.c:
     status: Not Started
-    target: "crate::regcomp"
-    subsystem: "Encoding & Regex"
-    notes: "Onigmo regex compiler"
+    target: crate::regcomp
+    subsystem: Encoding & Regex
+    notes: Onigmo regex compiler
   regenc.c:
     status: Not Started
-    target: "crate::regenc"
-    subsystem: "Encoding & Regex"
-    notes: "Onigmo encoding engine"
+    target: crate::regenc
+    subsystem: Encoding & Regex
+    notes: Onigmo encoding engine
   regerror.c:
     status: Not Started
-    target: "crate::regerror"
-    subsystem: "Encoding & Regex"
-    notes: "Onigmo regex error reporting"
+    target: crate::regerror
+    subsystem: Encoding & Regex
+    notes: Onigmo regex error reporting
   regexec.c:
     status: Not Started
-    target: "crate::regexec"
-    subsystem: "Encoding & Regex"
-    notes: "Onigmo regex execution engine"
+    target: crate::regexec
+    subsystem: Encoding & Regex
+    notes: Onigmo regex execution engine
   regparse.c:
     status: Not Started
-    target: "crate::regparse"
-    subsystem: "Encoding & Regex"
-    notes: "Onigmo regex parser"
+    target: crate::regparse
+    subsystem: Encoding & Regex
+    notes: Onigmo regex parser
   regsyntax.c:
     status: Not Started
-    target: "crate::regsyntax"
-    subsystem: "Encoding & Regex"
-    notes: "Onigmo syntax options"
-
-  # Utilities & Support
+    target: crate::regsyntax
+    subsystem: Encoding & Regex
+    notes: Onigmo syntax options
   st.c:
-    status: Not Started
-    target: "crate::st"
-    subsystem: "Utilities & Support"
-    notes: "Symbol table / hash table internal implementation"
+    status: Blocked
+    target: crate::st
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit st-A-11)'
   util.c:
-    status: In Progress
-    target: "core_rs::util"
-    subsystem: "Utilities & Support"
-    notes: "Ported: ruby_scan_digits, ruby_scan_oct, ruby_scan_hex, ruby_strtoul, ruby_each_words. Remaining: qsort, getcwd, dtoa/strtod"
+    status: Blocked
+    target: core_rs::util
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit util-A-01)'
   variable.c:
-    status: Not Started
-    target: "crate::variable"
-    subsystem: "Utilities & Support"
-    notes: "Global and instance variable access"
+    status: Blocked
+    target: crate::variable
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit variable-A-02)'
   version.c:
-    status: Not Started
-    target: "crate::version"
-    subsystem: "Utilities & Support"
-    notes: "Ruby version constants"
+    status: Blocked
+    target: crate::version
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit version-A-01)'
   sprintf.c:
-    status: Not Started
-    target: "crate::sprintf"
-    subsystem: "Utilities & Support"
-    notes: "Kernel#sprintf formatting"
+    status: Blocked
+    target: crate::sprintf
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit sprintf-A-01)'
   strftime.c:
-    status: Not Started
-    target: "crate::strftime"
-    subsystem: "Utilities & Support"
-    notes: "Date/time formatting"
+    status: Blocked
+    target: crate::strftime
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit strftime-A-01)'
   vsnprintf.c:
-    status: Not Started
-    target: "crate::vsnprintf"
-    subsystem: "Utilities & Support"
-    notes: "Portable vsnprintf"
+    status: Blocked
+    target: crate::vsnprintf
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit vsnprintf-A-01)'
   siphash.c:
-    status: Not Started
-    target: "crate::siphash"
-    subsystem: "Utilities & Support"
-    notes: "SipHash hashing algorithm"
+    status: Blocked
+    target: crate::siphash
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit siphash-A-03)'
   id_table.c:
-    status: Not Started
-    target: "crate::id_table"
-    subsystem: "Utilities & Support"
-    notes: "ID lookup table"
+    status: Blocked
+    target: crate::id_table
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit id_table-A-01)'
   debug.c:
-    status: Not Started
-    target: "crate::debug"
-    subsystem: "Utilities & Support"
-    notes: "Debugging helpers"
+    status: Blocked
+    target: crate::debug
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit debug-A-02)'
   debug_counter.c:
     status: Not Started
-    target: "crate::debug_counter"
-    subsystem: "Utilities & Support"
-    notes: "Performance debug counters"
+    target: crate::debug_counter
+    subsystem: Utilities & Support
+    notes: Performance debug counters
   dln.c:
-    status: Not Started
-    target: "crate::dln"
-    subsystem: "Utilities & Support"
-    notes: "Dynamic linking loader"
+    status: Blocked
+    target: crate::dln
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit dln-A-01)'
   dln_find.c:
     status: Not Started
-    target: "crate::dln_find"
-    subsystem: "Utilities & Support"
-    notes: "Dynamic loading path search"
+    target: crate::dln_find
+    subsystem: Utilities & Support
+    notes: Dynamic loading path search
   addr2line.c:
-    status: Not Started
-    target: "crate::addr2line"
-    subsystem: "Utilities & Support"
-    notes: "Address to source line resolution"
+    status: Blocked
+    target: crate::addr2line
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit addr2line-A-08)'
   error.c:
-    status: Not Started
-    target: "crate::error"
-    subsystem: "Utilities & Support"
-    notes: "Exception and error handling"
+    status: Blocked
+    target: crate::error
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit error-A-02)'
   inits.c:
     status: Not Started
-    target: "crate::inits"
-    subsystem: "Utilities & Support"
-    notes: "Subsystem initializers"
+    target: crate::inits
+    subsystem: Utilities & Support
+    notes: Subsystem initializers
   load.c:
-    status: Not Started
-    target: "crate::load"
-    subsystem: "Utilities & Support"
-    notes: "Require and load mechanism"
+    status: Blocked
+    target: crate::load
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit load-A-01)'
   loadpath.c:
     status: Not Started
-    target: "crate::loadpath"
-    subsystem: "Utilities & Support"
-    notes: "LOAD_PATH initialization"
+    target: crate::loadpath
+    subsystem: Utilities & Support
+    notes: LOAD_PATH initialization
   localeinit.c:
     status: Not Started
-    target: "crate::localeinit"
-    subsystem: "Utilities & Support"
-    notes: "Locale initialization"
+    target: crate::localeinit
+    subsystem: Utilities & Support
+    notes: Locale initialization
   main.c:
     status: Not Started
-    target: "crate::main"
-    subsystem: "Utilities & Support"
-    notes: "Main entry point"
+    target: crate::main
+    subsystem: Utilities & Support
+    notes: Main entry point
   marshal.c:
-    status: Not Started
-    target: "crate::marshal"
-    subsystem: "Utilities & Support"
-    notes: "Marshal serialization"
+    status: Blocked
+    target: crate::marshal
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit marshal-A-02)'
   math.c:
-    status: Not Started
-    target: "crate::math"
-    subsystem: "Utilities & Support"
-    notes: "Math module functions"
+    status: Blocked
+    target: crate::math
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit math-A-01)'
   mini_builtin.c:
     status: Not Started
-    target: "crate::mini_builtin"
-    subsystem: "Utilities & Support"
-    notes: "Miniruby builtin features"
+    target: crate::mini_builtin
+    subsystem: Utilities & Support
+    notes: Miniruby builtin features
   miniinit.c:
     status: Not Started
-    target: "crate::miniinit"
-    subsystem: "Utilities & Support"
-    notes: "Miniruby initializers"
+    target: crate::miniinit
+    subsystem: Utilities & Support
+    notes: Miniruby initializers
   builtin.c:
     status: Not Started
-    target: "crate::builtin"
-    subsystem: "Utilities & Support"
-    notes: "Builtin Ruby class loader"
+    target: crate::builtin
+    subsystem: Utilities & Support
+    notes: Builtin Ruby class loader
   box.c:
-    status: Not Started
-    target: "crate::box"
-    subsystem: "Utilities & Support"
-    notes: "Value boxing helpers"
-
-  # Platform & Miscellaneous
+    status: Blocked
+    target: crate::box
+    subsystem: Utilities & Support
+    notes: 'Blocked: Verification build or test failure (unit box-A-02)'
   dmydln.c:
     status: N/A
-    target: "N/A"
-    subsystem: "Platform & Miscellaneous"
-    notes: "Dummy dynamic linking stub"
+    target: N/A
+    subsystem: Platform & Miscellaneous
+    notes: Dummy dynamic linking stub
   dmyenc.c:
     status: N/A
-    target: "N/A"
-    subsystem: "Platform & Miscellaneous"
-    notes: "Dummy encoding stub"
+    target: N/A
+    subsystem: Platform & Miscellaneous
+    notes: Dummy encoding stub
   dmyext.c:
     status: N/A
-    target: "N/A"
-    subsystem: "Platform & Miscellaneous"
-    notes: "Dummy extension stub"
+    target: N/A
+    subsystem: Platform & Miscellaneous
+    notes: Dummy extension stub
   goruby.c:
     status: N/A
-    target: "N/A"
-    subsystem: "Platform & Miscellaneous"
-    notes: "Golf Ruby executable wrapper"
+    target: N/A
+    subsystem: Platform & Miscellaneous
+    notes: Golf Ruby executable wrapper
   ruby-runner.c:
     status: N/A
-    target: "N/A"
-    subsystem: "Platform & Miscellaneous"
-    notes: "Development runner binary"
+    target: N/A
+    subsystem: Platform & Miscellaneous
+    notes: Development runner binary
   ruby.c:
-    status: Not Started
-    target: "crate::ruby_cli"
-    subsystem: "Platform & Miscellaneous"
-    notes: "Main Ruby CLI argument handling"
+    status: Blocked
+    target: crate::ruby_cli
+    subsystem: Platform & Miscellaneous
+    notes: 'Blocked: Verification build or test failure (unit ruby-A-02)'
   rubystub.c:
     status: N/A
-    target: "N/A"
-    subsystem: "Platform & Miscellaneous"
-    notes: "Embedded stub"
+    target: N/A
+    subsystem: Platform & Miscellaneous
+    notes: Embedded stub
   sparc.c:
     status: N/A
-    target: "N/A"
-    subsystem: "Platform & Miscellaneous"
-    notes: "SPARC architecture assembly helper"
+    target: N/A
+    subsystem: Platform & Miscellaneous
+    notes: SPARC architecture assembly helper
+  id.c:
+    status: Blocked
+    notes: 'Blocked: Verification build or test failure (unit id-A-01)'
+  lex.c:
+    status: Blocked
+    notes: 'Blocked: Verification build or test failure (unit lex-A-01)'
+  miniprelude.c:
+    status: Blocked
+    notes: 'Blocked: Verification build or test failure (unit miniprelude-A-01)'
+  parse.c:
+    status: Blocked
+    notes: 'Blocked: Verification build or test failure (unit parse-A-28)'
+  mt19937.c:
+    status: Blocked
+    notes: 'Blocked: Verification build or test failure (unit mt19937-A-01)'
+  dtoa.c:
+    status: Blocked
+    notes: 'Blocked: Verification build or test failure (unit dtoa-A-08)'
