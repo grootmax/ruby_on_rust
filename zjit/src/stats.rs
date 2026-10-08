@@ -848,7 +848,7 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
     }
 
     // Memory usage stats
-    let jit_frame_region_bytes = ZJITState::get_jit_frame_table().allocator().map_or(0, |allocator| allocator.mapped_bytes());
+    let jit_frame_region_bytes = ZJITState::get_jit_frame_allocator().map_or(0, |allocator| allocator.mapped_bytes());
     let code_region_bytes = ZJITState::get_code_block().mapped_region_size();
     set_stat_usize!(hash, "jit_frame_region_bytes", jit_frame_region_bytes);
     set_stat_usize!(hash, "code_region_bytes", code_region_bytes);

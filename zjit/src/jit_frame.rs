@@ -72,86 +72,25 @@ impl JITFrameAllocator {
     }
 }
 
-/// A typed handle wrapping a JITFrameTable index for external code references.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct JITFrameId(pub usize);
-
-impl JITFrameId {
-    /// Create a new JITFrameId wrapping an index.
-    pub fn new(index: usize) -> Self {
-        Self(index)
-    }
-
-    /// Return the table index wrapped by this JITFrameId.
-    pub fn index(self) -> usize {
-        self.0
-    }
-}
-
-/// Centralized frame registry table for JIT frames.
-pub struct JITFrameTable {
-    /// Storage for frame raw pointers.
-    frames: Vec<*mut JITFrame>,
-
-    /// Low-address bump allocator for JIT frames.
-    allocator: Option<JITFrameAllocator>,
-}
-
-impl JITFrameTable {
-    /// Create a new JITFrameTable instance.
-    pub fn new() -> Self {
-        Self {
-            frames: Vec::new(),
-            allocator: JITFrameAllocator::new(),
-        }
-    }
-
-    /// Return the number of frames registered in the table.
-    pub fn len(&self) -> usize {
-        self.frames.len()
-    }
-
-    /// Return whether the frame table is empty.
-    pub fn is_empty(&self) -> bool {
-        self.frames.is_empty()
-    }
-
-    /// Reference to the underlying JITFrameAllocator, if available.
-    pub fn allocator(&self) -> Option<&JITFrameAllocator> {
-        self.allocator.as_ref()
-    }
-
-    /// Mutable reference to the underlying JITFrameAllocator, if available.
-    pub fn allocator_mut(&mut self) -> Option<&mut JITFrameAllocator> {
-        self.allocator.as_mut()
-    }
-
-    /// Index-validated lookup returning the raw JITFrame pointer for a given typed handle,
-    /// or None if the index is out of bounds.
-    pub fn get(&self, id: JITFrameId) -> Option<*mut JITFrame> {
-        self.frames.get(id.index()).copied()
-    }
-
-    /// Index-validated lookup by raw index.
-    pub fn get_by_index(&self, index: usize) -> Option<*mut JITFrame> {
-        self.frames.get(index).copied()
-    }
-
-    /// Allocate a JITFrame and store it in the table, returning a typed JITFrameId handle
-    /// and raw pointer.
-    pub fn alloc(
-        &mut self,
+impl JITFrame {
+    /// Allocate a JITFrame and its trailing stack map on the heap, register it
+    /// with ZJITState, and return a raw pointer that remains valid for the
+    /// lifetime of the process.
+    fn alloc(
         pc: *const VALUE,
         iseq: IseqPtr,
         materialize_block_code: bool,
         stack_size: usize,
-    ) -> (JITFrameId, *const JITFrame) {
+    ) -> *const Self {
+        // JITFrame ends with a flexible stack[] array, so allocate enough
+        // space for the fixed fields plus the requested stack map entries.
         let frame_size = size_of::<JITFrame>()
             .checked_add(stack_size.checked_mul(size_of::<VALUE>()).unwrap())
             .unwrap();
         let layout = Layout::from_size_align(frame_size, align_of::<JITFrame>()).unwrap();
-
-        let mut raw_ptr = match self.allocator.as_mut() {
+        // Prefer the low-address arena so that call sites can store this pointer
+        // as a 32-bit immediate. Falling back to the heap only costs code size.
+        let mut raw_ptr = match ZJITState::get_jit_frame_allocator() {
             Some(arena) => arena.try_alloc(layout) as *mut JITFrame,
             None => ptr::null_mut(),
         };
@@ -172,63 +111,14 @@ impl JITFrameTable {
                 stack: __IncompleteArrayField::new(),
             });
         }
-
-        let index = self.frames.len();
-        self.frames.push(raw_ptr);
-        (JITFrameId::new(index), raw_ptr as *const _)
+        ZJITState::get_jit_frames().push(raw_ptr);
+        raw_ptr as *const _
     }
 
-    /// Allocate a JITFrame for an ISEQ frame.
-    pub fn alloc_iseq(
-        &mut self,
-        pc: *const VALUE,
-        iseq: IseqPtr,
-        stack_size: usize,
-    ) -> (JITFrameId, *const JITFrame) {
-        let materialize_block_code = !iseq_may_write_block_code(iseq);
-        self.alloc(pc, iseq, materialize_block_code, stack_size)
-    }
-
-    /// Iterate over active frames and mark ISEQ pointers for GC.
-    pub fn gc_mark(&self) {
-        for &frame_ptr in &self.frames {
-            if !frame_ptr.is_null() {
-                unsafe { (*frame_ptr).mark(); }
-            }
-        }
-    }
-
-    /// Iterate over active frames and update ISEQ references during GC compaction.
-    pub fn gc_update_references(&mut self) {
-        for &frame_ptr in &self.frames {
-            if !frame_ptr.is_null() {
-                unsafe { (*frame_ptr).update_references(); }
-            }
-        }
-    }
-
-    /// Bounded iteration over registered frames returning (JITFrameId, *const JITFrame) pairs.
-    pub fn iter(&self) -> impl Iterator<Item = (JITFrameId, *const JITFrame)> + '_ {
-        self.frames.iter().enumerate().map(|(idx, &ptr)| (JITFrameId::new(idx), ptr as *const _))
-    }
-}
-
-impl Default for JITFrameTable {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl JITFrame {
-    /// Create a JITFrame for an ISEQ frame and register it in JITFrameTable.
+    /// Create a JITFrame for an ISEQ frame.
     pub fn new_iseq(pc: *const VALUE, iseq: IseqPtr, stack_size: usize) -> *const Self {
-        let (_id, ptr) = ZJITState::get_jit_frame_table().alloc_iseq(pc, iseq, stack_size);
-        ptr
-    }
-
-    /// Create a JITFrame for an ISEQ frame and return both the JITFrameId handle and raw pointer.
-    pub fn new_iseq_with_id(pc: *const VALUE, iseq: IseqPtr, stack_size: usize) -> (JITFrameId, *const Self) {
-        ZJITState::get_jit_frame_table().alloc_iseq(pc, iseq, stack_size)
+        let materialize_block_code = !iseq_may_write_block_code(iseq);
+        Self::alloc(pc, iseq, materialize_block_code, stack_size)
     }
 
     /// Mark the iseq pointer for GC. Called from rb_zjit_root_mark.
@@ -258,8 +148,6 @@ pub extern "C" fn rb_zjit_jit_frame_update_references(jit_frame: *mut JITFrame) 
 
 #[cfg(test)]
 mod tests {
-    use super::{JITFrame, JITFrameId, JITFrameTable};
-    use std::ptr;
     use crate::cruby::{eval, inspect};
     use insta::assert_snapshot;
 
@@ -587,38 +475,5 @@ mod tests {
             test
             test
         "), @"[2, 22, 4, 24]");
-    }
-
-    #[test]
-    fn test_jit_frame_table_basic_operations() {
-        let mut table = JITFrameTable::new();
-        assert_eq!(table.len(), 0);
-        assert!(table.is_empty());
-
-        let (id0, ptr0) = table.alloc(ptr::null(), ptr::null_mut(), false, 0);
-        assert_eq!(id0.index(), 0);
-        assert_eq!(table.len(), 1);
-        assert!(!table.is_empty());
-        assert_eq!(table.get(id0), Some(ptr0 as *mut JITFrame));
-        assert_eq!(table.get_by_index(0), Some(ptr0 as *mut JITFrame));
-
-        let (id1, ptr1) = table.alloc(ptr::null(), ptr::null_mut(), false, 2);
-        assert_eq!(id1.index(), 1);
-        assert_eq!(table.len(), 2);
-        assert_eq!(table.get(id1), Some(ptr1 as *mut JITFrame));
-
-        // Out of bounds lookup returns None
-        assert_eq!(table.get(JITFrameId::new(999)), None);
-        assert_eq!(table.get_by_index(999), None);
-
-        // Bounded iteration
-        let pairs: Vec<(JITFrameId, *const JITFrame)> = table.iter().collect();
-        assert_eq!(pairs.len(), 2);
-        assert_eq!(pairs[0], (id0, ptr0));
-        assert_eq!(pairs[1], (id1, ptr1));
-
-        // GC iteration methods call without panicking
-        table.gc_mark();
-        table.gc_update_references();
     }
 }

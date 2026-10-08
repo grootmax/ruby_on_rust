@@ -8,7 +8,7 @@ use std::sync::atomic::Ordering;
 use crate::invariants::Invariants;
 use crate::asm::CodeBlock;
 use crate::options::{get_option, rb_zjit_prepare_options};
-use crate::jit_frame::JITFrameTable;
+use crate::jit_frame::{JITFrame, JITFrameAllocator};
 use crate::stats::{Counters, InsnCounters, PerfettoTracer};
 use crate::virtualmem::CodePtr;
 use std::sync::atomic::AtomicUsize;
@@ -84,8 +84,13 @@ pub struct ZJITState {
     /// Perfetto tracer for --zjit-trace-exits
     perfetto_tracer: Option<PerfettoTracer>,
 
-    /// Centralized registry table for JIT frames
-    jit_frame_table: JITFrameTable,
+    /// Frame metadata for ISEQ and C calls that are known at compile time
+    jit_frames: Vec<*mut JITFrame>,
+
+    /// Bump allocator that serves JITFrame allocations from address space below
+    /// INT32_MAX, so that call sites can store frame pointers as 32-bit immediates.
+    /// None when the platform cannot provide low memory.
+    jit_frame_allocator: Option<JITFrameAllocator>,
 }
 
 /// Tracks the initialization progress
@@ -165,7 +170,8 @@ impl ZJITState {
             ccall_counter_pointers: HashMap::new(),
             iseq_calls_count_pointers: HashMap::new(),
             perfetto_tracer,
-            jit_frame_table: JITFrameTable::new(),
+            jit_frames: vec![],
+            jit_frame_allocator: JITFrameAllocator::new(),
         };
         unsafe { ZJIT_STATE = Enabled(zjit_state); }
 
@@ -205,9 +211,13 @@ impl ZJITState {
         &mut ZJITState::get_instance().invariants
     }
 
-    /// Get a mutable reference to the JIT frame registry table
-    pub fn get_jit_frame_table() -> &'static mut JITFrameTable {
-        &mut ZJITState::get_instance().jit_frame_table
+    pub fn get_jit_frames() -> &'static mut Vec<*mut JITFrame> {
+        &mut ZJITState::get_instance().jit_frames
+    }
+
+    /// Get a mutable reference to the JITFrame allocator
+    pub fn get_jit_frame_allocator() -> Option<&'static mut JITFrameAllocator> {
+        ZJITState::get_instance().jit_frame_allocator.as_mut()
     }
 
     pub fn get_method_annotations() -> &'static cruby_methods::Annotations {
