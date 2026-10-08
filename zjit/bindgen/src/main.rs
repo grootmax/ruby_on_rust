@@ -63,8 +63,8 @@ fn main() {
         // Makes the output more compact
         .merge_extern_blocks(true)
 
-        // Enable layout tests
-        .layout_tests(true)
+        // Don't want layout tests as they are platform dependent
+        .layout_tests(false)
 
         // Block for stability since output is different on Darwin and Linux
         .blocklist_type("size_t")
@@ -90,9 +90,8 @@ fn main() {
 
         // This struct is public to Ruby C extensions
         .allowlist_type("RBasic")
-        .allowlist_type("RString")
+
         .allowlist_type("RArray")
-        .allowlist_type("RObject")
         .allowlist_type("rb_gc_zjit_fastpath_kind")
         .allowlist_type("rb_gc_zjit_fastpath")
         .allowlist_type("rb_gc_zjit_fastpath_data")
