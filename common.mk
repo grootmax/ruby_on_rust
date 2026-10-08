@@ -651,13 +651,13 @@ RDOC_COVERAGE_EXCLUDES = -x ^ext/json -x ^ext/openssl -x ^ext/psych \
 
 rdoc-coverage: PHONY $(RDOC_DEPENDS) $(RBCONFIG)
 	@echo Generating RDoc coverage report
-	$(Q) $(RDOC) --quiet -C $(RDOCFLAGS) $(RDOC_COVERAGE_EXCLUDES) .
+	$(Q)-$(RDOC) --quiet -C $(RDOCFLAGS) $(RDOC_COVERAGE_EXCLUDES) .
 
 check-doc-lock: PHONY rdoc
 	$(Q) $(XRUBY) "$(srcdir)/tool/doc_lock.rb" --check
 
 undocumented: PHONY $(RDOC_DEPENDS) $(RBCONFIG)
-	$(Q) $(RDOC) --quiet -C $(RDOCFLAGS) $(RDOC_COVERAGE_EXCLUDES) . | \
+	$(Q)-$(RDOC) --quiet -C $(RDOCFLAGS) $(RDOC_COVERAGE_EXCLUDES) . | \
 	sed -n \
 	-e '/^ *# in file /{' -e 's///;N;s/\n/: /p' -e '}' \
 	-e 's/^ *\(.*[^ ]\) *# in file \(.*\)/\2: \1/p' | \
