@@ -110,7 +110,6 @@ jobs:
           cache-bin: false
       - name: Set MMTk environment variables
         run: |
-          echo 'EXCLUDES=../src/test/.excludes-mmtk' >> $GITHUB_ENV
           echo 'MSPECOPT=-B../src/spec/mmtk.mspec' >> $GITHUB_ENV
         if: ${{ matrix.gc.name == 'mmtk' }}
 

@@ -225,7 +225,6 @@ jobs:
         env:
           RUBY_TESTOPTS: '-q --tty=no'
           TESTS: ${{ matrix.tests }}
-          EXCLUDES: '../src/test/.excludes-zjit'
           TEST_BUNDLED_GEMS_ALLOW_FAILURES: ''
           PRECHECK_BUNDLED_GEMS: 'no'
           SYNTAX_SUGGEST_TIMEOUT: '30'

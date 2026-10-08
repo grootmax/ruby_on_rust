@@ -76,7 +76,6 @@ jobs:
         run: make -s ${{ matrix.test_task }} RUN_OPTS="$RUN_OPTS" SPECOPTS="$SPECOPTS"
         env:
           RUBY_TESTOPTS: ${{ matrix.testopts }}
-          EXCLUDES: '../src/test/.excludes-parsey'
           RUN_OPTS: ${{ matrix.run_opts || '--parser=parse.y' }}
           SPECOPTS: ${{ matrix.specopts || '-T --parser=parse.y' }}
           TEST_BUNDLED_GEMS_ALLOW_FAILURES: ''
