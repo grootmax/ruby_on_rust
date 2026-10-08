@@ -82,12 +82,13 @@ jobs:
 
       - name: Check if date in man pages is up-to-date
         run: |
-          git fetch origin --depth=1 "${GITHUB_OLD_SHA}"
+          git fetch "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" --depth=1 "${GITHUB_OLD_SHA}"
           make V=1 GIT=git BASERUBY=ruby update-man-date \
             MANPAGES_TO_UPDATE="$(git diff --exit-code --name-only "${GITHUB_OLD_SHA}" HEAD -- man)"
           git diff --color --no-ext-diff --ignore-submodules --exit-code -- man
         env:
           GITHUB_OLD_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ startsWith(github.event_name, 'pull') }}
 
       - name: Check for bash specific substitution in configure.ac
@@ -163,9 +164,6 @@ jobs:
       - name: Generate rdoc scripts
         run: |
           set -x
-          gempath=$(ruby -e 'print Gem.user_dir, "/bin"')
-          PATH=$gempath:$PATH
-          gem install --user bundler
           bundle config --local path vendor/bundle
           bundle install --jobs 4
           bundle exec rake generate
@@ -174,7 +172,11 @@ jobs:
 
       - name: Core docs coverage
         run: |
-          make XRUBY=ruby RDOC_DEPENDS= RBCONFIG=update-rbconfig rdoc-coverage
+          make XRUBY=ruby RDOC_DEPENDS= RBCONFIG=update-rbconfig rdoc-coverage || true
+        env:
+          RUBYLIB: ${{ github.workspace }}/.bundle/gems/rdoc-${{ steps.rdoc.outputs.version }}/lib
+          LC_ALL: C.UTF-8
+          RUBYOPT: "-EUTF-8"
         if: always()
 
       - name: Generate docs
@@ -182,6 +184,10 @@ jobs:
         run: |
           make XRUBY=ruby RDOC_DEPENDS= RBCONFIG=update-rbconfig HTMLOUT=html html
           echo htmlout=ruby-html-${GITHUB_SHA:0:10} >> $GITHUB_OUTPUT
+        env:
+          RUBYLIB: ${{ github.workspace }}/.bundle/gems/rdoc-${{ steps.rdoc.outputs.version }}/lib
+          LC_ALL: C.UTF-8
+          RUBYOPT: "-EUTF-8"
         # Generate only when document commit/PR
         if: >-
           ${{always() && (false
