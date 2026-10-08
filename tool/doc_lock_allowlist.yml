@@ -1,0 +1,9 @@
+# Approved documentation differences between CRuby and Ruby on Rust
+# Use this allowlist to temporarily permit documentation drift during development.
+
+classes: []
+methods: []
+parameter_mismatches: []
+call_seq_mismatches: []
+comment_mismatches: []
+exclusions: []

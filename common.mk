@@ -653,6 +653,9 @@ rdoc-coverage: PHONY $(RDOC_DEPENDS) $(RBCONFIG)
 	@echo Generating RDoc coverage report
 	$(Q) $(RDOC) --quiet -C $(RDOCFLAGS) $(RDOC_COVERAGE_EXCLUDES) .
 
+check-doc-lock: PHONY rdoc
+	$(Q) $(XRUBY) "$(srcdir)/tool/doc_lock.rb" --check
+
 undocumented: PHONY $(RDOC_DEPENDS) $(RBCONFIG)
 	$(Q) $(RDOC) --quiet -C $(RDOCFLAGS) $(RDOC_COVERAGE_EXCLUDES) . | \
 	sed -n \
@@ -1037,7 +1040,7 @@ $(ENC_MK): $(srcdir)/enc/make_encmake.rb $(srcdir)/enc/Makefile.in $(srcdir)/enc
 
 .PHONY: PHONY all fake prereq incs srcs preludes help
 .PHONY: test install install-nodoc install-doc dist
-.PHONY: loadpath golf capi rdoc install-prereq clear-installed-list
+.PHONY: loadpath golf capi rdoc check-doc-lock install-prereq clear-installed-list
 .PHONY: clean clean-ext clean-local clean-enc clean-golf clean-rdoc clean-html clean-extout
 .PHONY: clean-srcs clean-srcs-local clean-srcs-ext
 .PHONY: distclean distclean-ext distclean-local distclean-enc distclean-golf distclean-extout
