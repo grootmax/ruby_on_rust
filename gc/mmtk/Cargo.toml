@@ -8,12 +8,8 @@ edition = "2024"
 name = "mmtk_ruby"
 crate-type = ["cdylib", "staticlib"]
 
-[profile.dev]
-panic = "abort"
-
 [profile.release]
 lto = true
-panic = "abort"
 
 [dependencies]
 libc = "0.2"

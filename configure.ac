@@ -4026,7 +4026,7 @@ AS_CASE(["${ZJIT_SUPPORT}"],
     AC_DEFINE(USE_ZJIT, 0)
 ])
 
-RUSTC_FLAGS='-g -C lto=thin -C opt-level=3 -C panic=abort -C overflow-checks=on'
+RUSTC_FLAGS='-g -C lto=thin -C opt-level=3 -C overflow-checks=on'
 AS_IF([test -n "${rustc_flags}"], [
     RUSTC_FLAGS="${RUSTC_FLAGS} ${rustc_flags}"
 ])

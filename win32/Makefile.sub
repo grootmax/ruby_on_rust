@@ -350,7 +350,7 @@ INSTALL_STATIC_LIBRARY = no
 # Explicit, so that a windows-gnu default toolchain does not build libyjit.a.
 JIT_RUST_FLAGS = --crate-type=staticlib --target=x86_64-pc-windows-msvc --cfg feature=\"stats_allocator\"
 !if !defined(RUSTC_FLAGS)
-RUSTC_FLAGS = -g -C lto=thin -C opt-level=3 -C panic=abort -C overflow-checks=on
+RUSTC_FLAGS = -g -C lto=thin -C opt-level=3 -C overflow-checks=on
 !endif
 !elseif defined(YJIT_SUPPORT) && "$(YJIT_SUPPORT)" != "no"
 !error YJIT_SUPPORT accepts only yes or no, not $(YJIT_SUPPORT).  Retry without YJIT_SUPPORT=$(YJIT_SUPPORT).

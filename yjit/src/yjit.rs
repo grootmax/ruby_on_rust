@@ -7,7 +7,7 @@ use crate::stats::YjitExitLocations;
 use crate::stats::incr_counter;
 use crate::stats::{with_compile_time,rb_yjit_max_compile_time_ns,rb_yjit_total_compile_time_ns};
 
-use std::os::raw::c_char;
+use std::os::raw::{c_char, c_int};
 use std::time::Instant;
 use crate::log::Log;
 
@@ -59,14 +59,12 @@ pub fn out_of_memory_p() -> bool {
 /// could redefine core methods (e.g. Kernel.prepend via bundler).
 #[no_mangle]
 pub extern "C" fn rb_yjit_init_builtin_cmes() {
-    init_panic_hook();
     yjit_reg_method_codegen_fns();
 }
 
 /// This function is called from C code
 #[no_mangle]
 pub extern "C" fn rb_yjit_init(yjit_enabled: bool) {
-    init_panic_hook();
     // If --yjit-disable, yjit_init() will not be called until RubyVM::YJIT.enable.
     if yjit_enabled {
         yjit_init();
@@ -75,7 +73,6 @@ pub extern "C" fn rb_yjit_init(yjit_enabled: bool) {
 
 /// Initialize and enable YJIT. You should call this at boot or with GVL.
 fn yjit_init() {
-    init_panic_hook();
     // TODO: need to make sure that command-line options have been
     // initialized by CRuby
 
@@ -126,49 +123,35 @@ pub extern "C" fn rb_yjit_free_at_exit() {
     yjit_shutdown_free_codegen_table();
 }
 
-/// Register a custom Rust panic hook to format diagnostic logs (location and message) to stderr before process termination via abort.
-pub fn init_panic_hook() {
-    use std::io::{stderr, Write};
+/// At the moment, we abort in all cases we panic.
+/// To aid with getting diagnostics in the wild without requiring
+/// people to set RUST_BACKTRACE=1, register a panic hook that crash using rb_bug().
+/// rb_bug() might not be as good at printing a call trace as Rust's stdlib, but
+/// it dumps some other info that might be relevant.
+///
+/// In case we want to start doing fancier exception handling with panic=unwind,
+/// we can revisit this later. For now, this helps to get us good bug reports.
+fn rb_bug_panic_hook() {
+    use std::env;
     use std::panic;
-    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::io::{stderr, Write};
 
-    static HOOK_SET: AtomicBool = AtomicBool::new(false);
-    if HOOK_SET.swap(true, Ordering::SeqCst) {
-        return;
-    }
+    // Probably the default hook. We do this very early during process boot.
+    let previous_hook = panic::take_hook();
 
-    panic::set_hook(Box::new(|panic_info| {
-        let mut err = stderr().lock();
-        let _ = writeln!(err, "ruby: Rust panic encountered!");
+    panic::set_hook(Box::new(move |panic_info| {
+        // Not using `eprintln` to avoid double panic.
+        let _ = stderr().write_all(b"ruby: YJIT has panicked. More info to follow...\n");
 
-        if let Some(location) = panic_info.location() {
-            let _ = writeln!(
-                err,
-                "Location: {}:{}:{}",
-                location.file(),
-                location.line(),
-                location.column()
-            );
-        } else {
-            let _ = writeln!(err, "Location: <unknown>");
-        }
+        // Always show a Rust backtrace.
+        env::set_var("RUST_BACKTRACE", "1");
+        previous_hook(panic_info);
 
-        let msg = if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
-            s
-        } else if let Some(s) = panic_info.payload().downcast_ref::<String>() {
-            s.as_str()
-        } else {
-            "Box<dyn Any>"
-        };
-        let _ = writeln!(err, "Message: {}", msg);
-        let _ = err.flush();
-
-        std::process::abort();
+        // Abort with rb_bug(). It has a length limit on the message.
+        let panic_message = &format!("{}", panic_info)[..];
+        let len = std::cmp::min(0x100, panic_message.len()) as c_int;
+        unsafe { rb_bug(b"YJIT: %*s\0".as_ref().as_ptr() as *const c_char, len, panic_message.as_ptr()); }
     }));
-}
-
-pub fn rb_bug_panic_hook() {
-    init_panic_hook();
 }
 
 /// Called from C code to begin compiling a function
@@ -327,16 +310,5 @@ pub extern "C" fn rb_yjit_lazy_push_frame(pc: *mut VALUE) {
     if let Some(&(cme, recv_idx)) = CodegenGlobals::get_pc_to_cfunc().get(&pc) {
         incr_counter!(num_lazy_frame_push);
         unsafe { rb_vm_push_cfunc_frame(cme, recv_idx as i32) }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_init_panic_hook() {
-        init_panic_hook();
-        init_panic_hook();
     }
 }
