@@ -1,5 +1,6 @@
 #![cfg(test)]
 
+use std::sync::atomic::Ordering;
 use super::{gen_insn, JITState};
 use crate::asm::CodeBlock;
 use crate::backend::lir::Assembler;
@@ -46,9 +47,9 @@ fn with_inlining_threshold<T>(threshold: usize, mut ruby_fragment: impl FnMut() 
 fn assert_inlines(program: &str) -> String {
     ensure_rubyvm(); // ZJITState is not available until the VM is booted
     let counters = crate::state::ZJITState::get_counters();
-    let inline_count_before = counters.inline_method_count;
+    let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
     let result = assert_compiles(program);
-    assert!(counters.inline_method_count > inline_count_before,
+    assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
         "expected the program to inline at least one method, but inline_method_count did not increase");
     result
 }
@@ -60,9 +61,9 @@ fn assert_inlines(program: &str) -> String {
 fn assert_inlines_allowing_exits(program: &str) -> String {
     ensure_rubyvm(); // ZJITState is not available until the VM is booted
     let counters = crate::state::ZJITState::get_counters();
-    let inline_count_before = counters.inline_method_count;
+    let inline_count_before = counters.inline_method_count.load(Ordering::Relaxed);
     let result = assert_compiles_allowing_exits(program);
-    assert!(counters.inline_method_count > inline_count_before,
+    assert!(counters.inline_method_count.load(Ordering::Relaxed) > inline_count_before,
         "expected the program to inline at least one method, but inline_method_count did not increase");
     result
 }

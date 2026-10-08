@@ -1,7 +1,7 @@
 //! Counters and associated methods for events when ZJIT is run.
 
 use std::time::Instant;
-use std::sync::atomic::Ordering;
+use std::sync::atomic::{AtomicU64, Ordering};
 use crate::options::OPTIONS;
 
 // test binaries always bring it in as a cargo dependency
@@ -39,14 +39,14 @@ macro_rules! make_counters {
         /// Struct containing the counter values
         #[derive(Default, Debug)]
         pub struct Counters {
-            $(pub $default_counter_name: u64,)+
-            $(pub $exit_counter_name: u64,)+
-            $(pub $dynamic_send_counter_name: u64,)+
-            $(pub $optimized_send_counter_name: u64,)+
-            $(pub $dynamic_setivar_counter_name: u64,)+
-            $(pub $dynamic_getivar_counter_name: u64,)+
-            $(pub $dynamic_definedivar_counter_name: u64,)+
-            $(pub $counter_name: u64,)+
+            $(pub $default_counter_name: AtomicU64,)+
+            $(pub $exit_counter_name: AtomicU64,)+
+            $(pub $dynamic_send_counter_name: AtomicU64,)+
+            $(pub $optimized_send_counter_name: AtomicU64,)+
+            $(pub $dynamic_setivar_counter_name: AtomicU64,)+
+            $(pub $dynamic_getivar_counter_name: AtomicU64,)+
+            $(pub $dynamic_definedivar_counter_name: AtomicU64,)+
+            $(pub $counter_name: AtomicU64,)+
         }
 
         /// Enum to represent a counter
@@ -92,19 +92,24 @@ macro_rules! make_counters {
             }
         }
 
-        /// Map a counter to a pointer
-        pub fn counter_ptr(counter: Counter) -> *mut u64 {
+        /// Map a counter to an atomic reference
+        pub fn counter_ref(counter: Counter) -> &'static AtomicU64 {
             let counters = $crate::state::ZJITState::get_counters();
             match counter {
-                $( Counter::$default_counter_name => std::ptr::addr_of_mut!(counters.$default_counter_name), )+
-                $( Counter::$exit_counter_name => std::ptr::addr_of_mut!(counters.$exit_counter_name), )+
-                $( Counter::$dynamic_send_counter_name => std::ptr::addr_of_mut!(counters.$dynamic_send_counter_name), )+
-                $( Counter::$dynamic_setivar_counter_name => std::ptr::addr_of_mut!(counters.$dynamic_setivar_counter_name), )+
-                $( Counter::$dynamic_getivar_counter_name => std::ptr::addr_of_mut!(counters.$dynamic_getivar_counter_name), )+
-                $( Counter::$dynamic_definedivar_counter_name => std::ptr::addr_of_mut!(counters.$dynamic_definedivar_counter_name), )+
-                $( Counter::$optimized_send_counter_name => std::ptr::addr_of_mut!(counters.$optimized_send_counter_name), )+
-                $( Counter::$counter_name => std::ptr::addr_of_mut!(counters.$counter_name), )+
+                $( Counter::$default_counter_name => &counters.$default_counter_name, )+
+                $( Counter::$exit_counter_name => &counters.$exit_counter_name, )+
+                $( Counter::$dynamic_send_counter_name => &counters.$dynamic_send_counter_name, )+
+                $( Counter::$dynamic_setivar_counter_name => &counters.$dynamic_setivar_counter_name, )+
+                $( Counter::$dynamic_getivar_counter_name => &counters.$dynamic_getivar_counter_name, )+
+                $( Counter::$dynamic_definedivar_counter_name => &counters.$dynamic_definedivar_counter_name, )+
+                $( Counter::$optimized_send_counter_name => &counters.$optimized_send_counter_name, )+
+                $( Counter::$counter_name => &counters.$counter_name, )+
             }
+        }
+
+        /// Map a counter to a pointer
+        pub fn counter_ptr(counter: Counter) -> *mut u64 {
+            counter_ref(counter) as *const AtomicU64 as *mut u64
         }
 
         /// List of counters that are available without --zjit-stats.
@@ -495,14 +500,12 @@ make_counters! {
 
 /// Increase a counter by a specified amount
 pub fn incr_counter_by(counter: Counter, amount: u64) {
-    let ptr = counter_ptr(counter);
-    unsafe { *ptr += amount; }
+    counter_ref(counter).fetch_add(amount, Ordering::Relaxed);
 }
 
 /// Decrease a counter by a specified amount
 pub fn decr_counter_by(counter: Counter, amount: u64) {
-    let ptr = counter_ptr(counter);
-    unsafe { *ptr -= amount; }
+    counter_ref(counter).fetch_sub(amount, Ordering::Relaxed);
 }
 
 /// Increment a counter by its identifier
@@ -844,7 +847,7 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
 
     // Set default counters
     for &counter in DEFAULT_COUNTERS {
-        set_stat_usize!(hash, &counter.name(), unsafe { *counter_ptr(counter) });
+        set_stat_usize!(hash, &counter.name(), counter_ref(counter).load(Ordering::Relaxed));
     }
 
     // Memory usage stats
@@ -862,13 +865,13 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
 
     // Set other stats-only counters
     for &counter in OTHER_COUNTERS {
-        set_stat_usize!(hash, &counter.name(), unsafe { *counter_ptr(counter) });
+        set_stat_usize!(hash, &counter.name(), counter_ref(counter).load(Ordering::Relaxed));
     }
 
     // Set side-exit counters for each SideExitReason
     let mut side_exit_count = 0;
     for &counter in EXIT_COUNTERS {
-        let count = unsafe { *counter_ptr(counter) };
+        let count = counter_ref(counter).load(Ordering::Relaxed);
         side_exit_count += count;
         set_stat_usize!(hash, &counter.name(), count);
     }
@@ -885,7 +888,7 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
     // Set send fallback counters for each DynamicSendReason
     let mut dynamic_send_count = 0;
     for &counter in DYNAMIC_SEND_COUNTERS {
-        let count = unsafe { *counter_ptr(counter) };
+        let count = counter_ref(counter).load(Ordering::Relaxed);
         dynamic_send_count += count;
         set_stat_usize!(hash, &counter.name(), count);
     }
@@ -894,7 +897,7 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
     // Set optimized send counters
     let mut optimized_send_count = 0;
     for &counter in OPTIMIZED_SEND_COUNTERS {
-        let count = unsafe { *counter_ptr(counter) };
+        let count = counter_ref(counter).load(Ordering::Relaxed);
         optimized_send_count += count;
         set_stat_usize!(hash, &counter.name(), count);
     }
@@ -904,7 +907,7 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
     // Set send fallback counters for each setivar fallback reason
     let mut dynamic_setivar_count = 0;
     for &counter in DYNAMIC_SETIVAR_COUNTERS {
-        let count = unsafe { *counter_ptr(counter) };
+        let count = counter_ref(counter).load(Ordering::Relaxed);
         dynamic_setivar_count += count;
         set_stat_usize!(hash, &counter.name(), count);
     }
@@ -913,7 +916,7 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
     // Set send fallback counters for each getivar fallback reason
     let mut dynamic_getivar_count = 0;
     for &counter in DYNAMIC_GETIVAR_COUNTERS {
-        let count = unsafe { *counter_ptr(counter) };
+        let count = counter_ref(counter).load(Ordering::Relaxed);
         dynamic_getivar_count += count;
         set_stat_usize!(hash, &counter.name(), count);
     }
@@ -922,7 +925,7 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
     // Set send fallback counters for each definedivar fallback reason
     let mut dynamic_definedivar_count = 0;
     for &counter in DYNAMIC_DEFINEDIVAR_COUNTERS {
-        let count = unsafe { *counter_ptr(counter) };
+        let count = counter_ref(counter).load(Ordering::Relaxed);
         dynamic_definedivar_count += count;
         set_stat_usize!(hash, &counter.name(), count);
     }
@@ -941,7 +944,7 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
         let vm_insn_count = unsafe { rb_vm_insn_count };
         set_stat_usize!(hash, "vm_insn_count", vm_insn_count);
 
-        let zjit_insn_count = ZJITState::get_counters().zjit_insn_count;
+        let zjit_insn_count = ZJITState::get_counters().zjit_insn_count.load(Ordering::Relaxed);
         let total_insn_count = vm_insn_count + zjit_insn_count;
         set_stat_usize!(hash, "total_insn_count", total_insn_count);
 
@@ -980,7 +983,7 @@ pub extern "C" fn rb_zjit_stats(_ec: EcPtr, _self: VALUE, target_key: VALUE) -> 
 }
 
 pub fn total_exit_count() -> u64 {
-    EXIT_COUNTERS.iter().fold(0, |sum, counter| sum + unsafe { *counter_ptr(*counter) })
+    EXIT_COUNTERS.iter().fold(0, |sum, counter| sum + counter_ref(*counter).load(Ordering::Relaxed))
 }
 
 /// Measure the time taken by func() and add that to zjit_compile_time.
