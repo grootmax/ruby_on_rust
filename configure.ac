@@ -4026,7 +4026,7 @@ AS_CASE(["${ZJIT_SUPPORT}"],
     AC_DEFINE(USE_ZJIT, 0)
 ])
 
-RUSTC_FLAGS='-g -C lto=thin -C opt-level=3 -C overflow-checks=on'
+RUSTC_FLAGS='-g -C lto=thin -C opt-level=3 -C overflow-checks=on -D warnings'
 AS_IF([test -n "${rustc_flags}"], [
     RUSTC_FLAGS="${RUSTC_FLAGS} ${rustc_flags}"
 ])
@@ -4223,7 +4223,7 @@ AS_IF([test "$rb_rust_ports_ok" = yes && test "$rb_rust_ports" != no], [
     ])
 ])
 AC_DEFINE_UNQUOTED(USE_RUST_PORTS, $USE_RUST_PORTS)
-CORE_RS_RUSTC_FLAGS='-g -C opt-level=3 -C lto -C codegen-units=1 -C panic=abort -C overflow-checks=on'
+CORE_RS_RUSTC_FLAGS='-g -C opt-level=3 -C lto -C codegen-units=1 -C panic=abort -C overflow-checks=on -D warnings'
 AC_SUBST(USE_RUST_PORTS)dnl 1 when core functions are built from their Rust ports
 AC_SUBST(CORE_RS_RUSTC_FLAGS)dnl rustc flags for the core_rs crate
 AC_SUBST(X_CORE_RS_LIB, [$CORE_RS_LIB])dnl the core_rs staticlib

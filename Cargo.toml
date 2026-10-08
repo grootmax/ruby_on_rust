@@ -14,12 +14,18 @@
 [workspace]
 members = ["zjit", "yjit", "jit"]
 
+[workspace.lints.rust]
+warnings = "deny"
+
 [package]
 name = "ruby"
 version = "0.0.0"
 edition = "2024"
 rust-version = "1.85.0"
 publish = false # Don't publish to crates.io
+
+[lints]
+workspace = true
 
 [dependencies]
 yjit = { path = "yjit", optional = true }

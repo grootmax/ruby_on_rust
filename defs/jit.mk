@@ -5,6 +5,8 @@
 # Without it, certain make version trigger a warning. It does not
 # add the prefix when `make --dry-run` so dry runs are indeed dry.
 
+RUSTFLAGS ?= -D warnings
+
 ifneq ($(JIT_CARGO_SUPPORT),no)
 
 # Show Cargo progress when doing `make V=1`
@@ -33,6 +35,7 @@ $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	$(gnumake_recursive)$(Q)CARGO_TARGET_DIR='$(CARGO_TARGET_DIR)' \
 	    CARGO_TERM_PROGRESS_WHEN='never' \
 	    MACOSX_DEPLOYMENT_TARGET=11.0 \
+	    RUSTFLAGS="$(RUSTFLAGS)" \
 	    $(CARGO) $(CARGO_VERBOSE) build --manifest-path '$(top_srcdir)/Cargo.toml' $(CARGO_BUILD_ARGS)
 	$(RUST_LIB_TOUCH)
 else ifneq ($(strip $(RLIB_DIR)),) # combo build

@@ -285,6 +285,8 @@ MAKE_LINK = $(MINIRUBY) -rfileutils -e "include FileUtils::Verbose" \
 	  -e "noraise {ln(src, dest)} or" \
 	  -e "cp(src, dest)"
 
+RUSTFLAGS ?= -D warnings
+
 # For release builds
 YJIT_RUSTC_ARGS = --crate-name=yjit \
 	$(JIT_RUST_FLAGS) \
