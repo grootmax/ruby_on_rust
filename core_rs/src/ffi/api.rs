@@ -84,3 +84,61 @@ unsafe extern "C" {
     /// `VALUE rb_hash_aset(VALUE hash, VALUE key, VALUE val)`
     pub fn rb_hash_aset(hash: VALUE, key: VALUE, val: VALUE) -> VALUE;
 }
+
+#[cfg(not(test))]
+unsafe extern "C" {
+    pub fn rb_ec_current() -> *mut crate::ec::rb_execution_context_struct;
+    pub fn rb_ec_check_interrupts(ec: *mut crate::ec::rb_execution_context_struct);
+    pub fn rb_ec_ractor(ec: *const crate::ec::rb_execution_context_struct) -> *mut crate::ractor::rb_ractor_struct;
+    pub fn rb_ec_thread_id(ec: *const crate::ec::rb_execution_context_struct) -> usize;
+    pub fn rb_ractor_shareable_p(obj: VALUE) -> bool;
+    pub fn rb_ractor_assert_shareable(obj: VALUE);
+    pub fn rb_current_ractor_raw_stub() -> *mut crate::ractor::rb_ractor_struct;
+}
+
+#[cfg(test)]
+pub use mock::*;
+
+#[cfg(test)]
+pub mod mock {
+    use super::*;
+    use crate::ec::rb_execution_context_struct;
+    use crate::ractor::rb_ractor_struct;
+    use std::cell::Cell;
+
+    std::thread_local! {
+        pub static MOCK_EC: Cell<*mut rb_execution_context_struct> = const { Cell::new(core::ptr::null_mut()) };
+        pub static MOCK_RACTOR: Cell<*mut rb_ractor_struct> = const { Cell::new(core::ptr::null_mut()) };
+        pub static INTERRUPTS_CHECKED: Cell<bool> = const { Cell::new(false) };
+    }
+
+    pub unsafe fn rb_ec_current() -> *mut rb_execution_context_struct {
+        MOCK_EC.with(|c| c.get())
+    }
+
+    pub unsafe fn rb_ec_check_interrupts(_ec: *mut rb_execution_context_struct) {
+        INTERRUPTS_CHECKED.with(|c| c.set(true));
+    }
+
+    pub unsafe fn rb_ec_ractor(_ec: *const rb_execution_context_struct) -> *mut rb_ractor_struct {
+        MOCK_RACTOR.with(|c| c.get())
+    }
+
+    pub unsafe fn rb_ec_thread_id(_ec: *const rb_execution_context_struct) -> usize {
+        12345
+    }
+
+    pub unsafe fn rb_ractor_shareable_p(obj: VALUE) -> bool {
+        crate::ffi::value::SPECIAL_CONST_P(obj)
+    }
+
+    pub unsafe fn rb_ractor_assert_shareable(obj: VALUE) {
+        if unsafe { !rb_ractor_shareable_p(obj) } {
+            panic!("unshareable object");
+        }
+    }
+
+    pub unsafe fn rb_current_ractor_raw_stub() -> *mut rb_ractor_struct {
+        MOCK_RACTOR.with(|c| c.get())
+    }
+}

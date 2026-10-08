@@ -44,6 +44,10 @@ enum method_missing_reason {
 VALUE rb_vm_push_frame_fname(struct rb_execution_context_struct *ec, VALUE fname);
 
 /* vm.c */
+struct rb_execution_context_struct *rb_ec_current(void);
+void rb_ec_check_interrupts(struct rb_execution_context_struct *ec);
+struct rb_ractor_struct *rb_ec_ractor(const struct rb_execution_context_struct *ec);
+uintptr_t rb_ec_thread_id(const struct rb_execution_context_struct *ec);
 VALUE rb_obj_is_thread(VALUE obj);
 void rb_vm_mark(void *ptr);
 void rb_vm_register_global_object(VALUE obj);

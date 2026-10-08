@@ -5448,4 +5448,33 @@ rb_vm_empty_cc_for_super(void)
     return &vm_empty_cc_for_super;
 }
 
+struct rb_execution_context_struct *
+rb_ec_current(void)
+{
+    return rb_current_execution_context(false);
+}
+
+void
+rb_ec_check_interrupts(struct rb_execution_context_struct *ec)
+{
+    if (ec) {
+        rb_vm_check_ints(ec);
+    }
+}
+
+struct rb_ractor_struct *
+rb_ec_ractor(const struct rb_execution_context_struct *ec)
+{
+    if (!ec) return NULL;
+    return rb_ec_ractor_ptr(ec);
+}
+
+uintptr_t
+rb_ec_thread_id(const struct rb_execution_context_struct *ec)
+{
+    if (!ec) return 0;
+    rb_thread_t *th = rb_ec_thread_ptr(ec);
+    return (uintptr_t)th;
+}
+
 #include "vm_call_iseq_optimized.inc" /* required from vm_insnhelper.c */

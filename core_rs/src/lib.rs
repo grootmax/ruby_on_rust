@@ -21,7 +21,9 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 
 pub mod complex;
+pub mod ec;
 pub mod ffi;
+pub mod ractor;
 pub mod re;
 pub mod util;
 

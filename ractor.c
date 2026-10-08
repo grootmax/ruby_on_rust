@@ -4318,4 +4318,18 @@ rb_builtin_shareable_lambda(rb_execution_context_t *ec, VALUE self, VALUE arg_se
     return ractor_shareable_proc(ec, arg_self, true);
 }
 
+void
+rb_ractor_assert_shareable(VALUE obj)
+{
+    if (!rb_ractor_shareable_p(obj)) {
+        rb_raise(rb_eRactorIsolationError, "can not pass unshareable object across Ractor boundary");
+    }
+}
+
+struct rb_ractor_struct *
+rb_current_ractor_raw_stub(void)
+{
+    return rb_current_ractor_raw(false);
+}
+
 #include "ractor.rbinc"
