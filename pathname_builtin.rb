@@ -1427,37 +1427,36 @@ class Pathname    # * File *
   # call-seq:
   #   ctime -> new_time
   #
-  # On Windows, returns the #birthtime.
+  # On Windows, returns the birthtime for the path in `self`.
   #
   # On other systems,
   # returns a new Time object containing the time of the most recent
   # metadata change to the entry represented by `self`;
-  # see {File System Timestamps}[rdoc-ref:file/timestamps.md]:
+  # see [File System Timestamps](rdoc-ref:file/timestamps.md):
   #
   # ```ruby
   # # A directory and its Pathname.
-  # dir_path = 'doc/foo'
+  # dir_path = '/tmp/dir'
   # dir_pn = Pathname(dir_path)
-  # # Create directory; directory ctime established.
+  # # Create directory; establishes directory ctime.
   # dir_pn.mkdir
-  # dir_pn.ctime  # => 2026-06-16 16:44:15.86720572 -0500
+  # dir_pn.ctime                     # => 2026-10-05 16:36:52.738405306 -0500
   # # A file therein and its Pathname.
-  # file_path = dir_pn.join('t.tmp')
+  # file_path = dir_pn.join('t.tmp') # => #<Pathname:/tmp/dir/t.tmp>
   # file_pn = Pathname(file_path)
-  # # Create file; file ctime established; directory ctime updated.
+  # # Create file; establishes file ctime; updates directory ctime.
   # file_pn.write('foo')
-  # file_pn.ctime # => 2026-06-16 16:46:00.734974872 -0500
-  # dir_pn.ctime  # => 2026-06-16 16:46:00.734974872 -0500
-  # # Write file; file ctime updated; directory ctime not updated.
+  # file_pn.ctime                    # => 2026-10-05 16:38:35.076588258 -0500
+  # dir_pn.ctime                     # => 2026-10-05 16:38:35.076588258 -0500
+  # # Write file; updates file ctime; does not update directory ctime..
   # file_pn.write('bar')
-  # file_pn.ctime # => 2026-06-16 16:49:11.421204188 -0500
-  # dir_pn.ctime  # => 2026-06-16 16:46:00.734974872 -0500
-  # # Read file; neither ctime updated.
+  # file_pn.ctime                    # => 2026-10-05 16:39:57.842776244 -0500
+  # dir_pn.ctime                     # => 2026-10-05 16:38:35.076588258 -0500
+  # # Read file; updates neither ctime.
   # file_pn.read
-  # file_pn.ctime # => 2026-06-16 16:49:11.421204188 -0500
-  # dir_pn.ctime  # => 2026-06-16 16:46:00.734974872 -0500
-  # # Clean up.
-  # dir_pn.rmtree
+  # file_pn.ctime                    # => 2026-10-05 16:39:57.842776244 -0500
+  # dir_pn.ctime                     # => 2026-10-05 16:38:35.076588258 -0500
+  # dir_pn.rmtree                    # Clean up.
   # ```
   #
   def ctime() File.ctime(@path) end
@@ -2341,35 +2340,19 @@ class Pathname    # * FileTest *
   # call-seq:
   #   executable? -> true or false
   #
-  # Returns whether the entry represented by `self` exists and is executable.
-  #
-  # On Windows, the entry is executable if its path has file extension
-  # `.bat`, `.cmd`, `.com`, or `.exe`:
-  #
-  # ```ruby
-  # Pathname('bin/gem').executable? # => true
-  # mode('bin/gem') # => "100775 -rwxrwxr-x"
-  # Pathname('.').executable? # => true
-  # mode('.') # => "040775 drwxrwxr-x"
-  # Pathname('nosuch').executable? # => false
-  # ```
-  #
-  # On other systems, the entry is executable if it has the execute/search
-  # permission for the effective user and group id of the current process;
-  # see {Permissions}[rdoc-ref:file/filesystem_modes.md@Permissions].
-  #
-  # These examples use
-  # a {helper method}[rdoc-ref:file/filesystem_modes.md@Helper+Method], `mode`,
-  # that displays a mode both in octal digits and in characters:
+  # Returns whether the entry represented by `self` exists
+  # and is [executable](rdoc-ref:file/filesystem_modes.md@Executable+Files)
+  # by the effective owner/group of the current process.
   #
   # ```ruby
-  # Pathname('bin/gem').executable? # => true
-  # mode('bin/gem')                 # => "100775 -rwxrwxr-x"
-  # Pathname('.').executable?       # => true
-  # mode('.')                       # => "040775 drwxrwxr-x"
-  # Pathname('nosuch').executable?  # => false
+  # Pathname('/bin/ruby').executable?   # => true
+  # Pathname('/etc').executable?        # => true
+  # Pathname('/etc/passwd').executable? # => false
+  # Pathname('nosuch').executable?      # => false
   # ```
   #
+  # Note that some filesystem settings may cause this method to return `true`
+  # even though the entry is not executable by the effective owner/group.
   def executable?() FileTest.executable?(@path) end
 
   # :markup: markdown
@@ -2377,18 +2360,8 @@ class Pathname    # * FileTest *
   # call-seq:
   #   executable_real? -> true or false
   #
-  # Returns whether the entry represented by `self` is executable
-  # by the real user and group id of the current process;
-  # calls FileTest.executable_real? with argument `self.to_s`:
-  #
-  # ```ruby
-  # pn = Pathname('example')
-  # pn.write('')
-  # pn.executable_real? # => false
-  # pn.chmod(0100)
-  # pn.executable_real? # => true
-  # ```
-  #
+  # Like Pathname#executable?, but checks against the real owner/group
+  # instead of the effective owner/group.
   def executable_real?() FileTest.executable_real?(@path) end
 
   # :markup: markdown

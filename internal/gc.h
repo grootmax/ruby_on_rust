@@ -26,12 +26,10 @@ struct rb_gc_zjit_fastpath;
 #define SET_MACHINE_STACK_END(p) __asm__ __volatile__ ("movq\t%%rsp, %0" : "=r" (*(p)))
 #elif defined(__i386) && defined(__GNUC__)
 #define SET_MACHINE_STACK_END(p) __asm__ __volatile__ ("movl\t%%esp, %0" : "=r" (*(p)))
-#elif (defined(__powerpc__) || defined(__powerpc64__)) && defined(__GNUC__) && !defined(_AIX) && !defined(__APPLE__) // Not Apple is NEEDED to unbreak ppc64 build on Darwin. Don't ask.
+#elif (defined(__powerpc__) || defined(__powerpc64__)) && defined(__GNUC__) && !defined(_AIX)
 #define SET_MACHINE_STACK_END(p) __asm__ __volatile__ ("mr\t%0, %%r1" : "=r" (*(p)))
 #elif (defined(__powerpc__) || defined(__powerpc64__)) && defined(__GNUC__) && defined(_AIX)
 #define SET_MACHINE_STACK_END(p) __asm__ __volatile__ ("mr %0,1" : "=r" (*(p)))
-#elif defined(__POWERPC__) && defined(__APPLE__) // Darwin ppc and ppc64
-#define SET_MACHINE_STACK_END(p) __asm__ volatile("mr %0, r1" : "=r" (*(p)))
 #elif defined(__aarch64__) && defined(__GNUC__)
 #define SET_MACHINE_STACK_END(p) __asm__ __volatile__ ("mov\t%0, sp" : "=r" (*(p)))
 #else
@@ -210,6 +208,7 @@ VALUE rb_newobj_of_unprotected(VALUE klass, VALUE flags, size_t size);
 void *rb_gc_ractor_cache_alloc(struct rb_ractor_struct *ractor);
 void rb_gc_ractor_cache_free(void *cache);
 bool rb_gc_zjit_new_obj_fastpath(size_t alloc_size, VALUE flags, VALUE klass, struct rb_gc_zjit_fastpath *fastpath);
+const uintptr_t *rb_gc_zjit_writebarrier_required_p_ptr(void);
 
 bool rb_gc_size_allocatable_p(size_t size);
 size_t rb_gc_size_slot_size(size_t size);

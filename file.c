@@ -764,12 +764,18 @@ rb_stat_dev_minor(VALUE self)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     stat.ino   -> integer
+ *    ino -> integer
  *
- *  Returns the inode number for <i>stat</i>.
+ *  Returns the inode value for the entry
+ *  in the [snapshot](rdoc-ref:File::Stat@Snapshot) in `self`:
  *
- *     File.stat("testfile").ino   #=> 1083669
+ *  ```ruby
+ *  File.stat('/etc').ino        # => 11141121
+ *  File.stat('/etc/passwd').ino # => 11141413
+ *  ```
  *
  */
 
@@ -789,16 +795,22 @@ rb_stat_ino(VALUE self)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     stat.mode   -> integer
+ *    mode -> integer
  *
- *  Returns an integer representing the permission bits of
- *  <i>stat</i>. The meaning of the bits is platform dependent; on
- *  Unix systems, see <code>stat(2)</code>.
+ *  Returns an integer representing the permissions of the entry
+ *  in the [snapshot](rdoc-ref:File::Stat@Snapshot) in `self`;
+ *  see [Filesystem Modes](rdoc-ref:file/filesystem_modes.md).
  *
- *     File.chmod(0644, "testfile")   #=> 1
- *     s = File.stat("testfile")
- *     sprintf("%o", s.mode)          #=> "100644"
+ *  The integer is most usefully formatted as six octal digits:
+ *
+ *  ```ruby
+ *  '%06o' % File.stat('/etc').mode        # => "040755"
+ *  '%06o' % File.stat('/etc/passwd').mode # => "100644"
+ *  ```
+ *
  */
 
 static VALUE
@@ -1235,17 +1247,36 @@ rb_stat_mtime(VALUE self)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     stat.ctime  ->  time
+ *    ctime -> time
  *
- *  Returns the change time for <i>stat</i> (that is, the time
- *  directory information about the file was changed, not the file
- *  itself).
+ *  On Windows, returns the birthtime for the entry in `self`.
  *
- *  Note that on Windows (NTFS), returns creation time (birth time).
+ *  On other systems, returns the time of the most recent metadata change
+ *  to the [snapshot](rdoc-ref:File::Stat@Snapshot) in `self`:
  *
- *     File.stat("testfile").ctime   #=> Wed Apr 09 08:53:14 CDT 2003
+ *  ```ruby
+ *  dirpath = '/tmp/dir'
+ *  Dir.mkdir(dirpath)                     # Establishes directory ctime.
+ *  dirstat0 = File.stat(dirpath)          # Take directory snapshot.
+ *  dirstat0.ctime     # => 2026-10-06 11:07:18.073533542 -0500 # Initial directory ctime.
+ *  filepath = File.join(dirpath, 't.tmp') # => "/tmp/dir/t.tmp"
+ *  File.write(filepath, 'foo')            # Establishes file ctime; upates directory ctime.
+ *  filestat0 = File.stat(filepath)        # Take file snapshot.
+ *  filestat0.ctime    # => 2026-10-06 11:07:52.555027213 -0500 # Initial file ctime.
+ *  dirstat0.ctime     # => 2026-10-06 11:07:18.073533542 -0500 # Directory snapshot unchanged.
+ *  dirstat1 = File.stat(dirpath)          # Take new directory snapshot.
+ *  dirstat1.ctime     # => 2026-10-06 11:07:52.555027213 -0500 # Snapshot has new ctime.
+ *  File.write(filepath, 'bar')            # Updates file ctime.
+ *  filestat0.ctime    # => 2026-10-06 11:07:52.555027213 -0500 # Old file snapshot unchanged.
+ *  filestat1 = File.stat(filepath)        # Take new file snapshot.
+ *  filestat1.ctime    # => 2026-10-06 11:14:11.19290223 -0500  # Snapshot shows change.
+ *  FileUtils.rmtree(dirpath)              # Clean up.
+ *  ```
  *
+ *  See {File System Timestamps}[rdoc-ref:file/timestamps.md].
  */
 
 static VALUE
@@ -2364,30 +2395,24 @@ rb_file_world_writable_p(VALUE obj, VALUE fname)
 }
 
 /*
+ * :markup: markdown
+ *
  * call-seq:
  *   File.executable?(path) -> true or false
  *
- * Returns whether the filesystem entry at the given string +path+
- * exists and is executable.
+ * Returns whether the filesystem entry at the given `path`
+ * is [executable](rdoc-ref:file/filesystem_modes.md@Executable+Files)
+ * by the effective owner/group of the current process:
  *
- * On Windows, the entry is executable if its path has file extension
- * +.bat+, +.cmd+, +.com+, or +.exe+:
+ * ```ruby
+ * File.executable?('/bin/ruby')   # => true
+ * File.executable?('/etc')        # => true
+ * File.executable?('/etc/passwd') # => false
+ * File.executable?('nosuch')      # => false
+ * ```
  *
- *   File.executable?('win32/rtname.cmd') # => true
- *   File.executable?('win32/rtname')     # => false
- *   File.executable?('win32/nosuch.cmd') # => false
- *
- * On other systems, the entry is executable if it has the execute/search
- * permission for the effective user and group id of the current process;
- * see {Permissions}[rdoc-ref:file/filesystem_modes.md@Permissions].
- *
- *   File.executable?('/bin/bash')   # => true
- *   File.executable?('.')           # => true
- *   File.executable?('/etc/passwd') # => false
- *   File.executable?('nosuch')      # => false
- *
- * Note that some filesystem settings may cause this method to return +true+
- * even though the entry is not executable by the effective user/group.
+ * Note that some filesystem settings may cause this method to return `true`
+ * even though the entry is not executable by the effective owner/group.
  */
 
 static VALUE
@@ -2397,18 +2422,13 @@ rb_file_executable_p(VALUE obj, VALUE fname)
 }
 
 /*
+ * :markup: markdown
+ *
  * call-seq:
- *    File.executable_real?(file_name)   -> true or false
+ *    File.executable_real?(path) -> true or false
  *
- * Returns +true+ if the named file is executable by the real user and group
- * id of this process. See <code>access(3)</code>.
- *
- * Windows does not support execute permissions separately from read
- * permissions. On Windows, a file is only considered executable if it ends in
- * .bat, .cmd, .com, or .exe.
- *
- * Note that some OS-level security features may cause this to return true
- * even though the file is not executable by the real user/group.
+ * Like File.executable?, but checks against the real owner/group
+ * instead of the effective owner/group.
  */
 
 static VALUE
@@ -3096,37 +3116,38 @@ rb_file_mtime(VALUE obj)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     File.ctime(object) -> time
+ *    File.ctime(object) -> time
  *
- *  Returns a Time object, based on the given +object+,
- *  which is a string path or an IO object.
+ *  On Windows, returns the birthtime for `object`.
  *
- *  On Windows, returns the #birthtime for +object+.
+ * On other systems,
+ * returns a new Time object containing the time of the most recent
+ * metadata change to the entry represented by `object`,
+ * which is a string path or an IO object;
+ * see [File System Timestamps](rdoc-ref:file/timestamps.md):
  *
- *  On other systems,
- *  returns a new Time object containing the time of the most recent
- *  metadata change to the entry represented by +object+;
- *  see {File System Timestamps}[rdoc-ref:file/timestamps.md]:
- *
- *    # Create directory; directory ctime established.
- *    dirpath = 'doc/foo'
- *    Dir.mkdir(dirpath)
- *    File.ctime(dirpath)                     # => 2026-08-23 10:43:05.473815913 -0500
- *    # Create file therein; file ctime established; directory ctime updated.
- *    filepath = File.join(dirpath, 't.tmp')  # => "doc/foo/t.tmp"
- *    File.write(filepath, 'foo')
- *    File.ctime(filepath)                    # => 2026-08-23 10:43:37.560429379 -0500
- *    File.ctime(dirpath)                     # => 2026-08-23 10:43:37.560429379 -0500
- *    # Write file; file ctime updated; directory ctime not updated.
- *    File.write(filepath, 'bar')
- *    File.ctime(filepath)                    # => 2026-08-23 10:46:49.299180833 -0500
- *    File.ctime(dirpath)                     # => 2026-08-23 10:43:37.560429379 -0500
- *    # Read file; neither ctime updated.
- *    File.read(filepath)
- *    File.ctime(filepath)                    # => 2026-08-23 10:46:49.299180833 -0500
- *    File.ctime(dirpath)                     # => 2026-08-23 10:43:37.560429379 -0500
- *    FileUtils.rm_rf(dirpath)                # Clean up.
+ * ```ruby
+ * dirpath = '/tmp/dir'
+ * Dir.mkdir(dirpath)
+ * File.ctime(dirpath)                    # => 2026-10-05 16:24:40.347201215 -0500
+ * # Create file therein; file ctime established; directory ctime updated.
+ * filepath = File.join(dirpath, 't.tmp') # => "/tmp/dir/t.tmp"
+ * File.write(filepath, 'foo')
+ * File.ctime(dirpath)                    # => 2026-10-05 16:25:34.790762181 -0500
+ * File.ctime(filepath)                   # => 2026-10-05 16:25:34.790762181 -0500
+ * # Write file; file ctime updated; directory ctime not updated.
+ * File.write(filepath, 'bar')
+ * File.ctime(dirpath)                    # => 2026-10-05 16:25:34.790762181 -0500
+ * File.ctime(filepath)                   # => 2026-10-05 16:26:23.030432041 -0500
+ * # Read file; neither ctime updated.
+ * File.read(filepath)
+ * File.ctime(dirpath)                    # => 2026-10-05 16:25:34.790762181 -0500
+ * File.ctime(filepath)                   # => 2026-10-05 16:26:23.030432041 -0500
+ * FileUtils.rm_rf(dirpath)               # Clean up.
+ * ```
  *
  */
 
@@ -3144,15 +3165,35 @@ rb_file_s_ctime(VALUE klass, VALUE fname)
 }
 
 /*
+ *  :markup: markdown
+ *
  *  call-seq:
- *     file.ctime  ->  time
+ *    ctime -> time
  *
- *  Returns the change time for <i>file</i> (that is, the time directory
- *  information about the file was changed, not the file itself).
+ *  On Windows, returns the birthtime for the entry in `self`.
  *
- *  Note that on Windows (NTFS), returns creation time (birth time).
+ *  On other systems,
+ *  returns a new Time object containing the time of the most recent
+ *  metadata change to the entry in `self`;
+ *  see [File System Timestamps](rdoc-ref:file/timestamps.md):
  *
- *     File.new("testfile").ctime   #=> Wed Apr 09 08:53:14 CDT 2003
+ *  ```ruby
+ *  # A directory.
+ *  dirpath = '/tmp/dir'
+ *  Dir.mkdir(dirpath)                     # Establishes directory ctime.
+ *  dir = File.new(dirpath) # (Dir does not have method ctime; we use File.)
+ *  dir.ctime                              # => 2026-10-05 17:23:49.406452569 -0500
+ *  # A file therein.
+ *  filepath = File.join(dirpath, 't.tmp') # => "/tmp/dir/t.tmp"
+ *  File.write(filepath, 'foo')            # Establishes file ctime.
+ *  file = File.new(filepath)
+ *  file.ctime                             # => 2026-10-05 17:26:26.467758515 -0500
+ *  dir.ctime                              # => 2026-10-05 17:26:26.467758515 -0500
+ *  File.write(filepath, 'bar')            # Updates file ctime; not directory ctime.
+ *  file.ctime                             # => 2026-10-05 17:28:26.307497599 -0500
+ *  dir.ctime                              # => 2026-10-05 17:26:26.467758515 -0500
+ *  FileUtils.rm_rf(dirpath)               # Clean up.
+ *  ```
  *
  */
 
@@ -5569,11 +5610,6 @@ rb_check_realpath_emulate_rescue(VALUE arg, VALUE exc)
 {
     return Qnil;
 }
-#elif !defined(NEEDS_REALPATH_BUFFER) && defined(__APPLE__) && \
-    (!defined(MAC_OS_X_VERSION_10_6) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6))
-/* realpath() on OSX < 10.6 doesn't implement automatic allocation */
-# include <sys/syslimits.h>
-# define NEEDS_REALPATH_BUFFER 1
 #endif /* HAVE_REALPATH */
 
 static VALUE
@@ -5583,11 +5619,6 @@ rb_check_realpath_internal(VALUE basedir, VALUE path, rb_encoding *origenc, enum
     VALUE unresolved_path;
     char *resolved_ptr = NULL;
     VALUE resolved;
-# if defined(NEEDS_REALPATH_BUFFER) && NEEDS_REALPATH_BUFFER
-    char resolved_buffer[PATH_MAX];
-# else
-    char *const resolved_buffer = NULL;
-# endif
 
     if (mode == RB_REALPATH_DIR) {
         return rb_check_realpath_emulate(basedir, path, origenc, mode);
@@ -5600,7 +5631,7 @@ rb_check_realpath_internal(VALUE basedir, VALUE path, rb_encoding *origenc, enum
     }
     if (origenc) unresolved_path = TO_OSPATH(unresolved_path);
 
-    if ((resolved_ptr = realpath(RSTRING_PTR(unresolved_path), resolved_buffer)) == NULL) {
+    if ((resolved_ptr = realpath(RSTRING_PTR(unresolved_path), NULL)) == NULL) {
         /*
            wasi-libc 22 and later support realpath(3) but return ENOTSUP
            when the underlying host syscall returns it.
@@ -5621,9 +5652,7 @@ rb_check_realpath_internal(VALUE basedir, VALUE path, rb_encoding *origenc, enum
         rb_sys_fail_path(unresolved_path);
     }
     resolved = ospath_new(resolved_ptr, strlen(resolved_ptr), rb_filesystem_encoding());
-# if !(defined(NEEDS_REALPATH_BUFFER) && NEEDS_REALPATH_BUFFER)
     free(resolved_ptr);
-# endif
 
 # if !defined(__linux__) && !defined(__APPLE__)
     /* As `resolved` is a String in the filesystem encoding, no
@@ -6901,7 +6930,7 @@ static VALUE
 rb_stat_s_alloc(VALUE klass)
 {
     VALUE obj;
-    stat_alloc(rb_cStat, &obj);
+    stat_alloc(klass, &obj);
     return obj;
 }
 
@@ -7481,29 +7510,25 @@ rb_stat_ww(VALUE obj)
 }
 
 /*
+ * :markup: markdown
+ *
  * call-seq:
  *   executable? -> true or false
  *
- * Returns whether the filesystem entry represented by +self+
- * exists and is executable;
- * raises Errno::ENOENT if the entry does not exist.
+ * Returns whether the filesystem entry represented by `self`
+ * is [executable](rdoc-ref:file/filesystem_modes.md@Executable+Files)
+ * by the effective owner/group of the current process:
  *
- * On Windows, the entry is executable if its path has file extension
- * +.bat+, +.cmd+, +.com+, or +.exe+:
+ * ```ruby
+ * File.stat('/bin/ruby').executable?   # => true
+ * File.stat('/etc').executable?        # => true
+ * File.stat('/etc/passwd').executable? # => false
+ * ```
  *
- *   File.stat('win32/rtname.cmd').executable? # => true
- *   File.stat('win32/file.c').executable?     # => false
+ * Raises Errno::ENOENT if the entry does not exist.
  *
- * On other systems, the entry is executable if it has the execute/search
- * permission for the effective user and group id of the current process;
- * see {Permissions}[rdoc-ref:file/filesystem_modes.md@Permissions]:
- *
- *   File.stat('/bin/bash').executable?        # => true
- *   File.stat('/etc/passwd').executable?      # => false
- *   File.stat('.').executable?                # => true
- *
- * Note that some filesystem settings may cause this method to return +true+
- * even though the entry is not executable by the effective user/group.
+ * Note that some filesystem settings may cause this method to return `true`
+ * even though the entry is not executable by the effective owner/group.
  */
 
 static VALUE
@@ -7531,11 +7556,12 @@ rb_stat_x(VALUE obj)
 }
 
 /*
+ *  :markup: markdown
  *  call-seq:
- *     stat.executable_real?    -> true or false
+ *    executable_real? -> true or false
  *
- *  Same as <code>executable?</code>, but tests using the real owner of
- *  the process.
+ *  Like Pathname#executable?, but checks against the real owner/group
+ *  instead of the effective owner/group.
  */
 
 static VALUE
