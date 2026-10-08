@@ -43,186 +43,186 @@ files:
     notes: "C helpers shared by upstream YJIT/ZJIT"
   compile.c:
     status: Not Started
-    target: "crate::core::compile"
+    target: "crate::compile"
     subsystem: "JIT Compiler"
     notes: "Bytecode compiler"
   iseq.c:
     status: Not Started
-    target: "crate::core::iseq"
+    target: "crate::iseq"
     subsystem: "JIT Compiler"
     notes: "Instruction sequences"
 
   # Core Data Structures
   array.c:
     status: Not Started
-    target: "crate::core::array"
+    target: "crate::array"
     subsystem: "Core Data Structures"
     notes: "Array object implementation"
   bignum.c:
     status: Not Started
-    target: "crate::core::bignum"
+    target: "crate::bignum"
     subsystem: "Core Data Structures"
     notes: "Big integer support"
   class.c:
     status: Not Started
-    target: "crate::core::class"
+    target: "crate::class"
     subsystem: "Core Data Structures"
     notes: "Class and module hierarchy"
   compar.c:
     status: Not Started
-    target: "crate::core::compar"
+    target: "crate::compar"
     subsystem: "Core Data Structures"
     notes: "Comparable mixin module"
   complex.c:
     status: In Progress
-    target: "crate::core::complex"
+    target: "core_rs::complex"
     subsystem: "Core Data Structures"
     notes: "Ported (complex-A-01, string scanner statics): issign, read_sign, isdecimal, read_rat_nos, read_rat, isimagunit, skip_ws and helpers. Remaining: Complex class methods"
   enum.c:
     status: Not Started
-    target: "crate::core::enum"
+    target: "crate::enum"
     subsystem: "Core Data Structures"
     notes: "Enumerable module"
   enumerator.c:
     status: Not Started
-    target: "crate::core::enumerator"
+    target: "crate::enumerator"
     subsystem: "Core Data Structures"
     notes: "Enumerator class"
   hash.c:
     status: Not Started
-    target: "crate::core::hash"
+    target: "crate::hash"
     subsystem: "Core Data Structures"
     notes: "Hash map implementation"
   numeric.c:
     status: Not Started
-    target: "crate::core::numeric"
+    target: "crate::numeric"
     subsystem: "Core Data Structures"
     notes: "Numeric base classes and operations"
   object.c:
     status: Not Started
-    target: "crate::core::object"
+    target: "crate::object"
     subsystem: "Core Data Structures"
     notes: "Object class methods and operations"
   pack.c:
     status: Not Started
-    target: "crate::core::pack"
+    target: "crate::pack"
     subsystem: "Core Data Structures"
     notes: "Array#pack and String#unpack"
   proc.c:
     status: Not Started
-    target: "crate::core::proc"
+    target: "crate::proc"
     subsystem: "Core Data Structures"
     notes: "Proc, Method, and Binding objects"
   range.c:
     status: Not Started
-    target: "crate::core::range"
+    target: "crate::range"
     subsystem: "Core Data Structures"
     notes: "Range object implementation"
   rational.c:
     status: Not Started
-    target: "crate::core::rational"
+    target: "crate::rational"
     subsystem: "Core Data Structures"
     notes: "Rational number implementation"
   set.c:
     status: Not Started
-    target: "crate::core::set"
+    target: "crate::set"
     subsystem: "Core Data Structures"
     notes: "Core Set class support"
   string.c:
     status: Not Started
-    target: "crate::core::string"
+    target: "crate::string"
     subsystem: "Core Data Structures"
     notes: "String object implementation"
   struct.c:
     status: Not Started
-    target: "crate::core::struct"
+    target: "crate::struct"
     subsystem: "Core Data Structures"
     notes: "Struct class implementation"
   symbol.c:
     status: Not Started
-    target: "crate::core::symbol"
+    target: "crate::symbol"
     subsystem: "Core Data Structures"
     notes: "Symbol management"
   time.c:
     status: Not Started
-    target: "crate::core::time"
+    target: "crate::time"
     subsystem: "Core Data Structures"
     notes: "Time class and operations"
   weakmap.c:
     status: Not Started
-    target: "crate::core::weakmap"
+    target: "crate::weakmap"
     subsystem: "Core Data Structures"
     notes: "ObjectSpace::WeakMap"
 
   # Virtual Machine & Execution
   vm.c:
     status: Not Started
-    target: "crate::core::vm"
+    target: "crate::vm"
     subsystem: "Virtual Machine & Execution"
     notes: "Core virtual machine engine"
   vm_args.c:
     status: Not Started
-    target: "crate::core::vm::args"
+    target: "crate::vm::args"
     subsystem: "Virtual Machine & Execution"
     notes: "Method argument passing"
   vm_backtrace.c:
     status: Not Started
-    target: "crate::core::vm::backtrace"
+    target: "crate::vm::backtrace"
     subsystem: "Virtual Machine & Execution"
     notes: "Backtrace generation"
   vm_dump.c:
     status: Not Started
-    target: "crate::core::vm::dump"
+    target: "crate::vm::dump"
     subsystem: "Virtual Machine & Execution"
     notes: "VM state dump utilities"
   vm_eval.c:
     status: Not Started
-    target: "crate::core::vm::eval"
+    target: "crate::vm::eval"
     subsystem: "Virtual Machine & Execution"
     notes: "Method dispatch and evaluation"
   vm_exec.c:
     status: Not Started
-    target: "crate::core::vm::exec"
+    target: "crate::vm::exec"
     subsystem: "Virtual Machine & Execution"
     notes: "VM loop execution"
   vm_insnhelper.c:
     status: Not Started
-    target: "crate::core::vm::insnhelper"
+    target: "crate::vm::insnhelper"
     subsystem: "Virtual Machine & Execution"
     notes: "Instruction execution helpers"
   vm_method.c:
     status: Not Started
-    target: "crate::core::vm::method"
+    target: "crate::vm::method"
     subsystem: "Virtual Machine & Execution"
     notes: "Method table management"
   vm_sync.c:
     status: Not Started
-    target: "crate::core::vm::sync"
+    target: "crate::vm::sync"
     subsystem: "Virtual Machine & Execution"
     notes: "VM synchronization primitives"
   vm_trace.c:
     status: Not Started
-    target: "crate::core::vm::trace"
+    target: "crate::vm::trace"
     subsystem: "Virtual Machine & Execution"
     notes: "TracePoint and event hooks"
   eval.c:
     status: Not Started
-    target: "crate::core::eval"
+    target: "crate::eval"
     subsystem: "Virtual Machine & Execution"
     notes: "Top-level evaluation entry points"
   eval_error.c:
     status: Not Started
-    target: "crate::core::eval::error"
+    target: "crate::eval::error"
     subsystem: "Virtual Machine & Execution"
     notes: "Evaluation error handling"
   eval_jump.c:
     status: Not Started
-    target: "crate::core::eval::jump"
+    target: "crate::eval::jump"
     subsystem: "Virtual Machine & Execution"
     notes: "Control flow jumps (throw, break, return)"
   cont.c:
     status: Not Started
-    target: "crate::core::cont"
+    target: "crate::cont"
     subsystem: "Virtual Machine & Execution"
     notes: "Continuation and Fiber core"
 
@@ -234,337 +234,337 @@ files:
     notes: "MMTk support is upstream modular GC, not a port by this project"
   imemo.c:
     status: Not Started
-    target: "crate::core::imemo"
+    target: "crate::imemo"
     subsystem: "Memory & Garbage Collection"
     notes: "Internal memo objects"
   shape.c:
     status: Not Started
-    target: "crate::core::shape"
+    target: "crate::shape"
     subsystem: "Memory & Garbage Collection"
     notes: "Object shape / property layout tracking"
   memory_view.c:
     status: Not Started
-    target: "crate::core::memory_view"
+    target: "crate::memory_view"
     subsystem: "Memory & Garbage Collection"
     notes: "Memory view interface"
 
   # Concurrency & Threads
   thread.c:
     status: Not Started
-    target: "crate::core::thread"
+    target: "crate::thread"
     subsystem: "Concurrency & Threads"
     notes: "Thread management core"
   thread_none.c:
     status: Not Started
-    target: "crate::core::thread::none"
+    target: "crate::thread::none"
     subsystem: "Concurrency & Threads"
     notes: "No-threads platform stubs"
   thread_pthread.c:
     status: Not Started
-    target: "crate::core::thread::pthread"
+    target: "crate::thread::pthread"
     subsystem: "Concurrency & Threads"
     notes: "POSIX threads implementation"
   thread_sched.c:
     status: Not Started
-    target: "crate::core::thread::sched"
+    target: "crate::thread::sched"
     subsystem: "Concurrency & Threads"
     notes: "Thread scheduler"
   thread_sched_mn.c:
     status: Not Started
-    target: "crate::core::thread::sched_mn"
+    target: "crate::thread::sched_mn"
     subsystem: "Concurrency & Threads"
     notes: "M:N thread scheduler"
   thread_sync.c:
     status: Not Started
-    target: "crate::core::thread::sync"
+    target: "crate::thread::sync"
     subsystem: "Concurrency & Threads"
     notes: "Thread synchronization primitives"
   thread_win32.c:
     status: Not Started
-    target: "crate::core::thread::win32"
+    target: "crate::thread::win32"
     subsystem: "Concurrency & Threads"
     notes: "Windows threads implementation"
   ractor.c:
     status: Not Started
-    target: "crate::core::ractor"
+    target: "crate::ractor"
     subsystem: "Concurrency & Threads"
     notes: "Ractor actor model implementation"
   ractor_sync.c:
     status: Not Started
-    target: "crate::core::ractor::sync"
+    target: "crate::ractor::sync"
     subsystem: "Concurrency & Threads"
     notes: "Ractor synchronization"
   scheduler.c:
     status: Not Started
-    target: "crate::core::scheduler"
+    target: "crate::scheduler"
     subsystem: "Concurrency & Threads"
     notes: "Fiber scheduler interface"
   signal.c:
     status: Not Started
-    target: "crate::core::signal"
+    target: "crate::signal"
     subsystem: "Concurrency & Threads"
     notes: "Signal handling"
   concurrent_set.c:
     status: Not Started
-    target: "crate::core::concurrent_set"
+    target: "crate::concurrent_set"
     subsystem: "Concurrency & Threads"
     notes: "Lock-free concurrent set"
 
   # Parser & AST
   node.c:
     status: Not Started
-    target: "crate::core::parser::node"
+    target: "crate::parser::node"
     subsystem: "Parser & AST"
     notes: "AST node construction"
   node_dump.c:
     status: Not Started
-    target: "crate::core::parser::node_dump"
+    target: "crate::parser::node_dump"
     subsystem: "Parser & AST"
     notes: "AST dump utilities"
   ruby_parser.c:
     status: Not Started
-    target: "crate::core::parser::ruby_parser"
+    target: "crate::parser::ruby_parser"
     subsystem: "Parser & AST"
     notes: "Ruby parser driver"
   universal_parser.c:
     status: Not Started
-    target: "crate::core::parser::universal_parser"
+    target: "crate::parser::universal_parser"
     subsystem: "Parser & AST"
     notes: "Universal parser interface"
   prism_compile.c:
     status: Not Started
-    target: "crate::core::parser::prism_compile"
+    target: "crate::parser::prism_compile"
     subsystem: "Parser & AST"
     notes: "Prism AST compiler"
   prism_init.c:
     status: Not Started
-    target: "crate::core::parser::prism_init"
+    target: "crate::parser::prism_init"
     subsystem: "Parser & AST"
     notes: "Prism initialization"
   ast.c:
     status: Not Started
-    target: "crate::core::parser::ast"
+    target: "crate::parser::ast"
     subsystem: "Parser & AST"
     notes: "Ruby::AST module"
   parser_st.c:
     status: Not Started
-    target: "crate::core::parser::parser_st"
+    target: "crate::parser::parser_st"
     subsystem: "Parser & AST"
     notes: "Parser symbol table"
 
   # IO & Filesystem
   io.c:
     status: Not Started
-    target: "crate::core::io"
+    target: "crate::io"
     subsystem: "IO & Filesystem"
     notes: "IO class operations"
   io_buffer.c:
     status: Not Started
-    target: "crate::core::io::buffer"
+    target: "crate::io::buffer"
     subsystem: "IO & Filesystem"
     notes: "IO::Buffer implementation"
   file.c:
     status: Not Started
-    target: "crate::core::file"
+    target: "crate::file"
     subsystem: "IO & Filesystem"
     notes: "File system operations"
   dir.c:
     status: Not Started
-    target: "crate::core::dir"
+    target: "crate::dir"
     subsystem: "IO & Filesystem"
     notes: "Directory operations"
   process.c:
     status: Not Started
-    target: "crate::core::process"
+    target: "crate::process"
     subsystem: "IO & Filesystem"
     notes: "Process management"
   pathname.c:
     status: Not Started
-    target: "crate::core::pathname"
+    target: "crate::pathname"
     subsystem: "IO & Filesystem"
     notes: "Pathname standard helper"
   random.c:
     status: Not Started
-    target: "crate::core::random"
+    target: "crate::random"
     subsystem: "IO & Filesystem"
     notes: "Random number generation"
 
   # Encoding & Regex
   encoding.c:
     status: Not Started
-    target: "crate::core::encoding"
+    target: "crate::encoding"
     subsystem: "Encoding & Regex"
     notes: "String encoding support"
   transcode.c:
     status: Not Started
-    target: "crate::core::transcode"
+    target: "crate::transcode"
     subsystem: "Encoding & Regex"
     notes: "Character transcoding"
   re.c:
     status: In Progress
-    target: "crate::core::re"
+    target: "core_rs::re"
     subsystem: "Encoding & Regex"
     notes: "Ported: rb_memsearch (all search algorithms), rb_memcicmp. Remaining: Regexp class interface"
   regcomp.c:
     status: Not Started
-    target: "crate::core::regcomp"
+    target: "crate::regcomp"
     subsystem: "Encoding & Regex"
     notes: "Onigmo regex compiler"
   regenc.c:
     status: Not Started
-    target: "crate::core::regenc"
+    target: "crate::regenc"
     subsystem: "Encoding & Regex"
     notes: "Onigmo encoding engine"
   regerror.c:
     status: Not Started
-    target: "crate::core::regerror"
+    target: "crate::regerror"
     subsystem: "Encoding & Regex"
     notes: "Onigmo regex error reporting"
   regexec.c:
     status: Not Started
-    target: "crate::core::regexec"
+    target: "crate::regexec"
     subsystem: "Encoding & Regex"
     notes: "Onigmo regex execution engine"
   regparse.c:
     status: Not Started
-    target: "crate::core::regparse"
+    target: "crate::regparse"
     subsystem: "Encoding & Regex"
     notes: "Onigmo regex parser"
   regsyntax.c:
     status: Not Started
-    target: "crate::core::regsyntax"
+    target: "crate::regsyntax"
     subsystem: "Encoding & Regex"
     notes: "Onigmo syntax options"
 
   # Utilities & Support
   st.c:
     status: Not Started
-    target: "crate::core::st"
+    target: "crate::st"
     subsystem: "Utilities & Support"
     notes: "Symbol table / hash table internal implementation"
   util.c:
     status: In Progress
-    target: "crate::core::util"
+    target: "core_rs::util"
     subsystem: "Utilities & Support"
     notes: "Ported: ruby_scan_digits, ruby_scan_oct, ruby_scan_hex, ruby_strtoul, ruby_each_words. Remaining: qsort, getcwd, dtoa/strtod"
   variable.c:
     status: Not Started
-    target: "crate::core::variable"
+    target: "crate::variable"
     subsystem: "Utilities & Support"
     notes: "Global and instance variable access"
   version.c:
     status: Not Started
-    target: "crate::core::version"
+    target: "crate::version"
     subsystem: "Utilities & Support"
     notes: "Ruby version constants"
   sprintf.c:
     status: Not Started
-    target: "crate::core::sprintf"
+    target: "crate::sprintf"
     subsystem: "Utilities & Support"
     notes: "Kernel#sprintf formatting"
   strftime.c:
     status: Not Started
-    target: "crate::core::strftime"
+    target: "crate::strftime"
     subsystem: "Utilities & Support"
     notes: "Date/time formatting"
   vsnprintf.c:
     status: Not Started
-    target: "crate::core::vsnprintf"
+    target: "crate::vsnprintf"
     subsystem: "Utilities & Support"
     notes: "Portable vsnprintf"
   siphash.c:
     status: Not Started
-    target: "crate::core::siphash"
+    target: "crate::siphash"
     subsystem: "Utilities & Support"
     notes: "SipHash hashing algorithm"
   id_table.c:
     status: Not Started
-    target: "crate::core::id_table"
+    target: "crate::id_table"
     subsystem: "Utilities & Support"
     notes: "ID lookup table"
   debug.c:
     status: Not Started
-    target: "crate::core::debug"
+    target: "crate::debug"
     subsystem: "Utilities & Support"
     notes: "Debugging helpers"
   debug_counter.c:
     status: Not Started
-    target: "crate::core::debug_counter"
+    target: "crate::debug_counter"
     subsystem: "Utilities & Support"
     notes: "Performance debug counters"
   dln.c:
     status: Not Started
-    target: "crate::core::dln"
+    target: "crate::dln"
     subsystem: "Utilities & Support"
     notes: "Dynamic linking loader"
   dln_find.c:
     status: Not Started
-    target: "crate::core::dln_find"
+    target: "crate::dln_find"
     subsystem: "Utilities & Support"
     notes: "Dynamic loading path search"
   addr2line.c:
     status: Not Started
-    target: "crate::core::addr2line"
+    target: "crate::addr2line"
     subsystem: "Utilities & Support"
     notes: "Address to source line resolution"
   error.c:
     status: Not Started
-    target: "crate::core::error"
+    target: "crate::error"
     subsystem: "Utilities & Support"
     notes: "Exception and error handling"
   inits.c:
     status: Not Started
-    target: "crate::core::inits"
+    target: "crate::inits"
     subsystem: "Utilities & Support"
     notes: "Subsystem initializers"
   load.c:
     status: Not Started
-    target: "crate::core::load"
+    target: "crate::load"
     subsystem: "Utilities & Support"
     notes: "Require and load mechanism"
   loadpath.c:
     status: Not Started
-    target: "crate::core::loadpath"
+    target: "crate::loadpath"
     subsystem: "Utilities & Support"
     notes: "LOAD_PATH initialization"
   localeinit.c:
     status: Not Started
-    target: "crate::core::localeinit"
+    target: "crate::localeinit"
     subsystem: "Utilities & Support"
     notes: "Locale initialization"
   main.c:
     status: Not Started
-    target: "crate::core::main"
+    target: "crate::main"
     subsystem: "Utilities & Support"
     notes: "Main entry point"
   marshal.c:
     status: Not Started
-    target: "crate::core::marshal"
+    target: "crate::marshal"
     subsystem: "Utilities & Support"
     notes: "Marshal serialization"
   math.c:
     status: Not Started
-    target: "crate::core::math"
+    target: "crate::math"
     subsystem: "Utilities & Support"
     notes: "Math module functions"
   mini_builtin.c:
     status: Not Started
-    target: "crate::core::mini_builtin"
+    target: "crate::mini_builtin"
     subsystem: "Utilities & Support"
     notes: "Miniruby builtin features"
   miniinit.c:
     status: Not Started
-    target: "crate::core::miniinit"
+    target: "crate::miniinit"
     subsystem: "Utilities & Support"
     notes: "Miniruby initializers"
   builtin.c:
     status: Not Started
-    target: "crate::core::builtin"
+    target: "crate::builtin"
     subsystem: "Utilities & Support"
     notes: "Builtin Ruby class loader"
   box.c:
     status: Not Started
-    target: "crate::core::box"
+    target: "crate::box"
     subsystem: "Utilities & Support"
     notes: "Value boxing helpers"
 
@@ -596,7 +596,7 @@ files:
     notes: "Development runner binary"
   ruby.c:
     status: Not Started
-    target: "crate::core::ruby_cli"
+    target: "crate::ruby_cli"
     subsystem: "Platform & Miscellaneous"
     notes: "Main Ruby CLI argument handling"
   rubystub.c:
