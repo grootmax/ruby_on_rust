@@ -1,3 +1,5 @@
+use std::ptr::copy_nonoverlapping;
+
 use crate::Ruby;
 use crate::api::RubyMutator;
 use crate::extra_assert;
@@ -106,6 +108,25 @@ impl RubyObjectAccess {
 
     pub fn object_size(&self) -> usize {
         Self::prefix_size() + self.payload_size() + Self::suffix_size()
+    }
+
+    /// Copies the object's memory range from `obj_start()` to `dst`.
+    pub fn copy_to(&self, dst: Address) {
+        unsafe {
+            copy_nonoverlapping::<u8>(self.obj_start().to_ptr(), dst.to_mut_ptr(), self.object_size());
+        }
+    }
+
+    /// Clears the object's memory range in memory with zeros.
+    pub fn clear_memory(&self) {
+        unsafe {
+            std::ptr::write_bytes::<u8>(self.obj_start().to_mut_ptr(), 0, self.object_size());
+        }
+    }
+
+    /// Constructs an `ObjectReference` from a raw payload address.
+    pub fn payload_to_objref(payload: Address) -> ObjectReference {
+        unsafe { ObjectReference::from_raw_address_unchecked(payload) }
     }
 }
 

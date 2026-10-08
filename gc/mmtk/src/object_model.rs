@@ -1,5 +1,3 @@
-use std::ptr::copy_nonoverlapping;
-
 use crate::Ruby;
 use crate::abi;
 use crate::abi::MIN_OBJ_ALIGN;
@@ -50,15 +48,12 @@ impl ObjectModel<Ruby> for VMObjectModel {
         copy_context: &mut GCWorkerCopyContext<Ruby>,
     ) -> ObjectReference {
         let from_acc = RubyObjectAccess::from_objref(from);
-        let from_start = from_acc.obj_start();
         let object_size = from_acc.object_size();
         let to_start = copy_context.alloc_copy(from, object_size, MIN_OBJ_ALIGN, 0, semantics);
         debug_assert!(!to_start.is_zero());
         let to_payload = to_start.add(OBJREF_OFFSET);
-        unsafe {
-            copy_nonoverlapping::<u8>(from_start.to_ptr(), to_start.to_mut_ptr(), object_size);
-        }
-        let to_obj = unsafe { ObjectReference::from_raw_address_unchecked(to_payload) };
+        from_acc.copy_to(to_start);
+        let to_obj = RubyObjectAccess::payload_to_objref(to_payload);
         copy_context.post_copy(to_obj, object_size, semantics);
         trace!("Copied object from {} to {}", from, to_obj);
 
@@ -66,6 +61,7 @@ impl ObjectModel<Ruby> for VMObjectModel {
 
         #[cfg(feature = "clear_old_copy")]
         {
+            let from_start = from_acc.obj_start();
             trace!(
                 "Clearing old copy {} ({}-{})",
                 from,
@@ -74,7 +70,7 @@ impl ObjectModel<Ruby> for VMObjectModel {
             );
             // For debug purpose, we clear the old copy so that if the Ruby VM reads from the old
             // copy again, it will likely result in an error.
-            unsafe { std::ptr::write_bytes::<u8>(from_start.to_mut_ptr(), 0, object_size) }
+            from_acc.clear_memory();
         }
 
         to_obj
