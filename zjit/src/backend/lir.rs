@@ -11,7 +11,7 @@ use crate::asm::LabelName;
 use crate::hir::{Invariant, SideExitReason};
 use crate::hir;
 use crate::options::{TraceExits, get_option};
-use crate::payload::IseqVersionRef;
+use crate::payload::{IseqVersionRef, JITFrame};
 use crate::stats::{exit_counter_ptr, exit_counter_ptr_for_opcode, side_exit_counter, CompileError};
 use crate::virtualmem::CodePtr;
 use crate::asm::{CodeBlock, Label};
@@ -2707,50 +2707,47 @@ impl Assembler
                     }
 
                     if let Some(StackMap { stack, jit_frame, frame_depth }) = stack_map {
-                        assert_eq!(unsafe { (*jit_frame).stack_size } as usize, stack.len());
-                        for (idx, stack_entry) in stack.iter().enumerate() {
-                            let entry = match *stack_entry {
-                                StackMapEntry::Opnd(Opnd::Value(value)) => {
-                                    // TODO: Investigate using a constant pool to track any value reference in the stack map
-                                    assert!(value.special_const_p(), "StackMap should only materialize immediate VALUEs, but got: {value:?}");
-                                    value
-                                }
-                                StackMapEntry::Opnd(Opnd::UImm(value)) => {
-                                    let value = VALUE(value as usize);
-                                    // TODO: Investigate using a constant pool to track any value reference in the stack map
-                                    assert!(value.special_const_p(), "StackMap should only materialize immediate VALUEs, but got: {value:?}");
-                                    value
-                                }
-                                StackMapEntry::Skip(size) => {
-                                    let encoded = (size << ZJIT_STACK_MAP_SHIFT) | ZJIT_STACK_MAP_SKIP_TAG as usize;
-                                    debug_assert!(!VALUE(encoded).special_const_p(), "encoded StackMap skip should not look like an immediate VALUE");
-                                    VALUE(encoded)
-                                }
-                                StackMapEntry::BasePtr { slot_index, stack_size } => {
-                                    debug_assert_eq!(idx, 0, "base_ptr must be the first StackMap entry so later entries decode from it");
-                                    StackMapEntry::encode_base_ptr(slot_index, stack_size)
-                                }
-                                StackMapEntry::Opnd(Opnd::VReg { idx: vreg, .. }) => {
-                                    let vreg_stack_index = match intervals[vreg].assigned.get().expect("StackMap VReg should have an allocation") {
-                                        Allocation::Reg(_) => {
-                                            let caller_saved_reg_idx = survivors.iter().position(|&survivor_id| survivor_id == vreg).unwrap();
-                                            let stack_idx = self.stack_state.stack_idx_for_caller_saved_reg(caller_saved_reg_idx);
-                                            self.stack_state.stack_map_index_for_spill(stack_idx, frame_depth)
-                                        }
-                                        Allocation::Stack(stack_idx) => {
-                                            self.stack_state.stack_map_index_for_spill(stack_idx, frame_depth)
-                                        }
-                                    };
+                        let encoded_entries = stack.iter().enumerate().map(|(idx, stack_entry)| match *stack_entry {
+                            StackMapEntry::Opnd(Opnd::Value(value)) => {
+                                // TODO: Investigate using a constant pool to track any value reference in the stack map
+                                assert!(value.special_const_p(), "StackMap should only materialize immediate VALUEs, but got: {value:?}");
+                                value
+                            }
+                            StackMapEntry::Opnd(Opnd::UImm(value)) => {
+                                let value = VALUE(value as usize);
+                                // TODO: Investigate using a constant pool to track any value reference in the stack map
+                                assert!(value.special_const_p(), "StackMap should only materialize immediate VALUEs, but got: {value:?}");
+                                value
+                            }
+                            StackMapEntry::Skip(size) => {
+                                let encoded = (size << ZJIT_STACK_MAP_SHIFT) | ZJIT_STACK_MAP_SKIP_TAG as usize;
+                                debug_assert!(!VALUE(encoded).special_const_p(), "encoded StackMap skip should not look like an immediate VALUE");
+                                VALUE(encoded)
+                            }
+                            StackMapEntry::BasePtr { slot_index, stack_size } => {
+                                debug_assert_eq!(idx, 0, "base_ptr must be the first StackMap entry so later entries decode from it");
+                                StackMapEntry::encode_base_ptr(slot_index, stack_size)
+                            }
+                            StackMapEntry::Opnd(Opnd::VReg { idx: vreg, .. }) => {
+                                let vreg_stack_index = match intervals[vreg].assigned.get().expect("StackMap VReg should have an allocation") {
+                                    Allocation::Reg(_) => {
+                                        let caller_saved_reg_idx = survivors.iter().position(|&survivor_id| survivor_id == vreg).unwrap();
+                                        let stack_idx = self.stack_state.stack_idx_for_caller_saved_reg(caller_saved_reg_idx);
+                                        self.stack_state.stack_map_index_for_spill(stack_idx, frame_depth)
+                                    }
+                                    Allocation::Stack(stack_idx) => {
+                                        self.stack_state.stack_map_index_for_spill(stack_idx, frame_depth)
+                                    }
+                                };
 
-                                    // Encode the offset as a shifted-and-tagged integer.
-                                    let encoded = (vreg_stack_index << ZJIT_STACK_MAP_SHIFT) | ZJIT_STACK_MAP_VREG_TAG as usize;
-                                    debug_assert!(!VALUE(encoded).special_const_p(), "encoded StackMap VReg should not look like an immediate VALUE");
-                                    VALUE(encoded)
-                                }
-                                _ => unreachable!("unexpected entry in StackMap: {stack_entry:?}"),
-                            };
-                            unsafe { (*jit_frame.cast_mut()).stack.as_mut_ptr().add(idx).write(entry); }
-                        }
+                                // Encode the offset as a shifted-and-tagged integer.
+                                let encoded = (vreg_stack_index << ZJIT_STACK_MAP_SHIFT) | ZJIT_STACK_MAP_VREG_TAG as usize;
+                                debug_assert!(!VALUE(encoded).special_const_p(), "encoded StackMap VReg should not look like an immediate VALUE");
+                                VALUE(encoded)
+                            }
+                            _ => unreachable!("unexpected entry in StackMap: {stack_entry:?}"),
+                        });
+                        unsafe { JITFrame::set_stack_entries(jit_frame, encoded_entries); }
                     }
 
                     // Push arguments that don't fit in `c_arg_regs` onto the
@@ -3054,33 +3051,30 @@ impl Assembler
         fn compile_exit_stack_map(asm: &mut Assembler, stack_map: &StackMap) {
             let StackMap { stack, jit_frame, frame_depth } = stack_map;
             let jit_frame = *jit_frame;
-            assert_eq!(unsafe { (*jit_frame).stack_size } as usize, stack.len());
 
             let mut capture_idx = 0;
-            for (idx, stack_entry) in stack.iter().enumerate() {
-                let entry = match *stack_entry {
-                    StackMapEntry::Opnd(Opnd::Value(_) | Opnd::UImm(_)) => {
-                        let StackMapEntry::Opnd(opnd) = *stack_entry else { unreachable!() };
-                        immediate_stack_map_value(opnd)
-                            .unwrap_or_else(|| capture_stack_map_opnd(asm, opnd, &mut capture_idx, *frame_depth))
-                    }
-                    StackMapEntry::Skip(size) => {
-                        let encoded = (size << ZJIT_STACK_MAP_SHIFT) | ZJIT_STACK_MAP_SKIP_TAG as usize;
-                        debug_assert!(!VALUE(encoded).special_const_p(), "encoded StackMap skip should not look like an immediate VALUE");
-                        VALUE(encoded)
-                    }
-                    StackMapEntry::Opnd(Opnd::Mem(Mem { base: MemBase::Stack { stack_idx, .. }, disp, .. })) => {
-                        assert_eq!(disp, 0, "StackMap stack slot should not have a displacement");
-                        encode_stack_map_index(asm, stack_idx.to_usize(), *frame_depth)
-                    }
-                    StackMapEntry::Opnd(Opnd::Reg(_)) => {
-                        let StackMapEntry::Opnd(opnd) = *stack_entry else { unreachable!() };
-                        capture_stack_map_opnd(asm, opnd, &mut capture_idx, *frame_depth)
-                    }
-                    _ => unreachable!("unexpected entry in SideExit StackMap: {stack_entry:?}"),
-                };
-                unsafe { (*jit_frame.cast_mut()).stack.as_mut_ptr().add(idx).write(entry); }
-            }
+            let encoded_entries = stack.iter().map(|stack_entry| match *stack_entry {
+                StackMapEntry::Opnd(Opnd::Value(_) | Opnd::UImm(_)) => {
+                    let StackMapEntry::Opnd(opnd) = *stack_entry else { unreachable!() };
+                    immediate_stack_map_value(opnd)
+                        .unwrap_or_else(|| capture_stack_map_opnd(asm, opnd, &mut capture_idx, *frame_depth))
+                }
+                StackMapEntry::Skip(size) => {
+                    let encoded = (size << ZJIT_STACK_MAP_SHIFT) | ZJIT_STACK_MAP_SKIP_TAG as usize;
+                    debug_assert!(!VALUE(encoded).special_const_p(), "encoded StackMap skip should not look like an immediate VALUE");
+                    VALUE(encoded)
+                }
+                StackMapEntry::Opnd(Opnd::Mem(Mem { base: MemBase::Stack { stack_idx, .. }, disp, .. })) => {
+                    assert_eq!(disp, 0, "StackMap stack slot should not have a displacement");
+                    encode_stack_map_index(asm, stack_idx.to_usize(), *frame_depth)
+                }
+                StackMapEntry::Opnd(Opnd::Reg(_)) => {
+                    let StackMapEntry::Opnd(opnd) = *stack_entry else { unreachable!() };
+                    capture_stack_map_opnd(asm, opnd, &mut capture_idx, *frame_depth)
+                }
+                _ => unreachable!("unexpected entry in SideExit StackMap: {stack_entry:?}"),
+            });
+            unsafe { JITFrame::set_stack_entries(jit_frame, encoded_entries); }
 
             assert!(capture_idx <= asm.stack_state.num_side_exit_stack_map_slots);
             asm_comment!(asm, "install side-exit JITFrame for caller depth {}", frame_depth);
