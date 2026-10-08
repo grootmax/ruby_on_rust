@@ -1,0 +1,5 @@
+[env]
+RUST_TEST_THREADS = "1"
+
+[target.'cfg(all())']
+runner = ["/bin/sh", "-c", 'exec "$0" "$@" --test-threads=1']

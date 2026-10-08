@@ -3,11 +3,189 @@
 
 require "yaml"
 require "optparse"
+require "set"
 
 VALID_STATUSES = ["Not Started", "In Progress", "Ported", "Blocked", "N/A"].freeze
 
 def number_with_delimiter(number)
   number.to_s.gsub(/(\d)(?=(\d\d\d)+(?!\d))/, '\1,')
+end
+
+def scan_rust_file(file_path)
+  content = File.read(file_path)
+  lines = content.lines
+  total_loc = lines.size
+
+  unsafe_blocks_count = 0
+  unsafe_fn_count = 0
+  unsafe_lines_set = Set.new
+
+  in_block_comment_depth = 0
+  in_string = false
+  raw_string_hashes = nil
+
+  brace_depth = 0
+  unsafe_stack = []
+  pending_unsafe_count = 0
+
+  lines.each_with_index do |line_str, line_idx|
+    line_number = line_idx + 1
+
+    i = 0
+    chars = line_str.chars
+    len = chars.size
+
+    while i < len
+      c = chars[i]
+
+      if in_block_comment_depth > 0
+        if c == "/" && i + 1 < len && chars[i + 1] == "*"
+          in_block_comment_depth += 1
+          i += 2
+          next
+        elsif c == "*" && i + 1 < len && chars[i + 1] == "/"
+          in_block_comment_depth -= 1
+          i += 2
+          next
+        else
+          i += 1
+          next
+        end
+      end
+
+      if raw_string_hashes
+        if c == "\""
+          matching = true
+          raw_string_hashes.times do |h_idx|
+            if i + 1 + h_idx >= len || chars[i + 1 + h_idx] != "#"
+              matching = false
+              break
+            end
+          end
+          if matching
+            i += 1 + raw_string_hashes
+            raw_string_hashes = nil
+            next
+          end
+        end
+        i += 1
+        next
+      end
+
+      if in_string
+        if c == "\\"
+          i += 2
+          next
+        elsif c == "\""
+          in_string = false
+          i += 1
+          next
+        else
+          i += 1
+          next
+        end
+      end
+
+      if c == "/" && i + 1 < len && chars[i + 1] == "/"
+        break
+      end
+
+      if c == "/" && i + 1 < len && chars[i + 1] == "*"
+        in_block_comment_depth += 1
+        i += 2
+        next
+      end
+
+      if c == "r" && i + 1 < len && (chars[i + 1] == "\"" || chars[i + 1] == "#")
+        j = i + 1
+        hashes = 0
+        while j < len && chars[j] == "#"
+          hashes += 1
+          j += 1
+        end
+        if j < len && chars[j] == "\""
+          raw_string_hashes = hashes
+          i = j + 1
+          next
+        end
+      end
+
+      if c == "\""
+        in_string = true
+        i += 1
+        next
+      end
+
+      if c == "'"
+        if i + 2 < len && chars[i + 2] == "'" && chars[i + 1] != "\\"
+          i += 3
+          next
+        elsif i + 3 < len && chars[i + 3] == "'" && chars[i + 1] == "\\"
+          i += 4
+          next
+        end
+        i += 1
+        next
+      end
+
+      if c == "u" && (i == 0 || !chars[i - 1].match?(/[a-zA-Z0-9_]/))
+        if line_str[i..].match?(/\Aunsafe\b/)
+          unsafe_blocks_count += 1
+          pending_unsafe_count += 1
+          rest = line_str[(i + 6)..]
+          if rest.match?(/\A\s*(?:async\s+|const\s+|extern\s+(?:"[^"]*"\s+)?)*fn\b/)
+            unsafe_fn_count += 1
+          end
+          i += 6
+          next
+        end
+      end
+
+      if c == "{"
+        if pending_unsafe_count > 0
+          pending_unsafe_count.times do
+            unsafe_stack.push(brace_depth + 1)
+          end
+          pending_unsafe_count = 0
+        end
+        brace_depth += 1
+        i += 1
+        next
+      end
+
+      if c == "}"
+        if brace_depth > 0
+          brace_depth -= 1
+          while !unsafe_stack.empty? && unsafe_stack.last > brace_depth
+            unsafe_stack.pop
+          end
+        end
+        i += 1
+        next
+      end
+
+      if c == ";"
+        if pending_unsafe_count > 0 && brace_depth == 0
+          pending_unsafe_count = 0
+        end
+        i += 1
+        next
+      end
+
+      i += 1
+    end
+
+    if !unsafe_stack.empty? || pending_unsafe_count > 0
+      unsafe_lines_set.add(line_number)
+    end
+  end
+
+  {
+    loc: total_loc,
+    unsafe_blocks: unsafe_blocks_count,
+    unsafe_fns: unsafe_fn_count,
+    unsafe_lines: unsafe_lines_set.size
+  }
 end
 
 check_mode = false
@@ -95,6 +273,66 @@ VALID_STATUSES.each do |st|
   s = stats[st]
   lines << "| **#{st}** | #{number_with_delimiter(s[:count])} | #{number_with_delimiter(s[:loc])} | #{s[:pct]}% |"
 end
+
+# Rust Workspace Unsafe Code Scanner
+rust_crate_dirs = {
+  "core_rs" => Dir.glob(File.join(repo_root, "core_rs", "**", "*.rs")),
+  "jit" => Dir.glob(File.join(repo_root, "jit", "**", "*.rs")),
+  "ruby" => Dir.glob(File.join(repo_root, "ruby.rs")),
+  "yjit" => Dir.glob(File.join(repo_root, "yjit", "**", "*.rs")),
+  "zjit" => Dir.glob(File.join(repo_root, "zjit", "**", "*.rs"))
+}
+
+rust_metrics = []
+grand_rust_files = 0
+grand_rust_loc = 0
+grand_unsafe_blocks = 0
+grand_unsafe_fns = 0
+grand_unsafe_lines = 0
+
+rust_crate_dirs.keys.sort.each do |crate_name|
+  files = rust_crate_dirs[crate_name].reject { |f| f.include?("/target/") }.sort
+  c_totals = { files: files.size, loc: 0, unsafe_blocks: 0, unsafe_fns: 0, unsafe_lines: 0 }
+  files.each do |f|
+    res = scan_rust_file(f)
+    c_totals[:loc] += res[:loc]
+    c_totals[:unsafe_blocks] += res[:unsafe_blocks]
+    c_totals[:unsafe_fns] += res[:unsafe_fns]
+    c_totals[:unsafe_lines] += res[:unsafe_lines]
+  end
+
+  density = c_totals[:loc].positive? ? (c_totals[:unsafe_lines].to_f / c_totals[:loc] * 100.0).round(1) : 0.0
+
+  grand_rust_files += c_totals[:files]
+  grand_rust_loc += c_totals[:loc]
+  grand_unsafe_blocks += c_totals[:unsafe_blocks]
+  grand_unsafe_fns += c_totals[:unsafe_fns]
+  grand_unsafe_lines += c_totals[:unsafe_lines]
+
+  rust_metrics << {
+    name: crate_name,
+    files: c_totals[:files],
+    loc: c_totals[:loc],
+    unsafe_blocks: c_totals[:unsafe_blocks],
+    unsafe_fns: c_totals[:unsafe_fns],
+    unsafe_lines: c_totals[:unsafe_lines],
+    density: density
+  }
+end
+
+grand_density = grand_rust_loc.positive? ? (grand_unsafe_lines.to_f / grand_rust_loc * 100.0).round(1) : 0.0
+
+lines << ""
+lines << "## Rust Unsafe Code Density"
+lines << ""
+lines << "| Crate / Module | Files | Lines of Code (LOC) | Unsafe Blocks | Unsafe Functions | Unsafe Lines | Unsafe Line Density |"
+lines << "| :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
+
+rust_metrics.each do |m|
+  lines << "| `#{m[:name]}` | #{number_with_delimiter(m[:files])} | #{number_with_delimiter(m[:loc])} | #{number_with_delimiter(m[:unsafe_blocks])} | #{number_with_delimiter(m[:unsafe_fns])} | #{number_with_delimiter(m[:unsafe_lines])} | #{m[:density]}% |"
+end
+
+lines << "| **Total** | **#{number_with_delimiter(grand_rust_files)}** | **#{number_with_delimiter(grand_rust_loc)}** | **#{number_with_delimiter(grand_unsafe_blocks)}** | **#{number_with_delimiter(grand_unsafe_fns)}** | **#{number_with_delimiter(grand_unsafe_lines)}** | **#{grand_density}%** |"
 
 lines << ""
 lines << "## Migration Progress by Subsystem"
