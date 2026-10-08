@@ -3004,9 +3004,10 @@ struct CallerArguments<'a> {
 impl<'a> CallerArguments<'a> {
     /// Decode callinfo metadata and locate the splat in the original Send arguments.
     /// Do this once per Send so builds for different splat lengths share the same layout.
-    fn new(original: &'a [InsnId], ci: *const rb_callinfo) -> Self {
-        let flags = unsafe { rb_vm_ci_flag(ci) };
-        let kwarg = unsafe { rb_vm_ci_kwarg(ci) };
+    fn new(original: &'a [InsnId], ci: impl Into<CallInfoHandle>) -> Self {
+        let ci = ci.into();
+        let flags = ci.flag();
+        let kwarg = ci.kwarg();
         let kwarg_count = if kwarg.is_null() {
             0
         } else {
@@ -4179,8 +4180,9 @@ impl Function {
     }
 
     /// Select caller-splat lengths for a callsite.
-    fn caller_splat_lengths(&self, ci: *const rb_callinfo, recv: InsnId, state: InsnId, profiles: &ProfileOracle) -> Vec<SplatLength> {
-        if self.policy.no_side_exits || unsafe { rb_vm_ci_flag(ci) } & VM_CALL_ARGS_SPLAT == 0 {
+    fn caller_splat_lengths(&self, ci: impl Into<CallInfoHandle>, recv: InsnId, state: InsnId, profiles: &ProfileOracle) -> Vec<SplatLength> {
+        let ci = ci.into();
+        if self.policy.no_side_exits || ci.flag() & VM_CALL_ARGS_SPLAT == 0 {
             return vec![];
         }
         let frame_state = self.frame_state_ref(state);
@@ -4206,13 +4208,12 @@ impl Function {
             self.type_of(recv).runtime_exact_ruby_class()
         };
         let Some(klass) = klass else { return vec![] };
-        let mut cme = unsafe { rb_callable_method_entry(klass, vm_ci_mid(ci)) };
-        if cme.is_null() { return vec![]; }
-        cme = unsafe { rb_check_overloaded_cme(cme, ci) };
-        while unsafe { get_cme_def_type(cme) } == VM_METHOD_TYPE_ALIAS {
-            cme = unsafe { rb_aliased_callable_method_entry(cme) };
+        let Some(mut cme) = CallableMethodEntry::lookup(klass, ci.mid()) else { return vec![]; };
+        cme = cme.check_overloaded(ci);
+        while cme.def_type() == VM_METHOD_TYPE_ALIAS {
+            cme = cme.aliased_entry();
         }
-        if unsafe { get_cme_def_type(cme) } != VM_METHOD_TYPE_ISEQ {
+        if cme.def_type() != VM_METHOD_TYPE_ISEQ {
             return vec![];
         }
         splat_length_summary.buckets().iter().flatten().copied().collect()
@@ -4222,12 +4223,13 @@ impl Function {
     /// operand in the shared fallback; only matched arms may expand its elements.
     fn dispatch_caller_splat(&mut self, mut block: BlockId, send: Insn, lengths: &[SplatLength], fallback_block: BlockId, join_block: BlockId) {
         let Insn::Send { cd, ref args, state, .. } = send else { unreachable!() };
-        let ci = unsafe { (*cd).ci };
-        let flags = unsafe { rb_vm_ci_flag(ci) };
+        let cd_handle = CallDataHandle(cd);
+        let ci_handle = cd_handle.call_info();
+        let flags = cd_handle.flag();
         let insn_idx = self.frame_state_ref(state).insn_idx() as u32;
         // Unlike argument setup, this still sees trailing block/keyword-splat operands.
         let trailing = usize::from(flags & VM_CALL_ARGS_BLOCKARG != 0) + usize::from(flags & VM_CALL_KW_SPLAT != 0);
-        let caller_args = CallerArguments::new(&args[..args.len() - trailing], ci);
+        let caller_args = CallerArguments::new(&args[..args.len() - trailing], ci_handle);
         let array = args[caller_args.splat_arg_idx.unwrap()];
         let actual = self.push_insn(block, Insn::ArrayLength { array });
         for (index, &length) in lengths.iter().enumerate() {
@@ -4611,14 +4613,12 @@ impl Function {
     }
 
     pub fn assume_expected_cfunc(&mut self, block: BlockId, class: VALUE, method_id: ID, cfunc: *mut c_void, state: InsnId) -> bool {
-        let cme = unsafe { rb_callable_method_entry(class, method_id) };
-        if cme.is_null() { return false; }
-        let def_type = unsafe { get_cme_def_type(cme) };
-        if def_type != VM_METHOD_TYPE_CFUNC { return false; }
-        if unsafe { get_mct_func(get_cme_def_body_cfunc(cme)) } != cfunc {
+        let Some(cme) = CallableMethodEntry::lookup(class, method_id) else { return false; };
+        if cme.def_type() != VM_METHOD_TYPE_CFUNC { return false; }
+        if cme.mct_func() as *mut c_void != cfunc {
             return false;
         }
-        self.gen_patch_points_for_optimized_ccall(block, class, method_id, cme, state);
+        self.gen_patch_points_for_optimized_ccall(block, class, method_id, cme.as_ptr(), state);
         if !self.assume_no_singleton_classes(block, class, state) {
             return false;
         }
@@ -4799,8 +4799,8 @@ impl Function {
         // The trivial inliner runs first to handle simple cases (constant returns,
         // parameter returns, etc.) without frame push/pop overhead. The general
         // inliner then handles more complex methods that require full inlining.
-        let call_info = unsafe { (*cd).ci };
-        let ci_flags = unsafe { vm_ci_flag(call_info) };
+        let cd_handle = CallDataHandle(cd);
+        let ci_flags = cd_handle.flag();
         // .send call is not currently supported for builtins
         if ci_flags & VM_CALL_OPT_SEND != 0 {
             return self.push_insn(block, insn);
@@ -4869,21 +4869,20 @@ impl Function {
                                 continue;
                             }
                         };
-                        let ci = unsafe { (*cd).ci }; // info about the call site
+                        let cd_handle = CallDataHandle(cd);
+                        let ci_handle = cd_handle.call_info();
+                        let flags = cd_handle.flag();
+                        let mid = cd_handle.mid();
 
-                        let flags = unsafe { rb_vm_ci_flag(ci) };
-
-                        let mid = unsafe { vm_ci_mid(ci) };
                         // Do method lookup
-                        let mut cme = unsafe { rb_callable_method_entry(klass, mid) };
-                        if cme.is_null() {
+                        let Some(mut cme_handle) = CallableMethodEntry::lookup(klass, mid) else {
                             self.set_dynamic_send_reason(insn_id, SendNotOptimizedMethodType(MethodType::Null));
                             self.push_insn_id(block, insn_id); continue;
-                        }
+                        };
                         // Load an overloaded cme if applicable. See vm_search_cc().
                         // It allows you to use a faster ISEQ if possible.
-                        cme = unsafe { rb_check_overloaded_cme(cme, ci) };
-                        let visibility = unsafe { METHOD_ENTRY_VISI(cme) };
+                        cme_handle = cme_handle.check_overloaded(ci_handle);
+                        let visibility = cme_handle.visibility();
                         match (visibility, flags & VM_CALL_FCALL != 0) {
                             (METHOD_VISI_PUBLIC, _) => {}
                             (METHOD_VISI_PRIVATE, true) => {}
@@ -4893,11 +4892,12 @@ impl Function {
                                 self.push_insn_id(block, insn_id); continue;
                             }
                         }
-                        let mut def_type = unsafe { get_cme_def_type(cme) };
+                        let mut def_type = cme_handle.def_type();
                         while def_type == VM_METHOD_TYPE_ALIAS {
-                            cme = unsafe { rb_aliased_callable_method_entry(cme) };
-                            def_type = unsafe { get_cme_def_type(cme) };
+                            cme_handle = cme_handle.aliased_entry();
+                            def_type = cme_handle.def_type();
                         }
+                        let cme = cme_handle.as_ptr();
 
                         // Check if we can optimize `foo(&block)` to a direct send: either `block` is
                         // nil (strip it and send without a block) or `block` is monomorphically an
@@ -4996,8 +4996,8 @@ impl Function {
                             // TODO(max): Allow non-iseq; cache cme
                             // Only specialize positional-positional calls
                             // TODO(max): Handle other kinds of parameter passing
-                            let iseq = unsafe { get_def_iseq_ptr((*cme).def) };
-                            let caller_args = CallerArguments::new(&args, ci);
+                            let iseq = cme_handle.iseq_ptr();
+                            let caller_args = CallerArguments::new(&args, ci_handle);
                             let caller_splat = if let Some(arg_idx) = caller_args.splat_arg_idx {
                                 // Count the profile shape for every caller-splat execution;
                                 // complex_arg_pass_caller_splat separately tracks fallbacks.
@@ -5049,7 +5049,7 @@ impl Function {
                             let replacement = self.try_inline_send_direct(block, Insn::SendDirect(Box::new(SendDirectData { recv, cd, cme, iseq, args: send_args, kw_bits, jit_entry_idx, state: send_state, block: send_block })));
                             self.make_equal_to(insn_id, replacement);
                         } else if !has_block && def_type == VM_METHOD_TYPE_BMETHOD {
-                            let procv = unsafe { rb_get_def_bmethod_proc((*cme).def) };
+                            let procv = cme_handle.bmethod_proc();
                             let proc = unsafe { rb_jit_get_proc_ptr(procv) };
                             let proc_block = unsafe { (*proc).block.as_ref() };
                             // Target ISEQ bmethods. Can't handle for example, `define_method(:foo, &:foo)`
@@ -5061,7 +5061,7 @@ impl Function {
                             let capture = unsafe { proc_block.as_.captured.as_ref() };
                             let iseq = unsafe { *capture.code.iseq.as_ref() };
 
-                            let caller_args = CallerArguments::new(&args, ci);
+                            let caller_args = CallerArguments::new(&args, ci_handle);
                             let Ok(call) = self.build_send_direct_args(&caller_args, None, iseq, has_block)
                                 .inspect_err(|failure| failure.record(self, block, insn_id, SendDirectFallbackContext::Send)) else {
                                 self.push_insn_id(block, insn_id); continue;
@@ -5236,11 +5236,12 @@ impl Function {
                                 profiled_type: Option<ProfiledType>,
                                 cme: *const rb_callable_method_entry_struct,
                             ) -> Result<(), ()> {
-                                let call_info = unsafe { (*cd).ci };
-                                let argc = unsafe { vm_ci_argc(call_info) };
-                                let method_id = unsafe { rb_vm_ci_mid(call_info) };
+                                let cd_handle = CallDataHandle(cd);
+                                let ci_handle = cd_handle.call_info();
+                                let argc = ci_handle.argc();
+                                let method_id = ci_handle.mid();
 
-                                let ci_flags = unsafe { vm_ci_flag(call_info) };
+                                let ci_flags = cd_handle.flag();
                                 // When seeing &block argument, fall back to dynamic dispatch for now
                                 // TODO: Support block forwarding
                                 if unspecializable_c_call_type(ci_flags) {
@@ -5259,11 +5260,11 @@ impl Function {
                                     None => None,
                                 };
 
-                                let cfunc = unsafe { get_cme_def_body_cfunc(cme) };
+                                let cme_handle = CallableMethodEntry(cme);
                                 // Find the `argc` (arity) of the C method, which describes the parameters it expects
-                                let cfunc_argc = unsafe { get_mct_argc(cfunc) };
-                                let cfunc_ptr = unsafe { get_mct_func(cfunc) }.cast();
-                                let name = unsafe { (*cme).called_id };
+                                let cfunc_argc = cme_handle.mct_argc();
+                                let cfunc_ptr = cme_handle.mct_func();
+                                let name = cme_handle.called_id();
 
                                 // Look up annotations
                                 let props = ZJITState::get_method_annotations().get_cfunc_properties(cme);
@@ -5322,7 +5323,7 @@ impl Function {
                                             // Only allow leaf calls if we don't have a block argument
                                             if props.leaf && props.no_gc {
                                                 fun.count(block, Counter::inline_cfunc_optimized_send_count);
-                                                let owner = unsafe { (*cme).owner };
+                                                let owner = cme_handle.owner();
                                                 let ccall = fun.push_insn(block, Insn::CCall { cfunc: cfunc_ptr, recv, args, name, owner, return_type, elidable });
                                                 fun.insn_types[ccall] = fun.infer_type(ccall);
                                                 fun.make_equal_to(send_insn_id, ccall);
@@ -5389,7 +5390,7 @@ impl Function {
                                             // Only allow inline calls if they are leaf, don't allocate, and don't have a block argument
                                             if props.leaf && props.no_gc {
                                                 fun.count(block, Counter::inline_cfunc_optimized_send_count);
-                                                let owner = unsafe { (*cme).owner };
+                                                let owner = cme_handle.owner();
                                                 let ccall = fun.push_insn(block, Insn::CCall { cfunc: cfunc_ptr, recv, args, name, owner, return_type, elidable });
                                                 fun.insn_types[ccall] = fun.infer_type(ccall);
                                                 fun.make_equal_to(send_insn_id, ccall);
@@ -5439,9 +5440,12 @@ impl Function {
                     &Insn::IsMethodCfunc { val, cd, cfunc, state } if self.type_of(val).ruby_object_known() => {
                         let class = self.type_of(val).ruby_object().unwrap();
                         let cd_owner = self.frame_state_iseq(state);
-                        let cme = unsafe { rb_zjit_vm_search_method(cd_owner.into(), cd as *mut rb_call_data, class) };
-                        let is_expected_cfunc = unsafe { rb_zjit_cme_is_cfunc(cme, cfunc as *const c_void) };
-                        let method = unsafe { rb_vm_ci_mid((*cd).ci) };
+                        let cd_handle = CallDataHandle(cd);
+                        let cme_handle = CallableMethodEntry::search_method(cd_owner.into(), cd_handle, class)
+                            .unwrap_or(CallableMethodEntry(std::ptr::null()));
+                        let is_expected_cfunc = cme_handle.is_cfunc(cfunc as *const c_void);
+                        let method = cd_handle.mid();
+                        let cme = cme_handle.as_ptr();
                         self.push_insn(block, Insn::PatchPoint { invariant: Invariant::MethodRedefined { klass: class, method, cme }, state });
                         let replacement = self.push_insn(block, Insn::Const { val: Const::CBool(is_expected_cfunc) });
                         self.insn_types[replacement] = self.infer_type(replacement);
@@ -5474,17 +5478,17 @@ impl Function {
                         fn emit_super_call_guards(
                             fun: &mut Function,
                             block: BlockId,
-                            super_cme: *const rb_callable_method_entry_t,
-                            current_cme: *const rb_callable_method_entry_t,
+                            super_cme: CallableMethodEntry,
+                            current_cme: CallableMethodEntry,
                             mid: ID,
                             state: InsnId,
                             local_iseq: IseqPtr,
                         ) {
                             fun.push_insn(block, Insn::PatchPoint {
                                 invariant: Invariant::MethodRedefined {
-                                    klass: unsafe { (*super_cme).defined_class },
+                                    klass: super_cme.defined_class(),
                                     method: mid,
-                                    cme: super_cme
+                                    cme: super_cme.as_ptr(),
                                 },
                                 state
                             });
@@ -5498,7 +5502,7 @@ impl Function {
                             // Load ep[VM_ENV_DATA_INDEX_ME_CREF]
                             let method_entry = fun.load_field(block, lep, FieldName::VM_ENV_DATA_INDEX_ME_CREF, SIZEOF_VALUE_I32 * VM_ENV_DATA_INDEX_ME_CREF, types::RubyValue);
                             // Guard that it matches the expected CME
-                            fun.push_insn(block, Insn::GuardBitEquals { val: method_entry, expected: Const::Value(current_cme.into()), reason: Box::new(SideExitReason::GuardSuperMethodEntry), state, recompile: None });
+                            fun.push_insn(block, Insn::GuardBitEquals { val: method_entry, expected: Const::Value(current_cme.as_ptr().into()), reason: Box::new(SideExitReason::GuardSuperMethodEntry), state, recompile: None });
 
                             let block_handler = fun.load_field(block, lep, FieldName::VM_ENV_DATA_INDEX_SPECVAL, SIZEOF_VALUE_I32 * VM_ENV_DATA_INDEX_SPECVAL, types::RubyValue);
                             fun.push_insn(block, Insn::GuardBitEquals {
@@ -5529,8 +5533,9 @@ impl Function {
                             continue;
                         }
 
-                        let ci = unsafe { (*cd).ci };
-                        let flags = unsafe { rb_vm_ci_flag(ci) };
+                        let cd_handle = CallDataHandle(cd);
+                        let ci_handle = cd_handle.call_info();
+                        let flags = cd_handle.flag();
                         assert!(flags & VM_CALL_FCALL != 0);
 
                         // Reject calls with complex argument handling.
@@ -5552,7 +5557,7 @@ impl Function {
                         // compilation's. The runtime guard walks from the live CFP, which is
                         // the callee's CFP for inlined code, so the profile lookup must agree.
                         let local_payload = get_or_create_iseq_payload(frame_state_iseq);
-                        let Some(current_cme) = local_payload.profile.get_super_method_entry(frame_state_insn_idx) else {
+                        let Some(current_cme_raw) = local_payload.profile.get_super_method_entry(frame_state_insn_idx) else {
                             self.push_insn_id(block, insn_id);
 
                             // The absence of the super CME could be due to a missing profile, but
@@ -5561,13 +5566,14 @@ impl Function {
                             self.set_dynamic_send_reason(insn_id, SuperPolymorphic);
                             continue;
                         };
+                        let current_cme = CallableMethodEntry(current_cme_raw);
 
                         // Get defined_class and method ID from the profiled CME.
-                        let current_defined_class = unsafe { (*current_cme).defined_class };
-                        let mid = unsafe { get_def_original_id((*current_cme).def) };
+                        let current_defined_class = current_cme.defined_class();
+                        let mid = current_cme.original_id();
 
                         // Compute superclass: RCLASS_SUPER(RCLASS_ORIGIN(defined_class))
-                        let superclass = unsafe { rb_class_get_superclass(RCLASS_ORIGIN(current_defined_class)) };
+                        let superclass = VmGlobals::class_get_superclass(current_defined_class);
                         if superclass.nil_p() {
                             self.push_insn_id(block, insn_id);
                             self.set_dynamic_send_reason(insn_id, SuperClassNotFound);
@@ -5575,17 +5581,16 @@ impl Function {
                         }
 
                         // Look up the super method.
-                        let mut super_cme = unsafe { rb_callable_method_entry(superclass, mid) };
-                        if super_cme.is_null() {
+                        let Some(mut super_cme) = CallableMethodEntry::lookup(superclass, mid) else {
                             self.push_insn_id(block, insn_id);
                             self.set_dynamic_send_reason(insn_id, SuperTargetNotFound);
                             continue;
-                        }
+                        };
 
-                        let mut def_type = unsafe { get_cme_def_type(super_cme) };
+                        let mut def_type = super_cme.def_type();
                         while def_type == VM_METHOD_TYPE_ALIAS {
-                            super_cme = unsafe { rb_aliased_callable_method_entry(super_cme) };
-                            def_type = unsafe { get_cme_def_type(super_cme) };
+                            super_cme = super_cme.aliased_entry();
+                            def_type = super_cme.def_type();
                         }
 
                         let args = match resolved.insn(self) {
@@ -5596,9 +5601,9 @@ impl Function {
                         if def_type == VM_METHOD_TYPE_ISEQ {
                             // Check if the super method's parameters support direct send.
                             // If not, we can't do direct dispatch.
-                            let super_iseq = unsafe { get_def_iseq_ptr((*super_cme).def) };
+                            let super_iseq = super_cme.iseq_ptr();
                             // TODO: pass Option<blockiseq> to build_send_direct_args when we start specializing `super { ... }`.
-                            let caller_args = CallerArguments::new(&args, ci);
+                            let caller_args = CallerArguments::new(&args, ci_handle);
                             let Ok(call) = self.build_send_direct_args(&caller_args, None, super_iseq, false)
                                 .inspect_err(|failure| failure.record(self, block, insn_id, SendDirectFallbackContext::Super)) else {
                                 self.push_insn_id(block, insn_id); continue;
@@ -5612,7 +5617,7 @@ impl Function {
                             let replacement = self.try_inline_send_direct(block, Insn::SendDirect(Box::new(SendDirectData {
                                 recv,
                                 cd,
-                                cme: super_cme,
+                                cme: super_cme.as_ptr(),
                                 iseq: super_iseq,
                                 args: send_args,
                                 kw_bits,
@@ -5623,13 +5628,12 @@ impl Function {
                             self.make_equal_to(insn_id, replacement);
 
                         } else if def_type == VM_METHOD_TYPE_CFUNC {
-                            let cfunc = unsafe { get_cme_def_body_cfunc(super_cme) };
-                            let cfunc_argc = unsafe { get_mct_argc(cfunc) };
-                            let cfunc_ptr = unsafe { get_mct_func(cfunc) }.cast();
+                            let cfunc_argc = super_cme.mct_argc();
+                            let cfunc_ptr = super_cme.mct_func();
 
-                            let props = ZJITState::get_method_annotations().get_cfunc_properties(super_cme);
+                            let props = ZJITState::get_method_annotations().get_cfunc_properties(super_cme.as_ptr());
                             if props.is_none() && get_option!(stats) {
-                                self.count_not_annotated_cfunc(block, super_cme);
+                                self.count_not_annotated_cfunc(block, super_cme.as_ptr());
                             }
                             let props = props.unwrap_or_default();
 
@@ -5662,8 +5666,8 @@ impl Function {
                                     }
 
                                     // Use CCallWithFrame for the C function.
-                                    let name = unsafe { (*super_cme).called_id };
-                                    let owner = unsafe { (*super_cme).owner };
+                                    let name = super_cme.called_id();
+                                    let owner = super_cme.owner();
                                     let return_type = props.return_type;
                                     let elidable = props.elidable;
                                     // Filter for a leaf and GC free function
@@ -5672,14 +5676,14 @@ impl Function {
                                         self.push_insn(block, Insn::CCall { cfunc: cfunc_ptr, recv, args, name, owner, return_type, elidable })
                                     } else {
                                         if get_option!(stats) {
-                                            self.count_not_inlined_cfunc(block, super_cme);
+                                            self.count_not_inlined_cfunc(block, super_cme.as_ptr());
                                         }
                                         self.push_insn(block, Insn::CCallWithFrame(Box::new(CCallWithFrameData {
                                             cd,
                                             cfunc: cfunc_ptr,
                                             recv,
                                             args,
-                                            cme: super_cme,
+                                            cme: super_cme.as_ptr(),
                                             name,
                                             state,
                                             return_type,
@@ -5712,8 +5716,8 @@ impl Function {
                                     }
 
                                     // Use CCallVariadic for the variadic C function.
-                                    let name = unsafe { (*super_cme).called_id };
-                                    let owner = unsafe { (*super_cme).owner };
+                                    let name = super_cme.called_id();
+                                    let owner = super_cme.owner();
                                     let return_type = props.return_type;
                                     let elidable = props.elidable;
                                     // Filter for a leaf and GC free function
@@ -5722,13 +5726,13 @@ impl Function {
                                         self.push_insn(block, Insn::CCall { cfunc: cfunc_ptr, recv, args, name, owner, return_type, elidable })
                                     } else {
                                         if get_option!(stats) {
-                                            self.count_not_inlined_cfunc(block, super_cme);
+                                            self.count_not_inlined_cfunc(block, super_cme.as_ptr());
                                         }
                                         self.push_insn(block, Insn::CCallVariadic(Box::new(CCallVariadicData {
                                             cfunc: cfunc_ptr,
                                             recv,
                                             args,
-                                            cme: super_cme,
+                                            cme: super_cme.as_ptr(),
                                             name,
                                             state,
                                             return_type,
@@ -6186,13 +6190,12 @@ impl Function {
         // Too-complex shapes use hash tables; rb_shape_get_iv_index doesn't support them.
         // Callers must filter these out before calling load_ivar.
         assert!(!recv_type.shape().is_complex(), "load_ivar called with too-complex shape");
-        let mut ivar_index: attr_index_t = 0;
-        if ! unsafe { rb_shape_get_iv_index(recv_type.shape().0, id, &mut ivar_index) } {
+        let Some(ivar_index) = ShapeHandle(recv_type.shape()).iv_index(id) else {
             // If there is no IVAR index, then the ivar was undefined when we
             // entered the compiler.  That means we can just return nil for this
             // shape + iv name
             return self.push_insn(block, Insn::Const { val: Const::Value(Qnil) });
-        }
+        };
 
         let layout = recv_type.shape().layout();
         // Callers must take the SingleRactorMode patch point before specializing a class read.
@@ -6286,9 +6289,10 @@ impl Function {
             // too-complex shapes can't use index access
             return Err(Counter::setivar_fallback_complex);
         }
-        let mut ivar_index: attr_index_t = 0;
         let mut next_shape = profiled_type.shape();
-        if !unsafe { rb_shape_get_iv_index(profiled_type.shape().0, id, &mut ivar_index) } {
+        let ivar_index = if let Some(index) = ShapeHandle(profiled_type.shape()).iv_index(id) {
+            index
+        } else {
             // Updating the fields object's shape requires preserving its private layout and
             // capacity bits, which can differ from the owning RObject's. Existing ivars do not
             // change either shape, so they can still use the fast path.
@@ -6309,8 +6313,7 @@ impl Function {
             if new_shape_complex {
                 return Err(Counter::setivar_fallback_new_shape_complex);
             }
-            let ivar_result = unsafe { rb_shape_get_iv_index(next_shape.0, id, &mut ivar_index) };
-            assert!(ivar_result, "New shape must have the ivar index");
+            let index = ShapeHandle(next_shape).iv_index(id).expect("New shape must have the ivar index");
             let current_capacity = unsafe { rb_jit_shape_capacity(current_shape_id.0) };
             let next_capacity = unsafe { rb_jit_shape_capacity(next_shape.0) };
             // If the new shape has a different capacity, or is COMPLEX, we'll have to
@@ -6319,8 +6322,9 @@ impl Function {
             if needs_extension {
                 return Err(Counter::setivar_fallback_new_shape_needs_extension);
             }
-            // Fall through to preparing the ivar write.
-        }
+            index
+        };
+        // Fall through to preparing the ivar write.
 
         Ok(SetIvarSpec { profiled_type, ivar_index, next_shape })
     }
@@ -9275,7 +9279,7 @@ fn add_iseq_to_hir(
                 YARVINSN_putspecialobject => {
                     let value_type = SpecialObjectType::from(get_arg(pc, 0).as_u32());
                     let insn = if value_type == SpecialObjectType::VMCore {
-                        Insn::Const { val: Const::Value(unsafe { rb_mRubyVMFrozenCore }) }
+                        Insn::Const { val: Const::Value(VmGlobals::frozen_core()) }
                     } else {
                         Insn::PutSpecialObject { value_type, state: exit_id }
                     };
@@ -9556,8 +9560,7 @@ fn add_iseq_to_hir(
                             });
 
                             block = fall_through;
-                            let mut ivar_index: attr_index_t = 0;
-                            let result = if unsafe { rb_shape_get_iv_index(profiled_shape.0, id, &mut ivar_index) } {
+                            let result = if ShapeHandle(profiled_shape).iv_index(id).is_some() {
                                 fun.push_insn(iftrue_block, Insn::Const { val: Const::Value(pushval) })
                             } else {
                                 fun.push_insn(iftrue_block, Insn::Const { val: Const::Value(Qnil) })
@@ -9576,8 +9579,7 @@ fn add_iseq_to_hir(
                             self_param = fun.guard_heap(block, self_param, exit_id);
                             let shape = fun.load_shape(block, self_param);
                             fun.guard_shape(block, shape, profiled_shape, exit_id, Some(Recompile));
-                            let mut ivar_index: attr_index_t = 0;
-                            let result = if unsafe { rb_shape_get_iv_index(profiled_shape.0, id, &mut ivar_index) } {
+                            let result = if ShapeHandle(profiled_shape).iv_index(id).is_some() {
                                 fun.push_insn(block, Insn::Const { val: Const::Value(pushval) })
                             } else {
                                 // If there is no IVAR index, then the ivar was undefined when we
@@ -9660,7 +9662,7 @@ fn add_iseq_to_hir(
                         }
                         if [ID!(NULL), ID!(RubyVM), ID!(ZJIT), ID(0)] == segments {
                             debug_assert_ne!(ID!(NULL), ID(0));
-                            let ruby_vm_mod = rb_const_lookup(rb_cObject, ID!(RubyVM));
+                            let ruby_vm_mod = rb_const_lookup(VmGlobals::c_object(), ID!(RubyVM));
                             if !ruby_vm_mod.is_null() && (*ruby_vm_mod).value == rb_cRubyVM {
                                 let zjit_module = VALUE(state::ZJIT_MODULE.load(Ordering::Relaxed));
                                 let lookedup_module = rb_const_lookup(rb_cRubyVM, ID!(ZJIT));
@@ -9782,8 +9784,8 @@ fn add_iseq_to_hir(
                     // Check if #new resolves to rb_class_new_instance_pass_kw.
                     // TODO: Guard on a profiled class and add a patch point for #new redefinition
                     let argc = crate::profile::num_arguments_on_stack(cd);
-                    let ci = unsafe { (*cd).ci };
-                    let flags = unsafe { rb_vm_ci_flag(ci) };
+                    let cd_handle = CallDataHandle(cd);
+                    let flags = cd_handle.flag();
                     assert_eq!(flags & VM_CALL_ARGS_BLOCKARG, 0);
                     let val = state.stack_topn(argc)?;
                     let test_id = fun.push_insn(block, Insn::IsMethodCfunc { val, cd, cfunc: rb_class_new_instance_pass_kw as *const u8, state: exit_id });
@@ -9974,7 +9976,7 @@ fn add_iseq_to_hir(
                         if_false: BranchEdge { target: nil_check_block, args: vec![] },
                     });
                     // TODO(Shopify/ruby#753): GC root, so we should be able to avoid unnecessary GC tracing
-                    let proxy_val = fun.push_insn(iseq_or_ifunc_block, Insn::Const { val: Const::Value(unsafe { rb_block_param_proxy }) });
+                    let proxy_val = fun.push_insn(iseq_or_ifunc_block, Insn::Const { val: Const::Value(VmGlobals::block_param_proxy()) });
                     jump_to_join_block(fun, iseq_or_ifunc_block, proxy_val);
 
                     // Handle VM_BLOCK_HANDLER_NONE: the block param is nil.
@@ -10112,8 +10114,8 @@ fn add_iseq_to_hir(
                 YARVINSN_opt_neq => {
                     // NB: opt_neq has two cd; get_arg(0) is for eq and get_arg(1) is for neq
                     let cd: *const rb_call_data = get_arg(pc, 1).as_ptr();
-                    let call_info = unsafe { (*cd).ci };
-                    let flags = unsafe { rb_vm_ci_flag(call_info) };
+                    let cd_handle = CallDataHandle(cd);
+                    let flags = cd_handle.flag();
                     if let Err(call_type) = unhandled_call_type(flags) {
                         // Can't handle the call type; side-exit into the interpreter
                         fun.push_insn(block, Insn::SideExit { state: exit_id, reason: Box::new(SideExitReason::UnhandledCallType(call_type)), recompile: None });
@@ -10212,15 +10214,15 @@ fn add_iseq_to_hir(
                 YARVINSN_opt_regexpmatch2 |
                 YARVINSN_opt_send_without_block => {
                     let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
-                    let call_info = unsafe { (*cd).ci };
-                    let flags = unsafe { rb_vm_ci_flag(call_info) };
+                    let cd_handle = CallDataHandle(cd);
+                    let flags = cd_handle.flag();
                     if let Err(call_type) = unhandled_call_type(flags) {
                         // Can't handle tailcall; side-exit into the interpreter
                         fun.push_insn(block, Insn::SideExit { state: exit_id, reason: Box::new(SideExitReason::UnhandledCallType(call_type)), recompile: None });
                         break;  // End the block
                     }
                     let argc = crate::profile::num_arguments_on_stack(cd);
-                    let mid = unsafe { rb_vm_ci_mid(call_info) };
+                    let mid = cd_handle.mid();
 
                     // Check for calls to directives
                     if argc == 0
@@ -10258,7 +10260,7 @@ fn add_iseq_to_hir(
 
                     let args = state.stack_pop_n(argc as usize)?;
                     let recv = state.stack_pop()?;
-                    let lengths = fun.caller_splat_lengths(call_info, recv, exit_id, &profiles);
+                    let lengths = fun.caller_splat_lengths(cd_handle, recv, exit_id, &profiles);
                     let caller_splat_length = if lengths.len() == 1 { Some(lengths[0]) } else { None };
 
                     if let Some(summary) = fun.polymorphic_summary(&profiles, recv, exit_id) {
@@ -10302,7 +10304,7 @@ fn add_iseq_to_hir(
                             // Set the refined type now; otherwise length selection sees Any and cannot
                             // identify the ISEQ callee needed for polymorphic splat dispatch.
                             fun.insn_types[refined_recv] = expected;
-                            let lengths = fun.caller_splat_lengths(call_info, refined_recv, snapshot, &profiles);
+                            let lengths = fun.caller_splat_lengths(cd_handle, refined_recv, snapshot, &profiles);
                             let send = Insn::Send { recv: refined_recv, cd, block: None, args: args.clone(), caller_splat_length, state: snapshot, reason: Uncategorized(opcode.into()) };
                             if lengths.len() > 1 {
                                 // Receiver and length misses share the original, unexpanded Send.
@@ -10339,8 +10341,8 @@ fn add_iseq_to_hir(
                 YARVINSN_send => {
                     let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
                     let blockiseq: IseqPtr = get_arg(pc, 1).as_iseq();
-                    let call_info = unsafe { (*cd).ci };
-                    let flags = unsafe { rb_vm_ci_flag(call_info) };
+                    let cd_handle = CallDataHandle(cd);
+                    let flags = cd_handle.flag();
                     if let Err(call_type) = unhandled_call_type(flags) {
                         // Can't handle tailcall; side-exit into the interpreter
                         fun.push_insn(block, Insn::SideExit { state: exit_id, reason: Box::new(SideExitReason::UnhandledCallType(call_type)), recompile: None });
@@ -10362,7 +10364,7 @@ fn add_iseq_to_hir(
                     } else {
                         None
                     };
-                    let lengths = fun.caller_splat_lengths(call_info, recv, exit_id, &profiles);
+                    let lengths = fun.caller_splat_lengths(cd_handle, recv, exit_id, &profiles);
                     let caller_splat_length = if lengths.len() == 1 { Some(lengths[0]) } else { None };
                     if let Some(summary) = fun.polymorphic_summary(&profiles, recv, exit_id) {
                         let join_block = fun.new_block(insn_idx);
@@ -10425,8 +10427,8 @@ fn add_iseq_to_hir(
                 YARVINSN_sendforward => {
                     let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
                     let blockiseq: IseqPtr = get_arg(pc, 1).as_iseq();
-                    let call_info = unsafe { (*cd).ci };
-                    let flags = unsafe { rb_vm_ci_flag(call_info) };
+                    let cd_handle = CallDataHandle(cd);
+                    let flags = cd_handle.flag();
                     let forwarding = (flags & VM_CALL_FORWARDING) != 0;
                     if let Err(call_type) = unhandled_call_type(flags) {
                         // Can't handle the call type; side-exit into the interpreter
@@ -10438,7 +10440,7 @@ fn add_iseq_to_hir(
                         fun.push_insn(block, Insn::SideExit { state: exit_id, reason: Box::new(SideExitReason::SendWhileTracing), recompile: None });
                         break;
                     }
-                    let argc = unsafe { vm_ci_argc((*cd).ci) };
+                    let argc = cd_handle.argc();
 
                     let args = state.stack_pop_n(argc as usize + usize::from(forwarding))?;
                     let recv = state.stack_pop()?;
@@ -10455,8 +10457,8 @@ fn add_iseq_to_hir(
                 }
                 YARVINSN_invokesuper => {
                     let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
-                    let call_info = unsafe { (*cd).ci };
-                    let flags = unsafe { rb_vm_ci_flag(call_info) };
+                    let cd_handle = CallDataHandle(cd);
+                    let flags = cd_handle.flag();
                     if let Err(call_type) = unhandled_call_type(flags) {
                         // Can't handle tailcall; side-exit into the interpreter
                         fun.push_insn(block, Insn::SideExit { state: exit_id, reason: Box::new(SideExitReason::UnhandledCallType(call_type)), recompile: None });
@@ -10484,8 +10486,8 @@ fn add_iseq_to_hir(
                 YARVINSN_invokesuperforward => {
                     let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
                     let blockiseq: IseqPtr = get_arg(pc, 1).as_iseq();
-                    let call_info = unsafe { (*cd).ci };
-                    let flags = unsafe { rb_vm_ci_flag(call_info) };
+                    let cd_handle = CallDataHandle(cd);
+                    let flags = cd_handle.flag();
                     let forwarding = (flags & VM_CALL_FORWARDING) != 0;
                     if let Err(call_type) = unhandled_call_type(flags) {
                         // Can't handle tailcall; side-exit into the interpreter
@@ -10497,7 +10499,7 @@ fn add_iseq_to_hir(
                         fun.push_insn(block, Insn::SideExit { state: exit_id, reason: Box::new(SideExitReason::SendWhileTracing), recompile: None });
                         break;
                     }
-                    let argc = unsafe { vm_ci_argc((*cd).ci) };
+                    let argc = cd_handle.argc();
                     let args = state.stack_pop_n(argc as usize + usize::from(forwarding))?;
                     let recv = state.stack_pop()?;
                     let result = fun.push_insn(block, Insn::InvokeSuperForward { recv, cd, blockiseq, args, state: exit_id, reason: InvokeSuperForwardNotSpecialized });
@@ -10513,8 +10515,8 @@ fn add_iseq_to_hir(
                 }
                 YARVINSN_invokeblock => {
                     let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
-                    let call_info = unsafe { (*cd).ci };
-                    let flags = unsafe { rb_vm_ci_flag(call_info) };
+                    let cd_handle = CallDataHandle(cd);
+                    let flags = cd_handle.flag();
                     if let Err(call_type) = unhandled_call_type(flags) {
                         // Can't handle tailcall; side-exit into the interpreter
                         fun.push_insn(block, Insn::SideExit { state: exit_id, reason: Box::new(SideExitReason::UnhandledCallType(call_type)), recompile: None });

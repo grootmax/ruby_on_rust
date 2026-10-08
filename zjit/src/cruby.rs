@@ -200,8 +200,6 @@ pub use rb_get_cikw_keywords_idx as get_cikw_keywords_idx;
 pub use rb_FL_TEST_RAW as FL_TEST_RAW;
 pub use rb_RB_TYPE_P as RB_TYPE_P;
 pub use rb_vm_ci_argc as vm_ci_argc;
-pub use rb_vm_ci_mid as vm_ci_mid;
-pub use rb_vm_ci_flag as vm_ci_flag;
 pub use rb_METHOD_ENTRY_VISI as METHOD_ENTRY_VISI;
 pub use rb_RCLASS_ORIGIN as RCLASS_ORIGIN;
 pub use rb_jit_fix_mod_fix as rb_fix_mod_fix;
@@ -1773,3 +1771,372 @@ pub(crate) mod ids {
     pub(crate) use ID;
 }
 pub(crate) use ids::ID;
+
+/// Safe wrapper handle around raw `rb_callinfo` pointer.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct CallInfoHandle(pub *const rb_callinfo);
+
+impl CallInfoHandle {
+    pub fn new(ptr: *const rb_callinfo) -> Self {
+        Self(ptr)
+    }
+
+    pub fn as_ptr(&self) -> *const rb_callinfo {
+        self.0
+    }
+
+    pub fn is_null(&self) -> bool {
+        self.0.is_null()
+    }
+
+    pub fn flag(&self) -> u32 {
+        if self.0.is_null() {
+            0
+        } else {
+            unsafe { rb_vm_ci_flag(self.0) }
+        }
+    }
+
+    pub fn mid(&self) -> ID {
+        if self.0.is_null() {
+            ID(0)
+        } else {
+            unsafe { rb_vm_ci_mid(self.0) }
+        }
+    }
+
+    pub fn argc(&self) -> u32 {
+        if self.0.is_null() {
+            0
+        } else {
+            unsafe { rb_vm_ci_argc(self.0) }
+        }
+    }
+
+    pub fn kwarg(&self) -> *const rb_callinfo_kwarg {
+        if self.0.is_null() {
+            std::ptr::null()
+        } else {
+            unsafe { rb_vm_ci_kwarg(self.0) }
+        }
+    }
+}
+
+impl From<*const rb_callinfo> for CallInfoHandle {
+    fn from(ptr: *const rb_callinfo) -> Self {
+        Self(ptr)
+    }
+}
+
+impl From<CallDataHandle> for CallInfoHandle {
+    fn from(cd: CallDataHandle) -> Self {
+        cd.call_info()
+    }
+}
+
+/// Safe wrapper handle around raw `rb_call_data` pointer.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct CallDataHandle(pub *const rb_call_data);
+
+impl CallDataHandle {
+    pub fn new(ptr: *const rb_call_data) -> Self {
+        Self(ptr)
+    }
+
+    pub fn as_ptr(&self) -> *const rb_call_data {
+        self.0
+    }
+
+    pub fn is_null(&self) -> bool {
+        self.0.is_null()
+    }
+
+    pub fn call_info(&self) -> CallInfoHandle {
+        if self.0.is_null() {
+            CallInfoHandle(std::ptr::null())
+        } else {
+            CallInfoHandle(unsafe { (*self.0).ci })
+        }
+    }
+
+    pub fn flag(&self) -> u32 {
+        self.call_info().flag()
+    }
+
+    pub fn mid(&self) -> ID {
+        self.call_info().mid()
+    }
+
+    pub fn argc(&self) -> u32 {
+        self.call_info().argc()
+    }
+
+    pub fn kwarg(&self) -> *const rb_callinfo_kwarg {
+        self.call_info().kwarg()
+    }
+}
+
+impl From<*const rb_call_data> for CallDataHandle {
+    fn from(ptr: *const rb_call_data) -> Self {
+        Self(ptr)
+    }
+}
+
+/// Safe wrapper handle around raw `rb_callable_method_entry_t` pointer.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct CallableMethodEntry(pub *const rb_callable_method_entry_t);
+
+impl CallableMethodEntry {
+    pub fn new(ptr: *const rb_callable_method_entry_t) -> Option<Self> {
+        if ptr.is_null() {
+            None
+        } else {
+            Some(Self(ptr))
+        }
+    }
+
+    pub fn as_ptr(&self) -> *const rb_callable_method_entry_t {
+        self.0
+    }
+
+    pub fn is_null(&self) -> bool {
+        self.0.is_null()
+    }
+
+    pub fn lookup(class: VALUE, mid: ID) -> Option<Self> {
+        let ptr = unsafe { rb_callable_method_entry(class, mid) };
+        Self::new(ptr)
+    }
+
+    pub fn search_method(cd_owner: VALUE, cd: CallDataHandle, class: VALUE) -> Option<Self> {
+        let ptr = unsafe { rb_zjit_vm_search_method(cd_owner, cd.as_ptr() as *mut rb_call_data, class) };
+        Self::new(ptr)
+    }
+
+    pub fn check_overloaded(&self, ci: CallInfoHandle) -> Self {
+        let ptr = unsafe { rb_check_overloaded_cme(self.0, ci.as_ptr()) };
+        Self(ptr)
+    }
+
+    pub fn visibility(&self) -> rb_method_visibility_t {
+        unsafe { METHOD_ENTRY_VISI(self.0) }
+    }
+
+    pub fn def_type(&self) -> rb_method_type_t {
+        unsafe { get_cme_def_type(self.0) }
+    }
+
+    pub fn aliased_entry(&self) -> Self {
+        let ptr = unsafe { rb_aliased_callable_method_entry(self.0) };
+        Self(ptr)
+    }
+
+    pub fn defined_class(&self) -> VALUE {
+        unsafe { (*self.0).defined_class }
+    }
+
+    pub fn owner(&self) -> VALUE {
+        unsafe { (*self.0).owner }
+    }
+
+    pub fn called_id(&self) -> ID {
+        unsafe { (*self.0).called_id }
+    }
+
+    pub fn def(&self) -> *const rb_method_definition_struct {
+        unsafe { (*self.0).def }
+    }
+
+    pub fn original_id(&self) -> ID {
+        unsafe { get_def_original_id((*self.0).def) }
+    }
+
+    pub fn iseq_ptr(&self) -> IseqPtr {
+        unsafe { get_def_iseq_ptr((*self.0).def) }
+    }
+
+    pub fn cfunc(&self) -> *mut rb_method_cfunc_t {
+        unsafe { get_cme_def_body_cfunc(self.0) }
+    }
+
+    pub fn mct_argc(&self) -> i32 {
+        unsafe { get_mct_argc(self.cfunc()) as i32 }
+    }
+
+    pub fn mct_func(&self) -> *const u8 {
+        unsafe { get_mct_func(self.cfunc()).cast() }
+    }
+
+    pub fn attr_id(&self) -> ID {
+        unsafe { get_cme_def_body_attr_id(self.0) }
+    }
+
+    pub fn optimized_type(&self) -> method_optimized_type {
+        unsafe { get_cme_def_body_optimized_type(self.0) }
+    }
+
+    pub fn optimized_index(&self) -> usize {
+        unsafe { get_cme_def_body_optimized_index(self.0) as usize }
+    }
+
+    pub fn is_cfunc(&self, cfunc: *const c_void) -> bool {
+        unsafe { rb_zjit_cme_is_cfunc(self.0, cfunc) }
+    }
+
+    pub fn method_serial(&self) -> usize {
+        unsafe { get_def_method_serial((*self.0).def) }
+    }
+
+    pub fn bmethod_proc(&self) -> VALUE {
+        unsafe { rb_get_def_bmethod_proc((*self.0).def) }
+    }
+}
+
+impl From<*const rb_callable_method_entry_t> for CallableMethodEntry {
+    fn from(ptr: *const rb_callable_method_entry_t) -> Self {
+        Self(ptr)
+    }
+}
+
+/// Safe wrapper around shape operations.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct ShapeHandle(pub ShapeId);
+
+impl ShapeHandle {
+    pub fn new(shape_id: ShapeId) -> Self {
+        Self(shape_id)
+    }
+
+    pub fn shape_id(&self) -> ShapeId {
+        self.0
+    }
+
+    pub fn get_iv_index(shape_id: ShapeId, id: ID) -> Option<attr_index_t> {
+        let mut ivar_index = 0;
+        if unsafe { rb_shape_get_iv_index(shape_id.0, id, &mut ivar_index) } {
+            Some(ivar_index)
+        } else {
+            None
+        }
+    }
+
+    pub fn iv_index(&self, id: ID) -> Option<attr_index_t> {
+        Self::get_iv_index(self.0, id)
+    }
+}
+
+/// Safe accessor module for CRuby VM globals.
+pub struct VmGlobals;
+
+#[allow(non_snake_case)]
+impl VmGlobals {
+    pub fn frozen_core() -> VALUE {
+        unsafe { rb_mRubyVMFrozenCore }
+    }
+    pub fn rb_mRubyVMFrozenCore() -> VALUE {
+        Self::frozen_core()
+    }
+
+    pub fn block_param_proxy() -> VALUE {
+        unsafe { rb_block_param_proxy }
+    }
+    pub fn rb_block_param_proxy() -> VALUE {
+        Self::block_param_proxy()
+    }
+
+    pub fn c_array() -> VALUE {
+        unsafe { rb_cArray }
+    }
+    pub fn rb_cArray() -> VALUE {
+        Self::c_array()
+    }
+
+    pub fn c_integer() -> VALUE {
+        unsafe { rb_cInteger }
+    }
+    pub fn rb_cInteger() -> VALUE {
+        Self::c_integer()
+    }
+
+    pub fn c_float() -> VALUE {
+        unsafe { rb_cFloat }
+    }
+    pub fn rb_cFloat() -> VALUE {
+        Self::c_float()
+    }
+
+    pub fn c_string() -> VALUE {
+        unsafe { rb_cString }
+    }
+    pub fn rb_cString() -> VALUE {
+        Self::c_string()
+    }
+
+    pub fn c_hash() -> VALUE {
+        unsafe { rb_cHash }
+    }
+    pub fn rb_cHash() -> VALUE {
+        Self::c_hash()
+    }
+
+    pub fn c_symbol() -> VALUE {
+        unsafe { rb_cSymbol }
+    }
+    pub fn rb_cSymbol() -> VALUE {
+        Self::c_symbol()
+    }
+
+    pub fn c_range() -> VALUE {
+        unsafe { rb_cRange }
+    }
+    pub fn rb_cRange() -> VALUE {
+        Self::c_range()
+    }
+
+    pub fn c_nil_class() -> VALUE {
+        unsafe { rb_cNilClass }
+    }
+    pub fn rb_cNilClass() -> VALUE {
+        Self::c_nil_class()
+    }
+
+    pub fn c_true_class() -> VALUE {
+        unsafe { rb_cTrueClass }
+    }
+    pub fn rb_cTrueClass() -> VALUE {
+        Self::c_true_class()
+    }
+
+    pub fn c_false_class() -> VALUE {
+        unsafe { rb_cFalseClass }
+    }
+    pub fn rb_cFalseClass() -> VALUE {
+        Self::c_false_class()
+    }
+
+    pub fn c_object() -> VALUE {
+        unsafe { rb_cObject }
+    }
+    pub fn rb_cObject() -> VALUE {
+        Self::c_object()
+    }
+
+    pub fn c_set() -> VALUE {
+        unsafe { rb_cSet }
+    }
+    pub fn rb_cSet() -> VALUE {
+        Self::c_set()
+    }
+
+    pub fn is_singleton_class(val: VALUE) -> bool {
+        unsafe { rb_zjit_singleton_class_p(val) }
+    }
+
+    pub fn class_get_superclass(class: VALUE) -> VALUE {
+        unsafe { rb_class_get_superclass(RCLASS_ORIGIN(class)) }
+    }
+
+    pub fn read_value_ptr(ptr: *const VALUE) -> VALUE {
+        unsafe { *ptr }
+    }
+}

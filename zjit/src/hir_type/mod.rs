@@ -2,13 +2,11 @@
 
 #![allow(non_upper_case_globals)]
 use crate::cruby;
-use crate::cruby::{rb_block_param_proxy, Qfalse, Qnil, Qtrue, RUBY_T_ARRAY, RUBY_T_HASH, RUBY_T_STRING, VALUE};
-use crate::cruby::{rb_cInteger, rb_cFloat, rb_cArray, rb_cHash, rb_cString, rb_cSymbol, rb_cRange, rb_zjit_singleton_class_p};
+use crate::cruby::{Qfalse, Qnil, Qtrue, RUBY_T_ARRAY, RUBY_T_HASH, RUBY_T_STRING, VALUE, VmGlobals};
 use crate::cruby::ClassRelationship;
 use crate::cruby::get_class_name;
 use crate::cruby::get_module_name;
 use crate::cruby::ruby_sym_to_rust_string;
-use crate::cruby::rb_mRubyVMFrozenCore;
 use crate::hir::{Const, PtrPrintMap};
 use crate::profile::ProfiledType;
 
@@ -112,8 +110,8 @@ fn write_spec(f: &mut std::fmt::Formatter, printer: &TypePrinter) -> std::fmt::R
     let ty = printer.inner;
     match ty.spec() {
         Specialization::Any | Specialization::Empty => { Ok(()) },
-        Specialization::Object(val) if val == unsafe { rb_mRubyVMFrozenCore } => write!(f, "[VMFrozenCore]"),
-        Specialization::Object(val) if val == unsafe { rb_block_param_proxy } => write!(f, "[BlockParamProxy]"),
+        Specialization::Object(val) if val == VmGlobals::frozen_core() => write!(f, "[VMFrozenCore]"),
+        Specialization::Object(val) if val == VmGlobals::block_param_proxy() => write!(f, "[BlockParamProxy]"),
         Specialization::Object(val) if ty.is_subtype(types::Symbol) => write!(f, "[:{}]", ruby_sym_to_rust_string(val)),
         Specialization::Object(val) if ty.is_subtype(types::Class) =>
             write!(f, "[{}@{:p}]", get_class_name(val), printer.ptr_map.map_ptr(val.0 as *const std::ffi::c_void)),
@@ -127,10 +125,10 @@ fn write_spec(f: &mut std::fmt::Formatter, printer: &TypePrinter) -> std::fmt::R
         }
         Specialization::Object(val) => write!(f, "[{}]", val.print(printer.ptr_map)),
         // TODO(max): Ensure singleton classes never have Type specialization
-        Specialization::Type(val) if unsafe { rb_zjit_singleton_class_p(val) } =>
+        Specialization::Type(val) if VmGlobals::is_singleton_class(val) =>
             write!(f, "[class*:{}@{}]", get_class_name(val), val.print(printer.ptr_map)),
         Specialization::Type(val) => write!(f, "[class:{}]", get_class_name(val)),
-        Specialization::TypeExact(val) if unsafe { rb_zjit_singleton_class_p(val) } =>
+        Specialization::TypeExact(val) if VmGlobals::is_singleton_class(val) =>
             write!(f, "[class_exact*:{}@{}]", get_class_name(val), val.print(printer.ptr_map)),
         Specialization::TypeExact(val) =>
             write!(f, "[class_exact:{}]", get_class_name(val)),
@@ -197,21 +195,21 @@ impl std::fmt::Display for Type {
 
 fn is_array_exact(val: VALUE) -> bool {
     // Prism hides array values in the constant pool from the GC, so class_of will return 0
-    val.class_of() == unsafe { rb_cArray } || (val.class_of() == VALUE(0) && val.builtin_type() == RUBY_T_ARRAY)
+    val.class_of() == VmGlobals::c_array() || (val.class_of() == VALUE(0) && val.builtin_type() == RUBY_T_ARRAY)
 }
 
 fn is_string_exact(val: VALUE) -> bool {
     // Prism hides string values in the constant pool from the GC, so class_of will return 0
-    val.class_of() == unsafe { rb_cString } || (val.class_of() == VALUE(0) && val.builtin_type() == RUBY_T_STRING)
+    val.class_of() == VmGlobals::c_string() || (val.class_of() == VALUE(0) && val.builtin_type() == RUBY_T_STRING)
 }
 
 fn is_hash_exact(val: VALUE) -> bool {
     // Prism hides hash values in the constant pool from the GC, so class_of will return 0
-    val.class_of() == unsafe { rb_cHash } || (val.class_of() == VALUE(0) && val.builtin_type() == RUBY_T_HASH)
+    val.class_of() == VmGlobals::c_hash() || (val.class_of() == VALUE(0) && val.builtin_type() == RUBY_T_HASH)
 }
 
 fn is_range_exact(val: VALUE) -> bool {
-    val.class_of() == unsafe { rb_cRange }
+    val.class_of() == VmGlobals::c_range()
 }
 
 impl Type {
@@ -265,7 +263,7 @@ impl Type {
     fn bits_from_exact_class(class: VALUE) -> Option<u64> {
         types::ExactBitsAndClass
             .iter()
-            .find(|&(_, class_object)| unsafe { **class_object } == class)
+            .find(|&(_, class_object)| VmGlobals::read_value_ptr(*class_object) == class)
             .map(|&(bits, _)| bits)
     }
 
@@ -275,7 +273,7 @@ impl Type {
     fn bits_from_inexact_class(class: VALUE) -> Option<u64> {
         types::InexactBitsAndClass
             .iter()
-            .find(|&&(_, class_object)| unsafe { *class_object } == class)
+            .find(|&&(_, class_object)| VmGlobals::read_value_ptr(class_object) == class)
             .map(|&(bits, _)| bits)
     }
 
@@ -285,7 +283,7 @@ impl Type {
     fn bits_from_subclass(class: VALUE) -> Option<u64> {
         types::SubclassBitsAndClass
             .iter()
-            .find(|&(_, class_object)| class.is_subclass_of(unsafe { **class_object }) == ClassRelationship::Subclass)
+            .find(|&(_, class_object)| class.is_subclass_of(VmGlobals::read_value_ptr(*class_object)) == ClassRelationship::Subclass)
             // Can't be an immediate if it's a subclass.
             .map(|&(bits, _)| bits & !bits::Immediate)
     }
@@ -298,9 +296,9 @@ impl Type {
             else if is_hash_exact(val) { bits::HashExact }
             else if is_string_exact(val) { bits::StringExact }
             // Classes that have an immediate/heap split
-            else if val.class_of() == unsafe { rb_cInteger } { bits::Bignum }
-            else if val.class_of() == unsafe { rb_cFloat } { bits::HeapFloat }
-            else if val.class_of() == unsafe { rb_cSymbol } { bits::DynamicSymbol }
+            else if val.class_of() == VmGlobals::c_integer() { bits::Bignum }
+            else if val.class_of() == VmGlobals::c_float() { bits::HeapFloat }
+            else if val.class_of() == VmGlobals::c_symbol() { bits::DynamicSymbol }
             else if let Some(bits) = Self::bits_from_exact_class(val.class_of()) { bits }
             else if let Some(bits) = Self::bits_from_subclass(val.class_of()) { bits }
             else {
@@ -539,7 +537,7 @@ impl Type {
     fn is_builtin(class: VALUE) -> bool {
         types::ExactBitsAndClass
             .iter()
-            .any(|&(_, class_object)| unsafe { *class_object } == class)
+            .any(|&(_, class_object)| VmGlobals::read_value_ptr(class_object) == class)
     }
 
     /// Union both types together, preserving specialization if possible.
@@ -642,7 +640,7 @@ impl Type {
         types::ExactBitsAndClass
             .iter()
             .find(|&(bits, _)| self.is_subtype(Type::from_bits(*bits)))
-            .map(|&(_, class_object)| unsafe { *class_object })
+            .map(|&(_, class_object)| VmGlobals::read_value_ptr(class_object))
     }
 
     /// Check bit equality of two `Type`s. Do not use! You are probably looking for [`Type::is_subtype`].
@@ -706,11 +704,8 @@ mod tests {
     use crate::cruby::rb_hash_new;
     use crate::cruby::rb_float_new;
     use crate::cruby::define_class;
-    use crate::cruby::rb_cObject;
-    use crate::cruby::rb_cSet;
-    use crate::cruby::rb_cTrueClass;
-    use crate::cruby::rb_cFalseClass;
-    use crate::cruby::rb_cNilClass;
+    use crate::cruby::CallableMethodEntry;
+    use crate::cruby::VmGlobals;
 
     #[track_caller]
     fn assert_bit_equal(left: Type, right: Type) {
@@ -910,7 +905,7 @@ mod tests {
 
     #[test]
     fn integer_has_exact_ruby_class() {
-        assert_eq!(Type::fixnum(3).exact_ruby_class(), Some(unsafe { rb_cInteger }));
+        assert_eq!(Type::fixnum(3).exact_ruby_class(), Some(VmGlobals::c_integer()));
         assert_eq!(types::Fixnum.exact_ruby_class(), None);
         assert_eq!(types::Integer.exact_ruby_class(), None);
     }
@@ -938,14 +933,14 @@ mod tests {
     #[test]
     fn from_class() {
         crate::cruby::with_rubyvm(|| {
-            assert_bit_equal(Type::from_class(unsafe { rb_cInteger }), types::Integer);
-            assert_bit_equal(Type::from_class(unsafe { rb_cString }), types::StringExact);
-            assert_bit_equal(Type::from_class(unsafe { rb_cArray }), types::ArrayExact);
-            assert_bit_equal(Type::from_class(unsafe { rb_cHash }), types::HashExact);
-            assert_bit_equal(Type::from_class(unsafe { rb_cNilClass }), types::NilClass);
-            assert_bit_equal(Type::from_class(unsafe { rb_cTrueClass }), types::TrueClass);
-            assert_bit_equal(Type::from_class(unsafe { rb_cFalseClass }), types::FalseClass);
-            let c_class = define_class("C", unsafe { rb_cObject });
+            assert_bit_equal(Type::from_class(VmGlobals::c_integer()), types::Integer);
+            assert_bit_equal(Type::from_class(VmGlobals::c_string()), types::StringExact);
+            assert_bit_equal(Type::from_class(VmGlobals::c_array()), types::ArrayExact);
+            assert_bit_equal(Type::from_class(VmGlobals::c_hash()), types::HashExact);
+            assert_bit_equal(Type::from_class(VmGlobals::c_nil_class()), types::NilClass);
+            assert_bit_equal(Type::from_class(VmGlobals::c_true_class()), types::TrueClass);
+            assert_bit_equal(Type::from_class(VmGlobals::c_false_class()), types::FalseClass);
+            let c_class = define_class("C", VmGlobals::c_object());
             assert_bit_equal(Type::from_class(c_class), Type::new(bits::ObjectSubclass, Specialization::TypeExact(c_class)));
         });
     }
@@ -953,10 +948,10 @@ mod tests {
     #[test]
     fn from_class_inexact() {
         crate::cruby::with_rubyvm(|| {
-            assert_bit_equal(Type::from_class_inexact(unsafe { rb_cArray }), types::Array);
-            assert_bit_equal(Type::from_class_inexact(unsafe { rb_cNilClass }), types::NilClass);
-            assert_bit_equal(Type::from_class_inexact(unsafe { rb_cString }), types::String);
-            let c_class = define_class("C", unsafe { rb_cObject });
+            assert_bit_equal(Type::from_class_inexact(VmGlobals::c_array()), types::Array);
+            assert_bit_equal(Type::from_class_inexact(VmGlobals::c_nil_class()), types::NilClass);
+            assert_bit_equal(Type::from_class_inexact(VmGlobals::c_string()), types::String);
+            let c_class = define_class("C", VmGlobals::c_object());
             assert_bit_equal(Type::from_class_inexact(c_class),
                              Type::new(bits::ObjectSubclass, Specialization::Type(c_class)));
         });
@@ -965,7 +960,7 @@ mod tests {
     #[test]
     fn intersection_of_builtin_and_user_class_inexact_is_empty() {
         crate::cruby::with_rubyvm(|| {
-            let c_class = define_class("C", unsafe { rb_cObject });
+            let c_class = define_class("C", VmGlobals::c_object());
             let c_inexact = Type::from_class_inexact(c_class);
             // A Fixnum can never be an instance of C or any subclass of C; the
             // bits are disjoint, so no specialization comparison is needed.
@@ -979,7 +974,7 @@ mod tests {
     #[test]
     fn integer_has_ruby_class() {
         crate::cruby::with_rubyvm(|| {
-            assert_eq!(Type::fixnum(3).inexact_ruby_class(), Some(unsafe { rb_cInteger }));
+            assert_eq!(Type::fixnum(3).inexact_ruby_class(), Some(VmGlobals::c_integer()));
             assert_eq!(types::Fixnum.inexact_ruby_class(), None);
             assert_eq!(types::Integer.inexact_ruby_class(), None);
         });
@@ -994,7 +989,7 @@ mod tests {
     #[test]
     fn set_has_ruby_class() {
         crate::cruby::with_rubyvm(|| {
-            assert_eq!(types::SetExact.runtime_exact_ruby_class(), Some(unsafe { rb_cSet }));
+            assert_eq!(types::SetExact.runtime_exact_ruby_class(), Some(VmGlobals::c_set()));
             assert_eq!(types::Set.runtime_exact_ruby_class(), None);
             assert_eq!(types::SetSubclass.runtime_exact_ruby_class(), None);
         });
@@ -1112,11 +1107,11 @@ mod tests {
 
     #[test]
     fn cme() {
-        use crate::cruby::{rb_callable_method_entry, ID};
+        use crate::cruby::ID;
         crate::cruby::with_rubyvm(|| {
-            let cme = unsafe { rb_callable_method_entry(rb_cInteger, ID!(to_s)) };
+            let cme = CallableMethodEntry::lookup(VmGlobals::c_integer(), ID!(to_s)).unwrap();
             assert!(!cme.is_null());
-            let cme_value: VALUE = cme.into();
+            let cme_value: VALUE = cme.as_ptr().into();
             let ty = Type::from_value(cme_value);
             assert_subtype(ty, types::CallableMethodEntry);
             assert!(ty.ruby_object_known());
@@ -1139,9 +1134,9 @@ mod tests {
     fn string_subclass_is_string_subtype() {
         crate::cruby::with_rubyvm(|| {
             assert_subtype(types::StringExact, types::String);
-            assert_subtype(Type::from_class(unsafe { rb_cString }), types::String);
-            assert_subtype(Type::from_class(unsafe { rb_cString }), types::StringExact);
-            let c_class = define_class("C", unsafe { rb_cString });
+            assert_subtype(Type::from_class(VmGlobals::c_string()), types::String);
+            assert_subtype(Type::from_class(VmGlobals::c_string()), types::StringExact);
+            let c_class = define_class("C", VmGlobals::c_string());
             assert_subtype(Type::from_class(c_class), types::String);
         });
     }
@@ -1158,7 +1153,7 @@ mod tests {
     #[test]
     fn union_specialized_with_subclass_relationship_returns_superclass() {
         crate::cruby::with_rubyvm(|| {
-            let c_class = define_class("C", unsafe { rb_cObject });
+            let c_class = define_class("C", VmGlobals::c_object());
             let d_class = define_class("D", c_class);
             let c_instance = Type::new(bits::ObjectSubclass, Specialization::TypeExact(c_class));
             let d_instance = Type::new(bits::ObjectSubclass, Specialization::TypeExact(d_class));
