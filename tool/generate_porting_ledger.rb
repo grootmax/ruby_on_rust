@@ -3,12 +3,97 @@
 
 require "yaml"
 require "optparse"
+require "set"
 
 VALID_STATUSES = ["Not Started", "In Progress", "Ported", "Blocked", "N/A"].freeze
 
 def number_with_delimiter(number)
   number.to_s.gsub(/(\d)(?=(\d\d\d)+(?!\d))/, '\1,')
 end
+
+def analyze_rust_file(file_path)
+  lines = File.readlines(file_path, encoding: "UTF-8")
+  total_loc = lines.size
+  return { loc: 0, unsafe_blocks: 0, unsafe_loc: 0 } if total_loc == 0
+
+  unsafe_blocks = 0
+  unsafe_lines = Set.new
+  in_block_comment = false
+  unsafe_depth = 0
+  pending_unsafe = false
+
+  lines.each_with_index do |line_content, idx|
+    line_num = idx + 1
+
+    code = +""
+    i = 0
+    chars = line_content.chars
+    len = chars.size
+
+    while i < len
+      if in_block_comment
+        if chars[i] == "*" && chars[i + 1] == "/"
+          in_block_comment = false
+          i += 2
+        else
+          i += 1
+        end
+      elsif chars[i] == "/" && chars[i + 1] == "*"
+        in_block_comment = true
+        i += 2
+      elsif chars[i] == "/" && chars[i + 1] == "/"
+        break
+      elsif chars[i] == '"' || chars[i] == "'"
+        quote = chars[i]
+        code << " "
+        i += 1
+        while i < len && chars[i] != quote
+          i += 2 if chars[i] == "\\"
+          i += 1
+        end
+        i += 1
+      else
+        code << chars[i]
+        i += 1
+      end
+    end
+
+    if unsafe_depth > 0 || pending_unsafe
+      unsafe_lines.add(line_num)
+    end
+
+    unsafe_matches = code.scan(/\bunsafe\b/)
+    if !unsafe_matches.empty?
+      unsafe_blocks += unsafe_matches.size
+      unsafe_lines.add(line_num)
+      unless code.include?("unsafe(")
+        pending_unsafe = true
+      end
+    end
+
+    code.chars.each do |ch|
+      if ch == "{"
+        if pending_unsafe || unsafe_depth > 0
+          unsafe_depth += 1
+          pending_unsafe = false
+        end
+      elsif ch == "}"
+        if unsafe_depth > 0
+          unsafe_depth -= 1
+        end
+      elsif ch == ";" && pending_unsafe && unsafe_depth == 0
+        pending_unsafe = false
+      end
+    end
+  end
+
+  {
+    loc: total_loc,
+    unsafe_blocks: unsafe_blocks,
+    unsafe_loc: unsafe_lines.size
+  }
+end
+
 
 check_mode = false
 OptionParser.new do |opts|
@@ -134,6 +219,62 @@ file_entries.sort_by { |e| e[:basename] }.each do |e|
 end
 lines << ""
 
+rust_crates = ["jit", "yjit", "zjit"].select { |dir| File.directory?(File.join(repo_root, dir)) }
+
+rust_crate_entries = rust_crates.map do |crate_name|
+  crate_dir = File.join(repo_root, crate_name)
+  rust_files = Dir.glob(File.join(crate_dir, "**", "*.rs")).sort
+
+  if !rust_files.empty? && system("git", "rev-parse", "--is-inside-work-tree", out: File::NULL, err: File::NULL, chdir: repo_root)
+    IO.popen(["git", "-C", repo_root, "check-ignore", *rust_files]) do |io|
+      ignored_files = io.read.split("\n")
+      rust_files -= ignored_files
+    end
+  end
+
+  crate_loc = 0
+  crate_unsafe_blocks = 0
+  crate_unsafe_loc = 0
+
+  rust_files.each do |f|
+    res = analyze_rust_file(f)
+    crate_loc += res[:loc]
+    crate_unsafe_blocks += res[:unsafe_blocks]
+    crate_unsafe_loc += res[:unsafe_loc]
+  end
+
+  pct = crate_loc.positive? ? (crate_unsafe_loc.to_f / crate_loc * 100.0).round(1) : 0.0
+
+  {
+    crate: crate_name,
+    file_count: rust_files.size,
+    loc: crate_loc,
+    unsafe_blocks: crate_unsafe_blocks,
+    unsafe_loc: crate_unsafe_loc,
+    pct: pct
+  }
+end
+
+total_rust_files = rust_crate_entries.sum { |e| e[:file_count] }
+total_rust_loc = rust_crate_entries.sum { |e| e[:loc] }
+total_rust_unsafe_blocks = rust_crate_entries.sum { |e| e[:unsafe_blocks] }
+total_rust_unsafe_loc = rust_crate_entries.sum { |e| e[:unsafe_loc] }
+total_rust_pct = total_rust_loc.positive? ? (total_rust_unsafe_loc.to_f / total_rust_loc * 100.0).round(1) : 0.0
+
+lines << "## Rust Safety & Unsafe Code Metrics"
+lines << ""
+lines << "Automated safety metrics for Rust source files across JIT workspace crates."
+lines << ""
+lines << "| Rust Crate / Module | Source Files | Lines of Code (LOC) | Unsafe Blocks | Unsafe Lines (LOC) | Unsafe Line Density |"
+lines << "| :--- | :--- | :--- | :--- | :--- | :--- |"
+
+rust_crate_entries.each do |e|
+  lines << "| `#{e[:crate]}` | #{number_with_delimiter(e[:file_count])} | #{number_with_delimiter(e[:loc])} | #{number_with_delimiter(e[:unsafe_blocks])} | #{number_with_delimiter(e[:unsafe_loc])} | #{e[:pct]}% |"
+end
+
+lines << "| **Total Rust Workspace** | #{number_with_delimiter(total_rust_files)} | #{number_with_delimiter(total_rust_loc)} | #{number_with_delimiter(total_rust_unsafe_blocks)} | #{number_with_delimiter(total_rust_unsafe_loc)} | #{total_rust_pct}% |"
+lines << ""
+
 generated_markdown = lines.join("\n")
 
 if check_mode
@@ -145,7 +286,8 @@ if check_mode
   existing_markdown = File.read(porting_md_path)
 
   # Line counts change with every upstream sync, so --check ignores them:
-  # it masks the "Lines (LOC)", "Lines of Code (LOC)" and "% of Total LOC"
+  # it masks the "Lines (LOC)", "Lines of Code (LOC)", "Unsafe Blocks",
+  # "Unsafe Lines (LOC)", "Unsafe Line Density" and "% of Total LOC"
   # cells (found by their column headers) and compares everything else --
   # the file list, statuses, file counts, targets, subsystems and notes.
   mask_loc = lambda do |markdown|
@@ -156,14 +298,15 @@ if check_mode
         next line
       end
       cells = line.chomp.split("|", -1)
-      if cells.any? { |c| c.include?("LOC") }
-        masked_columns = cells.each_index.select { |i| cells[i].include?("LOC") }
+      if cells.any? { |c| c.include?("LOC") || c.include?("Density") || c.include?("Unsafe Blocks") }
+        masked_columns = cells.each_index.select { |i| cells[i].include?("LOC") || cells[i].include?("Density") || cells[i].include?("Unsafe Blocks") }
         next line
       end
       masked_columns.each { |i| cells[i] = " # " if cells[i] }
       cells.join("|") + "\n"
     end.join
   end
+
 
   if existing_markdown == generated_markdown
     puts "PORTING.md is up to date."
