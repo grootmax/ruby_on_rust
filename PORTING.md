@@ -7,9 +7,9 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 317,465 | 100.0% |
-| **Not Started** | 103 | 308,463 | 97.2% |
-| **In Progress** | 3 | 8,656 | 2.7% |
+| **Total C Source Files** | 113 | 317,549 | 100.0% |
+| **Not Started** | 102 | 308,317 | 97.1% |
+| **In Progress** | 4 | 8,886 | 2.8% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
 | **N/A** | 7 | 346 | 0.1% |
@@ -67,7 +67,7 @@ _Interpreter VM loop, instruction helpers, and evaluation_
 | `vm_backtrace.c` | 2,406 | Not Started | `crate::vm::backtrace` | Backtrace generation |
 | `vm_dump.c` | 1,660 | Not Started | `crate::vm::dump` | VM state dump utilities |
 | `vm_eval.c` | 2,966 | Not Started | `crate::vm::eval` | Method dispatch and evaluation |
-| `vm_exec.c` | 146 | Not Started | `crate::vm::exec` | VM loop execution |
+| `vm_exec.c` | 230 | In Progress | `core_rs::vm_exec` | VM loop execution with assembly register pinning |
 | `vm_insnhelper.c` | 7,802 | Not Started | `crate::vm::insnhelper` | Instruction execution helpers |
 | `vm_method.c` | 3,796 | Not Started | `crate::vm::method` | Method table management |
 | `vm_sync.c` | 282 | Not Started | `crate::vm::sync` | VM synchronization primitives |
@@ -297,7 +297,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `vm_backtrace.c` | Virtual Machine & Execution | 2,406 | Not Started | `crate::vm::backtrace` | Backtrace generation |
 | `vm_dump.c` | Virtual Machine & Execution | 1,660 | Not Started | `crate::vm::dump` | VM state dump utilities |
 | `vm_eval.c` | Virtual Machine & Execution | 2,966 | Not Started | `crate::vm::eval` | Method dispatch and evaluation |
-| `vm_exec.c` | Virtual Machine & Execution | 146 | Not Started | `crate::vm::exec` | VM loop execution |
+| `vm_exec.c` | Virtual Machine & Execution | 230 | In Progress | `core_rs::vm_exec` | VM loop execution with assembly register pinning |
 | `vm_insnhelper.c` | Virtual Machine & Execution | 7,802 | Not Started | `crate::vm::insnhelper` | Instruction execution helpers |
 | `vm_method.c` | Virtual Machine & Execution | 3,796 | Not Started | `crate::vm::method` | Method table management |
 | `vm_sync.c` | Virtual Machine & Execution | 282 | Not Started | `crate::vm::sync` | VM synchronization primitives |

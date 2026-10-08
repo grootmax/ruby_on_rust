@@ -181,10 +181,10 @@ files:
     subsystem: "Virtual Machine & Execution"
     notes: "Method dispatch and evaluation"
   vm_exec.c:
-    status: Not Started
-    target: "crate::vm::exec"
+    status: In Progress
+    target: "core_rs::vm_exec"
     subsystem: "Virtual Machine & Execution"
-    notes: "VM loop execution"
+    notes: "VM loop execution with assembly register pinning"
   vm_insnhelper.c:
     status: Not Started
     target: "crate::vm::insnhelper"
