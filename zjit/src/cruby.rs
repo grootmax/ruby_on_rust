@@ -268,6 +268,62 @@ pub struct rb_iseq_constant_body {
 #[repr(transparent)] // same size and alignment as simply `usize`
 pub struct VALUE(pub usize);
 
+/// A wrapper around `VALUE` that guarantees the handle is a valid heap object
+/// (i.e. not a special constant or immediate value) and properly aligned.
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+#[repr(transparent)]
+pub struct NonSpecialConstValue(pub VALUE);
+
+impl NonSpecialConstValue {
+    /// Create a new `NonSpecialConstValue` after validating tag bits and alignment.
+    pub fn new(val: VALUE) -> Option<Self> {
+        if val.as_rbasic().is_some() {
+            Some(NonSpecialConstValue(val))
+        } else {
+            None
+        }
+    }
+
+    /// Construct a `NonSpecialConstValue` without runtime tag/alignment checks.
+    ///
+    /// # Safety
+    /// The caller must guarantee that `val` is a live, aligned heap object and not a special constant.
+    pub unsafe fn new_unchecked(val: VALUE) -> Self {
+        NonSpecialConstValue(val)
+    }
+
+    /// Get the underlying `VALUE`.
+    pub fn value(self) -> VALUE {
+        self.0
+    }
+
+    /// Convert to `*const RBasic`.
+    pub fn as_rbasic(self) -> *const RBasic {
+        self.0.0 as *const RBasic
+    }
+
+    /// Convert to raw typed pointer `*const T`.
+    pub fn as_ptr<T>(self) -> *const T {
+        self.0.0 as *const T
+    }
+
+    /// Convert to raw typed mutable pointer `*mut T`.
+    pub fn as_mut_ptr<T>(self) -> *mut T {
+        self.0.0 as *mut T
+    }
+
+    /// Read object flags from `RBasic`.
+    pub fn builtin_flags(self) -> usize {
+        let rbasic_ptr = self.as_rbasic();
+        unsafe { (*rbasic_ptr).flags }.as_usize()
+    }
+
+    /// Return the Ruby type enum (e.g. `RUBY_T_ARRAY`).
+    pub fn builtin_type(self) -> ruby_value_type {
+        (self.builtin_flags() & (RUBY_T_MASK as usize)) as ruby_value_type
+    }
+}
+
 /// An interned string. See [ids] and methods this type.
 /// `0` is a sentinal value for IDs.
 #[repr(transparent)]
@@ -609,16 +665,13 @@ impl VALUE {
     }
 
     pub fn builtin_flags(self) -> usize {
-        assert!(!self.special_const_p());
-
-        let VALUE(cval) = self;
-        let rbasic_ptr = cval as *const RBasic;
+        let rbasic_ptr = self.as_rbasic().expect("builtin_flags called on non-heap or misaligned VALUE");
         let flags_bits: usize = unsafe { (*rbasic_ptr).flags }.as_usize();
         flags_bits
     }
 
     pub fn class_of(self) -> VALUE {
-        if !self.special_const_p() {
+        if self.as_rbasic().is_some() {
             let builtin_type = self.builtin_type();
             assert!(
                 builtin_type != RUBY_T_NONE && builtin_type != RUBY_T_MOVED,
@@ -708,6 +761,49 @@ impl VALUE {
     pub fn as_u64(self) -> u64 {
         let VALUE(i) = self;
         i.try_into().unwrap()
+    }
+
+    /// Return `Some(*const RBasic)` if `self` is a valid, aligned heap object and not a special constant.
+    pub fn as_rbasic(&self) -> Option<*const RBasic> {
+        if self.special_const_p() {
+            return None;
+        }
+        let align = std::mem::align_of::<RBasic>();
+        if (self.0 & (align - 1)) != 0 {
+            return None;
+        }
+        Some(self.0 as *const RBasic)
+    }
+
+    /// Return `Some(NonSpecialConstValue)` if `self` is a valid heap object handle.
+    pub fn as_heap_obj(&self) -> Option<NonSpecialConstValue> {
+        NonSpecialConstValue::new(*self)
+    }
+
+    /// Return `Some(*const T)` if `self` is non-null and aligned to `align_of::<T>()`.
+    pub fn as_non_null_ptr<T>(&self) -> Option<*const T> {
+        let ptr = self.0 as *const T;
+        if ptr.is_null() {
+            return None;
+        }
+        let align = std::mem::align_of::<T>();
+        if align > 1 && (self.0 & (align - 1)) != 0 {
+            return None;
+        }
+        Some(ptr)
+    }
+
+    /// Return `Some(*mut T)` if `self` is non-null and aligned to `align_of::<T>()`.
+    pub fn as_non_null_mut_ptr<T>(&self) -> Option<*mut T> {
+        let ptr = self.0 as *mut T;
+        if ptr.is_null() {
+            return None;
+        }
+        let align = std::mem::align_of::<T>();
+        if align > 1 && (self.0 & (align - 1)) != 0 {
+            return None;
+        }
+        Some(ptr)
     }
 
     pub const fn as_usize(self) -> usize {
@@ -1773,3 +1869,47 @@ pub(crate) mod ids {
     pub(crate) use ID;
 }
 pub(crate) use ids::ID;
+
+#[cfg(test)]
+mod checked_accessor_tests {
+    use super::*;
+
+    #[test]
+    fn test_special_consts_rejected_by_as_rbasic() {
+        assert!(Qnil.as_rbasic().is_none());
+        assert!(VALUE(0).as_rbasic().is_none());
+        assert!(VALUE(20).as_rbasic().is_none());
+        assert!(VALUE(3).as_rbasic().is_none());
+        assert!(VALUE(0x0c).as_rbasic().is_none());
+    }
+
+    #[test]
+    fn test_misaligned_pointers_rejected() {
+        let misaligned_val = VALUE(0x1001);
+        assert!(misaligned_val.as_rbasic().is_none());
+        assert!(misaligned_val.as_heap_obj().is_none());
+        assert!(misaligned_val.as_non_null_ptr::<RBasic>().is_none());
+    }
+
+    #[test]
+    fn test_valid_aligned_pointer() {
+        let mock_rbasic = RBasic {
+            flags: VALUE(RUBY_T_ARRAY as usize),
+            klass: VALUE(0x1000),
+        };
+        let ptr = &mock_rbasic as *const RBasic;
+        let val = VALUE(ptr as usize);
+
+        assert!(!val.special_const_p());
+        let rbasic = val.as_rbasic().unwrap();
+        assert_eq!(rbasic, ptr);
+
+        let heap_obj = val.as_heap_obj().unwrap();
+        assert_eq!(heap_obj.value(), val);
+        assert_eq!(heap_obj.as_rbasic(), ptr);
+
+        let non_null_ptr = val.as_non_null_ptr::<RBasic>().unwrap();
+        assert_eq!(non_null_ptr, ptr);
+    }
+}
+

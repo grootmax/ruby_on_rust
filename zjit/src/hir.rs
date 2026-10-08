@@ -171,7 +171,7 @@ impl<'a> std::fmt::Display for VALUEPrinter<'a> {
             Qnil => write!(f, "nil"),
             Qtrue => write!(f, "true"),
             Qfalse => write!(f, "false"),
-            val => write!(f, "VALUE({:p})", self.ptr_map.map_ptr(val.as_ptr::<VALUE>())),
+            val => write!(f, "VALUE({:p})", self.ptr_map.map_ptr(val.as_non_null_ptr::<VALUE>().unwrap_or(std::ptr::null()))),
         }
     }
 }
@@ -344,7 +344,7 @@ impl<'a> std::fmt::Display for InvariantPrinter<'a> {
             Invariant::MethodRedefined { klass, method, cme } => {
                 let class_name = get_class_name(klass);
                 write!(f, "MethodRedefined({class_name}@{:p}, {}@{:p}, cme:{:p})",
-                    self.ptr_map.map_ptr(klass.as_ptr::<VALUE>()),
+                    self.ptr_map.map_ptr(klass.as_non_null_ptr::<VALUE>().unwrap_or(std::ptr::null())),
                     method.contents_lossy(),
                     self.ptr_map.map_id(method.0),
                     self.ptr_map.map_ptr(cme)
@@ -373,7 +373,7 @@ impl<'a> std::fmt::Display for InvariantPrinter<'a> {
                 let class_name = get_class_name(klass);
                 write!(f, "NoSingletonClass({}@{:p})",
                     class_name,
-                    self.ptr_map.map_ptr(klass.as_ptr::<VALUE>()))
+                    self.ptr_map.map_ptr(klass.as_non_null_ptr::<VALUE>().unwrap_or(std::ptr::null())))
             }
             Invariant::RootBoxOnly => write!(f, "RootBoxOnly"),
         }
@@ -3169,7 +3169,7 @@ fn iseq_get_return_value(iseq: IseqPtr, captured_opnd: Option<InsnId>, ci_flags:
         YARVINSN_putself if captured_opnd.is_none() => Some(IseqReturn::Receiver),
         YARVINSN_opt_invokebuiltin_delegate_leave => {
             let pc = unsafe { rb_iseq_pc_at_idx(iseq, 0) };
-            let bf: *const rb_builtin_function = get_arg(pc, 0).as_ptr();
+            let bf: *const rb_builtin_function = get_arg(pc, 0).as_non_null_ptr().expect("invalid builtin function pointer");
             let argc = unsafe { (*bf).argc } as usize;
             if argc != 0 { return None; }
             let builtin_attrs = unsafe { rb_jit_iseq_builtin_attrs(iseq) };
@@ -6850,7 +6850,7 @@ impl Function {
                         let recv_type = self.type_of(recv);
                         match recv_type.ruby_object() {
                             Some(recv_obj) if recv_obj.is_frozen() => {
-                                let recv_ptr = recv_obj.as_ptr() as *const u32;
+                                let recv_ptr = recv_obj.as_non_null_ptr::<u32>().expect("invalid object pointer");
                                 let val = unsafe { recv_ptr.byte_add(offset).read() };
                                 self.new_insn(Insn::Const { val: Const::CShape(ShapeId(val)) })
                             }
@@ -9631,7 +9631,7 @@ fn add_iseq_to_hir(
                     state.stack_push(result);
                 }
                 YARVINSN_opt_getconstant_path => {
-                    let ic: *const iseq_inline_constant_cache = get_arg(pc, 0).as_ptr();
+                    let ic: *const iseq_inline_constant_cache = get_arg(pc, 0).as_non_null_ptr().expect("invalid ic pointer");
                     let idlist: *const ID = unsafe { (*ic).segments };
                     let ice = unsafe { (*ic).entry };
                     let can_fold = !ice.is_null()
@@ -9672,7 +9672,7 @@ fn add_iseq_to_hir(
                     }
                 }
                 YARVINSN_once => {
-                    let iseq: *const rb_iseq_t = get_arg(pc, 0).as_ptr();
+                    let iseq: *const rb_iseq_t = get_arg(pc, 0).as_non_null_ptr().expect("invalid iseq pointer");
                     let ise: *mut iseq_inline_storage_entry = get_arg(pc, 1).as_mut_ptr();
                     debug_assert!(!iseq.is_null());
                     debug_assert!(!ise.is_null());
@@ -9776,7 +9776,7 @@ fn add_iseq_to_hir(
                     state.stack_pop()?;
                 }
                 YARVINSN_opt_new => {
-                    let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
+                    let cd: *const rb_call_data = get_arg(pc, 0).as_non_null_ptr().expect("invalid call_data pointer");
                     let dst = get_arg(pc, 1).as_i64();
 
                     // Check if #new resolves to rb_class_new_instance_pass_kw.
@@ -10111,7 +10111,7 @@ fn add_iseq_to_hir(
                 }
                 YARVINSN_opt_neq => {
                     // NB: opt_neq has two cd; get_arg(0) is for eq and get_arg(1) is for neq
-                    let cd: *const rb_call_data = get_arg(pc, 1).as_ptr();
+                    let cd: *const rb_call_data = get_arg(pc, 1).as_non_null_ptr().expect("invalid call_data pointer");
                     let call_info = unsafe { (*cd).ci };
                     let flags = unsafe { rb_vm_ci_flag(call_info) };
                     if let Err(call_type) = unhandled_call_type(flags) {
@@ -10211,7 +10211,7 @@ fn add_iseq_to_hir(
                 YARVINSN_opt_not |
                 YARVINSN_opt_regexpmatch2 |
                 YARVINSN_opt_send_without_block => {
-                    let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
+                    let cd: *const rb_call_data = get_arg(pc, 0).as_non_null_ptr().expect("invalid call_data pointer");
                     let call_info = unsafe { (*cd).ci };
                     let flags = unsafe { rb_vm_ci_flag(call_info) };
                     if let Err(call_type) = unhandled_call_type(flags) {
@@ -10337,7 +10337,7 @@ fn add_iseq_to_hir(
                     }
                 }
                 YARVINSN_send => {
-                    let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
+                    let cd: *const rb_call_data = get_arg(pc, 0).as_non_null_ptr().expect("invalid call_data pointer");
                     let blockiseq: IseqPtr = get_arg(pc, 1).as_iseq();
                     let call_info = unsafe { (*cd).ci };
                     let flags = unsafe { rb_vm_ci_flag(call_info) };
@@ -10423,7 +10423,7 @@ fn add_iseq_to_hir(
                     }
                 }
                 YARVINSN_sendforward => {
-                    let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
+                    let cd: *const rb_call_data = get_arg(pc, 0).as_non_null_ptr().expect("invalid call_data pointer");
                     let blockiseq: IseqPtr = get_arg(pc, 1).as_iseq();
                     let call_info = unsafe { (*cd).ci };
                     let flags = unsafe { rb_vm_ci_flag(call_info) };
@@ -10454,7 +10454,7 @@ fn add_iseq_to_hir(
                     }
                 }
                 YARVINSN_invokesuper => {
-                    let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
+                    let cd: *const rb_call_data = get_arg(pc, 0).as_non_null_ptr().expect("invalid call_data pointer");
                     let call_info = unsafe { (*cd).ci };
                     let flags = unsafe { rb_vm_ci_flag(call_info) };
                     if let Err(call_type) = unhandled_call_type(flags) {
@@ -10469,7 +10469,7 @@ fn add_iseq_to_hir(
                     }
                     let args = state.stack_pop_n(crate::profile::num_arguments_on_stack(cd))?;
                     let recv = state.stack_pop()?;
-                    let blockiseq: IseqPtr = get_arg(pc, 1).as_ptr();
+                    let blockiseq: IseqPtr = get_arg(pc, 1).as_non_null_ptr().unwrap_or(std::ptr::null());
                     let result = fun.push_insn(block, Insn::InvokeSuper { recv, cd, blockiseq, args, state: exit_id, reason: Uncategorized(opcode.into()) });
                     state.stack_push(result);
 
@@ -10482,7 +10482,7 @@ fn add_iseq_to_hir(
                     }
                 }
                 YARVINSN_invokesuperforward => {
-                    let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
+                    let cd: *const rb_call_data = get_arg(pc, 0).as_non_null_ptr().expect("invalid call_data pointer");
                     let blockiseq: IseqPtr = get_arg(pc, 1).as_iseq();
                     let call_info = unsafe { (*cd).ci };
                     let flags = unsafe { rb_vm_ci_flag(call_info) };
@@ -10512,7 +10512,7 @@ fn add_iseq_to_hir(
                     }
                 }
                 YARVINSN_invokeblock => {
-                    let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
+                    let cd: *const rb_call_data = get_arg(pc, 0).as_non_null_ptr().expect("invalid call_data pointer");
                     let call_info = unsafe { (*cd).ci };
                     let flags = unsafe { rb_vm_ci_flag(call_info) };
                     if let Err(call_type) = unhandled_call_type(flags) {
@@ -10660,7 +10660,7 @@ fn add_iseq_to_hir(
                 }
                 YARVINSN_getinstancevariable => {
                     let id = ID(get_arg(pc, 0).as_u64());
-                    let ic = get_arg(pc, 1).as_ptr();
+                    let ic = get_arg(pc, 1).as_non_null_ptr().expect("invalid ic pointer");
                     // ic is in arg 1
                     let summary = fun.profile_summary(&profiles, self_param, exit_id);
                     let self_param = fun.guard_heap(block, self_param, exit_id);
@@ -10701,7 +10701,7 @@ fn add_iseq_to_hir(
                 }
                 YARVINSN_setinstancevariable => {
                     let id = ID(get_arg(pc, 0).as_u64());
-                    let ic: *const iseq_inline_iv_cache_entry = get_arg(pc, 1).as_ptr();
+                    let ic: *const iseq_inline_iv_cache_entry = get_arg(pc, 1).as_non_null_ptr().expect("invalid ic pointer");
                     let val = state.stack_pop()?;
                     let unrefined_self_param = self_param;
                     let summary = fun.profile_summary(&profiles, self_param, exit_id);
@@ -10753,13 +10753,13 @@ fn add_iseq_to_hir(
                 }
                 YARVINSN_getclassvariable => {
                     let id = ID(get_arg(pc, 0).as_u64());
-                    let ic = get_arg(pc, 1).as_ptr();
+                    let ic = get_arg(pc, 1).as_non_null_ptr().expect("invalid ic pointer");
                     let result = fun.push_insn(block, Insn::GetClassVar { id, ic, state: exit_id });
                     state.stack_push(result);
                 }
                 YARVINSN_setclassvariable => {
                     let id = ID(get_arg(pc, 0).as_u64());
-                    let ic = get_arg(pc, 1).as_ptr();
+                    let ic = get_arg(pc, 1).as_non_null_ptr().expect("invalid ic pointer");
                     let val = state.stack_pop()?;
                     fun.push_insn(block, Insn::SetClassVar { id, val, ic, state: exit_id });
                 }
@@ -10781,7 +10781,7 @@ fn add_iseq_to_hir(
                     state.stack_push(insn_id);
                 }
                 YARVINSN_invokebuiltin => {
-                    let bf: *const rb_builtin_function = get_arg(pc, 0).as_ptr();
+                    let bf: *const rb_builtin_function = get_arg(pc, 0).as_non_null_ptr().expect("invalid builtin function pointer");
                     let mut args = vec![];
                     for _ in 0..unsafe { (*bf).argc } {
                         args.push(state.stack_pop()?);
@@ -10808,7 +10808,7 @@ fn add_iseq_to_hir(
                 }
                 YARVINSN_opt_invokebuiltin_delegate |
                 YARVINSN_opt_invokebuiltin_delegate_leave => {
-                    let bf: *const rb_builtin_function = get_arg(pc, 0).as_ptr();
+                    let bf: *const rb_builtin_function = get_arg(pc, 0).as_non_null_ptr().expect("invalid builtin function pointer");
                     let argc = unsafe { (*bf).argc } as usize;
                     let index = get_arg(pc, 1).as_usize();
 
@@ -10835,7 +10835,7 @@ fn add_iseq_to_hir(
                     state.stack_push(insn_id);
                 }
                 YARVINSN_objtostring => {
-                    let cd: *const rb_call_data = get_arg(pc, 0).as_ptr();
+                    let cd: *const rb_call_data = get_arg(pc, 0).as_non_null_ptr().expect("invalid call_data pointer");
                     let argc = crate::profile::num_arguments_on_stack(cd);
                     assert_eq!(0, argc, "objtostring should not have args");
                     let recv = state.stack_pop()?;

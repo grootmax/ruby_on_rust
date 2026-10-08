@@ -141,7 +141,7 @@ fn annotate_builtin_method(props_map: &mut HashMap<*mut c_void, FnProperties>, c
                opcode == YARVINSN_opt_invokebuiltin_delegate_leave as i32 {
                 // The first operand is the builtin function pointer
                 let bf_value = *pc.add(1);
-                let bf_ptr: *const rb_builtin_function = bf_value.as_ptr();
+                let bf_ptr: *const rb_builtin_function = bf_value.as_non_null_ptr().expect("invalid builtin function pointer");
 
                 if func_ptr.is_null() {
                     func_ptr = (*bf_ptr).func_ptr as *mut c_void;
