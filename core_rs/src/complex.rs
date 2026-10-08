@@ -193,10 +193,15 @@ pub fn read_rat(s: &mut Cursor, strict: bool, b: &mut impl Out) -> bool {
     read_rat_nos(s, strict, b)
 }
 
+#[inline]
+fn inline_isspace(c: u8) -> bool {
+    // SAFETY: isspace() accepts any unsigned char value.
+    unsafe { isspace(c as c_int) != 0 }
+}
+
 /// `skip_ws()`: `while (isspace((unsigned char)**s)) (*s)++;`
 pub fn skip_ws(s: &mut Cursor) {
-    // SAFETY: isspace() accepts any unsigned char value.
-    while unsafe { isspace(s.byte() as c_int) } != 0 {
+    while inline_isspace(s.byte()) {
         s.pos += 1;
     }
 }
@@ -208,18 +213,38 @@ struct COut {
     b: *mut c_char,
 }
 
-impl Out for COut {
-    fn put(&mut self, c: u8) {
-        // SAFETY: the callers' contract (see the exported functions): the
-        // C caller's buffer has room wherever the C code would write.
+impl COut {
+    #[inline]
+    unsafe fn new(b: *mut c_char) -> Self {
+        COut { b }
+    }
+
+    #[inline]
+    unsafe fn write_byte(&mut self, c: u8) {
+        // SAFETY: buffer has room per caller contract.
         unsafe {
             *self.b = c as c_char;
             self.b = self.b.add(1);
         }
     }
+
+    #[inline]
+    unsafe fn step_back(&mut self) {
+        // SAFETY: undoes a previous write_byte.
+        unsafe {
+            self.b = self.b.sub(1);
+        }
+    }
+}
+
+impl Out for COut {
+    fn put(&mut self, c: u8) {
+        // SAFETY: caller guarantees buffer space.
+        unsafe { self.write_byte(c) }
+    }
     fn back(&mut self) {
-        // SAFETY: only undoes a put() of the same call chain.
-        self.b = unsafe { self.b.sub(1) };
+        // SAFETY: only steps back within written range.
+        unsafe { self.step_back() }
     }
 }
 
@@ -231,17 +256,31 @@ impl Out for COut {
 /// has room for every byte the C version of `f` would write (the C callers
 /// size it as the whole input string plus its NUL).
 unsafe fn with_c<R>(s: *mut *const c_char, b: *mut *mut c_char, f: impl FnOnce(&mut Cursor, &mut COut) -> R) -> R {
-    // SAFETY: per the contract.
-    let (start, bytes) = unsafe { (*s, CStr::from_ptr(*s).to_bytes_with_nul()) };
+    // SAFETY: s and b are valid pointers per contract.
+    let (start, bytes, mut out) = unsafe {
+        ((*s), CStr::from_ptr(*s).to_bytes_with_nul(), COut::new(*b))
+    };
     let mut cur = Cursor::new(bytes);
-    // SAFETY: per the contract.
-    let mut out = COut { b: unsafe { *b } };
     let r = f(&mut cur, &mut out);
-    // SAFETY: pos <= the string length, so the pointer stays in the string.
+    // SAFETY: pos <= input length, out.b valid per contract.
     unsafe {
         *s = start.add(cur.pos);
         *b = out.b;
     }
+    r
+}
+
+/// Runs `f` on the C string `*s` and updates `*s` to point past the consumed bytes.
+///
+/// # Safety
+/// `s` is valid and `*s` points into a NUL-terminated string.
+unsafe fn with_c_read<R>(s: *mut *const c_char, f: impl FnOnce(&mut Cursor) -> R) -> R {
+    // SAFETY: s is valid per contract.
+    let (start, bytes) = unsafe { (*s, CStr::from_ptr(*s).to_bytes_with_nul()) };
+    let mut cur = Cursor::new(bytes);
+    let r = f(&mut cur);
+    // SAFETY: pos <= string length.
+    unsafe { *s = start.add(cur.pos) };
     r
 }
 
@@ -296,15 +335,11 @@ pub unsafe extern "C" fn rb_core_complex_read_rat(s: *mut *const c_char, strict:
 /// Port of `skip_ws()` (complex.c).
 ///
 /// # Safety
-/// `s` is valid and `*s` points into a NUL-terminated string.
+/// See [`with_c_read`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn rb_core_complex_skip_ws(s: *mut *const c_char) {
-    // SAFETY: per the contract.
-    let (start, bytes) = unsafe { (*s, CStr::from_ptr(*s).to_bytes_with_nul()) };
-    let mut cur = Cursor::new(bytes);
-    skip_ws(&mut cur);
-    // SAFETY: pos <= the string length.
-    unsafe { *s = start.add(cur.pos) };
+    // SAFETY: forwarded contract.
+    unsafe { with_c_read(s, |s| skip_ws(s)) }
 }
 
 #[cfg(test)]

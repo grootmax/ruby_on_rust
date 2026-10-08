@@ -3,8 +3,10 @@
 
 require "yaml"
 require "optparse"
+require "date"
 
 VALID_STATUSES = ["Not Started", "In Progress", "Ported", "Blocked", "N/A"].freeze
+SOAK_GATE_DAYS = 28
 
 def number_with_delimiter(number)
   number.to_s.gsub(/(\d)(?=(\d\d\d)+(?!\d))/, '\1,')
@@ -37,6 +39,25 @@ status_data = YAML.load_file(status_file_path) || {}
 subsystems_config = status_data["subsystems"] || {}
 files_config = status_data["files"] || {}
 
+unless subsystems_config.is_a?(Hash) && files_config.is_a?(Hash)
+  warn "Error: Invalid schema in #{status_file_path}: 'subsystems' and 'files' must be Hashes"
+  exit 1
+end
+
+# Validate ported_date entries in status configuration
+files_config.each do |filename, config|
+  next unless config.is_a?(Hash)
+  pdate = config["ported_date"]
+  if pdate
+    begin
+      Date.parse(pdate.to_s)
+    rescue ArgumentError
+      warn "Error: Invalid ported_date '#{pdate}' for #{filename} in #{status_file_path}. Expected YYYY-MM-DD format."
+      exit 1
+    end
+  end
+end
+
 c_files = Dir.glob(File.join(repo_root, "*.c")).sort
 
 if !c_files.empty? && system("git", "rev-parse", "--is-inside-work-tree", out: File::NULL, err: File::NULL, chdir: repo_root)
@@ -57,13 +78,38 @@ file_entries = c_files.map do |file_path|
     status = "Not Started"
   end
 
+  ported_date_raw = config["ported_date"]
+  ported_date = nil
+  soak_days = nil
+  soak_status = "-"
+  soak_passed = false
+
+  if ported_date_raw
+    begin
+      parsed_date = Date.parse(ported_date_raw.to_s)
+      ported_date = parsed_date.strftime("%Y-%m-%d")
+      elapsed = (Date.today - parsed_date).to_i
+      soak_days = [elapsed, 0].max
+      soak_passed = soak_days >= SOAK_GATE_DAYS
+      soak_status = soak_passed ? "Passed (#{soak_days} days)" : "In Soak (#{soak_days}/#{SOAK_GATE_DAYS} days)"
+    rescue ArgumentError
+      soak_status = "Invalid Date"
+    end
+  elsif status == "Ported"
+    soak_status = "Pending Date"
+  end
+
   {
     basename: basename,
     loc: loc,
     status: status,
     target: config["target"] || "-",
     subsystem: config["subsystem"] || "Utilities & Support",
-    notes: config["notes"] || ""
+    notes: config["notes"] || "",
+    ported_date: ported_date,
+    soak_days: soak_days,
+    soak_status: soak_status,
+    soak_passed: soak_passed
   }
 end
 
@@ -77,6 +123,8 @@ stats = VALID_STATUSES.each_with_object({}) do |st, hash|
   pct = total_loc.positive? ? (loc.to_f / total_loc * 100.0).round(1) : 0.0
   hash[st] = { count: count, loc: loc, pct: pct }
 end
+
+ported_entries = file_entries.select { |e| e[:status] == "Ported" || e[:ported_date] }
 
 # Build Markdown content
 lines = []
@@ -97,11 +145,29 @@ VALID_STATUSES.each do |st|
 end
 
 lines << ""
+lines << "## Soak Gate Verification (4-Week Stability Gate)"
+lines << ""
+lines << "Mandatory 28-day stability soak period tracking for ported modules before final hardening classification."
+lines << ""
+
+if ported_entries.empty?
+  lines << "_No ported modules currently in soak verification._"
+  lines << ""
+else
+  lines << "| C Source File | Target Rust Crate/Module | Ported Date | Days Elapsed | Soak Gate Status |"
+  lines << "| :--- | :--- | :--- | :--- | :--- |"
+  ported_entries.sort_by { |e| e[:basename] }.each do |e|
+    pdate_str = e[:ported_date] || "-"
+    days_str = e[:soak_days] ? "#{e[:soak_days]} days" : "-"
+    lines << "| `#{e[:basename]}` | `#{e[:target]}` | #{pdate_str} | #{days_str} | #{e[:soak_status]} |"
+  end
+  lines << ""
+end
+
 lines << "## Migration Progress by Subsystem"
 lines << ""
 
 subsystem_names = subsystems_config.keys
-# Add any subsystems present in file entries that were not explicitly in config
 extra_subsystems = file_entries.map { |e| e[:subsystem] }.uniq - subsystem_names
 all_subsystems = subsystem_names + extra_subsystems
 
@@ -109,28 +175,29 @@ all_subsystems.each do |subsystem_name|
   sub_entries = file_entries.select { |e| e[:subsystem] == subsystem_name }
   next if sub_entries.empty?
 
-  sub_loc = sub_entries.sum { |e| e[:loc] }
   sub_desc = subsystems_config.dig(subsystem_name, "description")
 
   lines << "### #{subsystem_name}"
   lines << "_#{sub_desc}_" if sub_desc && !sub_desc.empty?
   lines << ""
-  lines << "| C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |"
-  lines << "| :--- | :--- | :--- | :--- | :--- |"
+  lines << "| C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Ported Date | Soak Status | Notes |"
+  lines << "| :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
 
   sub_entries.sort_by { |e| e[:basename] }.each do |e|
-    lines << "| `#{e[:basename]}` | #{number_with_delimiter(e[:loc])} | #{e[:status]} | `#{e[:target]}` | #{e[:notes]} |"
+    pdate_str = e[:ported_date] || "-"
+    lines << "| `#{e[:basename]}` | #{number_with_delimiter(e[:loc])} | #{e[:status]} | `#{e[:target]}` | #{pdate_str} | #{e[:soak_status]} | #{e[:notes]} |"
   end
   lines << ""
 end
 
 lines << "## Complete C Source File Ledger"
 lines << ""
-lines << "| C Source File | Subsystem | Lines (LOC) | Status | Target Rust Crate/Module | Notes |"
-lines << "| :--- | :--- | :--- | :--- | :--- | :--- |"
+lines << "| C Source File | Subsystem | Lines (LOC) | Status | Target Rust Crate/Module | Ported Date | Soak Status | Notes |"
+lines << "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
 
 file_entries.sort_by { |e| e[:basename] }.each do |e|
-  lines << "| `#{e[:basename]}` | #{e[:subsystem]} | #{number_with_delimiter(e[:loc])} | #{e[:status]} | `#{e[:target]}` | #{e[:notes]} |"
+  pdate_str = e[:ported_date] || "-"
+  lines << "| `#{e[:basename]}` | #{e[:subsystem]} | #{number_with_delimiter(e[:loc])} | #{e[:status]} | `#{e[:target]}` | #{pdate_str} | #{e[:soak_status]} | #{e[:notes]} |"
 end
 lines << ""
 
@@ -144,10 +211,6 @@ if check_mode
 
   existing_markdown = File.read(porting_md_path)
 
-  # Line counts change with every upstream sync, so --check ignores them:
-  # it masks the "Lines (LOC)", "Lines of Code (LOC)" and "% of Total LOC"
-  # cells (found by their column headers) and compares everything else --
-  # the file list, statuses, file counts, targets, subsystems and notes.
   mask_loc = lambda do |markdown|
     masked_columns = []
     markdown.lines.map do |line|
@@ -156,11 +219,11 @@ if check_mode
         next line
       end
       cells = line.chomp.split("|", -1)
-      if cells.any? { |c| c.include?("LOC") }
-        masked_columns = cells.each_index.select { |i| cells[i].include?("LOC") }
+      if cells.any? { |c| c.include?("LOC") || c.include?("Unsafe") || c.include?("Date") || c.include?("Soak") || c.include?("Days") }
+        masked_columns = cells.each_index.select { |i| cells[i].include?("LOC") || cells[i].include?("Unsafe") || cells[i].include?("Date") || cells[i].include?("Soak") || cells[i].include?("Days") }
         next line
       end
-      masked_columns.each { |i| cells[i] = " # " if cells[i] }
+      masked_columns.each { |i| cells[i] = " # " if cells[i] && !cells[i].strip.empty? }
       cells.join("|") + "\n"
     end.join
   end
@@ -169,7 +232,7 @@ if check_mode
     puts "PORTING.md is up to date."
     exit 0
   elsif mask_loc.(existing_markdown) == mask_loc.(generated_markdown)
-    puts "PORTING.md is up to date (line counts have drifted; run 'ruby tool/generate_porting_ledger.rb' to refresh them)."
+    puts "PORTING.md is up to date (line counts/soak metrics have drifted; run 'ruby tool/generate_porting_ledger.rb' to refresh them)."
     exit 0
   else
     warn "Error: PORTING.md is out of date. Please run 'ruby tool/generate_porting_ledger.rb' to update."
