@@ -222,6 +222,15 @@ pub unsafe extern "C" fn mmtk_init_binding(
     binding_options: *const RubyBindingOptions,
     upcalls: *const RubyUpcalls,
 ) {
+    assert!(!builder.is_null(), "builder passed to mmtk_init_binding must not be null");
+    assert!(
+        !binding_options.is_null(),
+        "binding_options passed to mmtk_init_binding must not be null"
+    );
+    if let Err(missing_fn) = unsafe { RubyUpcalls::validate_raw(upcalls) } {
+        panic!("Invalid RubyUpcalls passed to mmtk_init_binding: callback '{missing_fn}' is missing or null");
+    }
+
     crate::MUTATOR_THREAD_PANIC_HANDLER
         .set((unsafe { (*upcalls).clone() }).mutator_thread_panic_handler)
         .unwrap_or_else(|_| panic!("MUTATOR_THREAD_PANIC_HANDLER is already initialized"));
@@ -468,7 +477,11 @@ pub extern "C" fn mmtk_get_all_obj_free_candidates() -> RawVecOfObjRef {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn mmtk_free_raw_vec_of_obj_ref(raw_vec: RawVecOfObjRef) {
-    unsafe { raw_vec.into_vec() };
+    if let Ok(vec) = unsafe { raw_vec.try_into_vec() } {
+        drop(vec);
+    } else {
+        eprintln!("[MMTk] Warning: Attempted to free invalid RawVecOfObjRef");
+    }
 }
 
 // =============== Forking ===============

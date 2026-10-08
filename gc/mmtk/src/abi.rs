@@ -274,11 +274,56 @@ impl RawVecOfObjRef {
         RawVecOfObjRef { ptr, len, capa }
     }
 
+    /// Check invariant conditions for RawVecOfObjRef.
+    pub fn is_valid(&self) -> bool {
+        self.validate().is_ok()
+    }
+
+    /// Validate instance invariants:
+    /// - `len <= capa`
+    /// - `ptr` must not be null when `len > 0` or `capa > 0`
+    /// - `ptr` must be aligned to `align_of::<ObjectReference>()` when non-null
+    pub fn validate(&self) -> Result<(), &'static str> {
+        if self.len > self.capa {
+            return Err("RawVecOfObjRef len exceeds capa");
+        }
+        if (self.len > 0 || self.capa > 0) && self.ptr.is_null() {
+            return Err("RawVecOfObjRef ptr is null with non-zero len or capa");
+        }
+        if !self.ptr.is_null()
+            && (self.ptr as usize) % std::mem::align_of::<ObjectReference>() != 0
+        {
+            return Err("RawVecOfObjRef ptr is misaligned");
+        }
+        Ok(())
+    }
+
     /// # Safety
     ///
-    /// This function turns raw pointer into a Vec without check.
+    /// This function turns raw pointer into a Vec after verifying alignment,
+    /// non-null pointer, and length invariants.
     pub unsafe fn into_vec(self) -> Vec<ObjectReference> {
+        self.validate()
+            .unwrap_or_else(|err| panic!("Invalid RawVecOfObjRef invariant: {err}"));
+        if self.capa == 0 {
+            return Vec::new();
+        }
         unsafe { Vec::from_raw_parts(self.ptr, self.len, self.capa) }
+    }
+
+    /// Convert into Vec returning Result if invalid.
+    ///
+    /// # Safety
+    ///
+    /// This function turns raw pointer into a Vec after verifying alignment,
+    /// non-null pointer, and length invariants.
+    pub unsafe fn try_into_vec(self) -> Result<Vec<ObjectReference>, &'static str> {
+        self.validate()?;
+        if self.capa == 0 {
+            Ok(Vec::new())
+        } else {
+            Ok(unsafe { Vec::from_raw_parts(self.ptr, self.len, self.capa) })
+        }
     }
 }
 
@@ -325,6 +370,54 @@ pub struct RubyUpcalls {
     pub gc_thread_panic_handler: extern "C" fn(),
 }
 
+impl RubyUpcalls {
+    /// Validates that `upcalls` is non-null and that none of its mandatory callback function
+    /// pointers are null before dereferencing/cloning from C FFI.
+    pub unsafe fn validate_raw(upcalls: *const RubyUpcalls) -> Result<(), &'static str> {
+        if upcalls.is_null() {
+            return Err("RubyUpcalls pointer is null");
+        }
+        const MANDATORY_COUNT: usize = 23;
+        let fn_ptrs = unsafe {
+            std::slice::from_raw_parts(
+                upcalls as *const *const libc::c_void,
+                MANDATORY_COUNT,
+            )
+        };
+        const NAMES: [&str; MANDATORY_COUNT] = [
+            "init_gc_worker_thread",
+            "is_mutator",
+            "stop_the_world",
+            "resume_mutators",
+            "block_for_gc",
+            "before_updating_jit_code",
+            "after_updating_jit_code",
+            "number_of_mutators",
+            "get_mutators",
+            "scan_gc_roots",
+            "scan_objspace",
+            "move_obj_during_marking",
+            "update_object_references",
+            "call_gc_mark_children",
+            "handle_weak_references",
+            "call_obj_free",
+            "vm_live_bytes",
+            "update_global_tables",
+            "global_tables_count",
+            "update_finalizer_table",
+            "special_const_p",
+            "mutator_thread_panic_handler",
+            "gc_thread_panic_handler",
+        ];
+        for (idx, &ptr) in fn_ptrs.iter().enumerate() {
+            if ptr.is_null() {
+                return Err(NAMES[idx]);
+            }
+        }
+        Ok(())
+    }
+}
+
 unsafe impl Sync for RubyUpcalls {}
 
 #[repr(C)]
@@ -333,3 +426,163 @@ pub struct HeapBounds {
     pub start: *mut libc::c_void,
     pub end: *mut libc::c_void,
 }
+
+// Static compile-time memory layout, size, and alignment assertions
+const _: () = {
+    use std::mem::{align_of, offset_of, size_of};
+
+    // 1. RawVecOfObjRef
+    assert!(size_of::<RawVecOfObjRef>() == 3 * size_of::<usize>());
+    assert!(align_of::<RawVecOfObjRef>() == align_of::<*mut ObjectReference>());
+    assert!(offset_of!(RawVecOfObjRef, ptr) == 0);
+    assert!(offset_of!(RawVecOfObjRef, len) == size_of::<usize>());
+    assert!(offset_of!(RawVecOfObjRef, capa) == 2 * size_of::<usize>());
+
+    // 2. RubyUpcalls
+    assert!(size_of::<RubyUpcalls>() == 23 * size_of::<usize>());
+    assert!(align_of::<RubyUpcalls>() == align_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, init_gc_worker_thread) == 0 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, is_mutator) == 1 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, stop_the_world) == 2 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, resume_mutators) == 3 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, block_for_gc) == 4 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, before_updating_jit_code) == 5 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, after_updating_jit_code) == 6 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, number_of_mutators) == 7 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, get_mutators) == 8 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, scan_gc_roots) == 9 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, scan_objspace) == 10 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, move_obj_during_marking) == 11 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, update_object_references) == 12 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, call_gc_mark_children) == 13 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, handle_weak_references) == 14 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, call_obj_free) == 15 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, vm_live_bytes) == 16 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, update_global_tables) == 17 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, global_tables_count) == 18 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, update_finalizer_table) == 19 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, special_const_p) == 20 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, mutator_thread_panic_handler) == 21 * size_of::<usize>());
+    assert!(offset_of!(RubyUpcalls, gc_thread_panic_handler) == 22 * size_of::<usize>());
+
+    // 3. GCThreadTLS
+    assert!(size_of::<GCThreadTLS>() == 4 * size_of::<usize>());
+    assert!(align_of::<GCThreadTLS>() == align_of::<usize>());
+    assert!(offset_of!(GCThreadTLS, kind) == 0);
+    assert!(offset_of!(GCThreadTLS, gc_context) == size_of::<usize>());
+    assert!(offset_of!(GCThreadTLS, object_closure) == 2 * size_of::<usize>());
+
+    // 4. ObjectClosure
+    assert!(size_of::<ObjectClosure>() == 2 * size_of::<usize>());
+    assert!(align_of::<ObjectClosure>() == align_of::<usize>());
+    assert!(offset_of!(ObjectClosure, c_function) == 0);
+    assert!(offset_of!(ObjectClosure, rust_closure) == size_of::<usize>());
+
+    // 5. RubyBindingOptions
+    assert!(size_of::<RubyBindingOptions>() == 1 * size_of::<usize>());
+    assert!(align_of::<RubyBindingOptions>() == align_of::<usize>());
+    assert!(offset_of!(RubyBindingOptions, suffix_size) == 0);
+};
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::mem::{align_of, offset_of, size_of};
+
+    #[test]
+    fn test_raw_vec_of_obj_ref_layout() {
+        assert_eq!(size_of::<RawVecOfObjRef>(), 3 * size_of::<usize>());
+        assert_eq!(align_of::<RawVecOfObjRef>(), align_of::<*mut ObjectReference>());
+        assert_eq!(offset_of!(RawVecOfObjRef, ptr), 0);
+        assert_eq!(offset_of!(RawVecOfObjRef, len), size_of::<usize>());
+        assert_eq!(offset_of!(RawVecOfObjRef, capa), 2 * size_of::<usize>());
+    }
+
+    #[test]
+    fn test_raw_vec_of_obj_ref_invariants() {
+        let valid_empty = RawVecOfObjRef {
+            ptr: std::ptr::null_mut(),
+            len: 0,
+            capa: 0,
+        };
+        assert!(valid_empty.is_valid());
+        assert!(unsafe { valid_empty.into_vec() }.is_empty());
+
+        let mut dummy = [std::ptr::null_mut::<libc::c_void>(); 2];
+        let valid_nonempty = RawVecOfObjRef {
+            ptr: dummy.as_mut_ptr() as *mut ObjectReference,
+            len: 1,
+            capa: 2,
+        };
+        assert!(valid_nonempty.is_valid());
+
+        // Null ptr with len > 0
+        let invalid_null = RawVecOfObjRef {
+            ptr: std::ptr::null_mut(),
+            len: 1,
+            capa: 1,
+        };
+        assert!(!invalid_null.is_valid());
+
+        // len > capa
+        let invalid_len = RawVecOfObjRef {
+            ptr: dummy.as_mut_ptr() as *mut ObjectReference,
+            len: 3,
+            capa: 2,
+        };
+        assert!(!invalid_len.is_valid());
+
+        // Misaligned pointer
+        let misaligned_ptr = (dummy.as_mut_ptr() as usize + 1) as *mut ObjectReference;
+        let invalid_align = RawVecOfObjRef {
+            ptr: misaligned_ptr,
+            len: 1,
+            capa: 1,
+        };
+        assert!(!invalid_align.is_valid());
+    }
+
+    #[test]
+    fn test_ruby_upcalls_layout() {
+        assert_eq!(size_of::<RubyUpcalls>(), 23 * size_of::<usize>());
+        assert_eq!(align_of::<RubyUpcalls>(), align_of::<usize>());
+        assert_eq!(offset_of!(RubyUpcalls, init_gc_worker_thread), 0);
+        assert_eq!(offset_of!(RubyUpcalls, gc_thread_panic_handler), 22 * size_of::<usize>());
+    }
+
+    #[test]
+    fn test_ruby_upcalls_validation() {
+        assert!(unsafe { RubyUpcalls::validate_raw(std::ptr::null()) }.is_err());
+
+        let null_upcalls = [std::ptr::null::<libc::c_void>(); 23];
+        assert_eq!(
+            unsafe { RubyUpcalls::validate_raw(null_upcalls.as_ptr() as *const RubyUpcalls) },
+            Err("init_gc_worker_thread")
+        );
+    }
+
+    #[test]
+    fn test_gc_thread_tls_layout() {
+        assert_eq!(size_of::<GCThreadTLS>(), 4 * size_of::<usize>());
+        assert_eq!(align_of::<GCThreadTLS>(), align_of::<usize>());
+        assert_eq!(offset_of!(GCThreadTLS, kind), 0);
+        assert_eq!(offset_of!(GCThreadTLS, gc_context), size_of::<usize>());
+        assert_eq!(offset_of!(GCThreadTLS, object_closure), 2 * size_of::<usize>());
+    }
+
+    #[test]
+    fn test_object_closure_layout() {
+        assert_eq!(size_of::<ObjectClosure>(), 2 * size_of::<usize>());
+        assert_eq!(align_of::<ObjectClosure>(), align_of::<usize>());
+        assert_eq!(offset_of!(ObjectClosure, c_function), 0);
+        assert_eq!(offset_of!(ObjectClosure, rust_closure), size_of::<usize>());
+    }
+
+    #[test]
+    fn test_ruby_binding_options_layout() {
+        assert_eq!(size_of::<RubyBindingOptions>(), 1 * size_of::<usize>());
+        assert_eq!(align_of::<RubyBindingOptions>(), align_of::<usize>());
+        assert_eq!(offset_of!(RubyBindingOptions, suffix_size), 0);
+    }
+}
+
