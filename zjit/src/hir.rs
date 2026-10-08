@@ -89,6 +89,15 @@ impl std::fmt::Display for InsnId {
     }
 }
 
+/// Abstract allocation origin for hybrid allocation-site and type-based alias analysis.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AllocOrigin {
+    /// Object allocation originating from a specific HIR allocation site instruction (`ObjectAlloc` or `ObjectAllocClass`).
+    Site(InsnId),
+    /// Allocation site origin is unknown (e.g. method parameter, phi node / block param, escape point).
+    Unknown,
+}
+
 /// The index of a [`Block`], which effectively acts like a pointer.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, PartialOrd, Ord)]
 pub struct BlockId(pub u32);
@@ -6674,52 +6683,109 @@ impl Function {
     }
 
 
+    /// Determine abstract allocation origin for a receiver SSA value.
+    fn allocation_origin_of(&self, recv: InsnId) -> AllocOrigin {
+        let chased = self.chase_insn(recv);
+        match &self.insns[chased] {
+            Insn::ObjectAlloc { .. } | Insn::ObjectAllocClass { .. } => AllocOrigin::Site(chased),
+            _ => AllocOrigin::Unknown,
+        }
+    }
+
+    /// Check whether two receiver references (with their respective allocation origins) may alias.
+    fn may_alias(&self, recv_a: InsnId, origin_a: AllocOrigin, recv_b: InsnId, origin_b: AllocOrigin) -> bool {
+        // If both SSA values resolve to the same canonical instruction ID, they are the same reference.
+        if self.chase_insn(recv_a) == self.chase_insn(recv_b) {
+            return true;
+        }
+
+        // Query receiver type lattice intersection (Type::could_be) using refined type_of at access sites.
+        let type_a = self.type_of(recv_a);
+        let type_b = self.type_of(recv_b);
+        if !type_a.could_be(type_b) {
+            return false;
+        }
+
+        // Check allocation site disjointness.
+        match (origin_a, origin_b) {
+            (AllocOrigin::Site(site_a), AllocOrigin::Site(site_b)) => {
+                if site_a != site_b {
+                    return false;
+                }
+            }
+            _ => {}
+        }
+
+        true
+    }
+
     fn optimize_load_store(&mut self) {
+        #[derive(Clone, Copy)]
+        struct HeapEntry {
+            insn_id: InsnId,
+            recv: InsnId,
+        }
+
         for block in self.reverse_post_order() {
-            let mut compile_time_heap: HashMap<(InsnId, i32), InsnId>  = HashMap::new();
+            let mut compile_time_heap: HashMap<(InsnId, AllocOrigin, i32), HeapEntry> = HashMap::new();
             let old_insns = std::mem::take(&mut self.blocks[block].insns);
             let mut new_insns = Vec::with_capacity(old_insns.len());
             for insn_id in old_insns {
                 let replacement_insn: InsnId = match self.resolve(insn_id).insn(self) {
                     &Insn::StoreField { recv, offset, val, .. } => {
-                        let key = (self.chase_insn(recv), offset);
+                        let recv_ssa = self.chase_insn(recv);
+                        let origin = self.allocation_origin_of(recv_ssa);
+                        let key = (recv_ssa, origin, offset);
                         let heap_entry = compile_time_heap.get(&key).copied();
                         // TODO(Jacob): Switch from actual to partial equality
-                        if Some(val) == heap_entry {
-                            // If the value is already stored, short circuit and don't add an instruction to the block
-                            continue
+                        if let Some(entry) = heap_entry {
+                            if val == entry.insn_id {
+                                // If the value is already stored, short circuit and don't add an instruction to the block
+                                continue;
+                            }
                         }
-                        // TODO(Jacob): Add TBAA to avoid removing so many entries
-                        compile_time_heap.retain(|(_, off), _| *off != offset);
-                        compile_time_heap.insert(key, val);
+                        // Query both type lattice intersections (`Type::could_be`) and allocation site disjointness
+                        // before clearing field cache entries.
+                        compile_time_heap.retain(|&(_cached_recv_ssa, cached_origin, cached_offset), cached_entry| {
+                            if cached_offset != offset {
+                                true
+                            } else {
+                                !self.may_alias(recv, origin, cached_entry.recv, cached_origin)
+                            }
+                        });
+                        compile_time_heap.insert(key, HeapEntry { insn_id: val, recv });
                         insn_id
-                    },
+                    }
                     &Insn::LoadField { recv, offset, return_type, .. } => {
-                        let key = (self.chase_insn(recv), offset);
+                        let recv_ssa = self.chase_insn(recv);
+                        let origin = self.allocation_origin_of(recv_ssa);
+                        let key = (recv_ssa, origin, offset);
                         match compile_time_heap.entry(key) {
                             std::collections::hash_map::Entry::Occupied(entry) => {
-                                let cached_insn = *entry.get();
+                                let cached_entry = *entry.get();
 
                                 // TODO (nirvdrum 2026-06-04): Remove the return type guard and supporting code when the type checker becomes more accurate.
                                 // If there's an an embedded<=>heap shape storage transition, it's possible for this `LoadField` to have a different return
                                 // type than the cached entry (`CPtr` vs `BasicObject`). While the loaded value would be the same in either case, the
                                 // difference in associated type causes type checking to fail. Consequently, we conservatively retain the duplicate `LoadField`.
                                 // The `optimize_load_store_does_not_alias_loads_with_incompatible_return_types` test checks the problematic case.
-                                let can_forward_cached_insn = match self.resolve(cached_insn).insn(self) {
-                                    Insn::LoadField { return_type : cached_return_type,.. } => cached_return_type.is_subtype(return_type),
-                                    _ => true
+                                let can_forward_cached_insn = match self.resolve(cached_entry.insn_id).insn(self) {
+                                    Insn::LoadField { return_type: cached_return_type, .. } => {
+                                        cached_return_type.is_subtype(return_type)
+                                    }
+                                    _ => true,
                                 };
 
                                 if can_forward_cached_insn {
                                     // If the value is stored already, we should short circuit.
                                     // However, we need to replace insn_id with its representative in the SSA union.
-                                    self.make_equal_to(insn_id, cached_insn);
-                                    continue
+                                    self.make_equal_to(insn_id, cached_entry.insn_id);
+                                    continue;
                                 }
                             }
                             std::collections::hash_map::Entry::Vacant(_) => {
                                 // If the value has not been accessed, cache a copy to optimize future loads or stores.
-                                compile_time_heap.insert(key, insn_id);
+                                compile_time_heap.insert(key, HeapEntry { insn_id, recv });
                             }
                         }
                         insn_id
@@ -6729,11 +6795,10 @@ impl Function {
                         // We don't use LoadField for mark bits so we can ignore them for now.
                         // But flags does not exist in our effects abstract heap modeling and we don't want to add special casing to effects.
                         // This special casing in this pass here should be removed once we refine our effects system to provide greater granularity for WriteBarrier.
-                        // TODO: use TBAA
                         let offset = RUBY_OFFSET_RBASIC_FLAGS;
-                        compile_time_heap.retain(|(_, off), _| *off != offset);
+                        compile_time_heap.retain(|&(_, _, cached_offset), _| cached_offset != offset);
                         insn_id
-                    },
+                    }
                     insn => {
                         // If an instruction affects memory and we haven't modeled it, the compile_time_heap is invalidated
                         if insn.effects_of().includes(Effect::write(abstract_heaps::Memory)) {
@@ -11879,6 +11944,96 @@ mod validation_tests {
             "optimize_load_store failed to alias two loads with different, but compatible, return types: {:?}",
             function.validate(),
         );
+    }
+
+    #[test]
+    fn optimize_load_store_retains_cached_load_for_distinct_allocation_sites_of_same_class() {
+        let mut function = Function::new(std::ptr::null());
+        let entry = function.entry_block;
+        let exit_state = function.push_insn(entry, Insn::Const { val: Const::Value(Qnil) });
+        let alloc_a = function.push_insn(entry, Insn::ObjectAllocClass { class: unsafe { rb_cObject }, state: exit_state });
+        let alloc_b = function.push_insn(entry, Insn::ObjectAllocClass { class: unsafe { rb_cObject }, state: exit_state });
+        let val1 = function.push_insn(entry, Insn::Const { val: Const::Value(Qtrue) });
+
+        let load_b1 = function.load_field(entry, alloc_b, FieldName::as_heap, 0x10, types::BasicObject);
+        function.push_insn(entry, Insn::StoreField { recv: alloc_a, id: FieldName::as_heap, offset: 0x10, val: val1, num_bits: types::BasicObject.num_bits() });
+        let load_b2 = function.load_field(entry, alloc_b, FieldName::as_heap, 0x10, types::BasicObject);
+        function.push_insn(entry, Insn::Return { val: load_b2 });
+        function.seal_entries();
+
+        function.infer_types();
+        function.optimize_load_store();
+
+        assert_eq!(function.union_find.borrow().find_const(load_b2), function.union_find.borrow().find_const(load_b1));
+    }
+
+    #[test]
+    fn optimize_load_store_clears_cached_load_for_unknown_origin_of_same_class() {
+        crate::cruby::with_rubyvm(|| {
+            let mut function = Function::new(std::ptr::null());
+            let entry = function.entry_block;
+            let exit_state = function.push_insn(entry, Insn::Const { val: Const::Value(Qnil) });
+            let c_class = define_class("MyTestClass", unsafe { rb_cObject });
+            let alloc_a = function.push_insn(entry, Insn::ObjectAllocClass { class: c_class, state: exit_state });
+            let param_b = function.push_insn(entry, Insn::LoadArg { idx: 0, id: FieldName::as_heap, val_type: Type::from_class_inexact(c_class) });
+            let val1 = function.push_insn(entry, Insn::Const { val: Const::Value(Qtrue) });
+
+            let load_b1 = function.load_field(entry, param_b, FieldName::as_heap, 0x10, types::BasicObject);
+            function.push_insn(entry, Insn::StoreField { recv: alloc_a, id: FieldName::as_heap, offset: 0x10, val: val1, num_bits: types::BasicObject.num_bits() });
+            let load_b2 = function.load_field(entry, param_b, FieldName::as_heap, 0x10, types::BasicObject);
+            function.push_insn(entry, Insn::Return { val: load_b2 });
+            function.seal_entries();
+
+            function.infer_types();
+            function.optimize_load_store();
+
+            assert_ne!(function.union_find.borrow().find_const(load_b2), function.union_find.borrow().find_const(load_b1));
+        });
+    }
+
+    #[test]
+    fn optimize_load_store_retains_cached_load_for_unknown_origin_of_disjoint_type() {
+        let mut function = Function::new(std::ptr::null());
+        let entry = function.entry_block;
+        let exit_state = function.push_insn(entry, Insn::Const { val: Const::Value(Qnil) });
+        let alloc_a = function.push_insn(entry, Insn::ObjectAllocClass { class: unsafe { rb_cObject }, state: exit_state });
+        let param_b = function.push_insn(entry, Insn::Param);
+        let val1 = function.push_insn(entry, Insn::Const { val: Const::Value(Qtrue) });
+
+        let param_b_array = function.push_insn(entry, Insn::RefineType { val: param_b, new_type: types::Array });
+
+        let load_b1 = function.load_field(entry, param_b_array, FieldName::as_heap, 0x10, types::BasicObject);
+        function.push_insn(entry, Insn::StoreField { recv: alloc_a, id: FieldName::as_heap, offset: 0x10, val: val1, num_bits: types::BasicObject.num_bits() });
+        let load_b2 = function.load_field(entry, param_b_array, FieldName::as_heap, 0x10, types::BasicObject);
+        function.push_insn(entry, Insn::Return { val: load_b2 });
+        function.seal_entries();
+
+        function.infer_types();
+        function.optimize_load_store();
+
+        assert_eq!(function.union_find.borrow().find_const(load_b2), function.union_find.borrow().find_const(load_b1));
+    }
+
+    #[test]
+    fn optimize_load_store_tracks_object_alloc_instructions() {
+        let mut function = Function::new(std::ptr::null());
+        let entry = function.entry_block;
+        let exit_state = function.push_insn(entry, Insn::Const { val: Const::Value(Qnil) });
+        let class_val = function.push_insn(entry, Insn::Const { val: Const::Value(VALUE::fixnum_from_isize(100)) });
+        let alloc_a = function.push_insn(entry, Insn::ObjectAlloc { val: class_val, state: exit_state });
+        let alloc_b = function.push_insn(entry, Insn::ObjectAlloc { val: class_val, state: exit_state });
+        let val1 = function.push_insn(entry, Insn::Const { val: Const::Value(Qtrue) });
+
+        let load_b1 = function.load_field(entry, alloc_b, FieldName::as_heap, 0x10, types::BasicObject);
+        function.push_insn(entry, Insn::StoreField { recv: alloc_a, id: FieldName::as_heap, offset: 0x10, val: val1, num_bits: types::BasicObject.num_bits() });
+        let load_b2 = function.load_field(entry, alloc_b, FieldName::as_heap, 0x10, types::BasicObject);
+        function.push_insn(entry, Insn::Return { val: load_b2 });
+        function.seal_entries();
+
+        function.infer_types();
+        function.optimize_load_store();
+
+        assert_eq!(function.union_find.borrow().find_const(load_b2), function.union_find.borrow().find_const(load_b1));
     }
 }
 
