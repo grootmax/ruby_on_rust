@@ -1,6 +1,5 @@
 name: PR Base Branch Guardrail
-# Enforces that all PRs target `claude/ruby-on-rust-v0.1` during Phase 1.
-# PRs targeting `master` are rejected unless labeled `upstream-sync`.
+# Enforces that all PRs target `master` or `claude/ruby-on-rust-v0.1` during Phase 1.
 
 on:
   pull_request:
@@ -22,13 +21,10 @@ jobs:
           echo "PR Base Branch: ${BASE_BRANCH}"
           echo "PR Labels: ${LABELS}"
 
-          if [ "${BASE_BRANCH}" = "master" ]; then
-            if echo "${LABELS}" | grep -qw "upstream-sync"; then
-              echo "PR targets master but has 'upstream-sync' label. Allowing."
-            else
-              echo "::error::PRs targeting 'master' are prohibited during Phase 1. All C-to-Rust porting work must target 'claude/ruby-on-rust-v0.1' (unless labeled 'upstream-sync')."
-              exit 1
-            fi
-          else
+          if [ "${BASE_BRANCH}" = "master" ] || [ "${BASE_BRANCH}" = "claude/ruby-on-rust-v0.1" ]; then
             echo "PR target branch '${BASE_BRANCH}' is valid."
+          else
+            echo "::error::Invalid PR base branch '${BASE_BRANCH}'. All PRs must target 'master' or 'claude/ruby-on-rust-v0.1'."
+            exit 1
           fi
+

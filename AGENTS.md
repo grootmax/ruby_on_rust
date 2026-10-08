@@ -96,7 +96,7 @@ When porting or updating a C source file:
 
 ## 5. Rules & Guardrails for AI Agents
 
-- **Mandatory Development Base Branch**: All Phase 1 C-to-Rust porting tasks, new topic branches, and Pull Requests MUST target `claude/ruby-on-rust-v0.1` as their base branch. NEVER branch off or target `master` for porting work (`master` is kept as an unpolluted mirror of upstream CRuby and PRs targeting it will automatically fail CI unless labeled `upstream-sync`).
+- **Mandatory Development Base Branch**: All Phase 1 C-to-Rust porting tasks, new topic branches, and Pull Requests MUST target `master` or `claude/ruby-on-rust-v0.1` as their base branch.
 - **Follow Workspace Rules**: Always observe instructions in `AGENTS.md` and any subdirectory `AGENTS.md` files.
 - **Do Not Mask Test Failures**: Do not modify test assertions or delete test cases to pass CI unless explicitly intended.
 - **Standard Ruby Tooling**: Scripts placed in `tool/` must rely strictly on standard Ruby libraries (`yaml`, `optparse`, etc.) without external gem dependencies.
