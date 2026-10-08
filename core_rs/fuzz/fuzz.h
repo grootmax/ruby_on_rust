@@ -40,6 +40,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Weak symbol fallback for unexported core_rs C dependencies during fuzz linking */
+unsigned long __attribute__((weak)) rb_core_vm_exec_core_c(void *ec) { (void)ec; return 0; }
+
 /* ---- deterministic PRNG (splitmix64) ---------------------------------- */
 
 static uint64_t fuzz_state;

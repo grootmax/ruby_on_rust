@@ -7,8 +7,10 @@
 //! Callee-saved register preservation:
 //! `r14` and `r15` are saved on stack via `push` on entry and restored via `pop` on exit.
 
+#[allow(unused_imports)]
 use core::ptr;
 use crate::ffi::value::VALUE;
+#[allow(unused_imports)]
 use super::{rb_execution_context_t, rb_core_vm_exec_core_c, VM_INSTRUCTION_SIZE};
 
 #[cfg(target_arch = "x86_64")]
@@ -62,7 +64,9 @@ pub unsafe fn exec_core(ec: *mut rb_execution_context_t) -> VALUE {
             "pop r14",
             pc = in(reg) pc,
             cfp = in(reg) cfp,
-            clobber_abi("C"),
+            out("rax") _,
+            out("rcx") _,
+            out("rdx") _,
         );
     }
 

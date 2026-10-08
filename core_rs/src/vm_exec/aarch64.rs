@@ -7,11 +7,14 @@
 //! Callee-saved register preservation:
 //! `x19` and `x20` are saved on stack via `stp` on entry and restored via `ldp` on exit.
 
+#[allow(unused_imports)]
+use core::ptr;
 use crate::ffi::value::VALUE;
+#[allow(unused_imports)]
 use super::{rb_execution_context_t, rb_core_vm_exec_core_c, VM_INSTRUCTION_SIZE};
 
 #[cfg(target_arch = "aarch64")]
-static mut AARCH64_TABLE: [*const (); VM_INSTRUCTION_SIZE] = [core::ptr::null(); VM_INSTRUCTION_SIZE];
+static mut AARCH64_TABLE: [*const (); VM_INSTRUCTION_SIZE] = [ptr::null(); VM_INSTRUCTION_SIZE];
 #[cfg(target_arch = "aarch64")]
 static mut AARCH64_INIT: bool = false;
 
@@ -21,7 +24,7 @@ pub unsafe fn get_insns_address_table() -> &'static [*const (); VM_INSTRUCTION_S
     {
         if unsafe { !AARCH64_INIT } {
             unsafe {
-                let table_ptr = rb_core_vm_exec_core_c(core::ptr::null_mut()) as *const *const ();
+                let table_ptr = rb_core_vm_exec_core_c(ptr::null_mut()) as *const *const ();
                 if !table_ptr.is_null() {
                     core::ptr::copy_nonoverlapping(table_ptr, core::ptr::addr_of_mut!(AARCH64_TABLE) as *mut *const (), VM_INSTRUCTION_SIZE);
                 }
@@ -59,7 +62,8 @@ pub unsafe fn exec_core(ec: *mut rb_execution_context_t) -> VALUE {
             "ldp x19, x20, [sp], #16",
             pc = in(reg) pc,
             cfp = in(reg) cfp,
-            clobber_abi("C"),
+            out("x0") _,
+            out("x16") _,
         );
     }
 
@@ -86,7 +90,7 @@ mod tests {
 
     #[test]
     fn test_null_ec_returns_table() {
-        let ret = unsafe { exec_core(core::ptr::null_mut()) };
+        let ret = unsafe { exec_core(ptr::null_mut()) };
         let table = unsafe { get_insns_address_table() };
         assert_eq!(ret, table.as_ptr() as VALUE);
     }

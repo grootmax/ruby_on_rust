@@ -26,6 +26,14 @@
 # define USE_RUST_PORTS 0
 #endif
 
+#if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
+# pragma GCC visibility push(hidden)
+#endif
+
+/* vm_exec.c (core_rs/src/vm_exec/mod.rs) */
+struct rb_execution_context_struct;
+VALUE rb_core_vm_exec_core_c(struct rb_execution_context_struct *ec);
+
 #if USE_RUST_PORTS
 
 #include "ruby/internal/special_consts.h"
@@ -47,10 +55,6 @@ RBIMPL_STATIC_ASSERT(core_rs_flonum_flag, RUBY_FLONUM_FLAG == 0x02);
 RBIMPL_STATIC_ASSERT(core_rs_symbol_flag, RUBY_SYMBOL_FLAG == (USE_FLONUM ? 0x0c : 0x0e));
 RBIMPL_STATIC_ASSERT(core_rs_special_shift, RUBY_SPECIAL_SHIFT == 8);
 
-#if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
-# pragma GCC visibility push(hidden)
-#endif
-
 /* complex.c (core_rs/src/complex.rs) */
 int rb_core_complex_issign(int c);
 int rb_core_complex_isdecimal(int c);
@@ -61,14 +65,12 @@ int rb_core_complex_read_rat(const char **s, int strict, char **b);
 void rb_core_complex_skip_ws(const char **s);
 
 /* vm_exec.c (core_rs/src/vm_exec/mod.rs) */
-struct rb_execution_context_struct;
 VALUE rb_core_vm_exec_vm_exec_core(struct rb_execution_context_struct *ec);
 const void **rb_vm_get_insns_address_table(void);
-VALUE rb_core_vm_exec_core_c(struct rb_execution_context_struct *ec);
+
+#endif /* USE_RUST_PORTS */
 
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop
 #endif
-
-#endif /* USE_RUST_PORTS */
 #endif /* INTERNAL_CORE_RS_H */
