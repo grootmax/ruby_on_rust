@@ -18,13 +18,13 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Target Rust Crate/Module | Rust Lines (LOC) | Unsafe Blocks | Unsafe Lines | Unsafe Line % |
 | :--- | :--- | :--- | :--- | :--- |
-| `core_rs::complex` | 384 | 21 | 50 | 13.0% |
+| `core_rs::complex` | 386 | 21 | 50 | 13.0% |
 | `core_rs::re` | 339 | 9 | 70 | 20.6% |
 | `core_rs::util` | 411 | 30 | 73 | 17.8% |
 | `gc::mmtk` | 3,079 | 57 | 130 | 4.2% |
 | `jit` | 38 | 9 | 25 | 65.8% |
-| `yjit` | 36,691 | 614 | 2,605 | 7.1% |
-| `zjit` | 95,856 | 961 | 3,239 | 3.4% |
+| `yjit` | 36,691 | 614 | 2,221 | 6.1% |
+| `zjit` | 95,856 | 961 | 3,056 | 3.2% |
 
 ## Migration Progress by Subsystem
 
@@ -36,8 +36,8 @@ _Just-In-Time compilers and execution machinery_
 | `compile.c` | 15,441 | Not Started | `crate::compile` | 0 | 0.0% | Bytecode compiler |
 | `iseq.c` | 4,735 | Not Started | `crate::iseq` | 0 | 0.0% | Instruction sequences |
 | `jit.c` | 965 | Not Started | `jit` | 9 | 65.8% | C helpers shared by upstream YJIT/ZJIT |
-| `yjit.c` | 603 | Not Started | `yjit` | 614 | 7.1% | yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project |
-| `zjit.c` | 406 | Not Started | `zjit` | 961 | 3.4% | zjit.c is the C side of upstream ZJIT; ZJIT itself is upstream Rust, not a port by this project |
+| `yjit.c` | 603 | Not Started | `yjit` | 614 | 6.1% | yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project |
+| `zjit.c` | 406 | Not Started | `zjit` | 961 | 3.2% | zjit.c is the C side of upstream ZJIT; ZJIT itself is upstream Rust, not a port by this project |
 
 ### Core Data Structures
 _Built-in data types, objects, and core classes_
@@ -316,5 +316,5 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `vm_trace.c` | Virtual Machine & Execution | 1,983 | Not Started | `crate::vm::trace` | 0 | 0.0% | TracePoint and event hooks |
 | `vsnprintf.c` | Utilities & Support | 1,298 | Not Started | `crate::vsnprintf` | 0 | 0.0% | Portable vsnprintf |
 | `weakmap.c` | Core Data Structures | 999 | Not Started | `crate::weakmap` | 0 | 0.0% | ObjectSpace::WeakMap |
-| `yjit.c` | JIT Compiler | 603 | Not Started | `yjit` | 614 | 7.1% | yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project |
-| `zjit.c` | JIT Compiler | 406 | Not Started | `zjit` | 961 | 3.4% | zjit.c is the C side of upstream ZJIT; ZJIT itself is upstream Rust, not a port by this project |
+| `yjit.c` | JIT Compiler | 603 | Not Started | `yjit` | 614 | 6.1% | yjit.c is the C side of upstream YJIT; YJIT itself is upstream Rust, not a port by this project |
+| `zjit.c` | JIT Compiler | 406 | Not Started | `zjit` | 961 | 3.2% | zjit.c is the C side of upstream ZJIT; ZJIT itself is upstream Rust, not a port by this project |

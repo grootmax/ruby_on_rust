@@ -71,6 +71,9 @@ def analyze_rust_files(files)
         started = false
         (idx...lines.size).each do |j|
           l = lines[j].sub(%r{//.*$}, "").gsub(/"([^"\\]|\\.)*"/, "").gsub(/\x27[^\x27]*\x27/, "")
+          if !started && l.include?(";") && (!l.include?("{") || l.index(";") < l.index("{"))
+            break
+          end
           l.chars.each do |ch|
             if ch == "{"
               depth += 1

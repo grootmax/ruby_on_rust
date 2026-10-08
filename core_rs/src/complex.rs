@@ -63,10 +63,10 @@ pub trait Out {
 
 /// Thin audited boundary for C `isdigit`.
 #[inline]
-fn ffi_isdigit(c: u8) -> bool {
+fn ffi_isdigit(c: u8) -> c_int {
     let f: unsafe extern "C" fn(c_int) -> c_int = core::hint::black_box(isdigit);
     // SAFETY: isdigit accepts any unsigned char byte value.
-    unsafe { f(c as c_int) != 0 }
+    unsafe { f(c as c_int) }
 }
 
 /// Thin audited boundary for C `isspace`.
@@ -84,7 +84,7 @@ pub fn issign(c: c_int) -> bool {
 /// `isdecimal()`: `isdigit((unsigned char)c)`, returning isdigit()'s own
 /// non-zero value (glibc returns a table bit such as 2048, not 1).
 pub fn isdecimal_raw(c: c_int) -> c_int {
-    if ffi_isdigit(c as u8) { 1 } else { 0 }
+    ffi_isdigit(c as u8)
 }
 
 /// `isdecimal()` as a truth value.
@@ -376,6 +376,8 @@ mod tests {
         assert!(issign(b'+' as c_int) && issign(b'-' as c_int) && !issign(b'*' as c_int));
         assert!(isimagunit(b'j' as c_int) && !isimagunit(b'k' as c_int));
         assert!(isdecimal(b'7' as c_int) && !isdecimal(b'a' as c_int) && !isdecimal(0xb9u8 as c_char as c_int));
+        assert_ne!(isdecimal_raw(b'7' as c_int), 0);
+        assert_eq!(isdecimal_raw(b'a' as c_int), 0);
         let v = b" \t\n1\0";
         let mut s = Cursor::new(v);
         skip_ws(&mut s);
