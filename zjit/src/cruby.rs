@@ -84,10 +84,10 @@
 #![allow(clippy::upper_case_acronyms)]
 
 use std::convert::From;
-use std::ffi::{c_void, CString, CStr};
+use std::ffi::{CStr, CString, c_void};
 use std::fmt::{Debug, Display, Formatter};
 use std::os::raw::{c_char, c_int, c_long, c_uint};
-use std::panic::{catch_unwind, UnwindSafe};
+use std::panic::{UnwindSafe, catch_unwind};
 use std::ptr::NonNull;
 
 use crate::cast::IntoUsize;
@@ -138,7 +138,10 @@ unsafe extern "C" {
     pub fn rb_jit_fix_div_fix(x: VALUE, y: VALUE) -> VALUE;
     pub fn rb_jit_fix_mod_fix(x: VALUE, y: VALUE) -> VALUE;
     pub fn rb_vm_concat_array(ary1: VALUE, ary2st: VALUE) -> VALUE;
-    pub fn rb_vm_get_special_object(reg_ep: *const VALUE, value_type: vm_special_object_type) -> VALUE;
+    pub fn rb_vm_get_special_object(
+        reg_ep: *const VALUE,
+        value_type: vm_special_object_type,
+    ) -> VALUE;
     pub fn rb_vm_concat_to_array(ary1: VALUE, ary2st: VALUE) -> VALUE;
     pub fn rb_vm_defined(
         ec: EcPtr,
@@ -172,39 +175,41 @@ unsafe extern "C" {
         arity: c_int,
     );
     pub fn rb_vm_objtostring(reg_cfp: CfpPtr, recv: VALUE, cd: *const rb_call_data) -> VALUE;
+    pub fn rb_const_defined(klass: VALUE, id: ID) -> c_int;
+    pub fn rb_public_const_defined_from(klass: VALUE, id: ID) -> c_int;
 }
 
 // Renames
-pub use rb_insn_name as raw_insn_name;
-pub use rb_get_ec_cfp as get_ec_cfp;
+pub use rb_FL_TEST_RAW as FL_TEST_RAW;
+pub use rb_METHOD_ENTRY_VISI as METHOD_ENTRY_VISI;
+pub use rb_RB_TYPE_P as RB_TYPE_P;
+pub use rb_RCLASS_ORIGIN as RCLASS_ORIGIN;
 pub use rb_get_cfp_iseq as get_cfp_iseq;
 pub use rb_get_cfp_pc as get_cfp_pc;
 pub use rb_get_cfp_sp as get_cfp_sp;
-pub use rb_get_cme_def_type as get_cme_def_type;
-pub use rb_get_cme_def_body_attr_id as get_cme_def_body_attr_id;
-pub use rb_get_cme_def_body_optimized_type as get_cme_def_body_optimized_type;
-pub use rb_get_cme_def_body_optimized_index as get_cme_def_body_optimized_index;
-pub use rb_get_cme_def_body_cfunc as get_cme_def_body_cfunc;
-pub use rb_get_def_method_serial as get_def_method_serial;
-pub use rb_get_def_original_id as get_def_original_id;
-pub use rb_get_mct_argc as get_mct_argc;
-pub use rb_get_mct_func as get_mct_func;
-pub use rb_get_def_iseq_ptr as get_def_iseq_ptr;
-pub use rb_iseq_encoded_size as get_iseq_encoded_size;
-pub use rb_get_iseq_body_iseq_encoded as get_iseq_body_iseq_encoded;
-pub use rb_get_iseq_body_stack_max as get_iseq_body_stack_max;
-pub use rb_get_iseq_body_type as get_iseq_body_type;
-pub use rb_get_iseq_body_local_table_size as get_iseq_body_local_table_size;
 pub use rb_get_cikw_keyword_len as get_cikw_keyword_len;
 pub use rb_get_cikw_keywords_idx as get_cikw_keywords_idx;
-pub use rb_FL_TEST_RAW as FL_TEST_RAW;
-pub use rb_RB_TYPE_P as RB_TYPE_P;
-pub use rb_vm_ci_argc as vm_ci_argc;
-pub use rb_vm_ci_mid as vm_ci_mid;
-pub use rb_vm_ci_flag as vm_ci_flag;
-pub use rb_METHOD_ENTRY_VISI as METHOD_ENTRY_VISI;
-pub use rb_RCLASS_ORIGIN as RCLASS_ORIGIN;
+pub use rb_get_cme_def_body_attr_id as get_cme_def_body_attr_id;
+pub use rb_get_cme_def_body_cfunc as get_cme_def_body_cfunc;
+pub use rb_get_cme_def_body_optimized_index as get_cme_def_body_optimized_index;
+pub use rb_get_cme_def_body_optimized_type as get_cme_def_body_optimized_type;
+pub use rb_get_cme_def_type as get_cme_def_type;
+pub use rb_get_def_iseq_ptr as get_def_iseq_ptr;
+pub use rb_get_def_method_serial as get_def_method_serial;
+pub use rb_get_def_original_id as get_def_original_id;
+pub use rb_get_ec_cfp as get_ec_cfp;
+pub use rb_get_iseq_body_iseq_encoded as get_iseq_body_iseq_encoded;
+pub use rb_get_iseq_body_local_table_size as get_iseq_body_local_table_size;
+pub use rb_get_iseq_body_stack_max as get_iseq_body_stack_max;
+pub use rb_get_iseq_body_type as get_iseq_body_type;
+pub use rb_get_mct_argc as get_mct_argc;
+pub use rb_get_mct_func as get_mct_func;
+pub use rb_insn_name as raw_insn_name;
+pub use rb_iseq_encoded_size as get_iseq_encoded_size;
 pub use rb_jit_fix_mod_fix as rb_fix_mod_fix;
+pub use rb_vm_ci_argc as vm_ci_argc;
+pub use rb_vm_ci_flag as vm_ci_flag;
+pub use rb_vm_ci_mid as vm_ci_mid;
 
 /// A YARV instruction opcode (`ruby_vminsn_type`), stored as a `u16` since there are only
 /// `VM_INSTRUCTION_SIZE` (~259) instructions. Keeps enums that embed an opcode (e.g.
@@ -216,7 +221,10 @@ const _: () = assert!(VM_INSTRUCTION_SIZE <= u16::MAX as u32);
 
 impl From<ruby_vminsn_type> for VmInsnType {
     fn from(opcode: ruby_vminsn_type) -> Self {
-        assert!(opcode < VM_INSTRUCTION_SIZE, "opcode {opcode} out of range for a YARV instruction");
+        assert!(
+            opcode < VM_INSTRUCTION_SIZE,
+            "opcode {opcode} out of range for a YARV instruction"
+        );
         Self(opcode as u16)
     }
 }
@@ -245,9 +253,7 @@ pub fn insn_name(opcode: usize) -> String {
 }
 
 pub fn insn_len(opcode: usize) -> u32 {
-    unsafe {
-        rb_insn_len(VALUE(opcode)).try_into().unwrap()
-    }
+    unsafe { rb_insn_len(VALUE(opcode)).try_into().unwrap() }
 }
 
 /// We avoid using bindgen for `rb_iseq_constant_body` since its definition changes depending
@@ -283,7 +289,7 @@ pub type YarvInsnIdx = usize;
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct ShapeId(pub u32);
 
- #[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
 pub enum ShapeLayout {
     RObject,
     RClass,
@@ -546,11 +552,14 @@ impl VALUE {
     }
 
     pub fn instance_can_have_singleton_class(self) -> bool {
-        if self == unsafe { rb_cInteger } || self == unsafe { rb_cFloat } ||
-            self == unsafe { rb_cSymbol } || self == unsafe { rb_cNilClass } ||
-            self == unsafe { rb_cTrueClass } || self == unsafe { rb_cFalseClass } {
-
-            return false
+        if self == unsafe { rb_cInteger }
+            || self == unsafe { rb_cFloat }
+            || self == unsafe { rb_cSymbol }
+            || self == unsafe { rb_cNilClass }
+            || self == unsafe { rb_cTrueClass }
+            || self == unsafe { rb_cFalseClass }
+        {
+            return false;
         }
         true
     }
@@ -670,14 +679,14 @@ impl VALUE {
         }
     }
 
-    pub fn layout(self) ->  ShapeLayout {
+    pub fn layout(self) -> ShapeLayout {
         self.shape_id_of().layout()
     }
 
     pub fn struct_embedded_p(self) -> bool {
         unsafe {
-            RB_TYPE_P(self, RUBY_T_STRUCT) &&
-            FL_TEST_RAW(self, VALUE(RSTRUCT_EMBED_LEN_MASK)) != VALUE(0)
+            RB_TYPE_P(self, RUBY_T_STRUCT)
+                && FL_TEST_RAW(self, VALUE(RSTRUCT_EMBED_LEN_MASK)) != VALUE(0)
         }
     }
 
@@ -732,11 +741,7 @@ impl VALUE {
     pub fn as_optional_ptr<T>(self) -> Option<*const T> {
         let ptr: *const T = self.as_ptr();
 
-        if ptr.is_null() {
-            None
-        } else {
-            Some(ptr)
-        }
+        if ptr.is_null() { None } else { Some(ptr) }
     }
 
     /// Assert that `self` is an iseq in debug builds
@@ -752,13 +757,17 @@ impl VALUE {
     }
 
     pub fn cme_p(self) -> bool {
-        if self == VALUE(0) { return false; }
+        if self == VALUE(0) {
+            return false;
+        }
         unsafe { rb_IMEMO_TYPE_P(self, imemo_ment) == 1 }
     }
 
     /// Return true if `self` is an ISEQ (`imemo_iseq`)
     pub fn iseq_p(self) -> bool {
-        if self == VALUE(0) { return false; }
+        if self == VALUE(0) {
+            return false;
+        }
         unsafe { rb_IMEMO_TYPE_P(self, imemo_iseq) == 1 }
     }
 
@@ -826,7 +835,11 @@ impl OuterVariables {
             return None;
         }
         // Truthy means write
-        Some(if write.test() { OuterLocalAccess::ReadWrite } else { OuterLocalAccess::ReadOnly })
+        Some(if write.test() {
+            OuterLocalAccess::ReadWrite
+        } else {
+            OuterLocalAccess::ReadOnly
+        })
     }
 }
 
@@ -839,12 +852,18 @@ pub trait IseqAccess {
 impl IseqAccess for IseqPtr {
     /// Get a description of the ISEQ's signature. Analogous to `ISEQ_BODY(iseq)->param` in C.
     unsafe fn params<'a>(self) -> &'a IseqParameters {
-        unsafe { &*((*self).body.byte_add(ISEQ_BODY_OFFSET_PARAM.to_usize()) as *const IseqParameters) }
+        unsafe {
+            &*((*self).body.byte_add(ISEQ_BODY_OFFSET_PARAM.to_usize()) as *const IseqParameters)
+        }
     }
 
     /// The iseq's `outer_variables` table. See [`OuterVariables`].
     unsafe fn outer_variables(self) -> OuterVariables {
-        let field = unsafe { (*self).body.byte_add(ISEQ_BODY_OFFSET_OUTER_VARIABLES.to_usize()) } as *const *mut rb_id_table;
+        let field = unsafe {
+            (*self)
+                .body
+                .byte_add(ISEQ_BODY_OFFSET_OUTER_VARIABLES.to_usize())
+        } as *const *mut rb_id_table;
         OuterVariables(NonNull::new(unsafe { *field }))
     }
 }
@@ -856,7 +875,10 @@ impl IseqParameters {
     /// when the table is stored as `NULL` and implicit.
     /// The table stores the indexes as raw VALUE integers; they are not tagged as fixnum.
     pub fn opt_table_slice(&self) -> &[VALUE] {
-        let opt_num: usize = self.opt_num.try_into().expect("ISeq opt_num should always >=0");
+        let opt_num: usize = self
+            .opt_num
+            .try_into()
+            .expect("ISeq opt_num should always >=0");
         if opt_num > 0 {
             // The table has size=opt_num+1 because opt_table[opt_num] is valid (all optionals filled)
             unsafe { std::slice::from_raw_parts(self.opt_table, opt_num + 1) }
@@ -994,7 +1016,7 @@ pub fn cstr_to_rust_string(c_char_ptr: *const c_char) -> Option<String> {
 
     match c_str.to_str() {
         Ok(rust_str) => Some(rust_str.to_string()),
-        Err(_) => None
+        Err(_) => None,
     }
 }
 
@@ -1079,22 +1101,24 @@ pub struct SourceLocation {
 
 impl Debug for SourceLocation {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}:{}", self.file.to_string_lossy(), self.line))
+        f.write_fmt(format_args!(
+            "{}:{}",
+            self.file.to_string_lossy(),
+            self.line
+        ))
     }
 }
 
 /// Make a [SourceLocation] at the current spot.
 macro_rules! src_loc {
-    () => {
-        {
-            // Nul-terminated string with static lifetime, make a CStr out of it safely.
-            let file: &'static str = concat!(file!(), '\0');
-            $crate::cruby::SourceLocation {
-                file: unsafe { std::ffi::CStr::from_ptr(file.as_ptr().cast()) },
-                line: line!().try_into().unwrap(),
-            }
+    () => {{
+        // Nul-terminated string with static lifetime, make a CStr out of it safely.
+        let file: &'static str = concat!(file!(), '\0');
+        $crate::cruby::SourceLocation {
+            file: unsafe { std::ffi::CStr::from_ptr(file.as_ptr().cast()) },
+            line: line!().try_into().unwrap(),
         }
-    };
+    }};
 }
 
 pub(crate) use src_loc;
@@ -1160,8 +1184,8 @@ where
 /// we can revisit this later. For now, this helps to get us good bug reports.
 pub fn rb_bug_panic_hook() {
     use std::env;
+    use std::io::{Write, stderr};
     use std::panic;
-    use std::io::{stderr, Write};
 
     // Probably the default hook. We do this very early during process boot.
     let previous_hook = panic::take_hook();
@@ -1174,7 +1198,9 @@ pub fn rb_bug_panic_hook() {
         // You should set RUST_BACKTRACE=1 for dev builds.
         let release_build = cfg!(not(debug_assertions));
         if release_build {
-            unsafe { env::set_var("RUST_BACKTRACE", "1"); }
+            unsafe {
+                env::set_var("RUST_BACKTRACE", "1");
+            }
         }
         previous_hook(panic_info);
 
@@ -1184,9 +1210,17 @@ pub fn rb_bug_panic_hook() {
             // Abort with rb_bug(). It has a length limit on the message.
             let panic_message = &format!("{panic_info}")[..];
             let len = std::cmp::min(0x100, panic_message.len()) as c_int;
-            unsafe { rb_bug(b"ZJIT: %*s\0".as_ref().as_ptr() as *const c_char, len, panic_message.as_ptr()); }
+            unsafe {
+                rb_bug(
+                    b"ZJIT: %*s\0".as_ref().as_ptr() as *const c_char,
+                    len,
+                    panic_message.as_ptr(),
+                );
+            }
         } else {
-            eprintln!("note: run with `ZJIT_RB_BUG=1` environment variable to display a Ruby backtrace");
+            eprintln!(
+                "note: run with `ZJIT_RB_BUG=1` environment variable to display a Ruby backtrace"
+            );
         }
     }));
 }
@@ -1227,9 +1261,9 @@ mod manual_defs {
     pub const VM_CALL_KW_SPLAT: u32 = 1 << VM_CALL_KW_SPLAT_bit;
     pub const VM_CALL_KW_SPLAT_MUT: u32 = 1 << VM_CALL_KW_SPLAT_MUT_bit;
     pub const VM_CALL_TAILCALL: u32 = 1 << VM_CALL_TAILCALL_bit;
-    pub const VM_CALL_SUPER : u32 = 1 << VM_CALL_SUPER_bit;
-    pub const VM_CALL_ZSUPER : u32 = 1 << VM_CALL_ZSUPER_bit;
-    pub const VM_CALL_OPT_SEND : u32 = 1 << VM_CALL_OPT_SEND_bit;
+    pub const VM_CALL_SUPER: u32 = 1 << VM_CALL_SUPER_bit;
+    pub const VM_CALL_ZSUPER: u32 = 1 << VM_CALL_ZSUPER_bit;
+    pub const VM_CALL_OPT_SEND: u32 = 1 << VM_CALL_OPT_SEND_bit;
 
     // We'll need to encode a lot of Ruby struct/field offsets as constants unless we want to
     // redeclare all the Ruby C structs and write our own offsetof macro. For now, we use constants.
@@ -1269,7 +1303,13 @@ pub use manual_defs::*;
 pub mod test_utils {
     use std::{ptr::null, sync::Once};
 
-    use crate::{options::{DEFAULT_CALL_THRESHOLD, rb_zjit_call_threshold, rb_zjit_prepare_options, set_call_threshold}, state::{ZJITState, rb_zjit_compiling_p, rb_zjit_entry}};
+    use crate::{
+        options::{
+            DEFAULT_CALL_THRESHOLD, rb_zjit_call_threshold, rb_zjit_prepare_options,
+            set_call_threshold,
+        },
+        state::{ZJITState, rb_zjit_compiling_p, rb_zjit_entry},
+    };
 
     use super::*;
 
@@ -1304,9 +1344,16 @@ pub mod test_utils {
             // We drive ZJIT manually in tests, so disable heuristic compilation triggers.
             // (Also, pass this in case we offer a -DFORCE_ENABLE_ZJIT option which turns
             // ZJIT on by default.)
-            let cmdline = [c"--disable-all".as_ptr().cast_mut(), c"-e0".as_ptr().cast_mut()];
+            let cmdline = [
+                c"--disable-all".as_ptr().cast_mut(),
+                c"-e0".as_ptr().cast_mut(),
+            ];
             let options_ret = ruby_options(2, cmdline.as_ptr().cast_mut());
-            assert_ne!(0, ruby_executable_node(options_ret, std::ptr::null_mut()), "command-line parsing failed");
+            assert_ne!(
+                0,
+                ruby_executable_node(options_ret, std::ptr::null_mut()),
+                "command-line parsing failed"
+            );
 
             crate::cruby::ids::init(); // for ID! usages in tests
         }
@@ -1354,9 +1401,17 @@ pub mod test_utils {
         let data: *mut dyn FnMut() = &raw mut func_wrapper;
         let data: *const *mut dyn FnMut() = &raw const data;
         let mut state: c_int = 0;
-        unsafe { super::rb_protect(Some(callback_wrapper), VALUE(data.expose_provenance()), &mut state) };
+        unsafe {
+            super::rb_protect(
+                Some(callback_wrapper),
+                VALUE(data.expose_provenance()),
+                &mut state,
+            )
+        };
         if state != 0 {
-            unsafe { rb_zjit_print_exception(); }
+            unsafe {
+                rb_zjit_print_exception();
+            }
             assert_eq!(0, state, "Exceptional unwind in callback. Ruby exception?");
         }
 
@@ -1388,7 +1443,8 @@ pub mod test_utils {
     pub fn eval_with_options(program: &str, options_expr: &str) -> VALUE {
         with_rubyvm(|| {
             let options = eval(options_expr);
-            let wrapped_iseq = compile_to_wrapped_iseq_with_options(&unindent(program, false), options);
+            let wrapped_iseq =
+                compile_to_wrapped_iseq_with_options(&unindent(program, false), options);
             unsafe { rb_funcallv(wrapped_iseq, ID!(eval), 0, null()) }
         })
     }
@@ -1420,7 +1476,11 @@ pub mod test_utils {
         ZJITState::enable_assert_compiles();
         let result = inspect(program);
         ZJITState::disable_assert_compiles();
-        assert_eq!(exits_before, crate::stats::total_exit_count(), "Program side-exited");
+        assert_eq!(
+            exits_before,
+            crate::stats::total_exit_count(),
+            "Program side-exited"
+        );
         result
     }
 
@@ -1443,21 +1503,29 @@ pub mod test_utils {
     /// Remove the minimum indent from every line, skipping the first and last lines if `trim_lines`.
     pub fn unindent(string: &str, trim_lines: bool) -> String {
         // Break up a string into multiple lines
-        let mut lines: Vec<String> = string.split_inclusive("\n").map(|s| s.to_string()).collect();
-        if trim_lines { // raw string literals come with extra lines
+        let mut lines: Vec<String> = string
+            .split_inclusive("\n")
+            .map(|s| s.to_string())
+            .collect();
+        if trim_lines {
+            // raw string literals come with extra lines
             lines.remove(0);
             lines.remove(lines.len() - 1);
         }
 
         // Count the minimum number of spaces
-        let spaces = lines.iter().filter_map(|line| {
-            for (i, ch) in line.as_bytes().iter().enumerate() {
-                if *ch != b' ' {
-                    return Some(i);
+        let spaces = lines
+            .iter()
+            .filter_map(|line| {
+                for (i, ch) in line.as_bytes().iter().enumerate() {
+                    if *ch != b' ' {
+                        return Some(i);
+                    }
                 }
-            }
-            None
-        }).min().unwrap_or(0);
+                None
+            })
+            .min()
+            .unwrap_or(0);
 
         // Join lines, removing spaces
         let mut unindented: Vec<u8> = vec![];
@@ -1480,7 +1548,13 @@ pub mod test_utils {
         let bytes = program.as_bytes().as_ptr() as *const c_char;
         unsafe {
             let program_str = rb_utf8_str_new(bytes, program.len().try_into().unwrap());
-            let args = [program_str, Qnil, Qnil, VALUE(1_usize.wrapping_shl(1) | 1), options];
+            let args = [
+                program_str,
+                Qnil,
+                Qnil,
+                VALUE(1_usize.wrapping_shl(1) | 1),
+                options,
+            ];
             rb_funcallv(rb_cISeq, ID!(compile), args.len() as c_int, args.as_ptr())
         }
     }
@@ -1503,9 +1577,18 @@ pub mod test_utils {
         assert_eq!(VALUE::fixnum_from_usize(0), VALUE(1));
         assert_eq!(VALUE::fixnum_from_isize(-1), VALUE(0xffffffffffffffff));
         assert_eq!(VALUE::fixnum_from_isize(-2), VALUE(0xfffffffffffffffd));
-        assert_eq!(VALUE::fixnum_from_usize(RUBY_FIXNUM_MAX as usize), VALUE(0x7fffffffffffffff));
-        assert_eq!(VALUE::fixnum_from_isize(RUBY_FIXNUM_MAX), VALUE(0x7fffffffffffffff));
-        assert_eq!(VALUE::fixnum_from_isize(RUBY_FIXNUM_MIN), VALUE(0x8000000000000001));
+        assert_eq!(
+            VALUE::fixnum_from_usize(RUBY_FIXNUM_MAX as usize),
+            VALUE(0x7fffffffffffffff)
+        );
+        assert_eq!(
+            VALUE::fixnum_from_isize(RUBY_FIXNUM_MAX),
+            VALUE(0x7fffffffffffffff)
+        );
+        assert_eq!(
+            VALUE::fixnum_from_isize(RUBY_FIXNUM_MIN),
+            VALUE(0x8000000000000001)
+        );
     }
 
     #[test]
@@ -1514,40 +1597,58 @@ pub mod test_utils {
         assert_eq!(VALUE::fixnum_from_usize(0).as_fixnum(), 0);
         assert_eq!(VALUE::fixnum_from_isize(-1).as_fixnum(), -1);
         assert_eq!(VALUE::fixnum_from_isize(-2).as_fixnum(), -2);
-        assert_eq!(VALUE::fixnum_from_usize(RUBY_FIXNUM_MAX as usize).as_fixnum(), RUBY_FIXNUM_MAX.try_into().unwrap());
-        assert_eq!(VALUE::fixnum_from_isize(RUBY_FIXNUM_MAX).as_fixnum(), RUBY_FIXNUM_MAX.try_into().unwrap());
-        assert_eq!(VALUE::fixnum_from_isize(RUBY_FIXNUM_MIN).as_fixnum(), RUBY_FIXNUM_MIN.try_into().unwrap());
+        assert_eq!(
+            VALUE::fixnum_from_usize(RUBY_FIXNUM_MAX as usize).as_fixnum(),
+            RUBY_FIXNUM_MAX.try_into().unwrap()
+        );
+        assert_eq!(
+            VALUE::fixnum_from_isize(RUBY_FIXNUM_MAX).as_fixnum(),
+            RUBY_FIXNUM_MAX.try_into().unwrap()
+        );
+        assert_eq!(
+            VALUE::fixnum_from_isize(RUBY_FIXNUM_MIN).as_fixnum(),
+            RUBY_FIXNUM_MIN.try_into().unwrap()
+        );
     }
 
     #[test]
     #[should_panic]
     fn value_from_fixnum_too_big_usize() {
-        assert_eq!(VALUE::fixnum_from_usize((RUBY_FIXNUM_MAX+1) as usize), VALUE(1));
+        assert_eq!(
+            VALUE::fixnum_from_usize((RUBY_FIXNUM_MAX + 1) as usize),
+            VALUE(1)
+        );
     }
 
     #[test]
     #[should_panic]
     fn value_from_fixnum_too_big_isize() {
-        assert_eq!(VALUE::fixnum_from_isize(RUBY_FIXNUM_MAX+1), VALUE(1));
+        assert_eq!(VALUE::fixnum_from_isize(RUBY_FIXNUM_MAX + 1), VALUE(1));
     }
 
     #[test]
     #[should_panic]
     fn value_from_fixnum_too_small_usize() {
-        assert_eq!(VALUE::fixnum_from_usize((RUBY_FIXNUM_MIN-1) as usize), VALUE(1));
+        assert_eq!(
+            VALUE::fixnum_from_usize((RUBY_FIXNUM_MIN - 1) as usize),
+            VALUE(1)
+        );
     }
 
     #[test]
     #[should_panic]
     fn value_from_fixnum_too_small_isize() {
-        assert_eq!(VALUE::fixnum_from_isize(RUBY_FIXNUM_MIN-1), VALUE(1));
+        assert_eq!(VALUE::fixnum_from_isize(RUBY_FIXNUM_MIN - 1), VALUE(1));
     }
 
     #[test]
     fn value_fmt_debug() {
         assert_eq!("VALUE(0xcafe)", format!("{:?}", VALUE(0xcafe)));
         let alternate = format!("{:#?}", eval("::Hash"));
-        assert!(alternate.contains("Hash"), "'Hash' not substring of '{alternate}'");
+        assert!(
+            alternate.contains("Hash"),
+            "'Hash' not substring of '{alternate}'"
+        );
     }
 }
 #[cfg(test)]
@@ -1561,9 +1662,9 @@ pub fn get_class_name(class: VALUE) -> String {
         Some(class)
     } else {
         None
-    }.and_then(|class| unsafe {
-        cstr_to_rust_string(rb_class2name(class))
-    }).unwrap_or_else(|| "Unknown".to_string());
+    }
+    .and_then(|class| unsafe { cstr_to_rust_string(rb_class2name(class)) })
+    .unwrap_or_else(|| "Unknown".to_string());
 
     // For anonymous classes, include the superclass name for context.
     // Use rb_class_real to resolve through iclasses (internal include/prepend
@@ -1584,7 +1685,10 @@ pub fn get_class_name(class: VALUE) -> String {
 // rb_mod_name returns Qnil.
 pub fn get_module_name(module: VALUE) -> Option<String> {
     // type checks for rb_mod_name()
-    assert!(unsafe { RB_TYPE_P(module, RUBY_T_MODULE) || RB_TYPE_P(module, RUBY_T_CLASS) }, "Expected class or module");
+    assert!(
+        unsafe { RB_TYPE_P(module, RUBY_T_MODULE) || RB_TYPE_P(module, RUBY_T_CLASS) },
+        "Expected class or module"
+    );
     let name = unsafe { rb_mod_name(module) };
     if name == Qnil {
         None
@@ -1592,7 +1696,6 @@ pub fn get_module_name(module: VALUE) -> Option<String> {
         Some(ruby_str_to_rust_string(name))
     }
 }
-
 
 #[cfg(test)]
 mod class_name_tests {
@@ -1625,7 +1728,10 @@ mod class_name_tests {
     fn anonymous_class_nested_superclass() {
         with_rubyvm(|| {
             let name = get_class_name(eval("Class.new(Class.new(String))"));
-            assert!(name.starts_with("#<Class(#<Class(String):0x"), "got: {name}");
+            assert!(
+                name.starts_with("#<Class(#<Class(String):0x"),
+                "got: {name}"
+            );
         });
     }
 
@@ -1636,28 +1742,41 @@ mod class_name_tests {
             assert!(name.starts_with("#<Module:0x"), "got: {name}");
         });
     }
-
 }
 
 pub fn class_has_leaf_allocator(class: VALUE) -> bool {
     // We need to check if the class is initialized and not a singleton before
     // trying to read the allocator, otherwise it will raise.
     // Because of this they should be considered non-leaf anyways.
-    if !unsafe { rb_zjit_class_initialized_p(class) } { return false; }
-    if unsafe { rb_zjit_singleton_class_p(class) } { return false; }
+    if !unsafe { rb_zjit_class_initialized_p(class) } {
+        return false;
+    }
+    if unsafe { rb_zjit_singleton_class_p(class) } {
+        return false;
+    }
 
     // empty_hash_alloc
-    if class == unsafe { rb_cHash } { return true; }
+    if class == unsafe { rb_cHash } {
+        return true;
+    }
     // empty_ary_alloc
-    if class == unsafe { rb_cArray } { return true; }
+    if class == unsafe { rb_cArray } {
+        return true;
+    }
     // empty_str_alloc
-    if class == unsafe { rb_cString } { return true; }
+    if class == unsafe { rb_cString } {
+        return true;
+    }
     // rb_reg_s_alloc
-    if class == unsafe { rb_cRegexp } { return true; }
+    if class == unsafe { rb_cRegexp } {
+        return true;
+    }
     // struct_alloc, used by every Struct subclass, is leaf: it reads the hidden __members__ ivar
     // and allocates, without calling into Ruby. It does modify the class's __members__ ivar once
     // to cache the members, but without a Ractor check.
-    if unsafe { rb_zjit_class_has_struct_allocator(class) } { return true; }
+    if unsafe { rb_zjit_class_has_struct_allocator(class) } {
+        return true;
+    }
     // rb_class_allocate_instance
     unsafe { rb_zjit_class_has_default_allocator(class) }
 }
@@ -1679,18 +1798,30 @@ pub fn class_has_leaf_allocator(class: VALUE) -> bool {
 /// Returns `false` conservatively for anything that doesn't clearly qualify
 /// (modules, singleton classes, custom allocators, non-`def` ISEQs, etc.).
 pub fn iseq_self_is_heap_object(iseq: IseqPtr, owner: VALUE) -> bool {
-    if unsafe { rb_get_iseq_body_type(iseq) } != ISEQ_TYPE_METHOD { return false; }
-    if !unsafe { RB_TYPE_P(owner, RUBY_T_CLASS) } { return false; }
+    if unsafe { rb_get_iseq_body_type(iseq) } != ISEQ_TYPE_METHOD {
+        return false;
+    }
+    if !unsafe { RB_TYPE_P(owner, RUBY_T_CLASS) } {
+        return false;
+    }
     // Check initialized + non-singleton before reading the allocator (reading it otherwise
     // aborts).
     // TODO(max): Determine if we can loosen this to allow methods defined on singleton classes.
-    if !unsafe { rb_zjit_class_initialized_p(owner) } { return false; }
-    if unsafe { rb_zjit_singleton_class_p(owner) } { return false; }
-    if !unsafe { rb_zjit_class_has_default_allocator(owner) } { return false; }
+    if !unsafe { rb_zjit_class_initialized_p(owner) } {
+        return false;
+    }
+    if unsafe { rb_zjit_singleton_class_p(owner) } {
+        return false;
+    }
+    if !unsafe { rb_zjit_class_has_default_allocator(owner) } {
+        return false;
+    }
     // Exclude Object/BasicObject/Numeric and friends: classes that use the default
     // allocator but sit above an immediate class in the ancestry chain. They are
     // all ancestors of Integer, so this single check covers every immediate type.
-    if unsafe { rb_obj_is_kind_of(VALUE::fixnum_from_usize(0), owner) }.test() { return false; }
+    if unsafe { rb_obj_is_kind_of(VALUE::fixnum_from_usize(0), owner) }.test() {
+        return false;
+    }
     true
 }
 
@@ -1768,7 +1899,7 @@ pub(crate) mod ids {
             let id = $crate::cruby::ids::$id_name.load(std::sync::atomic::Ordering::Relaxed);
             debug_assert_ne!(0, id, "ids module should be initialized");
             $crate::cruby::ID(id)
-        }}
+        }};
     }
     pub(crate) use ID;
 }

@@ -733,6 +733,7 @@ defined
 (VALUE v)
 (VALUE val)
 // attr bool leaf = leafness_of_defined(op_type);
+// attr bool zjit_profile = true;
 {
     val = Qnil;
     if (vm_defined(ec, GET_CFP(), op_type, obj, v)) {

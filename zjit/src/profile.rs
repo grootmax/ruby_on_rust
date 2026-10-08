@@ -3,11 +3,15 @@
 // We use the YARV bytecode constants which have a CRuby-style name
 #![allow(non_upper_case_globals)]
 
-use std::collections::HashMap;
-use crate::{cruby::*, payload::get_or_create_iseq_payload, options::{get_option, NumProfiles}};
 use crate::distribution::{Distribution, DistributionSummary};
 use crate::stats::Counter::profile_time_ns;
 use crate::stats::with_time_stat;
+use crate::{
+    cruby::*,
+    options::{NumProfiles, get_option},
+    payload::get_or_create_iseq_payload,
+};
+use std::collections::HashMap;
 
 /// Ephemeral state for profiling runtime information
 struct Profiler {
@@ -23,7 +27,9 @@ impl Profiler {
         Profiler {
             cfp,
             iseq,
-            insn_idx: unsafe { get_cfp_pc(cfp).offset_from(get_iseq_body_iseq_encoded(iseq)) as usize },
+            insn_idx: unsafe {
+                get_cfp_pc(cfp).offset_from(get_iseq_body_iseq_encoded(iseq)) as usize
+            },
         }
     }
 
@@ -54,7 +60,9 @@ impl Profiler {
 #[unsafe(no_mangle)]
 pub extern "C" fn rb_zjit_profile_insn(bare_opcode: u32, ec: EcPtr) {
     with_vm_lock(src_loc!(), || {
-        with_time_stat(profile_time_ns, || profile_insn(bare_opcode as ruby_vminsn_type, ec));
+        with_time_stat(profile_time_ns, || {
+            profile_insn(bare_opcode as ruby_vminsn_type, ec)
+        });
     });
 }
 
@@ -66,34 +74,35 @@ fn profile_insn_sample(
 ) -> bool {
     match bare_opcode {
         YARVINSN_opt_nil_p => profile_operands(profiler, profile, 1),
-        YARVINSN_opt_plus  => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_plus => profile_operands(profiler, profile, 2),
         YARVINSN_opt_minus => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_mult  => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_div   => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_mod   => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_eq    => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_neq   => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_lt    => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_le    => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_gt    => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_ge    => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_and   => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_or    => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_mult => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_div => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_mod => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_eq => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_neq => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_lt => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_le => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_gt => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_ge => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_and => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_or => profile_operands(profiler, profile, 2),
         YARVINSN_opt_empty_p => profile_operands(profiler, profile, 1),
-        YARVINSN_opt_aref  => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_ltlt  => profile_operands(profiler, profile, 2),
-        YARVINSN_opt_aset  => profile_operands(profiler, profile, 3),
-        YARVINSN_opt_not   => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_aref => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_ltlt => profile_operands(profiler, profile, 2),
+        YARVINSN_opt_aset => profile_operands(profiler, profile, 3),
+        YARVINSN_opt_not => profile_operands(profiler, profile, 1),
         YARVINSN_getinstancevariable => profile_self(profiler, profile),
         YARVINSN_setinstancevariable => profile_self(profiler, profile),
-        YARVINSN_definedivar   => profile_self(profiler, profile),
-        YARVINSN_opt_regexpmatch2    => profile_operands(profiler, profile, 2),
-        YARVINSN_objtostring   => profile_operands(profiler, profile, 1),
-        YARVINSN_opt_length    => profile_operands(profiler, profile, 1),
-        YARVINSN_opt_size      => profile_operands(profiler, profile, 1),
-        YARVINSN_opt_succ      => profile_operands(profiler, profile, 1),
-        YARVINSN_invokeblock   => profile_block_handler(profiler, profile),
-        YARVINSN_invokesuper   => profile_invokesuper(profiler, profile),
+        YARVINSN_definedivar => profile_self(profiler, profile),
+        YARVINSN_defined => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_regexpmatch2 => profile_operands(profiler, profile, 2),
+        YARVINSN_objtostring => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_length => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_size => profile_operands(profiler, profile, 1),
+        YARVINSN_opt_succ => profile_operands(profiler, profile, 1),
+        YARVINSN_invokeblock => profile_block_handler(profiler, profile),
+        YARVINSN_invokesuper => profile_invokesuper(profiler, profile),
         YARVINSN_opt_send_without_block | YARVINSN_send => {
             let cd: *const rb_call_data = profiler.insn_opnd(0).as_ptr();
             let argc = num_arguments_on_stack(cd);
@@ -118,7 +127,9 @@ fn profile_insn(bare_opcode: ruby_vminsn_type, ec: EcPtr) {
     let entry = profile.entry_mut(profiler.insn_idx);
     entry.profiles_remaining = entry.profiles_remaining.saturating_sub(1);
     if entry.profiles_remaining == 0 {
-        unsafe { rb_zjit_iseq_insn_set(profiler.iseq, profiler.insn_idx as u32, bare_opcode); }
+        unsafe {
+            rb_zjit_iseq_insn_set(profiler.iseq, profiler.insn_idx as u32, bare_opcode);
+        }
     }
 }
 
@@ -154,7 +165,8 @@ pub type SplatLength = u32;
 /// executions as the operand type profile.
 pub type SplatLengthDistribution = Distribution<Option<SplatLength>, DISTRIBUTION_SIZE>;
 
-pub type SplatLengthDistributionSummary = DistributionSummary<Option<SplatLength>, DISTRIBUTION_SIZE>;
+pub type SplatLengthDistributionSummary =
+    DistributionSummary<Option<SplatLength>, DISTRIBUTION_SIZE>;
 
 /// Profile the Type of top-`n` stack operands
 fn profile_operands(profiler: &mut Profiler, profile: &mut IseqProfile, n: usize) {
@@ -175,7 +187,11 @@ fn profile_operands(profiler: &mut Profiler, profile: &mut IseqProfile, n: usize
     }
 }
 
-fn profile_splat_length(profiler: &mut Profiler, profile: &mut IseqProfile, ci: *const rb_callinfo) {
+fn profile_splat_length(
+    profiler: &mut Profiler,
+    profile: &mut IseqProfile,
+    ci: *const rb_callinfo,
+) {
     let flags = unsafe { rb_vm_ci_flag(ci) };
     // Only call sites with VM_CALL_ARGS_SPLAT have a splat array on the stack.
     if flags & VM_CALL_ARGS_SPLAT == 0 {
@@ -183,7 +199,11 @@ fn profile_splat_length(profiler: &mut Profiler, profile: &mut IseqProfile, ci: 
     }
 
     let kwarg = unsafe { rb_vm_ci_kwarg(ci) };
-    let caller_kw_count = if kwarg.is_null() { 0 } else { (unsafe { get_cikw_keyword_len(kwarg) }) as usize };
+    let caller_kw_count = if kwarg.is_null() {
+        0
+    } else {
+        (unsafe { get_cikw_keyword_len(kwarg) }) as usize
+    };
     // Starting at the top of the stack, skip the block argument, keyword-splat
     // hash, and explicit keyword values to reach the splat array.
     let splat_pos = usize::from(flags & VM_CALL_ARGS_BLOCKARG != 0)
@@ -195,8 +215,11 @@ fn profile_splat_length(profiler: &mut Profiler, profile: &mut IseqProfile, ci: 
     } else {
         None
     };
-    profile.splat_lengths.entry(profiler.insn_idx)
-        .or_insert_with(SplatLengthDistribution::new).observe(length);
+    profile
+        .splat_lengths
+        .entry(profiler.insn_idx)
+        .or_insert_with(SplatLengthDistribution::new)
+        .observe(length);
 }
 
 fn profile_self(profiler: &mut Profiler, profile: &mut IseqProfile) {
@@ -224,10 +247,13 @@ fn profile_block_handler(profiler: &mut Profiler, profile: &mut IseqProfile) {
 
 fn profile_invokesuper(profiler: &mut Profiler, profile: &mut IseqProfile) {
     let cme = unsafe { rb_vm_frame_method_entry(profiler.cfp) };
-    let cme_value = VALUE(cme as usize);  // CME is a T_IMEMO, which is a VALUE
+    let cme_value = VALUE(cme as usize); // CME is a T_IMEMO, which is a VALUE
 
-    profile.super_cme.entry(profiler.insn_idx)
-        .or_insert_with(|| TypeDistribution::new()).observe(ProfiledType::object(cme_value));
+    profile
+        .super_cme
+        .entry(profiler.insn_idx)
+        .or_insert_with(|| TypeDistribution::new())
+        .observe(ProfiledType::object(cme_value));
 
     unsafe { rb_gc_writebarrier(profiler.iseq.into(), cme_value) };
 
@@ -258,16 +284,34 @@ impl Flags {
     /// The profiled block handler is a Proc. The Proc object itself is not retained.
     const IS_PROC_BLOCK_HANDLER: u32 = 1 << 6;
 
-    pub fn none() -> Self { Self(Self::NONE) }
+    pub fn none() -> Self {
+        Self(Self::NONE)
+    }
 
-    pub fn immediate() -> Self { Self(Self::IS_IMMEDIATE) }
-    pub fn is_immediate(self) -> bool { (self.0 & Self::IS_IMMEDIATE) != 0 }
-    pub fn is_embedded(self) -> bool { (self.0 & Self::IS_EMBEDDED) != 0 }
-    pub fn is_t_object(self) -> bool { (self.0 & Self::IS_T_OBJECT) != 0 }
-    pub fn is_struct_embedded(self) -> bool { (self.0 & Self::IS_STRUCT_EMBEDDED) != 0 }
-    pub fn is_object_profiling(self) -> bool { (self.0 & Self::IS_OBJECT_PROFILING) != 0 }
-    pub fn is_ifunc_block_handler(self) -> bool { (self.0 & Self::IS_IFUNC_BLOCK_HANDLER) != 0 }
-    pub fn is_proc_block_handler(self) -> bool { (self.0 & Self::IS_PROC_BLOCK_HANDLER) != 0 }
+    pub fn immediate() -> Self {
+        Self(Self::IS_IMMEDIATE)
+    }
+    pub fn is_immediate(self) -> bool {
+        (self.0 & Self::IS_IMMEDIATE) != 0
+    }
+    pub fn is_embedded(self) -> bool {
+        (self.0 & Self::IS_EMBEDDED) != 0
+    }
+    pub fn is_t_object(self) -> bool {
+        (self.0 & Self::IS_T_OBJECT) != 0
+    }
+    pub fn is_struct_embedded(self) -> bool {
+        (self.0 & Self::IS_STRUCT_EMBEDDED) != 0
+    }
+    pub fn is_object_profiling(self) -> bool {
+        (self.0 & Self::IS_OBJECT_PROFILING) != 0
+    }
+    pub fn is_ifunc_block_handler(self) -> bool {
+        (self.0 & Self::IS_IFUNC_BLOCK_HANDLER) != 0
+    }
+    pub fn is_proc_block_handler(self) -> bool {
+        (self.0 & Self::IS_PROC_BLOCK_HANDLER) != 0
+    }
 }
 
 /// opt_send_without_block/opt_plus/... should store:
@@ -299,7 +343,11 @@ impl ProfiledType {
     fn object(obj: VALUE) -> Self {
         let mut flags = Flags::none();
         flags.0 |= Flags::IS_OBJECT_PROFILING;
-        Self { class: obj, shape: INVALID_SHAPE_ID, flags }
+        Self {
+            class: obj,
+            shape: INVALID_SHAPE_ID,
+            flags,
+        }
     }
 
     /// Profile an untagged block handler. ISEQ, Symbol, and no-block handlers are profiled as the object itself.
@@ -322,9 +370,11 @@ impl ProfiledType {
         // Qundef must never escape the VM internals; rb_class_of(Qundef) is undefined
         debug_assert_ne!(obj, Qundef, "should not profile Qundef");
         if obj.special_const_p() {
-            return Self { class: obj.class_of(),
-                          shape: INVALID_SHAPE_ID,
-                          flags: Flags::immediate() };
+            return Self {
+                class: obj.class_of(),
+                shape: INVALID_SHAPE_ID,
+                flags: Flags::immediate(),
+            };
         }
         let mut flags = Flags::none();
         let shape = obj.shape_id_of();
@@ -337,11 +387,19 @@ impl ProfiledType {
         if unsafe { RB_TYPE_P(obj, RUBY_T_OBJECT) } {
             flags.0 |= Flags::IS_T_OBJECT;
         }
-        Self { class: obj.class_of(), shape, flags }
+        Self {
+            class: obj.class_of(),
+            shape,
+            flags,
+        }
     }
 
     pub fn empty() -> Self {
-        Self { class: VALUE(0), shape: INVALID_SHAPE_ID, flags: Flags::none() }
+        Self {
+            class: VALUE(0),
+            shape: INVALID_SHAPE_ID,
+            flags: Flags::none(),
+        }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -385,7 +443,7 @@ impl ProfiledType {
         }
 
         let string = unsafe { rb_cString };
-        if self.class == string{
+        if self.class == string {
             return true;
         }
 
@@ -452,11 +510,14 @@ impl IseqProfile {
         match self.entries.binary_search_by_key(&idx, |e| e.insn_idx) {
             Ok(i) => &mut self.entries[i],
             Err(i) => {
-                self.entries.insert(i, ProfileEntry {
-                    insn_idx: idx,
-                    opnd_types: Vec::new(),
-                    profiles_remaining: get_option!(num_profiles),
-                });
+                self.entries.insert(
+                    i,
+                    ProfileEntry {
+                        insn_idx: idx,
+                        opnd_types: Vec::new(),
+                        profiles_remaining: get_option!(num_profiles),
+                    },
+                );
                 &mut self.entries[i]
             }
         }
@@ -465,22 +526,35 @@ impl IseqProfile {
     /// Get a profile entry for the given instruction index (read-only).
     fn entry(&self, insn_idx: YarvInsnIdx) -> Option<&ProfileEntry> {
         let idx = insn_idx as u32;
-        self.entries.binary_search_by_key(&idx, |e| e.insn_idx)
-            .ok().map(|i| &self.entries[i])
+        self.entries
+            .binary_search_by_key(&idx, |e| e.insn_idx)
+            .ok()
+            .map(|i| &self.entries[i])
     }
 
     /// Get profiled operand types for a given instruction index
     pub fn get_operand_types(&self, insn_idx: YarvInsnIdx) -> Option<&[TypeDistribution]> {
-        self.entry(insn_idx).map(|e| e.opnd_types.as_slice()).filter(|s| !s.is_empty())
+        self.entry(insn_idx)
+            .map(|e| e.opnd_types.as_slice())
+            .filter(|s| !s.is_empty())
     }
 
-    pub fn get_splat_length_summary(&self, insn_idx: YarvInsnIdx) -> Option<SplatLengthDistributionSummary> {
-        self.splat_lengths.get(&insn_idx)
+    pub fn get_splat_length_summary(
+        &self,
+        insn_idx: YarvInsnIdx,
+    ) -> Option<SplatLengthDistributionSummary> {
+        self.splat_lengths
+            .get(&insn_idx)
             .map(SplatLengthDistributionSummary::new)
     }
 
-    pub fn get_super_method_entry(&self, insn_idx: YarvInsnIdx) -> Option<*const rb_callable_method_entry_t> {
-        let Some(entry) = self.super_cme.get(&insn_idx) else { return None };
+    pub fn get_super_method_entry(
+        &self,
+        insn_idx: YarvInsnIdx,
+    ) -> Option<*const rb_callable_method_entry_t> {
+        let Some(entry) = self.super_cme.get(&insn_idx) else {
+            return None;
+        };
         let summary = TypeDistributionSummary::new(entry);
 
         if summary.is_monomorphic() {
@@ -534,10 +608,14 @@ mod tests {
 
     #[test]
     fn can_profile_block_handler() {
-        with_rubyvm(|| eval("
+        with_rubyvm(|| {
+            eval(
+                "
             def foo = yield
             foo rescue 0
             foo rescue 0
-        "));
+        ",
+            )
+        });
     }
 }
