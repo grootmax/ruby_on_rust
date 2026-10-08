@@ -1267,7 +1267,7 @@ pub enum Insn {
         cme: *const rb_callable_method_entry_t,
         recv: InsnId,
         num_args: u16,
-        blockiseq: Option<IseqPtr>,
+        block: Option<BlockHandler>,
         state: InsnId,
     },
 
@@ -1623,8 +1623,11 @@ macro_rules! for_each_operand_impl {
                 $visit_many!(args);
                 $visit_one!(*state);
             }
-            Insn::PushInlineFrame { recv, state, .. } => {
+            Insn::PushInlineFrame { recv, block, state, .. } => {
                 $visit_one!(*recv);
+                if let Some(BlockHandler::BlockArgProc(id)) = block {
+                    $visit_one!(*id);
+                }
                 $visit_one!(*state);
             }
             // SendDirect/CCallWithFrame/CCallVariadic carry their operands behind a Box,
@@ -5761,6 +5764,52 @@ impl Function {
         crate::stats::trace_compile_phase("infer_types", || self.infer_types());
     }
 
+    fn unwrap_proc_value_iseq(procv: VALUE) -> Option<IseqPtr> {
+        if procv.0 == 0 || procv.special_const_p() {
+            return None;
+        }
+        unsafe {
+            if !rb_obj_is_proc(procv).test() {
+                return None;
+            }
+            let proc_ptr = rb_jit_get_proc_ptr(procv);
+            if proc_ptr.is_null() {
+                return None;
+            }
+            let proc_block = (*proc_ptr).block.as_ref();
+            if proc_block.type_() == block_type_iseq {
+                let captured = proc_block.as_.captured.as_ref();
+                let iseq = captured.code.iseq.as_ref();
+                if iseq.is_null() {
+                    None
+                } else {
+                    Some(*iseq)
+                }
+            } else {
+                None
+            }
+        }
+    }
+
+    fn try_unwrap_proc_iseq(&mut self, proc_id: InsnId) -> Option<IseqPtr> {
+        let mut current = proc_id;
+        let mut depth = 0;
+        while depth < 10 {
+            depth += 1;
+            let resolved = self.resolve(current);
+            match resolved.insn(self) {
+                Insn::GuardType { val, .. } => {
+                    current = *val;
+                }
+                Insn::Const { val: Const::Value(procv) } => {
+                    return Self::unwrap_proc_value_iseq(*procv);
+                }
+                _ => break,
+            }
+        }
+        None
+    }
+
     /// Check whether a callee ISEQ can be inlined.
     fn can_inline(callee_iseq: IseqPtr) -> bool {
         // Inline callees with required, optional, post-required positional, keyword, and
@@ -5892,21 +5941,18 @@ impl Function {
                 };
                 let SendDirectData { recv, cme, iseq, kw_bits, jit_entry_idx, block: call_block, state, .. } = **data;
                 let args_len = data.args.len();
-                // TODO: Inline callees that receive a &proc block handler. The inlined body
-                // only knows a static blockiseq for yield/defined?(yield); it would need to
-                // be taught to dispatch to the runtime Proc instead.
-                if matches!(call_block, Some(BlockHandler::BlockArgProc(_))) {
-                    search_start = send_pos + 1;
-                    continue;
-                }
-                // TODO(max): If we accept BlockArg here, we need to change the folding of Defined
-                // in HIR construction for the defined opcode to check the send flags of the method
-                // being inlined, too.
-                let blockiseq: Option<IseqPtr> = call_block.map(|bh| match bh {
-                    BlockHandler::BlockIseq(bi) => bi,
-                    BlockHandler::BlockArg => unreachable!("BlockArg in SendDirect"),
-                    BlockHandler::BlockArgProc(_) => unreachable!("skipped above"),
-                });
+                let (blockiseq, proc_id) = match call_block {
+                    Some(BlockHandler::BlockIseq(bi)) => (Some(bi), None),
+                    Some(BlockHandler::BlockArgProc(pid)) => {
+                        if let Some(proc_iseq) = self.try_unwrap_proc_iseq(pid) {
+                            (Some(proc_iseq), None)
+                        } else {
+                            (None, Some(pid))
+                        }
+                    }
+                    Some(BlockHandler::BlockArg) => unreachable!("BlockArg in SendDirect"),
+                    None => (None, None),
+                };
 
                 // Apply the cheap optimization heuristics (size, budget, denylist)
                 // before can_inline's more expensive elibility checks. This allows
@@ -5970,6 +6016,7 @@ impl Function {
                     depth: caller_depth + 1,
                     jit_entry_idx: passed_opt_num,
                     blockiseq,
+                    proc_id,
                 };
                 let add_result = match add_iseq_to_hir(self, iseq, mode) {
                     Ok(r) => r,
@@ -6108,8 +6155,16 @@ impl Function {
                 self.push_insn_id(block, post_send_caller);
 
                 // Insert PushLightweightFrame and jump to callee body entry.
+                let inline_block_handler = if let Some(bi) = blockiseq {
+                    Some(BlockHandler::BlockIseq(bi))
+                } else if let Some(pid) = proc_id {
+                    Some(BlockHandler::BlockArgProc(pid))
+                } else {
+                    None
+                };
+
                 self.push_insn(block, Insn::PushInlineFrame {
-                    iseq, cme, recv, num_args: args.len().try_into().unwrap(), blockiseq, state,
+                    iseq, cme, recv, num_args: args.len().try_into().unwrap(), block: inline_block_handler, state,
                 });
                 self.count(block, Counter::inline_iseq_optimized_send_count);
                 self.push_insn(block, Insn::Jump(BranchEdge {
@@ -8996,6 +9051,8 @@ enum AddIseqMode {
         jit_entry_idx: usize,
         /// The literal block the caller passed to this frame, if any.
         blockiseq: Option<IseqPtr>,
+        /// The dynamic Proc block handler passed to this frame, if any.
+        proc_id: Option<InsnId>,
     },
 }
 
@@ -9486,7 +9543,7 @@ fn add_iseq_to_hir(
                             // TODO(max): If we handle non-blockiseq block arguments such as
                             // &:symbol or just &block forwarding, we need to revisit this and
                             // check flags.
-                            let has_block = matches!(mode, AddIseqMode::Inlined { blockiseq: Some(_), .. });
+                            let has_block = matches!(mode, AddIseqMode::Inlined { blockiseq: Some(_), .. } | AddIseqMode::Inlined { proc_id: Some(_), .. });
                             if has_block {
                                 Insn::Const { val: Const::Value(pushval) }
                             } else {

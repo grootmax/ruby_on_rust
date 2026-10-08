@@ -710,8 +710,16 @@ fn gen_insn(cb: &mut CodeBlock, jit: &mut JITState, asm: &mut Assembler, functio
                 *kw_bits, *jit_entry_idx, &function.frame_state(*state), block,
             )
         }
-        Insn::PushInlineFrame { cme, iseq, recv, num_args, blockiseq, state, .. } => {
-            no_output!(gen_push_inline_frame(jit, asm, function, *cme, *iseq, opnd!(recv), *num_args, &function.frame_state(*state), *blockiseq))
+        Insn::PushInlineFrame { cme, iseq, recv, num_args, block, state, .. } => {
+            let lir_block = block.as_ref().map(|bh| match bh {
+                BlockHandler::BlockIseq(blockiseq) => lir::BlockHandler::Iseq(*blockiseq),
+                BlockHandler::BlockArgProc(proc_id) => {
+                    let pid = *proc_id;
+                    lir::BlockHandler::Proc(opnd!(pid))
+                }
+                BlockHandler::BlockArg => unreachable!("BlockArg in PushInlineFrame"),
+            });
+            no_output!(gen_push_inline_frame(jit, asm, function, *cme, *iseq, opnd!(recv), *num_args, &function.frame_state(*state), lir_block))
         },
         Insn::PopInlineFrame { iseq, argc, state } => {
             no_output!(gen_pop_inline_frame(asm, *iseq, *argc, &function.frame_state(*state)))
@@ -1692,7 +1700,7 @@ fn gen_push_inline_frame(
     recv: Opnd,
     num_args: u16,
     state: &FrameState,
-    blockiseq: Option<IseqPtr>,
+    block: Option<lir::BlockHandler>,
 ) {
     let local_size = unsafe { get_iseq_body_local_table_size(iseq) }.to_usize();
     let stack_growth = state.stack_size() + local_size + unsafe { get_iseq_body_stack_max(iseq) }.to_usize();
@@ -1710,7 +1718,10 @@ fn gen_push_inline_frame(
     // The HIR specialization guards ensure we will only reach here for literal blocks,
     // not &block forwarding, &:foo, etc. These are rejected in `type_specialize` by
     // `unspecializable_call_type`.
-    let block_handler = blockiseq.map(|b| gen_block_handler_specval(asm, b));
+    let block_handler = block.map(|b| match b {
+        lir::BlockHandler::Iseq(b) => gen_block_handler_specval(asm, b),
+        lir::BlockHandler::Proc(proc_opnd) => proc_opnd,
+    });
 
     let callee_is_bmethod = VM_METHOD_TYPE_BMETHOD == unsafe { get_cme_def_type(cme) };
 

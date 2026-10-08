@@ -4656,9 +4656,12 @@ mod hir_opt_tests {
           v22:ObjectSubclass[class_exact:Proc] = GuardType v10, ObjectSubclass[class_exact:Proc] recompile
           PatchPoint MethodRedefined(Object@0x1008, foo@0x1010, cme:0x1018)
           v25:ObjectSubclass[class_exact*:Object@VALUE(0x1008)] = GuardType v9, ObjectSubclass[class_exact*:Object@VALUE(0x1008)] recompile
-          v26:BasicObject = SendDirect v25, &v22, :foo (0x1040)
+          PushInlineFrame :foo, v25 (0x1040), num_args=0
+          v32:Fixnum[5] = Const Value(5)
+          v34:BasicObject = InvokeBlock v32 # SendFallbackReason: InvokeBlock: not yet specialized
+          PopInlineFrame
           CheckInterrupts
-          Return v26
+          Return v34
         ");
     }
 
@@ -7128,9 +7131,11 @@ mod hir_opt_tests {
         bb6(v16:BasicObject, v17:BasicObject):
           v58:ObjectSubclass[class_exact:Proc] = GuardType v16, ObjectSubclass[class_exact:Proc] recompile
           PatchPoint MethodRedefined(Integer@0x1010, then@0x1018, cme:0x1020)
-          v62:BasicObject = SendDirect v14, &v58, :then (0x1048)
+          PushInlineFrame :then, v14 (0x1048), num_args=0
+          v85:BasicObject = InvokeBlock v14 # SendFallbackReason: InvokeBlock: not yet specialized
+          PopInlineFrame
           CheckInterrupts
-          Return v62
+          Return v85
         ");
     }
 
@@ -12513,7 +12518,7 @@ mod hir_opt_tests {
           StoreField v7, :blk@0x1000, v6
           Jump bb3(v5)
         bb3(v10:BasicObject):
-          v42:NilClass = Const Value(nil)
+          v55:NilClass = Const Value(nil)
           PatchPoint MethodRedefined(Object@0x1008, proc@0x1010, cme:0x1018)
           v35:ObjectSubclass[class_exact*:Object@VALUE(0x1008)] = GuardType v10, ObjectSubclass[class_exact*:Object@VALUE(0x1008)] recompile
           v36:BasicObject = CCallWithFrame v35, :Kernel#proc@0x1040, block=0x1048
@@ -12524,9 +12529,11 @@ mod hir_opt_tests {
           v25:BasicObject = LoadField v24, :blk@0x1000
           v37:ObjectSubclass[class_exact:Proc] = GuardType v25, ObjectSubclass[class_exact:Proc] recompile
           PatchPoint MethodRedefined(Object@0x1008, foo@0x1068, cme:0x1070)
-          v41:BasicObject = SendDirect v35, &v37, :foo (0x1098)
+          PushInlineFrame :foo, v35 (0x1098), num_args=0
+          v47:BasicObject = InvokeBlock # SendFallbackReason: InvokeBlock: not yet specialized
+          PopInlineFrame
           CheckInterrupts
-          Return v41
+          Return v47
         ");
     }
 
@@ -12642,7 +12649,7 @@ mod hir_opt_tests {
           StoreField v7, :blk@0x1000, v6
           Jump bb3(v5)
         bb3(v10:BasicObject):
-          v49:NilClass = Const Value(nil)
+          v80:NilClass = Const Value(nil)
           PatchPoint MethodRedefined(Object@0x1008, proc@0x1010, cme:0x1018)
           v39:ObjectSubclass[class_exact*:Object@VALUE(0x1008)] = GuardType v10, ObjectSubclass[class_exact*:Object@VALUE(0x1008)] recompile
           v40:BasicObject = CCallWithFrame v39, :Kernel#proc@0x1040, block=0x1048
@@ -12657,9 +12664,20 @@ mod hir_opt_tests {
           PatchPoint MethodRedefined(Object@0x1008, foo@0x1068, cme:0x1070)
           v45:ArrayExact = NewArray v26
           v46:Fixnum[20] = Const Value(20)
-          v48:BasicObject = SendDirect v39, &v41, :foo (0x1098), jit_entry_idx=1, v24, v45, v46
+          v75:Fixnum[0] = Const Value(0)
+          PushInlineFrame :foo, v39 (0x1098), num_args=3
+          PatchPoint NoSingletonClass(Array@0x10b8)
+          PatchPoint MethodRedefined(Array@0x10b8, sum@0x10c0, cme:0x10c8)
+          v85:BasicObject = CCallVariadic v45, :Array#sum@0x10f0
+          PatchPoint MethodRedefined(Integer@0x10f8, +@0x1100, cme:0x1108)
+          v89:Fixnum = GuardType v85, Fixnum
+          v90:Fixnum = FixnumAdd v24, v89
+          PatchPoint NoEPEscape(foo)
+          v94:Fixnum = FixnumAdd v90, v46
+          v71:BasicObject = InvokeBlock v94 # SendFallbackReason: InvokeBlock: not yet specialized
+          PopInlineFrame
           CheckInterrupts
-          Return v48
+          Return v71
         ");
     }
 
