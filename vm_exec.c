@@ -19,7 +19,8 @@ rb_vm_exec_batch_rs(rb_execution_context_t *ec)
 {
     return 0;
 }
-#else
+#endif
+
 struct rb_vm_insn_opcodes_struct rb_vm_insn_opcodes = {
     .nop = BIN(nop),
     .putnil = BIN(putnil),
@@ -50,7 +51,6 @@ struct rb_vm_insn_opcodes_struct rb_vm_insn_opcodes = {
     .opt_gt = BIN(opt_gt),
     .opt_ge = BIN(opt_ge),
 };
-#endif
 
 #if USE_YJIT || USE_ZJIT
 // The number of instructions executed on vm_exec_core. --yjit-stats and --zjit-stats use this.
