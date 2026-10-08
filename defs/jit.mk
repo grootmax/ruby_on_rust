@@ -22,19 +22,7 @@ RUST_LIB_TOUCH = touch $@
 #    ld: warning: object file (target/debug/libjit.a(<libcapstone object>)) was built for
 #    newer macOS version (15.2) than being linked (15.0)
 # This limits us to an older set of macOS API in the rust code, but we don't use any.
-
-JIT_OFFSETS_RS = $(top_srcdir)/yjit/src/jit_offsets.rs $(top_srcdir)/zjit/src/jit_offsets.rs
-
-$(top_srcdir)/yjit/src/jit_offsets.rs: $(top_srcdir)/vm_jit_offsets.h $(top_srcdir)/tool/generate_jit_offsets.rb
-	$(ECHO) "generating $@"
-	$(Q)$(BASERUBY) $(top_srcdir)/tool/generate_jit_offsets.rb $@
-
-$(top_srcdir)/zjit/src/jit_offsets.rs: $(top_srcdir)/yjit/src/jit_offsets.rs
-	$(Q)$(PREP) $(CP) $< $@
-
-jit-offsets: $(JIT_OFFSETS_RS)
-
-$(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version $(JIT_OFFSETS_RS)
+$(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	$(Q)if [ '$(ZJIT_SUPPORT)' != no -a '$(YJIT_SUPPORT)' != no ]; then \
 	    echo 'building YJIT and ZJIT ($(JIT_CARGO_SUPPORT:yes=release) mode)'; \
 	elif [ '$(ZJIT_SUPPORT)' != no ]; then \
@@ -49,7 +37,7 @@ $(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version $(JIT_OFFSETS_RS)
 	$(RUST_LIB_TOUCH)
 else ifneq ($(strip $(RLIB_DIR)),) # combo build
 
-$(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version $(JIT_OFFSETS_RS)
+$(RUST_LIB): $(srcdir)/ruby.rs target/.rustc-version
 	$(ECHO) 'building $(@F)'
 	$(gnumake_recursive)$(Q) $(RUSTC) --edition=2024 \
 	    $(RUSTC_FLAGS) \

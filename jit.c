@@ -24,62 +24,45 @@
 #include "internal/struct.h"
 #include "ruby/internal/core/rtypeddata.h"
 #include "zjit.h"
-#include "vm_jit_offsets.h"
 
 #ifndef _WIN32
 #include <sys/mman.h>
 #endif
 
-// Static assertions verifying field offsets against C VM struct definitions in vm_core.h
-_Static_assert(RUBY_OFFSET_EC_CFP == offsetof(rb_execution_context_t, cfp), "RUBY_OFFSET_EC_CFP mismatch");
-_Static_assert(RUBY_OFFSET_EC_INTERRUPT_FLAG == offsetof(rb_execution_context_t, interrupt_flag), "RUBY_OFFSET_EC_INTERRUPT_FLAG mismatch");
-_Static_assert(RUBY_OFFSET_EC_INTERRUPT_MASK == offsetof(rb_execution_context_t, interrupt_mask), "RUBY_OFFSET_EC_INTERRUPT_MASK mismatch");
-_Static_assert(RUBY_OFFSET_EC_THREAD_PTR == offsetof(rb_execution_context_t, thread_ptr), "RUBY_OFFSET_EC_THREAD_PTR mismatch");
-_Static_assert(RUBY_OFFSET_EC_RACTOR_ID == offsetof(rb_execution_context_t, ractor_id), "RUBY_OFFSET_EC_RACTOR_ID mismatch");
+enum jit_bindgen_constants {
+    // Field offsets for the RObject struct
+    ROBJECT_OFFSET_AS_HEAP_FIELDS = offsetof(struct RObject, as.extended),
+    ROBJECT_OFFSET_AS_ARY = offsetof(struct RObject, as.ary),
 
-_Static_assert(RUBY_OFFSET_CFP_PC == offsetof(rb_control_frame_t, pc), "RUBY_OFFSET_CFP_PC mismatch");
-_Static_assert(RUBY_OFFSET_CFP_SP == offsetof(rb_control_frame_t, sp), "RUBY_OFFSET_CFP_SP mismatch");
-_Static_assert(RUBY_OFFSET_CFP_ISEQ == offsetof(rb_control_frame_t, _iseq), "RUBY_OFFSET_CFP_ISEQ mismatch");
-_Static_assert(RUBY_OFFSET_CFP_SELF == offsetof(rb_control_frame_t, self), "RUBY_OFFSET_CFP_SELF mismatch");
-_Static_assert(RUBY_OFFSET_CFP_EP == offsetof(rb_control_frame_t, ep), "RUBY_OFFSET_CFP_EP mismatch");
-_Static_assert(RUBY_OFFSET_CFP_BLOCK_CODE == offsetof(rb_control_frame_t, block_code), "RUBY_OFFSET_CFP_BLOCK_CODE mismatch");
-_Static_assert(RUBY_OFFSET_CFP_JIT_RETURN == offsetof(rb_control_frame_t, jit_return), "RUBY_OFFSET_CFP_JIT_RETURN mismatch");
-_Static_assert(RUBY_SIZEOF_CONTROL_FRAME == sizeof(rb_control_frame_t), "RUBY_SIZEOF_CONTROL_FRAME mismatch");
+    // Field offset for prime classext's fields_obj from a class pointer
+    RCLASS_OFFSET_PRIME_FIELDS_OBJ = offsetof(struct RClass_and_rb_classext_t, classext.fields_obj),
 
-_Static_assert(RUBY_OFFSET_RBASIC_FLAGS == offsetof(struct RBasic, flags), "RUBY_OFFSET_RBASIC_FLAGS mismatch");
-_Static_assert(RUBY_OFFSET_RBASIC_KLASS == offsetof(struct RBasic, klass), "RUBY_OFFSET_RBASIC_KLASS mismatch");
+    // Field offset for fields_obj in T_DATA
+    TDATA_OFFSET_FIELDS_OBJ = offsetof(struct RTypedData, fields_obj),
 
-_Static_assert(ROBJECT_OFFSET_AS_HEAP_FIELDS == offsetof(struct RObject, as.extended), "ROBJECT_OFFSET_AS_HEAP_FIELDS mismatch");
-_Static_assert(ROBJECT_OFFSET_AS_ARY == offsetof(struct RObject, as.ary), "ROBJECT_OFFSET_AS_ARY mismatch");
+    // Field offset for the RHash struct
+    RUBY_OFFSET_RHASH_IFNONE = offsetof(struct RHash, ifnone),
 
-_Static_assert(RUBY_OFFSET_RARRAY_AS_HEAP_LEN == offsetof(struct RArray, as.heap.len), "RUBY_OFFSET_RARRAY_AS_HEAP_LEN mismatch");
-_Static_assert(RUBY_OFFSET_RARRAY_AS_HEAP_PTR == offsetof(struct RArray, as.heap.ptr), "RUBY_OFFSET_RARRAY_AS_HEAP_PTR mismatch");
-_Static_assert(RUBY_OFFSET_RARRAY_AS_ARY == offsetof(struct RArray, as.ary), "RUBY_OFFSET_RARRAY_AS_ARY mismatch");
+    // Field offsets for the embedded ar_table in a hash
+    RUBY_OFFSET_RHASH_AR_HINT = sizeof(struct RHash) + offsetof(ar_table, ar_hint),
+    RUBY_OFFSET_RHASH_AR_PAIRS = sizeof(struct RHash) + offsetof(ar_table, pairs),
 
-_Static_assert(RUBY_OFFSET_RSTRUCT_AS_HEAP_PTR == offsetof(struct RStruct, as.heap.ptr), "RUBY_OFFSET_RSTRUCT_AS_HEAP_PTR mismatch");
-_Static_assert(RUBY_OFFSET_RSTRUCT_FIELDS_OBJ == offsetof(struct RStruct, fields_obj), "RUBY_OFFSET_RSTRUCT_FIELDS_OBJ mismatch");
-_Static_assert(RUBY_OFFSET_RSTRUCT_AS_ARY == offsetof(struct RStruct, as.ary), "RUBY_OFFSET_RSTRUCT_AS_ARY mismatch");
+    // Max pairs an embedded ar_table hash holds before it converts to an st_table
+    RUBY_RHASH_AR_TABLE_MAX_SIZE = RHASH_AR_TABLE_MAX_SIZE,
 
-_Static_assert(RUBY_OFFSET_RSTRING_LEN == offsetof(struct RString, len), "RUBY_OFFSET_RSTRING_LEN mismatch");
-_Static_assert(RUBY_OFFSET_RSTRING_AS_HEAP_PTR == offsetof(struct RString, as.heap.ptr), "RUBY_OFFSET_RSTRING_AS_HEAP_PTR mismatch");
-_Static_assert(RUBY_OFFSET_RSTRING_AS_ARY == offsetof(struct RString, as.embed.ary), "RUBY_OFFSET_RSTRING_AS_ARY mismatch");
+    // Field offsets for the RString struct
+    RUBY_OFFSET_RSTRING_LEN = offsetof(struct RString, len),
 
-_Static_assert(RCLASS_OFFSET_PRIME_FIELDS_OBJ == offsetof(struct RClass_and_rb_classext_t, classext.fields_obj), "RCLASS_OFFSET_PRIME_FIELDS_OBJ mismatch");
-_Static_assert(TDATA_OFFSET_FIELDS_OBJ == offsetof(struct RTypedData, fields_obj), "TDATA_OFFSET_FIELDS_OBJ mismatch");
+    // Shape constant related to RBasic::flags. (See RBASIC_SET_SHAPE_ID())
+    RB_SHAPE_FLAG_SHIFT = SHAPE_FLAG_SHIFT,
 
-_Static_assert(RUBY_OFFSET_RHASH_IFNONE == offsetof(struct RHash, ifnone), "RUBY_OFFSET_RHASH_IFNONE mismatch");
-
-_Static_assert(RUBY_OFFSET_THREAD_SELF == offsetof(rb_thread_t, self), "RUBY_OFFSET_THREAD_SELF mismatch");
-
-_Static_assert(RUBY_OFFSET_IC_ENTRY == offsetof(struct iseq_inline_constant_cache, entry), "RUBY_OFFSET_IC_ENTRY mismatch");
-_Static_assert(RUBY_OFFSET_ICE_VALUE == offsetof(struct iseq_inline_constant_cache_entry, value), "RUBY_OFFSET_ICE_VALUE mismatch");
-
-// Relative field order checks to prevent layout drift
-_Static_assert(offsetof(rb_execution_context_t, cfp) < offsetof(rb_execution_context_t, interrupt_flag), "rb_execution_context_t field order drift");
-_Static_assert(offsetof(rb_control_frame_t, pc) < offsetof(rb_control_frame_t, sp), "rb_control_frame_t field order drift");
-_Static_assert(offsetof(rb_control_frame_t, sp) < offsetof(rb_control_frame_t, _iseq), "rb_control_frame_t field order drift");
-_Static_assert(offsetof(rb_control_frame_t, _iseq) < offsetof(rb_control_frame_t, self), "rb_control_frame_t field order drift");
-_Static_assert(offsetof(rb_control_frame_t, self) < offsetof(rb_control_frame_t, ep), "rb_control_frame_t field order drift");
+    // Field offsets for rb_execution_context_t
+    RUBY_OFFSET_EC_CFP = offsetof(rb_execution_context_t, cfp),
+    RUBY_OFFSET_EC_INTERRUPT_FLAG = offsetof(rb_execution_context_t, interrupt_flag),
+    RUBY_OFFSET_EC_INTERRUPT_MASK = offsetof(rb_execution_context_t, interrupt_mask),
+    RUBY_OFFSET_EC_THREAD_PTR = offsetof(rb_execution_context_t, thread_ptr),
+    RUBY_OFFSET_EC_RACTOR_ID = offsetof(rb_execution_context_t, ractor_id),
+};
 
 // Manually bound in rust since this is out-of-range of `int`,
 // so this can't be in a `enum`, and we avoid `static const`
