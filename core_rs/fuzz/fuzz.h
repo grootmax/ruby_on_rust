@@ -40,6 +40,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((weak))
+uint64_t rb_core_vm_exec_c_core(void *ec) { (void)ec; return 0; }
+#endif
+
 /* ---- deterministic PRNG (splitmix64) ---------------------------------- */
 
 static uint64_t fuzz_state;

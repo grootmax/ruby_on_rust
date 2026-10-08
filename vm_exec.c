@@ -43,70 +43,6 @@ static void vm_analysis_insn(int insn);
 
 #if !OPT_CALL_THREADED_CODE
 
-#if !USE_RUST_PORTS
-
-static VALUE
-vm_exec_core(rb_execution_context_t *ec)
-{
-#if defined(__GNUC__) && defined(__i386__)
-    DECL_SC_REG(const VALUE *, pc, "di");
-    DECL_SC_REG(rb_control_frame_t *, cfp, "si");
-
-#elif defined(__GNUC__) && defined(__x86_64__)
-    DECL_SC_REG(const VALUE *, pc, "14");
-    DECL_SC_REG(rb_control_frame_t *, cfp, "15");
-
-#elif defined(__GNUC__) && (defined(__powerpc64__) || defined(__POWERPC__))
-    DECL_SC_REG(const VALUE *, pc, "14");
-    DECL_SC_REG(rb_control_frame_t *, cfp, "15");
-
-#elif defined(__GNUC__) && defined(__aarch64__)
-    DECL_SC_REG(const VALUE *, pc, "19");
-    DECL_SC_REG(rb_control_frame_t *, cfp, "20");
-
-#else
-    register rb_control_frame_t *reg_cfp;
-    const VALUE *reg_pc;
-
-#endif
-
-#undef  RESTORE_REGS
-#define RESTORE_REGS() \
-{ \
-  VM_REG_CFP = ec->cfp; \
-  reg_pc  = reg_cfp->pc; \
-}
-
-#undef  VM_REG_PC
-#define VM_REG_PC reg_pc
-#undef  GET_PC
-#define GET_PC() (reg_pc)
-#undef  SET_PC
-#define SET_PC(x) (reg_cfp->pc = VM_REG_PC = (x))
-
-#if OPT_TOKEN_THREADED_CODE || OPT_DIRECT_THREADED_CODE
-#include "vmtc.inc"
-    if (UNLIKELY(ec == 0)) {
-        return (VALUE)insns_address_table;
-    }
-#endif
-    reg_cfp = ec->cfp;
-    reg_pc = reg_cfp->pc;
-
-  first:
-    INSN_DISPATCH();
-/*****************/
- #include "vm.inc"
-/*****************/
-    END_INSNS_DISPATCH();
-
-    /* unreachable */
-    rb_bug("vm_eval: unreachable");
-    goto first;
-}
-
-#else /* USE_RUST_PORTS */
-
 VALUE
 rb_core_vm_exec_c_core(rb_execution_context_t *ec)
 {
@@ -166,6 +102,16 @@ rb_core_vm_exec_c_core(rb_execution_context_t *ec)
     rb_bug("vm_eval: unreachable");
     goto first;
 }
+
+#if !USE_RUST_PORTS /* ported to core_rs/src/vm_exec.rs */
+
+static VALUE
+vm_exec_core(rb_execution_context_t *ec)
+{
+    return rb_core_vm_exec_c_core(ec);
+}
+
+#else /* USE_RUST_PORTS */
 
 #define vm_exec_core rb_core_vm_exec_vm_exec_core
 
@@ -182,36 +128,6 @@ rb_vm_get_insns_address_table(void)
 #include "vm.inc"
 #include "vmtc.inc"
 
-#if !USE_RUST_PORTS
-
-static VALUE
-vm_exec_core(rb_execution_context_t *ec)
-{
-    register rb_control_frame_t *reg_cfp = ec->cfp;
-    rb_thread_t *th;
-
-    while (1) {
-        reg_cfp = ((rb_insn_func_t) (*GET_PC()))(ec, reg_cfp);
-
-        if (UNLIKELY(reg_cfp == 0)) {
-            break;
-        }
-    }
-
-    if (!UNDEF_P((th = rb_ec_thread_ptr(ec))->retval)) {
-        VALUE ret = th->retval;
-        th->retval = Qundef;
-        return ret;
-    }
-    else {
-        VALUE err = ec->errinfo;
-        ec->errinfo = Qnil;
-        return err;
-    }
-}
-
-#else /* USE_RUST_PORTS */
-
 VALUE
 rb_core_vm_exec_c_core(rb_execution_context_t *ec)
 {
@@ -237,6 +153,16 @@ rb_core_vm_exec_c_core(rb_execution_context_t *ec)
         return err;
     }
 }
+
+#if !USE_RUST_PORTS /* ported to core_rs/src/vm_exec.rs */
+
+static VALUE
+vm_exec_core(rb_execution_context_t *ec)
+{
+    return rb_core_vm_exec_c_core(ec);
+}
+
+#else /* USE_RUST_PORTS */
 
 #define vm_exec_core rb_core_vm_exec_vm_exec_core
 
