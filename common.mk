@@ -2029,6 +2029,9 @@ fix-depends: PHONY
 check-depends: PHONY
 	$(BASERUBY) -C $(srcdir) tool/mkdepend.rb --scope=all --sources --check
 
+fix-porting-ledger: PHONY
+	$(BASERUBY) -C $(srcdir) tool/generate_porting_ledger.rb
+
 gc/Makefile:
 	$(MAKEDIRS) $(@D)
 	$(MESSAGE_BEGIN) \
@@ -2087,6 +2090,7 @@ help: PHONY
 	"  test-syntax-suggest:   run the SyntaxSuggest spec" \
 	"  test-bundled-gems:     run the test suite of bundled gems [BUNDLED_GEMS=<gems>]" \
 	"  test-tool:             tests under the tool/test" \
+	"  fix-porting-ledger:    re-generate PORTING.md" \
 	"  update-gems:           download files of the bundled gems" \
 	"  update-bundled_gems:   update the latest version of bundled gems" \
 	"  sync-default-gems:     sync default gems from upstream [GEM=<gem_name git_ref>]" \
