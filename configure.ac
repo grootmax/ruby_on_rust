@@ -4874,10 +4874,8 @@ AC_CONFIG_FILES(Makefile:template/Makefile.in, [
                 cat ${srcdir}/yjit/not_gmake.mk
                 echo ['$(MKFILES): ${srcdir}/yjit/not_gmake.mk']
             ])
-            AS_IF([test "$USE_RUST_PORTS" = 1], [
-                cat ${srcdir}/core_rs/core_rs.mk
-                echo ['$(MKFILES): ${srcdir}/core_rs/core_rs.mk']
-            ])
+            cat ${srcdir}/core_rs/core_rs.mk
+            echo ['$(MKFILES): ${srcdir}/core_rs/core_rs.mk']
 	], [
 	    echo 'distclean-local::; @$(RM) GNUmakefile uncommon.mk'
 	])

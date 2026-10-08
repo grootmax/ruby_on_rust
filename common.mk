@@ -925,7 +925,7 @@ yes-test-testframework: prog PHONY
 	$(ACTIONS_ENDGROUP)
 no-test-testframework: PHONY
 
-test-tool: $(TEST_RUNNABLE)-test-tool
+test-tool: $(TEST_RUNNABLE)-test-tool core-rs-check-inventory
 yes-test-tool: prog PHONY
 	$(ACTIONS_GROUP)
 	$(gnumake_recursive)$(Q)$(exec) $(RUNRUBY) "$(TOOL_TESTSDIR)/runner.rb" --ruby="$(RUNRUBY)" $(TESTOPTS) $(TESTS)
@@ -1047,7 +1047,7 @@ $(ENC_MK): $(srcdir)/enc/make_encmake.rb $(srcdir)/enc/Makefile.in $(srcdir)/enc
 .PHONY: exam check test test-short test-all test-coroutine btest btest-ruby test-basic test-knownbug
 .PHONY: run runruby parse benchmark gdb gdb-ruby
 .PHONY: update-mspec update-rubyspec test-rubyspec test-spec
-.PHONY: touch-unicode-files
+.PHONY: touch-unicode-files core-rs-check-inventory
 
 PHONY:
 

@@ -50,6 +50,11 @@ jobs:
           ruby tool/generate_porting_ledger.rb --check
         if: always()
 
+      - name: Check inventory guard drift
+        run: |
+          ruby tool/core_rs/inventory.rb --check
+        if: always()
+
       - name: Check for code styles
         run: |
           set -x

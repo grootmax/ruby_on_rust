@@ -60,3 +60,8 @@ core-rs-check-hidden: $(LIBRUBY_SO)
 	    exit 1; \
 	fi
 	$(Q) echo 'core_rs: no rb_core_* symbol is exported from $(LIBRUBY_SO)'
+
+core-rs-check-inventory:
+	$(Q) $(BASERUBY) $(srcdir)/tool/core_rs/inventory.rb --check
+
+.PHONY: core-rs core-rs-test core-rs-check-hidden core-rs-check-inventory
