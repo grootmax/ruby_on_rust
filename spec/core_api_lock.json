@@ -10758,7 +10758,7 @@
     "constants": [
       {
         "name": "ALT_SEPARATOR",
-        "value": ""
+        "value": "<ALT_SEPARATOR>"
       },
       {
         "name": "Constants",
@@ -10766,7 +10766,7 @@
       },
       {
         "name": "PATH_SEPARATOR",
-        "value": ":"
+        "value": "<PATH_SEPARATOR>"
       },
       {
         "name": "SEPARATOR",
@@ -11604,7 +11604,7 @@
       },
       {
         "name": "NULL",
-        "value": "/dev/null"
+        "value": "<NULL>"
       },
       {
         "name": "RDONLY",
@@ -23649,39 +23649,39 @@
       },
       {
         "name": "RUBY_COPYRIGHT",
-        "value": "ruby - Copyright (C) 1993-2024 Yukihiro Matsumoto"
+        "value": "<RUBY_COPYRIGHT>"
       },
       {
         "name": "RUBY_DESCRIPTION",
-        "value": "ruby 3.2.3 (2024-01-18 revision 52bb2ac0a6) [x86_64-linux-gnu]"
+        "value": "<RUBY_DESCRIPTION>"
       },
       {
         "name": "RUBY_ENGINE",
-        "value": "ruby"
+        "value": "<RUBY_ENGINE>"
       },
       {
         "name": "RUBY_ENGINE_VERSION",
-        "value": "3.2.3"
+        "value": "<RUBY_ENGINE_VERSION>"
       },
       {
         "name": "RUBY_PATCHLEVEL",
-        "value": "157"
+        "value": "<RUBY_PATCHLEVEL>"
       },
       {
         "name": "RUBY_PLATFORM",
-        "value": "x86_64-linux-gnu"
+        "value": "<RUBY_PLATFORM>"
       },
       {
         "name": "RUBY_RELEASE_DATE",
-        "value": "2024-01-18"
+        "value": "<RUBY_RELEASE_DATE>"
       },
       {
         "name": "RUBY_REVISION",
-        "value": "52bb2ac0a6971d0391efa2275f7a66bff319087c"
+        "value": "<RUBY_REVISION>"
       },
       {
         "name": "RUBY_VERSION",
-        "value": "3.2.3"
+        "value": "<RUBY_VERSION>"
       },
       {
         "name": "Ractor",
@@ -36727,7 +36727,7 @@
       },
       {
         "name": "DESTDIR",
-        "value": ""
+        "value": "<DESTDIR>"
       },
       {
         "name": "MAKEFILE_CONFIG",
@@ -36735,7 +36735,7 @@
       },
       {
         "name": "TOPDIR",
-        "value": "/usr"
+        "value": "<TOPDIR>"
       }
     ],
     "instance_methods": [

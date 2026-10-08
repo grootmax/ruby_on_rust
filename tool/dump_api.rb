@@ -97,6 +97,12 @@ module CoreApiDumper
         "<ARGF>"
       elsif mod == Object && name == :TOPLEVEL_BINDING
         "<TOPLEVEL_BINDING>"
+      elsif mod == Object && name.to_s.start_with?("RUBY_")
+        "<#{name}>"
+      elsif mod == RbConfig && [:TOPDIR, :DESTDIR].include?(name)
+        "<#{name}>"
+      elsif (mod == File || mod == File::Constants) && [:ALT_SEPARATOR, :PATH_SEPARATOR, :NULL].include?(name)
+        "<#{name}>"
       elsif val.is_a?(Float)
         if val.nan?
           "Float::NAN"
