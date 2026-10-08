@@ -103,12 +103,7 @@ pub extern "C" fn rb_zjit_root_update_references() {
     invariants.update_references();
 
     // Update iseq pointers in all JITFrames for GC compaction.
-    // rb_execution_context_update only updates JITFrames currently on the stack,
-    // but JITFrames not on the stack also need their iseq pointers updated
-    // because the JIT code will reuse them on the next call.
-    for &jit_frame in ZJITState::get_jit_frames().iter() {
-        unsafe { &mut *jit_frame }.update_references();
-    }
+    ZJITState::get_jit_frame_table().gc_update_references();
 }
 
 fn iseq_mark(payload: &IseqPayload) {
@@ -250,9 +245,7 @@ pub extern "C" fn rb_zjit_root_mark() {
     if !ZJITState::has_instance() {
         return;
     }
-    for &jit_frame in ZJITState::get_jit_frames().iter() {
-        unsafe { &*jit_frame }.mark();
-    }
+    ZJITState::get_jit_frame_table().gc_mark();
 }
 
 #[cfg(test)]
