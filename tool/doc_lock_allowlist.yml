@@ -7,4 +7,8 @@ parameter_mismatches: []
 call_seq_mismatches: []
 comment_mismatches: []
 visibility_mismatches: []
-exclusions: []
+exclusions:
+  - name: "Kernel#*"
+  - name: "Gem::*"
+  - name: "Bundler::*"
+  - name: "ZJIT::*"

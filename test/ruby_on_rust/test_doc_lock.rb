@@ -152,4 +152,49 @@ class TestDocLock < Test::Unit::TestCase
     assert_equal 1, results['approved'].size
     assert_equal 'visibility_mismatch', results['approved'].first['type']
   end
+
+  def test_allowlist_suppresses_exclusions_fnmatch
+    ref = {
+      'Kernel' => {
+        'name' => 'Kernel',
+        'type' => 'module',
+        'methods' => {
+          'Kernel#require' => {
+            'name' => 'require',
+            'full_name' => 'Kernel#require',
+            'singleton' => false,
+            'visibility' => 'private',
+            'params' => 'path',
+            'comment' => 'Old require'
+          }
+        }
+      }
+    }
+
+    target = {
+      'Kernel' => {
+        'name' => 'Kernel',
+        'type' => 'module',
+        'methods' => {
+          'Kernel#require' => {
+            'name' => 'require',
+            'full_name' => 'Kernel#require',
+            'singleton' => false,
+            'visibility' => 'public',
+            'params' => 'path, option: nil',
+            'comment' => 'New require'
+          }
+        }
+      }
+    }
+
+    allowlist = DocLock::Allowlist.new
+    allowlist.exclusions << { 'name' => 'Kernel#*' }
+
+    comparator = DocLock::Comparator.new(ref, target, allowlist)
+    results = comparator.compare
+
+    assert_equal 0, results['unapproved'].size
+    assert_equal 3, results['approved'].size
+  end
 end
