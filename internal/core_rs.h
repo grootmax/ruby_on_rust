@@ -61,9 +61,8 @@ int rb_core_complex_read_rat(const char **s, int strict, char **b);
 void rb_core_complex_skip_ws(const char **s);
 
 /* vm_exec.c (core_rs/src/vm_exec.rs) */
-VALUE rb_vm_exec_core_rs(struct rb_execution_context_struct *ec);
+VALUE rb_core_vm_exec_vm_exec_core(struct rb_execution_context_struct *ec);
 VALUE rb_core_vm_exec_c_core(struct rb_execution_context_struct *ec);
-const void **rb_vm_c_insns_address_table(void);
 
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop
