@@ -468,15 +468,15 @@ $(srcdir)/$(CONFIGURE): $(srcdir)/configure.ac
 prereq: $(srcdir)/$(CONFIGURE)
 
 incs: id.h
-all-incs: probes.h probes_bridge.h $(srcdir)/core_rs/src/usdt.rs
+all-incs: probes.h $(srcdir)/probes_bridge.h $(srcdir)/core_rs/src/usdt.rs
 
-probes_bridge.h probes_bridge.c $(srcdir)/core_rs/src/usdt.rs: $(srcdir)/probes.d $(tooldir)/gen_usdt_bindings.rb
+$(srcdir)/probes_bridge.h $(srcdir)/probes_bridge.c $(srcdir)/core_rs/src/usdt.rs: $(srcdir)/probes.d $(tooldir)/gen_usdt_bindings.rb
 	$(ECHO) generating C probe bridge and Rust USDT bindings
-	$(Q) $(BASERUBY) $(tooldir)/gen_usdt_bindings.rb --probes-d=$(srcdir)/probes.d --c-header=probes_bridge.h --c-impl=probes_bridge.c --rust-file=$(srcdir)/core_rs/src/usdt.rs
+	$(Q) $(BASERUBY) $(tooldir)/gen_usdt_bindings.rb --probes-d=$(srcdir)/probes.d --c-header=$(srcdir)/probes_bridge.h --c-impl=$(srcdir)/probes_bridge.c --rust-file=$(srcdir)/core_rs/src/usdt.rs
 
-probes_bridge.$(OBJEXT): probes_bridge.c probes.h probes_bridge.h
+probes_bridge.$(OBJEXT): $(srcdir)/probes_bridge.c probes.h $(srcdir)/probes_bridge.h
 	@$(ECHO) compiling probes_bridge.c
-	$(Q) $(CC) $(CFLAGS) $(XCFLAGS) $(CPPFLAGS) $(COUTFLAG)$@ -c probes_bridge.c
+	$(Q) $(CC) $(CFLAGS) $(XCFLAGS) $(CPPFLAGS) $(COUTFLAG)$@ -c $(srcdir)/probes_bridge.c
 
 # Things which should be considered:
 # * with gperf v.s. without gperf
