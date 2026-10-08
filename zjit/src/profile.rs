@@ -95,7 +95,7 @@ fn profile_insn_sample(
         YARVINSN_invokeblock   => profile_block_handler(profiler, profile),
         YARVINSN_invokesuper   => profile_invokesuper(profiler, profile),
         YARVINSN_opt_send_without_block | YARVINSN_send => {
-            let cd: *const rb_call_data = profiler.insn_opnd(0).as_non_null_ptr().expect("invalid call_data pointer");
+            let cd: *const rb_call_data = profiler.insn_opnd(0).as_ptr();
             let argc = num_arguments_on_stack(cd);
             // Profile all the arguments and self (+1).
             profile_operands(profiler, profile, argc + 1);
@@ -231,7 +231,7 @@ fn profile_invokesuper(profiler: &mut Profiler, profile: &mut IseqProfile) {
 
     unsafe { rb_gc_writebarrier(profiler.iseq.into(), cme_value) };
 
-    let cd: *const rb_call_data = profiler.insn_opnd(0).as_non_null_ptr().expect("invalid call_data pointer");
+    let cd: *const rb_call_data = profiler.insn_opnd(0).as_ptr();
     let argc = num_arguments_on_stack(cd);
 
     // Profile all the arguments and self (+1).
