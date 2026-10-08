@@ -52,8 +52,7 @@ pub struct set_table_entry {
     pub key: usize,
 }
 
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn rb_core_st_entry_equal(
+pub(crate) unsafe fn entry_equal(
     type_: *const c_void,
     entry_hash: usize,
     entry_key: usize,
@@ -96,7 +95,7 @@ pub unsafe extern "C" fn rb_core_st_ptr_equal_check(
     let type_ptr = unsafe { (*tab_ptr).type_ } as *const c_void;
     let e_hash = unsafe { (*entry_ptr).hash };
     let e_key = unsafe { (*entry_ptr).key };
-    let eq = unsafe { rb_core_st_entry_equal(type_ptr, e_hash, e_key, hash_val, key) };
+    let eq = unsafe { entry_equal(type_ptr, e_hash, e_key, hash_val, key) };
     if !res.is_null() {
         unsafe { *res = eq };
     }
@@ -124,7 +123,7 @@ pub unsafe extern "C" fn rb_core_st_set_ptr_equal_check(
     let type_ptr = unsafe { (*tab_ptr).type_ } as *const c_void;
     let e_hash = unsafe { (*entry_ptr).hash };
     let e_key = unsafe { (*entry_ptr).key };
-    let eq = unsafe { rb_core_st_entry_equal(type_ptr, e_hash, e_key, hash_val, key) };
+    let eq = unsafe { entry_equal(type_ptr, e_hash, e_key, hash_val, key) };
     if !res.is_null() {
         unsafe { *res = eq };
     }

@@ -61,7 +61,6 @@ int rb_core_complex_read_rat(const char **s, int strict, char **b);
 void rb_core_complex_skip_ws(const char **s);
 
 /* st.c (core_rs/src/st.rs) */
-int rb_core_st_entry_equal(const void *type, unsigned long entry_hash, unsigned long entry_key, unsigned long hash_val, unsigned long key);
 void rb_core_st_ptr_equal_check(const void *tab, const void *entry, unsigned long hash_val, unsigned long key, int *res, int *rebuilt_p);
 void rb_core_st_set_ptr_equal_check(const void *tab, const void *entry, unsigned long hash_val, unsigned long key, int *res, int *rebuilt_p);
 

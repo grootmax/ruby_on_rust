@@ -550,7 +550,8 @@ class AutoPortPipeline
       if c_content =~ pattern
         matched_func = $1
         macro_def = f.static ? "\n#else\n#define #{f.name} rb_core_#{mod_name}_#{f.name}\n" : "\n"
-        guarded = "#if !USE_RUST_PORTS /* ported to core_rs/src/#{mod_name}.rs (port unit #{unit_id}) */\n#{matched_func}#{macro_def}#endif /* !USE_RUST_PORTS */"
+        cond = mod_name == "st" ? "!USE_RUST_PORTS || !defined(RUBY_EXPORT)" : "!USE_RUST_PORTS"
+        guarded = "#if #{cond} /* ported to core_rs/src/#{mod_name}.rs (port unit #{unit_id}) */\n#{matched_func}#{macro_def}#endif /* !USE_RUST_PORTS */"
         c_content.sub!(matched_func, guarded)
       end
     end

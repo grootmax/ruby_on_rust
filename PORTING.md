@@ -7,11 +7,11 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 317,475 | 100.0% |
+| **Total C Source Files** | 113 | 317,474 | 100.0% |
 | **Not Started** | 43 | 96,474 | 30.4% |
 | **In Progress** | 1 | 2,839 | 0.9% |
 | **Ported** | 0 | 0 | 0.0% |
-| **Blocked** | 62 | 217,816 | 68.6% |
+| **Blocked** | 62 | 217,815 | 68.6% |
 | **N/A** | 7 | 346 | 0.1% |
 
 ## Migration Progress by Subsystem
@@ -168,7 +168,7 @@ _Internal utility functions, tables, and system helpers_
 | `miniinit.c` | 109 | Not Started | `crate::miniinit` | Miniruby initializers |
 | `siphash.c` | 493 | Blocked | `crate::siphash` | Blocked: Verification build or test failure (unit siphash-A-03) |
 | `sprintf.c` | 1,283 | Blocked | `crate::sprintf` | Blocked: Verification build or test failure (unit sprintf-A-01) |
-| `st.c` | 3,406 | Blocked | `crate::st` | Blocked: Verification build or test failure (unit st-A-11) |
+| `st.c` | 3,405 | Blocked | `crate::st` | Blocked: Verification build or test failure (unit st-A-11) |
 | `strftime.c` | 1,286 | Blocked | `crate::strftime` | Blocked: Verification build or test failure (unit strftime-A-01) |
 | `util.c` | 622 | Blocked | `core_rs::util` | Blocked: Verification build or test failure (unit util-A-01) |
 | `variable.c` | 4,725 | Blocked | `crate::variable` | Blocked: Verification build or test failure (unit variable-A-02) |
@@ -274,7 +274,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `siphash.c` | Utilities & Support | 493 | Blocked | `crate::siphash` | Blocked: Verification build or test failure (unit siphash-A-03) |
 | `sparc.c` | Platform & Miscellaneous | 40 | N/A | `N/A` | SPARC architecture assembly helper |
 | `sprintf.c` | Utilities & Support | 1,283 | Blocked | `crate::sprintf` | Blocked: Verification build or test failure (unit sprintf-A-01) |
-| `st.c` | Utilities & Support | 3,406 | Blocked | `crate::st` | Blocked: Verification build or test failure (unit st-A-11) |
+| `st.c` | Utilities & Support | 3,405 | Blocked | `crate::st` | Blocked: Verification build or test failure (unit st-A-11) |
 | `strftime.c` | Utilities & Support | 1,286 | Blocked | `crate::strftime` | Blocked: Verification build or test failure (unit strftime-A-01) |
 | `string.c` | Core Data Structures | 14,476 | Blocked | `crate::string` | Blocked: Verification build or test failure (unit string-A-06) |
 | `struct.c` | Core Data Structures | 2,352 | Blocked | `crate::struct` | Blocked: Verification build or test failure (unit struct-A-01) |
