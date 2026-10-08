@@ -1,0 +1,10 @@
+name: array_aref
+target_class: Array
+method: "[]"
+expected_complexity: O(1)
+expected_exponent: 0.0
+tolerance: 0.15
+setup: |
+  Array.new(n) { 0 }
+code: |
+  a[n / 2]

@@ -1,0 +1,11 @@
+name: array_shift
+target_class: Array
+method: shift
+expected_complexity: O(1)
+expected_exponent: 0.0
+tolerance: 0.15
+setup: |
+  Array.new(n) { 0 }
+code: |
+  a.shift
+  a.push(0)

@@ -199,6 +199,11 @@ jobs:
           RUBY_TESTOPTS: '-v --tty=no'
         if: ${{ contains(matrix.extra_checks, 'capi') }}
 
+      - name: Asymptotic Complexity Benchmark
+        run: |
+          $SETARCH make benchmark-complexity
+        if: ${{ matrix.test_task == 'check' }}
+
       - name: Upload crash dumps
         uses: ./.github/actions/crashdumps
         with:

@@ -1045,7 +1045,7 @@ $(ENC_MK): $(srcdir)/enc/make_encmake.rb $(srcdir)/enc/Makefile.in $(srcdir)/enc
 .PHONY: realclean realclean-ext realclean-local realclean-enc realclean-golf realclean-extout
 .PHONY: realclean-srcs realclean-srcs-local realclean-srcs-ext
 .PHONY: exam check test test-short test-all test-coroutine btest btest-ruby test-basic test-knownbug
-.PHONY: run runruby parse benchmark gdb gdb-ruby
+.PHONY: run runruby parse benchmark benchmark-complexity gdb gdb-ruby
 .PHONY: update-mspec update-rubyspec test-rubyspec test-spec
 .PHONY: touch-unicode-files
 
@@ -1465,6 +1465,9 @@ benchmark: miniruby$(EXEEXT) update-benchmark-driver PHONY
 	    --executables="compare-ruby::$(COMPARE_RUBY) -I$(EXTOUT)/common --disable-gem" \
 	    --executables="built-ruby::$(BENCH_RUBY) --disable-gem" \
 	    $(BENCH_OPTS) $(OPTS)
+
+benchmark-complexity: miniruby$(EXEEXT) PHONY
+	$(Q) $(BASERUBY) $(srcdir)/tool/ruby_on_rust/asymptotic_benchmark.rb --ruby="$(RUNRUBY)" $(OPTS)
 
 run.gdb:
 	echo set breakpoint pending on         > run.gdb

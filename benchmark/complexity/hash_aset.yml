@@ -1,0 +1,12 @@
+name: hash_aset
+target_class: Hash
+method: "[]="
+expected_complexity: O(1)
+expected_exponent: 0.0
+tolerance: 0.15
+setup: |
+  h = {}
+  n.times { |i| h[i] = i }
+  h
+code: |
+  h[n / 2] = 42

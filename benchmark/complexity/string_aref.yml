@@ -1,0 +1,10 @@
+name: string_aref
+target_class: String
+method: "[]"
+expected_complexity: O(1)
+expected_exponent: 0.0
+tolerance: 0.15
+setup: |
+  "a" * n
+code: |
+  s[n / 2]
