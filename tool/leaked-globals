@@ -2,8 +2,18 @@
 require_relative 'lib/colorize'
 require 'shellwords'
 
+abi_lock = false
+baseline_file = nil
+
 until ARGV.empty?
   case ARGV[0]
+  when /\A--abi-lock\z/
+    abi_lock = true
+  when /\A--baseline=(.*)\z/
+    baseline_file = $1
+  when /\A--baseline\z/
+    ARGV.shift
+    baseline_file = ARGV[0]
   when /\A SYMBOL_PREFIX=(.*)/x
     SYMBOL_PREFIX = $1
   when /\A NM=(.*)/x            # may be multiple words
@@ -23,6 +33,7 @@ until ARGV.empty?
 end
 SYMBOLS_IN_EMPTYLIB ||= nil
 EXTSTATIC ||= false
+abi_lock = true if baseline_file
 
 config = ARGV.shift
 count = 0
@@ -77,6 +88,16 @@ if defined?(NM) and NM.include?("--no-llvm-bc")
   puts "Skip #{col.skip("#{bitcode} LLVM bitcode object(s)")}" if bitcode > 0
 end
 
+so_file = ARGV.find do |n|
+  next false unless File.file?(n)
+  if soext
+    raw_soext = /\.#{soext}(?:$|\.)/
+    raw_soext =~ n
+  else
+    n =~ /\.so(?:\.|\z)/ || n =~ /\.dylib\z/ || n =~ /\.dll\z/ || n.include?("libruby")
+  end
+end
+
 print "Checking leaked global symbols..."
 STDOUT.flush
 if soext
@@ -108,6 +129,14 @@ Pipe.new(NM + ARGV).each do |line|
   next if !so and n.start_with?("__odr_asan_")
   next if !so and n.start_with?("__retguard_")
   next if !so and n.start_with?("__dtrace")
+  if n.start_with?("rb_core_")
+    unless n =~ /\Arb_core_[a-zA-Z0-9]+_[a-zA-Z0-9_]+\z/
+      puts col.fail("invalid core symbol name") if count.zero?
+      count += 1
+      puts "  #{n} (does not follow rb_core_<file>_<name> naming standard)"
+      next
+    end
+  end
   case n
   when /\A(?:Init_|InitVM_|pm_|[Oo]nig|dln_|coroutine_)/
     next
@@ -123,11 +152,113 @@ Pipe.new(NM + ARGV).each do |line|
   count += 1
   puts "  #{n}"
 end unless ARGV.empty?
+
+pass1_failed = false
 case count
 when 0
   puts col.pass("none")
 when 1
-  abort col.fail("1 un-prefixed symbol leaked")
+  puts col.fail("1 un-prefixed or invalid symbol leaked")
+  pass1_failed = true
 else
-  abort col.fail("#{count} un-prefixed symbols leaked")
+  puts col.fail("#{count} un-prefixed or invalid symbols leaked")
+  pass1_failed = true
+end
+
+pass2_failed = false
+if abi_lock
+  print "Checking dynamic ABI symbols..."
+  STDOUT.flush
+
+  if so_file.nil?
+    puts col.skip("no shared library")
+  else
+    extracted_lines = []
+    if defined?(NM) && !NM.empty?
+      begin
+        Pipe.new(NM + ["-D", so_file]).each { |line| extracted_lines << line.chomp }
+      rescue => e
+        extracted_lines = []
+      end
+    end
+
+    if extracted_lines.empty?
+      nm_cmd = (defined?(NM) && !NM.empty?) ? NM : ["nm", "-Pgp"]
+      begin
+        Pipe.new(nm_cmd + [so_file]).each { |line| extracted_lines << line.chomp }
+      rescue => e
+        extracted_lines = []
+      end
+    end
+
+    extracted_symbols = []
+    leaked_core_symbols = []
+    invalid_core_symbols = []
+
+    extracted_lines.each do |line|
+      next if line.empty?
+      n, t, = line.split
+      next unless t && /[A-TV-Z]/ =~ t
+      n.sub!(/^#{SYMBOL_PREFIX}/o, "") if defined?(SYMBOL_PREFIX) && SYMBOL_PREFIX
+      n = n.sub(/@.*/, '')
+
+      next if n.start_with?("__", "_ITM_", "_init", "_fini", "_edata", "_end", "gettid")
+
+      if n.start_with?("rb_core_")
+        leaked_core_symbols << n
+        unless n =~ /\Arb_core_[a-zA-Z0-9]+_[a-zA-Z0-9_]+\z/
+          invalid_core_symbols << n
+        end
+      end
+
+      extracted_symbols << n
+    end
+    extracted_symbols.uniq!
+
+    baseline_file ||= File.expand_path('../defs/exported_symbols.list', __dir__)
+    if File.exist?(baseline_file)
+      baseline_symbols = File.readlines(baseline_file).map do |line|
+        line.strip.sub(/#.*/, '')
+      end.reject(&:empty?).uniq
+
+      missing_symbols = baseline_symbols - extracted_symbols
+
+      abi_errors = 0
+
+      if !missing_symbols.empty?
+        puts col.fail("missing symbols") if abi_errors.zero?
+        puts "Missing exported C symbols in #{File.basename(so_file)}:"
+        missing_symbols.each { |sym| puts "  #{sym}" }
+        abi_errors += missing_symbols.size
+      end
+
+      if !leaked_core_symbols.empty?
+        puts col.fail("leaked internal core symbols") if abi_errors.zero?
+        puts "Internal rb_core_* symbols leaked into dynamic exports of #{File.basename(so_file)}:"
+        leaked_core_symbols.each { |sym| puts "  #{sym}" }
+        abi_errors += leaked_core_symbols.size
+      end
+
+      if !invalid_core_symbols.empty?
+        puts col.fail("invalid core symbol naming") if abi_errors.zero?
+        puts "Non-public core symbols violating rb_core_<file>_<name> standard:"
+        invalid_core_symbols.each { |sym| puts "  #{sym}" }
+        abi_errors += invalid_core_symbols.size
+      end
+
+      if abi_errors.zero?
+        puts col.pass("none")
+      else
+        pass2_failed = true
+      end
+    else
+      puts col.fail("missing baseline file")
+      puts "Baseline symbols file not found: #{baseline_file}"
+      pass2_failed = true
+    end
+  end
+end
+
+if pass1_failed || pass2_failed
+  exit 1
 end
