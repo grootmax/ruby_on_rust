@@ -40,7 +40,22 @@ static void vm_analysis_insn(int insn);
 #endif
 /* #define DECL_SC_REG(r, reg) VALUE reg_##r */
 
-#if !OPT_CALL_THREADED_CODE
+#if USE_RUST_PORTS
+#include "internal/core_rs.h"
+
+const void **
+rb_vm_get_insns_address_table(void)
+{
+    return rb_vm_get_insns_address_table_rs();
+}
+
+static VALUE
+vm_exec_core(rb_execution_context_t *ec)
+{
+    return rb_vm_exec_core_rs(ec);
+}
+
+#elif !OPT_CALL_THREADED_CODE
 static VALUE
 vm_exec_core(rb_execution_context_t *ec)
 {

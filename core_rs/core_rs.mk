@@ -17,6 +17,10 @@ CORE_RS_SRCS = $(srcdir)/core_rs/src/lib.rs \
 	$(srcdir)/core_rs/src/ffi/value.rs \
 	$(srcdir)/core_rs/src/re.rs \
 	$(srcdir)/core_rs/src/util.rs \
+	$(srcdir)/core_rs/src/vm_exec/mod.rs \
+	$(srcdir)/core_rs/src/vm_exec/aarch64.rs \
+	$(srcdir)/core_rs/src/vm_exec/fallback.rs \
+	$(srcdir)/core_rs/src/vm_exec/x86_64.rs \
 	$(empty)
 
 # rustc --cfg options that mirror the C configuration core_rs/src/ffi/
