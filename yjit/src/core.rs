@@ -95,16 +95,19 @@ impl Type {
                 unreachable!("Illegal value: {:?}", val)
             }
         } else {
-            let globals = CRubyGlobals::get();
-            let class = val.class_of();
-            if class == globals.rb_cArray() {
-                return Type::CArray;
-            } else if class == globals.rb_cHash() {
-                return Type::CHash;
-            } else if class == globals.rb_cString() {
-                return Type::CString;
+            // Core.rs can't reference rb_cString because it's linked by Rust-only tests.
+            // But CString vs TString is only an optimisation and shouldn't affect correctness.
+            #[cfg(not(test))]
+            match val.class_of() {
+                class if class == unsafe { rb_cArray }  => return Type::CArray,
+                class if class == unsafe { rb_cHash }   => return Type::CHash,
+                class if class == unsafe { rb_cString } => return Type::CString,
+                _ => {}
             }
-            if val == globals.rb_block_param_proxy() {
+            // We likewise can't reference rb_block_param_proxy, but it's again an optimisation;
+            // we can just treat it as a normal Object.
+            #[cfg(not(test))]
+            if val == unsafe { rb_block_param_proxy } {
                 return Type::BlockParamProxy;
             }
             match val.builtin_type() {
@@ -194,18 +197,19 @@ impl Type {
 
     /// Returns an Option with the class if it is known, otherwise None
     pub fn known_class(&self) -> Option<VALUE> {
-        let globals = CRubyGlobals::get();
-        match self {
-            Type::Nil => Some(globals.rb_cNilClass()),
-            Type::True => Some(globals.rb_cTrueClass()),
-            Type::False => Some(globals.rb_cFalseClass()),
-            Type::Fixnum => Some(globals.rb_cInteger()),
-            Type::Flonum => Some(globals.rb_cFloat()),
-            Type::ImmSymbol => Some(globals.rb_cSymbol()),
-            Type::CArray => Some(globals.rb_cArray()),
-            Type::CHash => Some(globals.rb_cHash()),
-            Type::CString => Some(globals.rb_cString()),
-            _ => None,
+        unsafe {
+            match self {
+                Type::Nil => Some(rb_cNilClass),
+                Type::True => Some(rb_cTrueClass),
+                Type::False => Some(rb_cFalseClass),
+                Type::Fixnum => Some(rb_cInteger),
+                Type::Flonum => Some(rb_cFloat),
+                Type::ImmSymbol => Some(rb_cSymbol),
+                Type::CArray => Some(rb_cArray),
+                Type::CHash => Some(rb_cHash),
+                Type::CString => Some(rb_cString),
+                _ => None,
+            }
         }
     }
 

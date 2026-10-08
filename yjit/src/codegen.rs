@@ -1695,7 +1695,7 @@ fn gen_putspecialobject(
 
     if object_type == VM_SPECIAL_OBJECT_VMCORE.as_usize() {
         let stack_top = asm.stack_push(Type::UnknownHeap);
-        let frozen_core = CRubyGlobals::get().rb_mRubyVMFrozenCore();
+        let frozen_core = unsafe { rb_mRubyVMFrozenCore };
         asm.mov(stack_top, frozen_core.into());
         Some(KeepCompiling)
     } else {
@@ -3857,7 +3857,7 @@ fn gen_opt_aref(
     let comptime_idx = jit.peek_at_stack(&asm.ctx, 0);
     let comptime_recv = jit.peek_at_stack(&asm.ctx, 1);
 
-    if comptime_recv.class_of() == CRubyGlobals::get().rb_cArray() && comptime_idx.fixnum_p() {
+    if comptime_recv.class_of() == unsafe { rb_cArray } && comptime_idx.fixnum_p() {
         if !assume_bop_not_redefined(jit, asm, ARRAY_REDEFINED_OP_FLAG, BOP_AREF) {
             return None;
         }
@@ -3899,7 +3899,7 @@ fn gen_opt_aref(
 
         // Jump to next instruction. This allows guard chains to share the same successor.
         return jump_to_next_insn(jit, asm);
-    } else if comptime_recv.class_of() == CRubyGlobals::get().rb_cHash() {
+    } else if comptime_recv.class_of() == unsafe { rb_cHash } {
         if !assume_bop_not_redefined(jit, asm, HASH_REDEFINED_OP_FLAG, BOP_AREF) {
             return None;
         }
@@ -3957,7 +3957,7 @@ fn gen_opt_aset(
     let key = asm.stack_opnd(1);
     let _val = asm.stack_opnd(0);
 
-    if comptime_recv.class_of() == CRubyGlobals::get().rb_cArray() && comptime_key.fixnum_p() {
+    if comptime_recv.class_of() == unsafe { rb_cArray } && comptime_key.fixnum_p() {
         // Guard receiver is an Array
         jit_guard_known_klass(
             jit,
@@ -4000,7 +4000,7 @@ fn gen_opt_aset(
         asm.mov(stack_ret, val);
 
         return jump_to_next_insn(jit, asm)
-    } else if comptime_recv.class_of() == CRubyGlobals::get().rb_cHash() {
+    } else if comptime_recv.class_of() == unsafe { rb_cHash } {
         // Guard receiver is a Hash
         jit_guard_known_klass(
             jit,
@@ -4994,8 +4994,7 @@ fn jit_guard_known_klass(
     if val_type.known_class() == Some(known_klass) {
         // Unless frozen, Array, Hash, and String objects may change their RBASIC_CLASS
         // when they get a singleton class. Those types need invalidations.
-        let globals = CRubyGlobals::get();
-        if [globals.rb_cArray(), globals.rb_cHash(), globals.rb_cString()].contains(&known_klass) {
+        if unsafe { [rb_cArray, rb_cHash, rb_cString].contains(&known_klass) } {
             if jit.assume_no_singleton_class(asm, known_klass) {
                 // Speculate that this object will not have a singleton class,
                 // and invalidate the block in case it does.
@@ -5122,12 +5121,11 @@ fn jit_guard_known_klass(
         asm.cmp(klass_opnd, known_klass.into());
         jit_chain_guard(JCC_JNE, jit, asm, max_chain_depth, counter);
 
-        let globals = CRubyGlobals::get();
-        if known_klass == globals.rb_cString() {
+        if known_klass == unsafe { rb_cString } {
             asm.ctx.upgrade_opnd_type(insn_opnd, Type::CString);
-        } else if known_klass == globals.rb_cArray() {
+        } else if known_klass == unsafe { rb_cArray } {
             asm.ctx.upgrade_opnd_type(insn_opnd, Type::CArray);
-        } else if known_klass == globals.rb_cHash() {
+        } else if known_klass == unsafe { rb_cHash } {
             asm.ctx.upgrade_opnd_type(insn_opnd, Type::CHash);
         }
     }
@@ -10713,10 +10711,10 @@ fn gen_getblockparamproxy(
         );
 
         // Push rb_block_param_proxy. It's a root, so no need to use jit_mov_gc_ptr.
-        assert!(!CRubyGlobals::get().rb_block_param_proxy().special_const_p());
+        assert!(!unsafe { rb_block_param_proxy }.special_const_p());
 
         let top = asm.stack_push(Type::BlockParamProxy);
-        asm.mov(top, Opnd::const_ptr(CRubyGlobals::get().rb_block_param_proxy().as_ptr()));
+        asm.mov(top, Opnd::const_ptr(unsafe { rb_block_param_proxy }.as_ptr()));
     } else if unsafe { rb_obj_is_proc(comptime_handler) }.test() {
         // The block parameter is a Proc
         c_callable! {
@@ -11058,75 +11056,73 @@ pub fn yjit_reg_method_codegen_fns() {
         assert!(METHOD_CODEGEN_TABLE.is_none());
         METHOD_CODEGEN_TABLE = Some(HashMap::default());
 
-        let globals = CRubyGlobals::get();
-
         // Specialization for C methods. See the function's docs for details.
-        reg_method_codegen(globals.rb_cBasicObject(), "!", jit_rb_obj_not);
+        reg_method_codegen(rb_cBasicObject, "!", jit_rb_obj_not);
 
-        reg_method_codegen(globals.rb_cNilClass(), "nil?", jit_rb_true);
-        reg_method_codegen(globals.rb_mKernel(), "nil?", jit_rb_false);
-        reg_method_codegen(globals.rb_mKernel(), "is_a?", jit_rb_kernel_is_a);
-        reg_method_codegen(globals.rb_mKernel(), "kind_of?", jit_rb_kernel_is_a);
-        reg_method_codegen(globals.rb_mKernel(), "instance_of?", jit_rb_kernel_instance_of);
+        reg_method_codegen(rb_cNilClass, "nil?", jit_rb_true);
+        reg_method_codegen(rb_mKernel, "nil?", jit_rb_false);
+        reg_method_codegen(rb_mKernel, "is_a?", jit_rb_kernel_is_a);
+        reg_method_codegen(rb_mKernel, "kind_of?", jit_rb_kernel_is_a);
+        reg_method_codegen(rb_mKernel, "instance_of?", jit_rb_kernel_instance_of);
 
-        reg_method_codegen(globals.rb_cBasicObject(), "==", jit_rb_obj_equal);
-        reg_method_codegen(globals.rb_cBasicObject(), "equal?", jit_rb_obj_equal);
-        reg_method_codegen(globals.rb_cBasicObject(), "!=", jit_rb_obj_not_equal);
-        reg_method_codegen(globals.rb_mKernel(), "eql?", jit_rb_obj_equal);
-        reg_method_codegen(globals.rb_cModule(), "==", jit_rb_obj_equal);
-        reg_method_codegen(globals.rb_cModule(), "===", jit_rb_mod_eqq);
-        reg_method_codegen(globals.rb_cModule(), "name", jit_rb_mod_name);
-        reg_method_codegen(globals.rb_cSymbol(), "==", jit_rb_obj_equal);
-        reg_method_codegen(globals.rb_cSymbol(), "===", jit_rb_obj_equal);
-        reg_method_codegen(globals.rb_cInteger(), "==", jit_rb_int_equal);
-        reg_method_codegen(globals.rb_cInteger(), "===", jit_rb_int_equal);
+        reg_method_codegen(rb_cBasicObject, "==", jit_rb_obj_equal);
+        reg_method_codegen(rb_cBasicObject, "equal?", jit_rb_obj_equal);
+        reg_method_codegen(rb_cBasicObject, "!=", jit_rb_obj_not_equal);
+        reg_method_codegen(rb_mKernel, "eql?", jit_rb_obj_equal);
+        reg_method_codegen(rb_cModule, "==", jit_rb_obj_equal);
+        reg_method_codegen(rb_cModule, "===", jit_rb_mod_eqq);
+        reg_method_codegen(rb_cModule, "name", jit_rb_mod_name);
+        reg_method_codegen(rb_cSymbol, "==", jit_rb_obj_equal);
+        reg_method_codegen(rb_cSymbol, "===", jit_rb_obj_equal);
+        reg_method_codegen(rb_cInteger, "==", jit_rb_int_equal);
+        reg_method_codegen(rb_cInteger, "===", jit_rb_int_equal);
 
-        reg_method_codegen(globals.rb_cInteger(), "succ", jit_rb_int_succ);
-        reg_method_codegen(globals.rb_cInteger(), "pred", jit_rb_int_pred);
-        reg_method_codegen(globals.rb_cInteger(), "/", jit_rb_int_div);
-        reg_method_codegen(globals.rb_cInteger(), "<<", jit_rb_int_lshift);
-        reg_method_codegen(globals.rb_cInteger(), ">>", jit_rb_int_rshift);
-        reg_method_codegen(globals.rb_cInteger(), "^", jit_rb_int_xor);
-        reg_method_codegen(globals.rb_cInteger(), "[]", jit_rb_int_aref);
+        reg_method_codegen(rb_cInteger, "succ", jit_rb_int_succ);
+        reg_method_codegen(rb_cInteger, "pred", jit_rb_int_pred);
+        reg_method_codegen(rb_cInteger, "/", jit_rb_int_div);
+        reg_method_codegen(rb_cInteger, "<<", jit_rb_int_lshift);
+        reg_method_codegen(rb_cInteger, ">>", jit_rb_int_rshift);
+        reg_method_codegen(rb_cInteger, "^", jit_rb_int_xor);
+        reg_method_codegen(rb_cInteger, "[]", jit_rb_int_aref);
 
-        reg_method_codegen(globals.rb_cFloat(), "+", jit_rb_float_plus);
-        reg_method_codegen(globals.rb_cFloat(), "-", jit_rb_float_minus);
-        reg_method_codegen(globals.rb_cFloat(), "*", jit_rb_float_mul);
-        reg_method_codegen(globals.rb_cFloat(), "/", jit_rb_float_div);
+        reg_method_codegen(rb_cFloat, "+", jit_rb_float_plus);
+        reg_method_codegen(rb_cFloat, "-", jit_rb_float_minus);
+        reg_method_codegen(rb_cFloat, "*", jit_rb_float_mul);
+        reg_method_codegen(rb_cFloat, "/", jit_rb_float_div);
 
-        reg_method_codegen(globals.rb_cString(), "dup", jit_rb_str_dup);
-        reg_method_codegen(globals.rb_cString(), "empty?", jit_rb_str_empty_p);
-        reg_method_codegen(globals.rb_cString(), "to_s", jit_rb_str_to_s);
-        reg_method_codegen(globals.rb_cString(), "to_str", jit_rb_str_to_s);
-        reg_method_codegen(globals.rb_cString(), "length", jit_rb_str_length);
-        reg_method_codegen(globals.rb_cString(), "size", jit_rb_str_length);
-        reg_method_codegen(globals.rb_cString(), "bytesize", jit_rb_str_bytesize);
-        reg_method_codegen(globals.rb_cString(), "getbyte", jit_rb_str_getbyte);
-        reg_method_codegen(globals.rb_cString(), "setbyte", jit_rb_str_setbyte);
-        reg_method_codegen(globals.rb_cString(), "byteslice", jit_rb_str_byteslice);
-        reg_method_codegen(globals.rb_cString(), "[]", jit_rb_str_aref_m);
-        reg_method_codegen(globals.rb_cString(), "slice", jit_rb_str_aref_m);
-        reg_method_codegen(globals.rb_cString(), "<<", jit_rb_str_concat);
-        reg_method_codegen(globals.rb_cString(), "+@", jit_rb_str_uplus);
+        reg_method_codegen(rb_cString, "dup", jit_rb_str_dup);
+        reg_method_codegen(rb_cString, "empty?", jit_rb_str_empty_p);
+        reg_method_codegen(rb_cString, "to_s", jit_rb_str_to_s);
+        reg_method_codegen(rb_cString, "to_str", jit_rb_str_to_s);
+        reg_method_codegen(rb_cString, "length", jit_rb_str_length);
+        reg_method_codegen(rb_cString, "size", jit_rb_str_length);
+        reg_method_codegen(rb_cString, "bytesize", jit_rb_str_bytesize);
+        reg_method_codegen(rb_cString, "getbyte", jit_rb_str_getbyte);
+        reg_method_codegen(rb_cString, "setbyte", jit_rb_str_setbyte);
+        reg_method_codegen(rb_cString, "byteslice", jit_rb_str_byteslice);
+        reg_method_codegen(rb_cString, "[]", jit_rb_str_aref_m);
+        reg_method_codegen(rb_cString, "slice", jit_rb_str_aref_m);
+        reg_method_codegen(rb_cString, "<<", jit_rb_str_concat);
+        reg_method_codegen(rb_cString, "+@", jit_rb_str_uplus);
 
-        reg_method_codegen(globals.rb_cNilClass(), "===", jit_rb_case_equal);
-        reg_method_codegen(globals.rb_cTrueClass(), "===", jit_rb_case_equal);
-        reg_method_codegen(globals.rb_cFalseClass(), "===", jit_rb_case_equal);
+        reg_method_codegen(rb_cNilClass, "===", jit_rb_case_equal);
+        reg_method_codegen(rb_cTrueClass, "===", jit_rb_case_equal);
+        reg_method_codegen(rb_cFalseClass, "===", jit_rb_case_equal);
 
-        reg_method_codegen(globals.rb_cArray(), "empty?", jit_rb_ary_empty_p);
-        reg_method_codegen(globals.rb_cArray(), "length", jit_rb_ary_length);
-        reg_method_codegen(globals.rb_cArray(), "size", jit_rb_ary_length);
-        reg_method_codegen(globals.rb_cArray(), "<<", jit_rb_ary_push);
+        reg_method_codegen(rb_cArray, "empty?", jit_rb_ary_empty_p);
+        reg_method_codegen(rb_cArray, "length", jit_rb_ary_length);
+        reg_method_codegen(rb_cArray, "size", jit_rb_ary_length);
+        reg_method_codegen(rb_cArray, "<<", jit_rb_ary_push);
 
-        reg_method_codegen(globals.rb_cHash(), "empty?", jit_rb_hash_empty_p);
+        reg_method_codegen(rb_cHash, "empty?", jit_rb_hash_empty_p);
 
-        reg_method_codegen(globals.rb_mKernel(), "respond_to?", jit_obj_respond_to);
-        reg_method_codegen(globals.rb_mKernel(), "block_given?", jit_rb_f_block_given_p);
-        reg_method_codegen(globals.rb_mKernel(), "dup", jit_rb_obj_dup);
+        reg_method_codegen(rb_mKernel, "respond_to?", jit_obj_respond_to);
+        reg_method_codegen(rb_mKernel, "block_given?", jit_rb_f_block_given_p);
+        reg_method_codegen(rb_mKernel, "dup", jit_rb_obj_dup);
 
-        reg_method_codegen(globals.rb_cClass(), "superclass", jit_rb_class_superclass);
+        reg_method_codegen(rb_cClass, "superclass", jit_rb_class_superclass);
 
-        reg_method_codegen(rb_singleton_class(globals.rb_cThread()), "current", jit_thread_s_current);
+        reg_method_codegen(rb_singleton_class(rb_cThread), "current", jit_thread_s_current);
     }
 }
 

@@ -59,7 +59,6 @@ pub fn out_of_memory_p() -> bool {
 /// could redefine core methods (e.g. Kernel.prepend via bundler).
 #[no_mangle]
 pub extern "C" fn rb_yjit_init_builtin_cmes() {
-    CRubyGlobals::init();
     yjit_reg_method_codegen_fns();
 }
 
@@ -74,19 +73,18 @@ pub extern "C" fn rb_yjit_init(yjit_enabled: bool) {
 
 /// Initialize and enable YJIT. You should call this at boot or with GVL.
 fn yjit_init() {
-    // Initialize CRuby globals type cache
-    CRubyGlobals::init();
+    // TODO: need to make sure that command-line options have been
+    // initialized by CRuby
 
     // Call YJIT hooks before enabling YJIT to avoid compiling the hooks themselves
     unsafe {
-        let yjit = rb_const_get(CRubyGlobals::get().rb_cRubyVM(), rust_str_to_id("YJIT"));
+        let yjit = rb_const_get(rb_cRubyVM, rust_str_to_id("YJIT"));
         rb_funcall(yjit, rust_str_to_id("call_jit_hooks"), 0);
     }
 
     // Catch panics to avoid UB for unwinding into C frames.
     // See https://doc.rust-lang.org/nomicon/exception-safety.html
     let result = std::panic::catch_unwind(|| {
-        CRubyGlobals::init();
         Invariants::init();
         CodegenGlobals::init();
         YjitExitLocations::init();
