@@ -2,10 +2,11 @@
  * Differential fuzz: pack.c leaf functions
  * (core_rs/src/pack.rs) against original C.
  *
- * FUZZ-EXTRACT: pack.c is_bigendian skip_to_eol pack_alignof hex2num
+ * FUZZ-EXTRACT: pack.c NATINT_PACK_DEFS:54-86 is_bigendian skip_to_eol pack_alignof hex2num
  */
 #define FUZZ_UNIT "pack_01"
 #include "ruby/ruby.h"
+#include "ruby/util.h"
 #include FUZZ_REF
 #include "fuzz.h"
 

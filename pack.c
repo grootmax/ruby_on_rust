@@ -1950,4 +1950,8 @@ void
 Init_pack(void)
 {
     id_associated = rb_make_internal_id();
+#if USE_RUST_PORTS
+    volatile void *volatile _ref_pack_is_bigendian = (void *)rb_core_pack_is_bigendian;
+    (void)_ref_pack_is_bigendian;
+#endif
 }

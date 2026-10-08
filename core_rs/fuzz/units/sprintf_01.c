@@ -2,10 +2,13 @@
  * Differential fuzz: sprintf.c leaf functions
  * (core_rs/src/sprintf.rs) against original C.
  *
- * FUZZ-EXTRACT: sprintf.c sign_bits fmt_setup ruby_ultoa
+ * FUZZ-EXTRACT: sprintf.c FLAGS:68-76 sign_bits HEXDIGITS:1040-1040 fmt_setup ruby_ultoa
+ * FUZZ-EXTRACT: vsnprintf.c TO_CHAR:338-338 BSD__ultoa
  */
 #define FUZZ_UNIT "sprintf_01"
 #include "ruby/ruby.h"
+#include "ruby/util.h"
+#include "internal.h"
 #include FUZZ_REF
 #include "fuzz.h"
 
@@ -22,7 +25,7 @@ fuzz_one(void)
     int base = (int)fuzz_below(20);
     char p_str[2] = { fuzz_one_in(2) ? 'X' : 'x', '\0' };
     char c_sb = ref_sign_bits(base, p_str);
-    char rs_sb = rs_rb_core_sprintf_sign_bits(base, p_str);
+    char rs_sb = rs_rb_core_sprintf_sign_bits((int)fuzz_rs_long(base), p_str);
     FUZZ_EQ("sign_bits", c_sb, rs_sb);
 
     // 2. ruby_ultoa
@@ -35,7 +38,7 @@ fuzz_one(void)
     char *rs_end = rs_buf + MAXLEN;
 
     char *c_res = ref_ruby_ultoa(val, c_end, ult_base, flags);
-    char *rs_res = rs_rb_core_sprintf_ruby_ultoa(val, rs_end, ult_base, flags);
+    char *rs_res = rs_rb_core_sprintf_ruby_ultoa((unsigned long)fuzz_rs_long(val), rs_end, ult_base, flags);
 
     long c_len = (long)(c_end - c_res);
     long rs_len = (long)(rs_end - rs_res);
@@ -51,7 +54,7 @@ fuzz_one(void)
     char c_fbuf[MAXLEN], rs_buf2[MAXLEN];
 
     char *c_fptr = ref_fmt_setup(c_fbuf, MAXLEN, spec, flags, width, prec);
-    char *rs_fptr = rs_rb_core_sprintf_fmt_setup(rs_buf2, MAXLEN, spec, flags, width, prec);
+    char *rs_fptr = rs_rb_core_sprintf_fmt_setup(rs_buf2, MAXLEN, spec, flags, (int)fuzz_rs_long(width), prec);
 
     long c_flen = (long)(c_fbuf + MAXLEN - c_fptr);
     long rs_flen = (long)(rs_buf2 + MAXLEN - rs_fptr);

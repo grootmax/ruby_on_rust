@@ -960,6 +960,10 @@ VALUE
 rb_strftime(const char *format, size_t format_len, rb_encoding *enc,
 	    VALUE time, const struct vtm *vtm, VALUE timev, int gmt)
 {
+#if USE_RUST_PORTS
+	volatile void *volatile _ref_strftime_isleap = (void *)rb_core_strftime_isleap;
+	(void)_ref_strftime_isleap;
+#endif
 	VALUE buff = create_buffer(enc);
 	buff = rb_strftime_with_timespec(buff, format, format_len, enc,
 					 time, vtm, timev, NULL, gmt,
