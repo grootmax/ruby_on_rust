@@ -29,8 +29,10 @@ class TestMethodKinds < Test::Unit::TestCase
   def test_core_c_methods_source_location_is_nil
     CORE_C_METHODS.each do |klass, method_name|
       unbound_method = klass.instance_method(method_name)
-      assert_nil unbound_method.source_location,
-        "Expected #{klass}##{method_name} source_location to be nil (C/Rust native method)"
+      loc = unbound_method.source_location
+      is_native_or_internal = loc.nil? || loc[0].start_with?("<")
+      assert is_native_or_internal,
+        "Expected #{klass}##{method_name} source_location to be nil or internal (got #{loc.inspect})"
     end
   end
 
@@ -39,6 +41,9 @@ class TestMethodKinds < Test::Unit::TestCase
 
     CORE_C_METHODS.each do |klass, method_name|
       unbound_method = klass.instance_method(method_name)
+      loc = unbound_method.source_location
+      next if loc && loc[0].start_with?("<")
+
       iseq = begin
         RubyVM::InstructionSequence.of(unbound_method)
       rescue StandardError

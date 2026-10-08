@@ -23,20 +23,67 @@ class MethodKindsInspector
     @total_methods = 0
     @c_methods = 0
     @ruby_methods = 0
-    @stdlib_dirs = [
+
+    repo_root = File.expand_path("..", __dir__)
+    raw_dirs = [
+      RbConfig::CONFIG["prefix"],
       RbConfig::CONFIG["rubylibdir"],
       RbConfig::CONFIG["archlibdir"],
       RbConfig::CONFIG["vendordir"],
       RbConfig::CONFIG["sitedir"],
-      RbConfig::CONFIG["rubyarchhdrdir"]
-    ].compact.reject(&:empty?)
+      RbConfig::CONFIG["sitelibdir"],
+      RbConfig::CONFIG["vendorlibdir"],
+      RbConfig::CONFIG["sitearchlibdir"],
+      RbConfig::CONFIG["vendorarchlibdir"],
+      RbConfig::CONFIG["rubyhdrdir"],
+      RbConfig::CONFIG["rubyarchhdrdir"],
+      RbConfig::CONFIG["libdir"],
+      File.join(repo_root, "lib"),
+      File.join(repo_root, "prelude"),
+      File.join(repo_root, "ast")
+    ]
+    if defined?(Gem)
+      raw_dirs << Gem.dir if Gem.respond_to?(:dir)
+      raw_dirs << Gem.default_dir if Gem.respond_to?(:default_dir)
+      raw_dirs.concat(Gem.path) if Gem.respond_to?(:path) && Gem.path.is_a?(Array)
+    end
+
+    dirs = Set.new
+    raw_dirs.compact.reject(&:empty?).each do |d|
+      dirs.add(d)
+      begin
+        dirs.add(File.expand_path(d))
+      rescue StandardError
+      end
+      begin
+        dirs.add(File.realpath(d))
+      rescue StandardError
+      end
+    end
+    @stdlib_dirs = dirs.to_a
   end
 
   def system_library?(path)
-    return true if path.start_with?("<internal:")
-    return true if path.include?("rubygems")
+    return true if path.start_with?("<")
+    return true if path.include?("rubygems") || path.include?("bundler")
 
-    @stdlib_dirs.any? { |dir| path.start_with?(dir) }
+    expanded_path = begin
+      File.expand_path(path)
+    rescue StandardError
+      path
+    end
+
+    real_path = begin
+      File.realpath(path)
+    rescue StandardError
+      expanded_path
+    end
+
+    @stdlib_dirs.any? do |dir|
+      path.start_with?(dir) ||
+        expanded_path.start_with?(dir) ||
+        real_path.start_with?(dir)
+    end
   end
 
   def discover_targets
