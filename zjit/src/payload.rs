@@ -60,135 +60,8 @@ pub struct IseqVersion {
     pub incoming: Vec<IseqCallRef>,
 }
 
-/// We use a raw pointer wrapper instead of Rc to save space for refcount.
-/// Safe handle wrapping a non-null pointer to an IseqVersion, encapsulating unsafe
-/// raw pointer dereferences behind audited boundary methods.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[repr(transparent)]
-pub struct IseqVersionRef(NonNull<IseqVersion>);
-
-impl IseqVersionRef {
-    /// Create an `IseqVersionRef` from a `NonNull<IseqVersion>`.
-    pub fn from_non_null(ptr: NonNull<IseqVersion>) -> Self {
-        Self(ptr)
-    }
-
-    /// Return the underlying raw pointer.
-    pub fn as_ptr(&self) -> *mut IseqVersion {
-        self.0.as_ptr()
-    }
-
-    /// Returns a reference to the underlying `IseqVersion`.
-    /// SAFETY: The caller must ensure the underlying `IseqVersion` pointer remains valid.
-    #[inline]
-    pub unsafe fn as_ref<'a>(&self) -> &'a IseqVersion {
-        unsafe { self.0.as_ref() }
-    }
-
-    /// Returns a mutable reference to the underlying `IseqVersion`.
-    /// SAFETY: The caller must ensure exclusive mutable access to the underlying `IseqVersion`.
-    #[inline]
-    pub unsafe fn as_mut<'a>(&mut self) -> &'a mut IseqVersion {
-        unsafe { self.0.as_mut() }
-    }
-
-    /// Get the associated ISEQ pointer.
-    pub fn iseq(&self) -> IseqPtr {
-        unsafe { self.0.as_ref().iseq }
-    }
-
-    /// Set the associated ISEQ pointer.
-    pub fn set_iseq(&self, iseq: IseqPtr) {
-        unsafe { (*self.0.as_ptr()).iseq = iseq; }
-    }
-
-    /// Clear the associated ISEQ pointer to null.
-    pub fn clear_iseq(&self) {
-        unsafe { (*self.0.as_ptr()).iseq = std::ptr::null(); }
-    }
-
-    /// Get the compilation status.
-    pub fn status(&self) -> &IseqStatus {
-        unsafe { &self.0.as_ref().status }
-    }
-
-    /// Set the compilation status.
-    pub fn set_status(&self, status: IseqStatus) {
-        unsafe { (*self.0.as_ptr()).status = status; }
-    }
-
-    /// Check if this version was invalidated.
-    pub fn is_invalidated(&self) -> bool {
-        unsafe { self.0.as_ref().status == IseqStatus::Invalidated }
-    }
-
-    /// Mark this version as invalidated.
-    pub fn set_invalidated(&self) {
-        self.set_status(IseqStatus::Invalidated);
-    }
-
-    /// Get a slice of GC offsets.
-    pub fn gc_offsets(&self) -> &[CodePtr] {
-        unsafe { &self.0.as_ref().gc_offsets }
-    }
-
-    /// Extend GC offsets with new code pointers.
-    pub fn extend_gc_offsets(&self, offsets: &[CodePtr]) {
-        unsafe { (*self.0.as_ptr()).gc_offsets.extend_from_slice(offsets); }
-    }
-
-    /// Retain GC offsets matching the predicate `f`.
-    pub fn retain_gc_offsets<F>(&self, f: F)
-    where
-        F: FnMut(&CodePtr) -> bool,
-    {
-        unsafe { (*self.0.as_ptr()).gc_offsets.retain(f); }
-    }
-
-    /// Get incoming JIT-to-JIT calls.
-    pub fn incoming(&self) -> &[IseqCallRef] {
-        unsafe { &self.0.as_ref().incoming }
-    }
-
-    /// Push an incoming JIT-to-JIT call.
-    pub fn push_incoming(&self, iseq_call: IseqCallRef) {
-        unsafe { (*self.0.as_ptr()).incoming.push(iseq_call); }
-    }
-
-    /// Get outgoing JIT-to-JIT calls.
-    pub fn outgoing(&self) -> &[IseqCallRef] {
-        unsafe { &self.0.as_ref().outgoing }
-    }
-
-    /// Extend outgoing JIT-to-JIT calls.
-    pub fn extend_outgoing(&self, iseq_calls: Vec<IseqCallRef>) {
-        unsafe { (*self.0.as_ptr()).outgoing.extend(iseq_calls); }
-    }
-
-    /// Update ISEQ and call references for GC compaction.
-    pub fn update_gc_references(&self, gc_location: unsafe fn(VALUE) -> VALUE) {
-        unsafe {
-            let version = &mut *self.0.as_ptr();
-            version.iseq = gc_location(version.iseq.into()).as_iseq();
-
-            for iseq_call in version.incoming.iter_mut() {
-                let old_iseq = iseq_call.iseq.get();
-                let new_iseq = gc_location(VALUE(old_iseq as usize)).0 as IseqPtr;
-                if old_iseq != new_iseq {
-                    iseq_call.iseq.set(new_iseq);
-                }
-            }
-
-            for iseq_call in version.outgoing.iter_mut() {
-                let old_iseq = iseq_call.iseq.get();
-                let new_iseq = gc_location(VALUE(old_iseq as usize)).0 as IseqPtr;
-                if old_iseq != new_iseq {
-                    iseq_call.iseq.set(new_iseq);
-                }
-            }
-        }
-    }
-}
+/// We use a raw pointer instead of Rc to save space for refcount
+pub type IseqVersionRef = NonNull<IseqVersion>;
 
 impl IseqVersion {
     /// Check if this version was invalidated
@@ -206,8 +79,7 @@ impl IseqVersion {
             incoming: vec![],
         };
         let version_ptr = Box::into_raw(Box::new(version));
-        let non_null = NonNull::new(version_ptr).expect("no null from Box");
-        IseqVersionRef::from_non_null(non_null)
+        NonNull::new(version_ptr).expect("no null from Box")
     }
 }
 

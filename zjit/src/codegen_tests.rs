@@ -141,8 +141,8 @@ fn test_function_stub_profiles_before_compiling() {
 
     let entry_iseq = get_method_iseq("self", "zjit_profile_stub_entry");
     let entry_payload = get_or_create_iseq_payload(entry_iseq);
-    let entry_version = entry_payload.versions.last().unwrap();
-    assert_eq!(1, entry_version.outgoing().len(), "expected a JIT-to-JIT function stub");
+    let entry_version = unsafe { entry_payload.versions.last().unwrap().as_ref() };
+    assert_eq!(1, entry_version.outgoing.len(), "expected a JIT-to-JIT function stub");
 
     let target_iseq = get_method_iseq("1", "zjit_profile_stub_target");
     assert!(get_or_create_iseq_payload(target_iseq).versions.is_empty());
@@ -207,14 +207,14 @@ fn test_recompile_exit_invalidates_on_first_exit() {
     let iseq = get_method_iseq("self", "recompile_on_first_exit");
     let payload = get_or_create_iseq_payload(iseq);
     assert_eq!(1, payload.versions.len());
-    assert!(!payload.versions.last().unwrap().is_invalidated());
+    assert!(!unsafe { payload.versions.last().unwrap().as_ref() }.is_invalidated());
 
     // With --zjit-num-exits-until-invalidate=1, the first recompile exit invalidates the version right
     // away, so subsequent calls re-profile every instruction in the interpreter before recompiling.
     eval("recompile_on_first_exit(1.5, 2.5)");
     let payload = get_or_create_iseq_payload(iseq);
     assert_eq!(1, payload.versions.len());
-    assert!(payload.versions.last().unwrap().is_invalidated());
+    assert!(unsafe { payload.versions.last().unwrap().as_ref() }.is_invalidated());
 }
 
 #[test]
@@ -230,21 +230,21 @@ fn test_recompile_exit_waits_for_exit_budget() {
     let iseq = get_method_iseq("self", "recompile_exit_budget");
     let payload = get_or_create_iseq_payload(iseq);
     assert_eq!(1, payload.versions.len());
-    assert!(!payload.versions.last().unwrap().is_invalidated());
+    assert!(!unsafe { payload.versions.last().unwrap().as_ref() }.is_invalidated());
 
     // The first two recompile exits only decrement the budget. The compiled version keeps running.
     for _ in 0..2 {
         eval("recompile_exit_budget(1.5, 2.5)");
         let payload = get_or_create_iseq_payload(iseq);
         assert_eq!(1, payload.versions.len());
-        assert!(!payload.versions.last().unwrap().is_invalidated());
+        assert!(!unsafe { payload.versions.last().unwrap().as_ref() }.is_invalidated());
     }
 
     // The third recompile exit exhausts the budget and invalidates the version.
     eval("recompile_exit_budget(1.5, 2.5)");
     let payload = get_or_create_iseq_payload(iseq);
     assert_eq!(1, payload.versions.len());
-    assert!(payload.versions.last().unwrap().is_invalidated());
+    assert!(unsafe { payload.versions.last().unwrap().as_ref() }.is_invalidated());
 }
 
 #[test]
@@ -270,7 +270,7 @@ fn test_function_stub_reprofiles_after_invalidation() {
     let target_iseq = get_method_iseq("self", "stub_reprofile_target");
     let target_payload = get_or_create_iseq_payload(target_iseq);
     assert_eq!(1, target_payload.versions.len());
-    assert!(!target_payload.versions.last().unwrap().is_invalidated());
+    assert!(!unsafe { target_payload.versions.last().unwrap().as_ref() }.is_invalidated());
 
     // The first Float argument misses the Fixnum guard in the callee, and the
     // recompile exit invalidates the callee right away, re-stubbing the
@@ -278,7 +278,7 @@ fn test_function_stub_reprofiles_after_invalidation() {
     assert_eq!(Qtrue, eval("stub_reprofile_entry(1.5) == 2.5"));
     let target_payload = get_or_create_iseq_payload(target_iseq);
     assert_eq!(1, target_payload.versions.len());
-    assert!(target_payload.versions.last().unwrap().is_invalidated());
+    assert!(unsafe { target_payload.versions.last().unwrap().as_ref() }.is_invalidated());
 
     // Every stub hit in the profiling window should interpret the invalidated
     // callee without recompiling it.
@@ -7859,7 +7859,7 @@ fn test_max_iseq_versions() {
     assert_eq!(payload.versions.len(), max_iseq_versions());
 
     // The last call should not discard the JIT code
-    assert!(matches!(payload.versions.last().unwrap().status(), IseqStatus::Compiled(_)));
+    assert!(matches!(unsafe { payload.versions.last().unwrap().as_ref() }.status, IseqStatus::Compiled(_)));
 }
 
 #[test]
@@ -9300,8 +9300,8 @@ fn test_regression_stub_frame_sp_published_for_gc() {
     // through a JIT-to-JIT function stub.
     let caller_iseq = get_method_iseq("self", "zjit_stub_gc_caller");
     let caller_payload = get_or_create_iseq_payload(caller_iseq);
-    let caller_version = caller_payload.versions.last().unwrap();
-    assert_eq!(1, caller_version.outgoing().len(), "expected a JIT-to-JIT function stub");
+    let caller_version = unsafe { caller_payload.versions.last().unwrap().as_ref() };
+    assert_eq!(1, caller_version.outgoing.len(), "expected a JIT-to-JIT function stub");
 }
 
 #[test]
@@ -9372,6 +9372,6 @@ fn test_regression_stub_frame_block_code_cleared_for_gc() {
     // through a JIT-to-JIT function stub.
     let caller_iseq = get_method_iseq("self", "zjit_bc_caller");
     let caller_payload = get_or_create_iseq_payload(caller_iseq);
-    let caller_version = caller_payload.versions.last().unwrap();
-    assert_eq!(1, caller_version.outgoing().len(), "expected a JIT-to-JIT function stub");
+    let caller_version = unsafe { caller_payload.versions.last().unwrap().as_ref() };
+    assert_eq!(1, caller_version.outgoing.len(), "expected a JIT-to-JIT function stub");
 }

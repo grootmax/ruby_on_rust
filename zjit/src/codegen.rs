@@ -90,7 +90,7 @@ impl JITState {
 
     /// Get the ISEQ for the version currently being compiled.
     fn iseq(&self) -> IseqPtr {
-        self.version.iseq()
+        unsafe { self.version.as_ref().iseq }
     }
 
     /// Find or create a label for a given BlockId
@@ -262,16 +262,16 @@ fn gen_iseq_entry_point(cb: &mut CodeBlock, iseq: IseqPtr, jit_exception: bool) 
 /// TODO: evolve this into a general `handle_event(iseq, event)` state machine that
 /// handles all compile lifecycle events (interpreter profiles, JIT profiles, invalidation,
 /// GC) so that all compile/recompile tuning decisions live in one place.
-pub fn invalidate_iseq_version(cb: &mut CodeBlock, iseq: IseqPtr, version: IseqVersionRef) {
+pub fn invalidate_iseq_version(cb: &mut CodeBlock, iseq: IseqPtr, version: &mut IseqVersionRef) {
     let payload = get_or_create_iseq_payload(iseq);
-    if !version.is_invalidated()
+    if !unsafe { version.as_ref() }.is_invalidated()
         && payload.versions.len() < max_iseq_versions()
     {
-        version.set_invalidated();
+        unsafe { version.as_mut() }.status = IseqStatus::Invalidated;
         unsafe { rb_iseq_reset_jit_func(iseq) };
 
         // Recompile JIT-to-JIT calls into the invalidated ISEQ
-        for incoming in version.incoming().iter() {
+        for incoming in unsafe { version.as_ref() }.incoming.iter() {
             if let Err(err) = gen_iseq_call(cb, incoming) {
                 debug!("{err:?}: gen_iseq_call failed during invalidation: {}", iseq_get_location(incoming.iseq.get(), 0));
             }
@@ -342,7 +342,7 @@ pub fn gen_entry_trampoline(cb: &mut CodeBlock) -> Result<CodePtr, CompileError>
 fn gen_iseq(cb: &mut CodeBlock, iseq: IseqPtr, function: Option<&Function>) -> Result<IseqCodePtrs, CompileError> {
     // Return an existing pointer if it's already compiled
     let payload = get_or_create_iseq_payload(iseq);
-    let last_status = payload.versions.last().map(|version| version.status());
+    let last_status = payload.versions.last().map(|version| &unsafe { version.as_ref() }.status);
     match last_status {
         Some(IseqStatus::Compiled(code_ptrs)) => return Ok(code_ptrs.clone()),
         Some(IseqStatus::CantCompile(err)) => return Err(err.clone()),
@@ -355,7 +355,7 @@ fn gen_iseq(cb: &mut CodeBlock, iseq: IseqPtr, function: Option<&Function>) -> R
 
     // Compile the ISEQ. When function is None, this is a lazy compile
     // from a stub hit -- wrap in a trace event covering the full compile.
-    let version = IseqVersion::new(iseq);
+    let mut version = IseqVersion::new(iseq);
     let code_ptrs = if function.is_none() {
         trace_compile_phase(&iseq_get_location(iseq, 0), || gen_iseq_body(cb, iseq, version, function))
     } else {
@@ -363,13 +363,13 @@ fn gen_iseq(cb: &mut CodeBlock, iseq: IseqPtr, function: Option<&Function>) -> R
     };
     match &code_ptrs {
         Ok(code_ptrs) => {
-            version.set_status(IseqStatus::Compiled(code_ptrs.clone()));
+            unsafe { version.as_mut() }.status = IseqStatus::Compiled(code_ptrs.clone());
             incr_counter!(compiled_iseq_count);
             // Give the new version a fresh budget of recompile exits. See exit_recompile().
             payload.num_exits_until_invalidate = get_option!(num_exits_until_invalidate);
         }
         Err(err) => {
-            version.set_status(IseqStatus::CantCompile(err.clone()));
+            unsafe { version.as_mut() }.status = IseqStatus::CantCompile(err.clone());
             incr_counter!(failed_iseq_count);
         }
     }
@@ -378,7 +378,7 @@ fn gen_iseq(cb: &mut CodeBlock, iseq: IseqPtr, function: Option<&Function>) -> R
 }
 
 /// Compile an ISEQ into machine code
-fn gen_iseq_body(cb: &mut CodeBlock, iseq: IseqPtr, version: IseqVersionRef, function: Option<&Function>) -> Result<IseqCodePtrs, CompileError> {
+fn gen_iseq_body(cb: &mut CodeBlock, iseq: IseqPtr, mut version: IseqVersionRef, function: Option<&Function>) -> Result<IseqCodePtrs, CompileError> {
     // If we ran out of code region, we shouldn't attempt to generate new code.
     if cb.has_dropped_bytes() {
         return Err(CompileError::OutOfMemory);
@@ -408,7 +408,7 @@ fn gen_iseq_body(cb: &mut CodeBlock, iseq: IseqPtr, version: IseqVersionRef, fun
         })?;
 
     // Prepare for GC
-    version.extend_outgoing(iseq_calls);
+    unsafe { version.as_mut() }.outgoing.extend(iseq_calls);
     append_gc_offsets(iseq, version, &gc_offsets);
     Ok(iseq_code_ptrs)
 }
@@ -3848,7 +3848,7 @@ c_callable! {
             let compiled_iseq: IseqPtr = compiled_iseq_raw.as_iseq();
             let payload = get_or_create_iseq_payload(compiled_iseq);
             let already_done = payload.versions.last()
-                .map_or(false, |v| v.is_invalidated())
+                .map_or(false, |v| unsafe { v.as_ref() }.is_invalidated())
                 || payload.versions.len() >= max_iseq_versions();
             if already_done {
                 return;
@@ -3864,7 +3864,7 @@ c_callable! {
         with_vm_lock(src_loc!(), || {
             let compiled_iseq: IseqPtr = compiled_iseq_raw.as_iseq();
             let payload = get_or_create_iseq_payload(compiled_iseq);
-            if let Some(&version) = payload.versions.last() {
+            if let Some(version) = payload.versions.last_mut() {
                 let cb = ZJITState::get_code_block();
                 invalidate_iseq_version(cb, compiled_iseq, version);
                 cb.mark_all_executable();
@@ -3995,7 +3995,7 @@ c_callable! {
             let cme = unsafe { rb_vm_frame_method_entry(cfp) };
             payload.self_is_heap_object = !cme.is_null()
                 && iseq_self_is_heap_object(iseq, unsafe { (*cme).owner });
-            let last_status = payload.versions.last().map(|version| version.status());
+            let last_status = payload.versions.last().map(|version| &unsafe { version.as_ref() }.status);
             let compile_error = match last_status {
                 Some(IseqStatus::CantCompile(err)) => Some(err),
                 _ if cb.has_dropped_bytes() => Some(&CompileError::OutOfMemory),
@@ -4024,8 +4024,8 @@ c_callable! {
             // Otherwise, attempt to compile the ISEQ. We have to mark_all_executable() beyond this point.
             let code_ptr = with_time_stat(compile_time_ns, || function_stub_hit_body(cb, &iseq_call));
             if code_ptr.is_ok() {
-                if let Some(version) = payload.versions.last() {
-                    version.push_incoming(iseq_call);
+                if let Some(version) = payload.versions.last_mut() {
+                    unsafe { version.as_mut() }.incoming.push(iseq_call);
                 }
             }
             let code_ptr = code_ptr.unwrap_or_else(|compile_error| {

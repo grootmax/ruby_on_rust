@@ -1,5 +1,6 @@
 //! This module is responsible for marking/moving objects on GC.
 
+use std::ptr::null;
 use std::{ffi::c_void, ops::Range};
 use crate::{cruby::*, state::ZJITState, stats::with_time_stat, virtualmem::CodePtr};
 use crate::payload::{IseqPayload, IseqVersionRef, get_iseq_payload_ptr};
@@ -65,7 +66,7 @@ pub extern "C" fn rb_zjit_iseq_free(iseq: IseqPtr) {
     // Clear IseqVersion references. Patch points may hold raw pointers to them, so
     // they have to outlive the ISEQ. They're dropped when the assumption is broken.
     for &version in payload.versions.iter() {
-        version.clear_iseq();
+        unsafe { (*version.as_ptr()).iseq = null() };
     }
 
     // Free the IseqPayload.
@@ -119,7 +120,7 @@ fn iseq_mark(payload: &IseqPayload) {
     // Mark objects baked in JIT code
     let cb = ZJITState::get_code_block();
     for version in payload.versions.iter() {
-        for &offset in version.gc_offsets().iter() {
+        for &offset in unsafe { version.as_ref() }.gc_offsets.iter() {
             let value_ptr: *const u8 = offset.raw_ptr(cb);
             // Creating an unaligned pointer is well defined unlike in C.
             let value_ptr = value_ptr as *const VALUE;
@@ -147,14 +148,33 @@ fn iseq_update_references(payload: &mut IseqPayload) {
     }
 }
 
-fn iseq_version_update_references(version: IseqVersionRef) {
-    version.update_gc_references(|val| unsafe { rb_gc_location(val) });
+fn iseq_version_update_references(mut version: IseqVersionRef) {
+    // Move ISEQ in the payload
+    unsafe { version.as_mut() }.iseq = unsafe { rb_gc_location(version.as_ref().iseq.into()) }.as_iseq();
+
+    // Move ISEQ references in incoming IseqCalls
+    for iseq_call in unsafe { version.as_mut() }.incoming.iter_mut() {
+        let old_iseq = iseq_call.iseq.get();
+        let new_iseq = unsafe { rb_gc_location(VALUE(old_iseq as usize)) }.0 as IseqPtr;
+        if old_iseq != new_iseq {
+            iseq_call.iseq.set(new_iseq);
+        }
+    }
+
+    // Move ISEQ references in outgoing IseqCalls
+    for iseq_call in unsafe { version.as_mut() }.outgoing.iter_mut() {
+        let old_iseq = iseq_call.iseq.get();
+        let new_iseq = unsafe { rb_gc_location(VALUE(old_iseq as usize)) }.0 as IseqPtr;
+        if old_iseq != new_iseq {
+            iseq_call.iseq.set(new_iseq);
+        }
+    }
 
     // Move objects baked in JIT code.
     // The code region is already writable because rb_zjit_mark_all_writable() was called
     // before the GC update_references phase. We write directly to avoid per-page mprotect calls.
     let cb = ZJITState::get_code_block();
-    for &offset in version.gc_offsets().iter() {
+    for &offset in unsafe { version.as_ref() }.gc_offsets.iter() {
         let value_ptr: *const u8 = offset.raw_ptr(cb);
         // Creating an unaligned pointer is well defined unlike in C.
         let value_ptr = value_ptr as *const VALUE;
@@ -171,8 +191,8 @@ fn iseq_version_update_references(version: IseqVersionRef) {
 }
 
 /// Append a set of gc_offsets to the iseq's payload
-pub fn append_gc_offsets(iseq: IseqPtr, version: IseqVersionRef, offsets: &[CodePtr]) {
-    version.extend_gc_offsets(offsets);
+pub fn append_gc_offsets(iseq: IseqPtr, mut version: IseqVersionRef, offsets: &Vec<CodePtr>) {
+    unsafe { version.as_mut() }.gc_offsets.extend(offsets);
 
     // Call writebarrier on each newly added value
     let cb = ZJITState::get_code_block();
@@ -190,8 +210,8 @@ pub fn append_gc_offsets(iseq: IseqPtr, version: IseqVersionRef, offsets: &[Code
 /// We do this when invalidation rewrites some code with a jump instruction
 /// and GC offsets are corrupted by the rewrite, assuming no on-stack code
 /// will step into the instruction with the GC offsets after invalidation.
-pub fn remove_gc_offsets(version: IseqVersionRef, removed_range: &Range<CodePtr>) {
-    version.retain_gc_offsets(|&gc_offset| {
+pub fn remove_gc_offsets(mut version: IseqVersionRef, removed_range: &Range<CodePtr>) {
+    unsafe { version.as_mut() }.gc_offsets.retain(|&gc_offset| {
         let offset_range = gc_offset..(gc_offset.add_bytes(SIZEOF_VALUE));
         !ranges_overlap(&offset_range, removed_range)
     });
