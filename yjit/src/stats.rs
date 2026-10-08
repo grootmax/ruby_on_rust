@@ -2,6 +2,7 @@
 //! See the --yjit-stats command-line option
 
 use std::ptr::addr_of_mut;
+use std::sync::atomic::Ordering;
 use std::time::Instant;
 use std::collections::HashMap;
 
@@ -32,7 +33,7 @@ pub static mut rb_yjit_max_compile_time_ns: u64 = 0;
 
 /// The number of bytes YJIT has allocated on the Rust heap.
 pub fn yjit_alloc_size() -> usize {
-    jit::GLOBAL_ALLOCATOR.metrics().allocated_bytes()
+    jit::GLOBAL_ALLOCATOR.alloc_size.load(Ordering::SeqCst)
 }
 
 /// Mapping of C function / ISEQ name to integer indices

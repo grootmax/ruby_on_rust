@@ -1,6 +1,7 @@
 //! Counters and associated methods for events when ZJIT is run.
 
 use std::time::Instant;
+use std::sync::atomic::Ordering;
 use crate::options::OPTIONS;
 
 // test binaries always bring it in as a cargo dependency
@@ -993,7 +994,7 @@ pub fn with_time_stat<F, R>(counter: Counter, func: F) -> R where F: FnOnce() ->
 
 /// The number of bytes ZJIT has allocated on the Rust heap.
 pub fn zjit_alloc_bytes() -> usize {
-    jit::GLOBAL_ALLOCATOR.metrics().allocated_bytes()
+    jit::GLOBAL_ALLOCATOR.alloc_size.load(Ordering::SeqCst)
 }
 
 /// Record a Perfetto duration event spanning the execution of `func`.
