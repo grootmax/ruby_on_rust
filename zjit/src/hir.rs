@@ -2471,8 +2471,7 @@ impl<'a> std::fmt::Display for InsnPrinter<'a> {
                 } else if op_type == DEFINED_CONST_FROM {
                     write!(f, "constant-from")?;
                 } else {
-                    let str_val = unsafe { rb_iseq_defined_string(op_type) };
-                    write!(f, "{}", String::from_utf8_lossy(unsafe { str_val.as_rstring_byte_slice().unwrap() }))?;
+                    write!(f, "{}", String::from_utf8_lossy(unsafe { rb_iseq_defined_string(op_type).as_rstring_byte_slice().unwrap() }))?;
                 };
                 write!(f, ", {v}")
             }
