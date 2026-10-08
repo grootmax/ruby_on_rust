@@ -62,6 +62,7 @@ void rb_core_complex_skip_ws(const char **s);
 
 /* vm_exec.c (core_rs/src/vm_exec.rs) */
 VALUE rb_core_vm_exec_vm_exec_core(struct rb_execution_context_struct *ec);
+VALUE rb_core_vm_exec_loop(struct rb_execution_context_struct *ec);
 
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop

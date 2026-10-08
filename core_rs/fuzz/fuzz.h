@@ -252,4 +252,14 @@ main(int argc, char **argv)
     return fuzz_mismatches == 0 ? 0 : 1;
 }
 
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((weak))
+#endif
+unsigned long long
+rb_core_vm_exec_loop(void *ec)
+{
+    (void)ec;
+    return 0;
+}
+
 #endif /* CORE_RS_FUZZ_H */
