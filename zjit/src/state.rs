@@ -3,7 +3,7 @@
 use crate::codegen::{gen_entry_trampoline, gen_exit_trampoline, gen_function_stub_hit_trampoline, gen_materialize_exit_trampoline, gen_materialize_exit_trampoline_with_counter};
 use crate::cruby::{self, rb_bug_panic_hook, rb_vm_insn_count, src_loc, EcPtr, Qnil, Qtrue, rb_profile_frames, rb_profile_frame_full_label, rb_profile_frame_absolute_path, rb_profile_frame_path, VALUE, VM_INSTRUCTION_SIZE, with_vm_lock, rust_str_to_id, rb_funcallv, rb_const_get, rb_cRubyVM};
 use crate::cruby_methods;
-use cruby::{CmeAccess, ID, rb_callable_method_entry, rb_gc_register_mark_object, ruby_str_to_rust_string_result};
+use cruby::{ID, rb_callable_method_entry, get_def_method_serial, rb_gc_register_mark_object, ruby_str_to_rust_string_result};
 use std::sync::atomic::Ordering;
 use crate::invariants::Invariants;
 use crate::asm::CodeBlock;
@@ -351,7 +351,7 @@ pub fn zjit_module_method_match_serial(method_id: ID, expected_serial: &AtomicUs
     if cme.is_null() {
         false
     } else {
-        let serial = unsafe { cme.def_method_serial() };
+        let serial = unsafe { get_def_method_serial((*cme).def) };
         serial == expected_serial.load(std::sync::atomic::Ordering::Relaxed)
     }
 }
@@ -380,17 +380,17 @@ pub extern "C" fn rb_zjit_init_builtin_cmes() {
 
         let cme = rb_callable_method_entry(zjit_module.class_of(), ID!(induce_side_exit_bang));
         assert!(! cme.is_null(), "RubyVM::ZJIT.induce_side_exit! should exist on boot");
-        let serial = cme.def_method_serial();
+        let serial = get_def_method_serial((*cme).def) ;
         INDUCE_SIDE_EXIT_SERIAL.store(serial, Ordering::Relaxed);
 
         let cme = rb_callable_method_entry(zjit_module.class_of(), ID!(induce_compile_failure_bang));
         assert!(! cme.is_null(), "RubyVM::ZJIT.induce_compile_failure! should exist on boot");
-        let serial = cme.def_method_serial();
+        let serial = get_def_method_serial((*cme).def) ;
         INDUCE_COMPILE_FAILURE_SERIAL.store(serial, Ordering::Relaxed);
 
         let cme = rb_callable_method_entry(zjit_module.class_of(), ID!(induce_breakpoint_bang));
         assert!(! cme.is_null(), "RubyVM::ZJIT.induce_breakpoint! should exist on boot");
-        let serial = cme.def_method_serial();
+        let serial = get_def_method_serial((*cme).def) ;
         INDUCE_BREAKPOINT_SERIAL.store(serial, Ordering::Relaxed);
 
         // Root and pin the module since we'll be doing object identity comparisons.

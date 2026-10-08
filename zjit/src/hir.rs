@@ -2044,7 +2044,7 @@ impl<'a> InsnPrinter<'a> {
 fn get_local_var_id(iseq: IseqPtr, level: u32, ep_offset: u32) -> ID {
     let mut current_iseq = iseq;
     for _ in 0..level {
-        current_iseq = unsafe { current_iseq.parent_iseq() };
+        current_iseq = unsafe { rb_get_iseq_body_parent_iseq(current_iseq) };
     }
     let local_idx = ep_offset_to_local_idx(current_iseq, ep_offset);
     unsafe { rb_zjit_local_id(current_iseq, local_idx.try_into().unwrap()) }
@@ -2265,7 +2265,7 @@ impl<'a> std::fmt::Display for InsnPrinter<'a> {
                     Some(BlockHandler::BlockArg) => unreachable!("BlockArg in SendDirect"),
                     None => format!("{:p}", ptr::null::<u8>()),
                 };
-                let method_name = unsafe { cme.called_id() };
+                let method_name = unsafe { (**cme).called_id };
                 write!(f, "SendDirect {recv}, {block}, :{method_name} ({:?})", self.ptr_map.map_ptr(*iseq))?;
                 if *jit_entry_idx != 0 {
                     write!(f, ", jit_entry_idx={jit_entry_idx}")?;
@@ -2274,7 +2274,7 @@ impl<'a> std::fmt::Display for InsnPrinter<'a> {
                 Ok(())
             }
             Insn::PushInlineFrame { recv, iseq, cme, num_args, .. } => {
-                let method_name = unsafe { cme.called_id() };
+                let method_name = unsafe { (**cme).called_id };
                 write!(f, "PushInlineFrame :{method_name}, {recv} ({:?})", self.ptr_map.map_ptr(*iseq))?;
                 write!(f, ", num_args={num_args}")?;
                 Ok(())
@@ -2438,7 +2438,7 @@ impl<'a> std::fmt::Display for InsnPrinter<'a> {
             },
             Insn::CCallWithFrame(insn) => {
                 let CCallWithFrameData { cfunc, recv, args, name, cme, block, .. } = &**insn;
-                write!(f, "CCallWithFrame {recv}, :{}@{:p}", qualified_method_name(unsafe { cme.owner() }, *name), self.ptr_map.map_ptr(*cfunc))?;
+                write!(f, "CCallWithFrame {recv}, :{}@{:p}", qualified_method_name(unsafe { (**cme).owner }, *name), self.ptr_map.map_ptr(*cfunc))?;
                 write_separated!(f, ", ", ", ", args);
                 match block {
                     Some(BlockHandler::BlockIseq(blockiseq)) =>
@@ -2453,7 +2453,7 @@ impl<'a> std::fmt::Display for InsnPrinter<'a> {
             },
             Insn::CCallVariadic(insn) => {
                 let CCallVariadicData { cfunc, recv, args, name, cme, .. } = &**insn;
-                write!(f, "CCallVariadic {recv}, :{}@{:p}", qualified_method_name(unsafe { cme.owner() }, *name), self.ptr_map.map_ptr(*cfunc))?;
+                write!(f, "CCallVariadic {recv}, :{}@{:p}", qualified_method_name(unsafe { (**cme).owner }, *name), self.ptr_map.map_ptr(*cfunc))?;
                 write_separated!(f, ", ", ", ", args);
                 Ok(())
             },
@@ -3124,7 +3124,7 @@ fn iseq_get_return_value(iseq: IseqPtr, captured_opnd: Option<InsnId>, ci_flags:
     }
     // Make sure the leave is the final instruction. Otherwise this is a
     // non-trivial ISEQ that should go through the general inliner.
-    let iseq_size = unsafe { iseq.encoded_size() };
+    let iseq_size = unsafe { get_iseq_encoded_size(iseq) };
     if insn_len(first_insn as usize) + insn_len(second_insn as usize) != iseq_size {
         return None;
     }
@@ -3148,7 +3148,7 @@ fn iseq_get_return_value(iseq: IseqPtr, captured_opnd: Option<InsnId>, ci_flags:
             let local_idx = ep_offset_to_local_idx(iseq, ep_offset);
 
             // Only inline if the local is a parameter (not a method-defined local) as we are indexing args.
-            let param_size = unsafe { iseq.param_size() } as usize;
+            let param_size = unsafe { rb_get_iseq_body_param_size(iseq) } as usize;
             if local_idx >= param_size {
                 return None;
             }
@@ -3198,11 +3198,11 @@ fn can_direct_invoke_block_iseq(iseq: IseqPtr, argc: usize) -> Result<(), SendFa
     if !unsafe { rb_simple_iseq_p(iseq) } {
         return Err(InvokeBlockNotSpecialized);
     }
-    let lead_num = unsafe { iseq.param_lead_num() } as usize;
+    let lead_num = unsafe { rb_get_iseq_body_param_lead_num(iseq) } as usize;
     if argc != lead_num {
         return Err(InvokeBlockNotSpecialized);
     }
-    if argc == 1 && !unsafe { iseq.flags_ambiguous_param0() } {
+    if argc == 1 && !unsafe { rb_get_iseq_flags_ambiguous_param0(iseq) } {
         return Err(InvokeBlockNotSpecialized);
     }
     if crate::codegen::block_iseq_may_throw(iseq) {
@@ -4209,10 +4209,10 @@ impl Function {
         let mut cme = unsafe { rb_callable_method_entry(klass, vm_ci_mid(ci)) };
         if cme.is_null() { return vec![]; }
         cme = unsafe { rb_check_overloaded_cme(cme, ci) };
-        while unsafe { cme.def_type() } == VM_METHOD_TYPE_ALIAS {
+        while unsafe { get_cme_def_type(cme) } == VM_METHOD_TYPE_ALIAS {
             cme = unsafe { rb_aliased_callable_method_entry(cme) };
         }
-        if unsafe { cme.def_type() } != VM_METHOD_TYPE_ISEQ {
+        if unsafe { get_cme_def_type(cme) } != VM_METHOD_TYPE_ISEQ {
             return vec![];
         }
         splat_length_summary.buckets().iter().flatten().copied().collect()
@@ -4308,7 +4308,7 @@ impl Function {
         iseq: IseqPtr,
     ) -> Result<(Vec<SendDirectArg>, u32), SendFallbackReason> {
         let kwarg = caller_args.kwarg;
-        let callee_keyword = unsafe { iseq.param_keyword() };
+        let callee_keyword = unsafe { rb_get_iseq_body_param_keyword(iseq) };
         if callee_keyword.is_null() {
             if kwarg.is_null() {
                 // Neither caller nor callee have keywords - nothing to do
@@ -4613,9 +4613,9 @@ impl Function {
     pub fn assume_expected_cfunc(&mut self, block: BlockId, class: VALUE, method_id: ID, cfunc: *mut c_void, state: InsnId) -> bool {
         let cme = unsafe { rb_callable_method_entry(class, method_id) };
         if cme.is_null() { return false; }
-        let def_type = unsafe { cme.def_type() };
+        let def_type = unsafe { get_cme_def_type(cme) };
         if def_type != VM_METHOD_TYPE_CFUNC { return false; }
-        if unsafe { get_mct_func(cme.def_body_cfunc()) } != cfunc {
+        if unsafe { get_mct_func(get_cme_def_body_cfunc(cme)) } != cfunc {
             return false;
         }
         self.gen_patch_points_for_optimized_ccall(block, class, method_id, cme, state);
@@ -4883,7 +4883,7 @@ impl Function {
                         // Load an overloaded cme if applicable. See vm_search_cc().
                         // It allows you to use a faster ISEQ if possible.
                         cme = unsafe { rb_check_overloaded_cme(cme, ci) };
-                        let visibility = unsafe { cme.visibility() };
+                        let visibility = unsafe { METHOD_ENTRY_VISI(cme) };
                         match (visibility, flags & VM_CALL_FCALL != 0) {
                             (METHOD_VISI_PUBLIC, _) => {}
                             (METHOD_VISI_PRIVATE, true) => {}
@@ -4893,10 +4893,10 @@ impl Function {
                                 self.push_insn_id(block, insn_id); continue;
                             }
                         }
-                        let mut def_type = unsafe { cme.def_type() };
+                        let mut def_type = unsafe { get_cme_def_type(cme) };
                         while def_type == VM_METHOD_TYPE_ALIAS {
                             cme = unsafe { rb_aliased_callable_method_entry(cme) };
-                            def_type = unsafe { cme.def_type() };
+                            def_type = unsafe { get_cme_def_type(cme) };
                         }
 
                         // Check if we can optimize `foo(&block)` to a direct send: either `block` is
@@ -4996,7 +4996,7 @@ impl Function {
                             // TODO(max): Allow non-iseq; cache cme
                             // Only specialize positional-positional calls
                             // TODO(max): Handle other kinds of parameter passing
-                            let iseq = unsafe { cme.def_iseq_ptr() };
+                            let iseq = unsafe { get_def_iseq_ptr((*cme).def) };
                             let caller_args = CallerArguments::new(&args, ci);
                             let caller_splat = if let Some(arg_idx) = caller_args.splat_arg_idx {
                                 // Count the profile shape for every caller-splat execution;
@@ -5049,7 +5049,7 @@ impl Function {
                             let replacement = self.try_inline_send_direct(block, Insn::SendDirect(Box::new(SendDirectData { recv, cd, cme, iseq, args: send_args, kw_bits, jit_entry_idx, state: send_state, block: send_block })));
                             self.make_equal_to(insn_id, replacement);
                         } else if !has_block && def_type == VM_METHOD_TYPE_BMETHOD {
-                            let procv = unsafe { cme.def_bmethod_proc() };
+                            let procv = unsafe { rb_get_def_bmethod_proc((*cme).def) };
                             let proc = unsafe { rb_jit_get_proc_ptr(procv) };
                             let proc_block = unsafe { (*proc).block.as_ref() };
                             // Target ISEQ bmethods. Can't handle for example, `define_method(:foo, &:foo)`
@@ -5098,7 +5098,7 @@ impl Function {
 
                             self.push_insn(block, Insn::PatchPoint { invariant: Invariant::MethodRedefined { klass, method: mid, cme }, state });
 
-                            let id = unsafe { cme.def_body_attr_id() };
+                            let id = unsafe { get_cme_def_body_attr_id(cme) };
                             if let Some(profiled_type) = profiled_type {
                                 recv = self.guard_type_recompile(block, recv, Type::from_profiled_type(profiled_type), state, Recompile);
 
@@ -5117,7 +5117,7 @@ impl Function {
                             }
                         } else if let (false, VM_METHOD_TYPE_ATTRSET, &[val]) = (has_block, def_type, args.as_slice()) {
                             self.push_insn(block, Insn::PatchPoint { invariant: Invariant::MethodRedefined { klass, method: mid, cme }, state });
-                            let id = unsafe { cme.def_body_attr_id() };
+                            let id = unsafe { get_cme_def_body_attr_id(cme) };
                             if let Some(profiled_type) = profiled_type {
                                 // TODO: attr_writer SetIvar has a null inline cache and may target a receiver
                                 // operand other than CFP self. Support it with a reprofile strategy that
@@ -5134,7 +5134,7 @@ impl Function {
                             }
                             self.make_equal_to(insn_id, val);
                         } else if !has_block && def_type == VM_METHOD_TYPE_OPTIMIZED {
-                            let opt_type: OptimizedMethodType = unsafe { cme.def_body_optimized_type() }.into();
+                            let opt_type: OptimizedMethodType = unsafe { get_cme_def_body_optimized_type(cme) }.into();
                             match (opt_type, args.as_slice()) {
                                 (OptimizedMethodType::Call, _) => {
                                     if flags & (VM_CALL_ARGS_SPLAT | VM_CALL_KWARG) != 0 {
@@ -5161,7 +5161,7 @@ impl Function {
                                         self.set_dynamic_send_reason(insn_id, ComplexArgPass);
                                         self.push_insn_id(block, insn_id); continue;
                                     }
-                                    let index: i32 = unsafe { cme.def_body_optimized_index() }
+                                    let index: i32 = unsafe { get_cme_def_body_optimized_index(cme) }
                                                     .try_into()
                                                     .unwrap();
                                     // We are going to use an encoding that takes a 4-byte immediate which
@@ -5259,11 +5259,11 @@ impl Function {
                                     None => None,
                                 };
 
-                                let cfunc = unsafe { cme.def_body_cfunc() };
+                                let cfunc = unsafe { get_cme_def_body_cfunc(cme) };
                                 // Find the `argc` (arity) of the C method, which describes the parameters it expects
                                 let cfunc_argc = unsafe { get_mct_argc(cfunc) };
                                 let cfunc_ptr = unsafe { get_mct_func(cfunc) }.cast();
-                                let name = unsafe { cme.called_id() };
+                                let name = unsafe { (*cme).called_id };
 
                                 // Look up annotations
                                 let props = ZJITState::get_method_annotations().get_cfunc_properties(cme);
@@ -5322,7 +5322,7 @@ impl Function {
                                             // Only allow leaf calls if we don't have a block argument
                                             if props.leaf && props.no_gc {
                                                 fun.count(block, Counter::inline_cfunc_optimized_send_count);
-                                                let owner = unsafe { cme.owner() };
+                                                let owner = unsafe { (*cme).owner };
                                                 let ccall = fun.push_insn(block, Insn::CCall { cfunc: cfunc_ptr, recv, args, name, owner, return_type, elidable });
                                                 fun.insn_types[ccall] = fun.infer_type(ccall);
                                                 fun.make_equal_to(send_insn_id, ccall);
@@ -5389,7 +5389,7 @@ impl Function {
                                             // Only allow inline calls if they are leaf, don't allocate, and don't have a block argument
                                             if props.leaf && props.no_gc {
                                                 fun.count(block, Counter::inline_cfunc_optimized_send_count);
-                                                let owner = unsafe { cme.owner() };
+                                                let owner = unsafe { (*cme).owner };
                                                 let ccall = fun.push_insn(block, Insn::CCall { cfunc: cfunc_ptr, recv, args, name, owner, return_type, elidable });
                                                 fun.insn_types[ccall] = fun.infer_type(ccall);
                                                 fun.make_equal_to(send_insn_id, ccall);
@@ -5482,7 +5482,7 @@ impl Function {
                         ) {
                             fun.push_insn(block, Insn::PatchPoint {
                                 invariant: Invariant::MethodRedefined {
-                                    klass: unsafe { super_cme.defined_class() },
+                                    klass: unsafe { (*super_cme).defined_class },
                                     method: mid,
                                     cme: super_cme
                                 },
@@ -5523,7 +5523,7 @@ impl Function {
                         };
 
                         // Don't handle super in a block since that needs a loop to find the running CME.
-                        if frame_state_iseq != unsafe { frame_state_iseq.local_iseq() } {
+                        if frame_state_iseq != unsafe { rb_get_iseq_body_local_iseq(frame_state_iseq) } {
                             self.push_insn_id(block, insn_id);
                             self.set_dynamic_send_reason(insn_id, SuperFromBlock);
                             continue;
@@ -5563,8 +5563,8 @@ impl Function {
                         };
 
                         // Get defined_class and method ID from the profiled CME.
-                        let current_defined_class = unsafe { current_cme.defined_class() };
-                        let mid = unsafe { current_cme.def_original_id() };
+                        let current_defined_class = unsafe { (*current_cme).defined_class };
+                        let mid = unsafe { get_def_original_id((*current_cme).def) };
 
                         // Compute superclass: RCLASS_SUPER(RCLASS_ORIGIN(defined_class))
                         let superclass = unsafe { rb_class_get_superclass(RCLASS_ORIGIN(current_defined_class)) };
@@ -5582,10 +5582,10 @@ impl Function {
                             continue;
                         }
 
-                        let mut def_type = unsafe { super_cme.def_type() };
+                        let mut def_type = unsafe { get_cme_def_type(super_cme) };
                         while def_type == VM_METHOD_TYPE_ALIAS {
                             super_cme = unsafe { rb_aliased_callable_method_entry(super_cme) };
-                            def_type = unsafe { super_cme.def_type() };
+                            def_type = unsafe { get_cme_def_type(super_cme) };
                         }
 
                         let args = match resolved.insn(self) {
@@ -5596,7 +5596,7 @@ impl Function {
                         if def_type == VM_METHOD_TYPE_ISEQ {
                             // Check if the super method's parameters support direct send.
                             // If not, we can't do direct dispatch.
-                            let super_iseq = unsafe { super_cme.def_iseq_ptr() };
+                            let super_iseq = unsafe { get_def_iseq_ptr((*super_cme).def) };
                             // TODO: pass Option<blockiseq> to build_send_direct_args when we start specializing `super { ... }`.
                             let caller_args = CallerArguments::new(&args, ci);
                             let Ok(call) = self.build_send_direct_args(&caller_args, None, super_iseq, false)
@@ -5623,7 +5623,7 @@ impl Function {
                             self.make_equal_to(insn_id, replacement);
 
                         } else if def_type == VM_METHOD_TYPE_CFUNC {
-                            let cfunc = unsafe { super_cme.def_body_cfunc() };
+                            let cfunc = unsafe { get_cme_def_body_cfunc(super_cme) };
                             let cfunc_argc = unsafe { get_mct_argc(cfunc) };
                             let cfunc_ptr = unsafe { get_mct_func(cfunc) }.cast();
 
@@ -5662,8 +5662,8 @@ impl Function {
                                     }
 
                                     // Use CCallWithFrame for the C function.
-                                    let name = unsafe { super_cme.called_id() };
-                                    let owner = unsafe { super_cme.owner() };
+                                    let name = unsafe { (*super_cme).called_id };
+                                    let owner = unsafe { (*super_cme).owner };
                                     let return_type = props.return_type;
                                     let elidable = props.elidable;
                                     // Filter for a leaf and GC free function
@@ -5712,8 +5712,8 @@ impl Function {
                                     }
 
                                     // Use CCallVariadic for the variadic C function.
-                                    let name = unsafe { super_cme.called_id() };
-                                    let owner = unsafe { super_cme.owner() };
+                                    let name = unsafe { (*super_cme).called_id };
+                                    let owner = unsafe { (*super_cme).owner };
                                     let return_type = props.return_type;
                                     let elidable = props.elidable;
                                     // Filter for a leaf and GC free function
@@ -5813,8 +5813,8 @@ impl Function {
         if !cme.is_null() {
             let deny = unsafe { crate::options::OPTIONS.as_ref() }.map(|o| &o.inline_deny);
             if deny.is_some_and(|d| !d.is_empty()) {
-                let owner = unsafe { cme.owner() };
-                let method_id = unsafe { cme.def_original_id() };
+                let owner = unsafe { (*cme).owner };
+                let method_id = unsafe { get_def_original_id((*cme).def) };
                 let qualified = qualified_method_name(owner, method_id);
                 if deny.unwrap().contains(&qualified) {
                     incr_counter!(inline_reject_denied);
@@ -5824,7 +5824,7 @@ impl Function {
         }
 
         // Check callee bytecode size against threshold.
-        let callee_size = unsafe { callee_iseq.encoded_size() } as usize;
+        let callee_size = unsafe { get_iseq_encoded_size(callee_iseq) } as usize;
         if callee_size > threshold {
             incr_counter!(inline_reject_too_large);
             return false;
@@ -6445,8 +6445,8 @@ impl Function {
     }
 
     fn count_not_inlined_cfunc(&mut self, block: BlockId, cme: *const rb_callable_method_entry_t) {
-        let owner = unsafe { cme.owner() };
-        let called_id = unsafe { cme.called_id() };
+        let owner = unsafe { (*cme).owner };
+        let called_id = unsafe { (*cme).called_id };
         let qualified_method_name = qualified_method_name(owner, called_id);
         let not_inlined_cfunc_counter_pointers = ZJITState::get_not_inlined_cfunc_counter_pointers();
         let counter_ptr = not_inlined_cfunc_counter_pointers.entry(qualified_method_name.clone()).or_insert_with(|| Box::new(0));
@@ -6465,8 +6465,8 @@ impl Function {
     }
 
     fn count_not_annotated_cfunc(&mut self, block: BlockId, cme: *const rb_callable_method_entry_t) {
-        let owner = unsafe { cme.owner() };
-        let called_id = unsafe { cme.called_id() };
+        let owner = unsafe { (*cme).owner };
+        let called_id = unsafe { (*cme).called_id };
         let qualified_method_name = qualified_method_name(owner, called_id);
         let not_annotated_cfunc_counter_pointers = ZJITState::get_not_annotated_cfunc_counter_pointers();
         let counter_ptr = not_annotated_cfunc_counter_pointers.entry(qualified_method_name.clone()).or_insert_with(|| Box::new(0));
@@ -8770,7 +8770,7 @@ struct BytecodeInfo {
 }
 
 fn compute_bytecode_info(iseq: *const rb_iseq_t, opt_table: &[u32]) -> BytecodeInfo {
-    let iseq_size = unsafe { iseq.encoded_size() };
+    let iseq_size = unsafe { get_iseq_encoded_size(iseq) };
     let mut insn_idx = 0;
     let mut jump_targets: HashSet<u32> = opt_table.iter().copied().collect();
     while insn_idx < iseq_size {
@@ -8831,14 +8831,14 @@ pub enum ParseError {
 
 /// Return the number of locals in the current ISEQ (includes parameters)
 fn num_locals(iseq: *const rb_iseq_t) -> usize {
-    (unsafe { iseq.local_table_size() }).to_usize()
+    (unsafe { get_iseq_body_local_table_size(iseq) }).to_usize()
 }
 
 /// Number of declared keyword parameters on the callee, or zero if the
 /// callee does not accept any keywords.
 fn callee_kw_num(iseq: *const rb_iseq_t) -> usize {
-    if unsafe { iseq.flags_has_kw() } {
-        let keyword = unsafe { iseq.param_keyword() };
+    if unsafe { rb_get_iseq_flags_has_kw(iseq) } {
+        let keyword = unsafe { rb_get_iseq_body_param_keyword(iseq) };
         if keyword.is_null() {
             0
         } else {
@@ -8852,11 +8852,11 @@ fn callee_kw_num(iseq: *const rb_iseq_t) -> usize {
 /// Local table index of the hidden `kw_bits` storage slot used by
 /// `checkkeyword`, or `None` when the callee has no keyword parameters.
 fn callee_kw_bits_local_idx(iseq: *const rb_iseq_t) -> Option<usize> {
-    if !unsafe { iseq.flags_has_kw() } {
+    if !unsafe { rb_get_iseq_flags_has_kw(iseq) } {
         return None;
     }
 
-    let keyword = unsafe { iseq.param_keyword() };
+    let keyword = unsafe { rb_get_iseq_body_param_keyword(iseq) };
     if keyword.is_null() {
         return None;
     }
@@ -9160,7 +9160,7 @@ fn add_iseq_to_hir(
 
     // Keep compiling blocks until the queue becomes empty
     let mut visited = HashSet::new();
-    let iseq_size = unsafe { iseq.encoded_size() };
+    let iseq_size = unsafe { get_iseq_encoded_size(iseq) };
     while let Some((incoming_state, mut block, mut insn_idx, mut local_inval)) = queue.pop_front() {
         // Compile each block only once
         if visited.contains(&block) { continue; }
@@ -9472,8 +9472,8 @@ fn add_iseq_to_hir(
                     let obj = get_arg(pc, 1);
                     let pushval = get_arg(pc, 2);
                     let v = state.stack_pop()?;
-                    let local_iseq = unsafe { iseq.local_iseq() };
-                    let insn = if op_type == DEFINED_YIELD && unsafe { local_iseq.body_type() } != ISEQ_TYPE_METHOD {
+                    let local_iseq = unsafe { rb_get_iseq_body_local_iseq(iseq) };
+                    let insn = if op_type == DEFINED_YIELD && unsafe { rb_get_iseq_body_type(local_iseq) } != ISEQ_TYPE_METHOD {
                         // `yield` goes to the block handler stowed in the "local" iseq which is
                         // the current iseq or a parent. Only the "method" iseq type can be passed a
                         // block handler. (e.g. `yield` in the top level script is a syntax error.)
@@ -9595,7 +9595,7 @@ fn add_iseq_to_hir(
                     // When a keyword is unspecified past index 32, a hash will be used instead.
                     // This can only happen in iseqs taking more than 32 keywords.
                     // In this case, we side exit to the interpreter.
-                    if unsafe { (*iseq.param_keyword()).num >= VM_KW_SPECIFIED_BITS_MAX.try_into().unwrap() } {
+                    if unsafe {(*rb_get_iseq_body_param_keyword(iseq)).num >= VM_KW_SPECIFIED_BITS_MAX.try_into().unwrap()} {
                         fun.push_insn(block, Insn::SideExit { state: exit_id, reason: Box::new(SideExitReason::TooManyKeywordParameters), recompile: None });
                         break;
                     }
@@ -11094,8 +11094,8 @@ fn compile_jit_entry_state(fun: &mut Function, jit_entry_block: BlockId, jit_ent
     let seen_ep_escape = iseq_seen_ep_escape(iseq);
 
     // If the iseq has keyword parameters, the keyword bits local will be appended to the local table.
-    let kw_bits_idx: Option<usize> = if unsafe { iseq.flags_has_kw() } {
-        let keyword = unsafe { iseq.param_keyword() };
+    let kw_bits_idx: Option<usize> = if unsafe { rb_get_iseq_flags_has_kw(iseq) } {
+        let keyword = unsafe { rb_get_iseq_body_param_keyword(iseq) };
         if !keyword.is_null() {
             Some(unsafe { (*keyword).bits_start } as usize)
         } else {

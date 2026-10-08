@@ -277,9 +277,6 @@ pub struct ID(pub ::std::os::raw::c_ulong);
 /// Pointer to an ISEQ
 pub type IseqPtr = *const rb_iseq_t;
 
-/// Pointer to a Callable Method Entry (CME)
-pub type CmePtr = *const rb_callable_method_entry_t;
-
 /// Index of a YARV instruction within an ISEQ's bytecode array.
 pub type YarvInsnIdx = usize;
 
@@ -337,7 +334,7 @@ pub fn iseq_opcode_at_idx(iseq: IseqPtr, insn_idx: u32) -> u32 {
 /// As of vm_push_frame(), EP is always equal to BP. However, after pushing
 /// a frame, some ISEQ setups call vm_bind_update_env(), which redirects EP.
 pub fn iseq_ep_starts_escaped(iseq: IseqPtr) -> bool {
-    match unsafe { iseq.body_type() } {
+    match unsafe { get_iseq_body_type(iseq) } {
         // The EP of the <main> frame points to TOPLEVEL_BINDING
         ISEQ_TYPE_MAIN |
         // eval frames point to the EP of another frame or scope
@@ -348,7 +345,7 @@ pub fn iseq_ep_starts_escaped(iseq: IseqPtr) -> bool {
 
 /// Return true if ZJIT may directly call this ISEQ from another JIT-compiled ISEQ.
 pub fn iseq_supports_jit_entry(iseq: IseqPtr) -> bool {
-    match unsafe { iseq.body_type() } {
+    match unsafe { get_iseq_body_type(iseq) } {
         // These ISEQs are only entered by the interpreter.
         ISEQ_TYPE_MAIN | ISEQ_TYPE_EVAL => false,
         _ => true,
@@ -382,7 +379,7 @@ pub fn ep_offset_to_local_idx(iseq: IseqPtr, ep_offset: u32) -> usize {
     // See usages of local_var_name() from iseq.c for similar calculation.
 
     // Equivalent of iseq->body->local_table_size
-    let local_table_size: i32 = unsafe { iseq.local_table_size() }
+    let local_table_size: i32 = unsafe { get_iseq_body_local_table_size(iseq) }
         .try_into()
         .unwrap();
     let op = (ep_offset - VM_ENV_DATA_SIZE) as i32;
@@ -393,7 +390,7 @@ pub fn ep_offset_to_local_idx(iseq: IseqPtr, ep_offset: u32) -> usize {
 
 /// Inverse of ep_offset_to_local_idx(). See [`ep_offset_to_local_idx`] for details.
 pub fn local_idx_to_ep_offset(iseq: IseqPtr, local_idx: usize) -> i32 {
-    let local_size = unsafe { iseq.local_table_size() };
+    let local_size = unsafe { get_iseq_body_local_table_size(iseq) };
     local_size_and_idx_to_ep_offset(local_size.to_usize(), local_idx)
 }
 
@@ -833,100 +830,10 @@ impl OuterVariables {
     }
 }
 
-/// Extension trait to enable method calls and type-safe accessors on CME pointers ([`CmePtr`])
-pub trait CmeAccess {
-    /// Get the owner class/module of the CME (`me->owner`).
-    unsafe fn owner(self) -> VALUE;
-    /// Get the ID of the called method (`me->called_id`).
-    unsafe fn called_id(self) -> ID;
-    /// Get the defined class of the CME (`me->defined_class`).
-    unsafe fn defined_class(self) -> VALUE;
-    /// Get the method definition pointer (`me->def`).
-    unsafe fn def(self) -> *mut rb_method_definition_struct;
-    /// Get the method definition type (`get_cme_def_type(cme)`).
-    unsafe fn def_type(self) -> rb_method_type_t;
-    /// Get the ISeq pointer for an ISEQ method (`get_def_iseq_ptr(cme->def)`).
-    unsafe fn def_iseq_ptr(self) -> IseqPtr;
-    /// Get the original method ID (`get_def_original_id(cme->def)`).
-    unsafe fn def_original_id(self) -> ID;
-    /// Get the method serial (`get_def_method_serial(cme->def)`).
-    unsafe fn def_method_serial(self) -> usize;
-    /// Get the proc for a bmethod (`rb_get_def_bmethod_proc(cme->def)`).
-    unsafe fn def_bmethod_proc(self) -> VALUE;
-    /// Get attribute ID for attr reader/writer (`get_cme_def_body_attr_id(cme)`).
-    unsafe fn def_body_attr_id(self) -> ID;
-    /// Get optimized method type (`get_cme_def_body_optimized_type(cme)`).
-    unsafe fn def_body_optimized_type(self) -> method_optimized_type;
-    /// Get optimized method index (`get_cme_def_body_optimized_index(cme)`).
-    unsafe fn def_body_optimized_index(self) -> u32;
-    /// Get cfunc struct pointer for CFUNC method (`get_cme_def_body_cfunc(cme)`).
-    unsafe fn def_body_cfunc(self) -> *const rb_method_cfunc_t;
-    /// Get visibility of the method (`METHOD_ENTRY_VISI(cme)`).
-    unsafe fn visibility(self) -> rb_method_visibility_t;
-}
-
-impl CmeAccess for CmePtr {
-    unsafe fn owner(self) -> VALUE {
-        unsafe { (*self).owner }
-    }
-    unsafe fn called_id(self) -> ID {
-        unsafe { (*self).called_id }
-    }
-    unsafe fn defined_class(self) -> VALUE {
-        unsafe { (*self).defined_class }
-    }
-    unsafe fn def(self) -> *mut rb_method_definition_struct {
-        unsafe { (*self).def }
-    }
-    unsafe fn def_type(self) -> rb_method_type_t {
-        unsafe { get_cme_def_type(self) }
-    }
-    unsafe fn def_iseq_ptr(self) -> IseqPtr {
-        unsafe { get_def_iseq_ptr((*self).def) }
-    }
-    unsafe fn def_original_id(self) -> ID {
-        unsafe { get_def_original_id((*self).def) }
-    }
-    unsafe fn def_method_serial(self) -> usize {
-        unsafe { get_def_method_serial((*self).def) }
-    }
-    unsafe fn def_bmethod_proc(self) -> VALUE {
-        unsafe { rb_get_def_bmethod_proc((*self).def) }
-    }
-    unsafe fn def_body_attr_id(self) -> ID {
-        unsafe { get_cme_def_body_attr_id(self) }
-    }
-    unsafe fn def_body_optimized_type(self) -> method_optimized_type {
-        unsafe { get_cme_def_body_optimized_type(self) }
-    }
-    unsafe fn def_body_optimized_index(self) -> u32 {
-        unsafe { get_cme_def_body_optimized_index(self) }
-    }
-    unsafe fn def_body_cfunc(self) -> *const rb_method_cfunc_t {
-        unsafe { get_cme_def_body_cfunc(self) }
-    }
-    unsafe fn visibility(self) -> rb_method_visibility_t {
-        unsafe { METHOD_ENTRY_VISI(self) }
-    }
-}
-
 /// Extension trait to enable method calls on [`IseqPtr`]
 pub trait IseqAccess {
     unsafe fn params<'a>(self) -> &'a IseqParameters;
     unsafe fn outer_variables(self) -> OuterVariables;
-    unsafe fn encoded_size(self) -> u32;
-    unsafe fn body_iseq_encoded(self) -> *const VALUE;
-    unsafe fn stack_max(self) -> u32;
-    unsafe fn body_type(self) -> rb_iseq_type;
-    unsafe fn local_table_size(self) -> u32;
-    unsafe fn local_iseq(self) -> IseqPtr;
-    unsafe fn parent_iseq(self) -> IseqPtr;
-    unsafe fn flags_has_kw(self) -> bool;
-    unsafe fn param_keyword(self) -> *const rb_iseq_param_keyword_struct;
-    unsafe fn flags_forwardable(self) -> bool;
-    unsafe fn param_size(self) -> u32;
-    unsafe fn param_lead_num(self) -> i32;
-    unsafe fn flags_ambiguous_param0(self) -> bool;
 }
 
 impl IseqAccess for IseqPtr {
@@ -939,58 +846,6 @@ impl IseqAccess for IseqPtr {
     unsafe fn outer_variables(self) -> OuterVariables {
         let field = unsafe { (*self).body.byte_add(ISEQ_BODY_OFFSET_OUTER_VARIABLES.to_usize()) } as *const *mut rb_id_table;
         OuterVariables(NonNull::new(unsafe { *field }))
-    }
-
-    unsafe fn encoded_size(self) -> u32 {
-        unsafe { get_iseq_encoded_size(self) }
-    }
-
-    unsafe fn body_iseq_encoded(self) -> *const VALUE {
-        unsafe { get_iseq_body_iseq_encoded(self) }
-    }
-
-    unsafe fn stack_max(self) -> u32 {
-        unsafe { get_iseq_body_stack_max(self) }
-    }
-
-    unsafe fn body_type(self) -> rb_iseq_type {
-        unsafe { get_iseq_body_type(self) }
-    }
-
-    unsafe fn local_table_size(self) -> u32 {
-        unsafe { get_iseq_body_local_table_size(self) }
-    }
-
-    unsafe fn local_iseq(self) -> IseqPtr {
-        unsafe { rb_get_iseq_body_local_iseq(self) }
-    }
-
-    unsafe fn parent_iseq(self) -> IseqPtr {
-        unsafe { rb_get_iseq_body_parent_iseq(self) }
-    }
-
-    unsafe fn flags_has_kw(self) -> bool {
-        unsafe { rb_get_iseq_flags_has_kw(self) }
-    }
-
-    unsafe fn param_keyword(self) -> *const rb_iseq_param_keyword_struct {
-        unsafe { rb_get_iseq_body_param_keyword(self) }
-    }
-
-    unsafe fn flags_forwardable(self) -> bool {
-        unsafe { rb_get_iseq_flags_forwardable(self) }
-    }
-
-    unsafe fn param_size(self) -> u32 {
-        unsafe { rb_get_iseq_body_param_size(self) }
-    }
-
-    unsafe fn param_lead_num(self) -> i32 {
-        unsafe { rb_get_iseq_body_param_lead_num(self) }
-    }
-
-    unsafe fn flags_ambiguous_param0(self) -> bool {
-        unsafe { rb_get_iseq_flags_ambiguous_param0(self) }
     }
 }
 
@@ -1157,10 +1012,10 @@ pub fn iseq_name(iseq: IseqPtr) -> String {
 
 // Equivalent of get_lvar_level() in compile.c
 pub fn get_lvar_level(mut iseq: IseqPtr) -> u32 {
-    let local_iseq = unsafe { iseq.local_iseq() };
+    let local_iseq = unsafe { rb_get_iseq_body_local_iseq(iseq) };
     let mut level = 0;
     while iseq != local_iseq {
-        iseq = unsafe { iseq.parent_iseq() };
+        iseq = unsafe { rb_get_iseq_body_parent_iseq(iseq) };
         level += 1;
     }
 
@@ -1824,7 +1679,7 @@ pub fn class_has_leaf_allocator(class: VALUE) -> bool {
 /// Returns `false` conservatively for anything that doesn't clearly qualify
 /// (modules, singleton classes, custom allocators, non-`def` ISEQs, etc.).
 pub fn iseq_self_is_heap_object(iseq: IseqPtr, owner: VALUE) -> bool {
-    if unsafe { iseq.body_type() } != ISEQ_TYPE_METHOD { return false; }
+    if unsafe { rb_get_iseq_body_type(iseq) } != ISEQ_TYPE_METHOD { return false; }
     if !unsafe { RB_TYPE_P(owner, RUBY_T_CLASS) } { return false; }
     // Check initialized + non-singleton before reading the allocator (reading it otherwise
     // aborts).
