@@ -2119,22 +2119,6 @@ pub struct rb_zjit_runtime_offsets {
 pub const RSTRUCT_EMBED_LEN_MASK: ruby_rstruct_flags = 1040384;
 pub const RSTRUCT_EMBED_LEN_SHIFT: ruby_rstruct_flags = 13;
 pub type ruby_rstruct_flags = usize;
-pub const ROBJECT_OFFSET_AS_HEAP_FIELDS: jit_bindgen_constants = 16;
-pub const ROBJECT_OFFSET_AS_ARY: jit_bindgen_constants = 16;
-pub const RCLASS_OFFSET_PRIME_FIELDS_OBJ: jit_bindgen_constants = 40;
-pub const TDATA_OFFSET_FIELDS_OBJ: jit_bindgen_constants = 16;
-pub const RUBY_OFFSET_RHASH_IFNONE: jit_bindgen_constants = 16;
-pub const RUBY_OFFSET_RHASH_AR_HINT: jit_bindgen_constants = 24;
-pub const RUBY_OFFSET_RHASH_AR_PAIRS: jit_bindgen_constants = 32;
-pub const RUBY_RHASH_AR_TABLE_MAX_SIZE: jit_bindgen_constants = 8;
-pub const RUBY_OFFSET_RSTRING_LEN: jit_bindgen_constants = 16;
-pub const RB_SHAPE_FLAG_SHIFT: jit_bindgen_constants = 32;
-pub const RUBY_OFFSET_EC_CFP: jit_bindgen_constants = 16;
-pub const RUBY_OFFSET_EC_INTERRUPT_FLAG: jit_bindgen_constants = 32;
-pub const RUBY_OFFSET_EC_INTERRUPT_MASK: jit_bindgen_constants = 36;
-pub const RUBY_OFFSET_EC_THREAD_PTR: jit_bindgen_constants = 48;
-pub const RUBY_OFFSET_EC_RACTOR_ID: jit_bindgen_constants = 64;
-pub type jit_bindgen_constants = i32;
 pub const rb_invalid_shape_id: shape_id_t = 524287;
 pub type rb_iseq_param_keyword_struct =
     rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword;

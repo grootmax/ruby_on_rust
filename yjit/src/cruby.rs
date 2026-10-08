@@ -749,36 +749,7 @@ mod manual_defs {
     pub const VM_CALL_ZSUPER : u32 = 1 << VM_CALL_ZSUPER_bit;
     pub const VM_CALL_OPT_SEND : u32 = 1 << VM_CALL_OPT_SEND_bit;
 
-    // We'll need to encode a lot of Ruby struct/field offsets as constants unless we want to
-    // redeclare all the Ruby C structs and write our own offsetof macro. For now, we use constants.
-    pub const RUBY_OFFSET_RBASIC_FLAGS: i32 = 0; // struct RBasic, field "flags"
-    pub const RUBY_OFFSET_RBASIC_KLASS: i32 = 8; // struct RBasic, field "klass"
-    pub const RUBY_OFFSET_RARRAY_AS_HEAP_LEN: i32 = 16; // struct RArray, subfield "as.heap.len"
-    pub const RUBY_OFFSET_RARRAY_AS_HEAP_PTR: i32 = 32; // struct RArray, subfield "as.heap.ptr"
-    pub const RUBY_OFFSET_RARRAY_AS_ARY: i32 = 16; // struct RArray, subfield "as.ary"
-
-    pub const RUBY_OFFSET_RSTRUCT_AS_HEAP_PTR: i32 = 32; // struct RStruct, subfield "as.heap.ptr"
-    pub const RUBY_OFFSET_RSTRUCT_AS_ARY: i32 = 24; // struct RStruct, subfield "as.ary"
-
-    pub const RUBY_OFFSET_RSTRING_AS_HEAP_PTR: i32 = 24; // struct RString, subfield "as.heap.ptr"
-    pub const RUBY_OFFSET_RSTRING_AS_ARY: i32 = 24; // struct RString, subfield "as.embed.ary"
-
-    // Constants from rb_control_frame_t vm_core.h
-    pub const RUBY_OFFSET_CFP_PC: i32 = 0;
-    pub const RUBY_OFFSET_CFP_SP: i32 = 8;
-    pub const RUBY_OFFSET_CFP_ISEQ: i32 = 16;
-    pub const RUBY_OFFSET_CFP_SELF: i32 = 24;
-    pub const RUBY_OFFSET_CFP_EP: i32 = 32;
-    pub const RUBY_OFFSET_CFP_BLOCK_CODE: i32 = 40;
-    pub const RUBY_OFFSET_CFP_JIT_RETURN: i32 = 48;
-    pub const RUBY_SIZEOF_CONTROL_FRAME: usize = 56;
-
-    // Constants from rb_thread_t in vm_core.h
-    pub const RUBY_OFFSET_THREAD_SELF: i32 = 16;
-
-    // Constants from iseq_inline_constant_cache (IC) and iseq_inline_constant_cache_entry (ICE) in vm_core.h
-    pub const RUBY_OFFSET_IC_ENTRY: i32 = 0;
-    pub const RUBY_OFFSET_ICE_VALUE: i32 = 8;
+    include!("jit_offsets.rs");
 }
 pub use manual_defs::*;
 
