@@ -51,13 +51,6 @@ YJIT_BINDGEN_DIFF_OPTS =
 # Needs `./configure --enable-yjit=dev` and Clang.
 ifneq ($(strip $(CARGO)),) # if configure found Cargo
 .PHONY: yjit-bindgen yjit-bindgen-show-unused
-.PHONY: yjit-clippy yjit-fmt
-yjit-clippy:
-	$(CARGO) clippy --manifest-path '$(top_srcdir)/yjit/Cargo.toml' --all-targets
-
-yjit-fmt:
-	$(CARGO) fmt --manifest-path '$(top_srcdir)/yjit/Cargo.toml'
-
 yjit-bindgen: yjit.$(OBJEXT)
 	YJIT_SRC_ROOT_PATH='$(top_srcdir)' $(CARGO) run --manifest-path '$(top_srcdir)/yjit/bindgen/Cargo.toml' -- $(CFLAGS) $(XCFLAGS) $(CPPFLAGS)
 	$(Q) if [ 'x$(HAVE_GIT)' = xyes ]; then $(GIT) -C "$(top_srcdir)" diff $(YJIT_BINDGEN_DIFF_OPTS) yjit/src/cruby_bindings.inc.rs; fi

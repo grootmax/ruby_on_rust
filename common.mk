@@ -1048,7 +1048,6 @@ $(ENC_MK): $(srcdir)/enc/make_encmake.rb $(srcdir)/enc/Makefile.in $(srcdir)/enc
 .PHONY: run runruby parse benchmark gdb gdb-ruby
 .PHONY: update-mspec update-rubyspec test-rubyspec test-spec
 .PHONY: touch-unicode-files
-.PHONY: yjit-clippy zjit-clippy yjit-fmt zjit-fmt
 
 PHONY:
 
