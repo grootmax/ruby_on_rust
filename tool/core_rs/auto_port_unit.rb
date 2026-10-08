@@ -72,10 +72,15 @@ class CToRustTranspiler
       #[repr(C)]
       #[derive(Copy, Clone)]
       pub struct st_table {
+          pub entry_power: c_uchar,
+          pub bin_power: c_uchar,
+          pub size_ind: c_uchar,
+          pub rebuilds_num: c_uchar,
+          pub entries_start: c_uint,
           pub type_: *const st_hash_type,
-          pub num_bins: usize,
-          pub entries_packed: c_uint,
-          pub rebuilds_num: c_uint,
+          pub num_entries: usize,
+          pub entries_bound: usize,
+          pub entries: *mut st_table_entry,
       }
 
       #[repr(C)]
@@ -89,10 +94,15 @@ class CToRustTranspiler
       #[repr(C)]
       #[derive(Copy, Clone)]
       pub struct set_table {
+          pub entry_power: c_uchar,
+          pub bin_power: c_uchar,
+          pub size_ind: c_uchar,
+          pub rebuilds_num: c_uchar,
+          pub entries_start: c_uint,
           pub type_: *const st_hash_type,
-          pub num_bins: usize,
-          pub entries_packed: c_uint,
-          pub rebuilds_num: c_uint,
+          pub num_entries: usize,
+          pub entries_bound: usize,
+          pub entries: *mut set_table_entry,
       }
 
       #[repr(C)]

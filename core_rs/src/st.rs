@@ -1,6 +1,6 @@
 //! Ports of st.c (port unit st-A-01).
 
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_int, c_uchar, c_uint, c_void};
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -12,10 +12,15 @@ pub struct st_hash_type {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct st_table {
+    pub entry_power: c_uchar,
+    pub bin_power: c_uchar,
+    pub size_ind: c_uchar,
+    pub rebuilds_num: c_uchar,
+    pub entries_start: c_uint,
     pub type_: *const st_hash_type,
-    pub num_bins: usize,
-    pub entries_packed: c_uint,
-    pub rebuilds_num: c_uint,
+    pub num_entries: usize,
+    pub entries_bound: usize,
+    pub entries: *mut st_table_entry,
 }
 
 #[repr(C)]
@@ -24,6 +29,27 @@ pub struct st_table_entry {
     pub hash: usize,
     pub key: usize,
     pub record: usize,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct set_table {
+    pub entry_power: c_uchar,
+    pub bin_power: c_uchar,
+    pub size_ind: c_uchar,
+    pub rebuilds_num: c_uchar,
+    pub entries_start: c_uint,
+    pub type_: *const st_hash_type,
+    pub num_entries: usize,
+    pub entries_bound: usize,
+    pub entries: *mut set_table_entry,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct set_table_entry {
+    pub hash: usize,
+    pub key: usize,
 }
 
 #[unsafe(no_mangle)]
@@ -89,5 +115,21 @@ pub unsafe extern "C" fn rb_core_st_set_ptr_equal_check(
     res: *mut c_int,
     rebuilt_p: *mut c_int,
 ) {
-    unsafe { rb_core_st_ptr_equal_check(tab, entry, hash_val, key, res, rebuilt_p) };
+    if tab.is_null() || entry.is_null() {
+        return;
+    }
+    let tab_ptr = tab as *const set_table;
+    let entry_ptr = entry as *const set_table_entry;
+    let old_rebuilds_num = unsafe { (*tab_ptr).rebuilds_num };
+    let type_ptr = unsafe { (*tab_ptr).type_ } as *const c_void;
+    let e_hash = unsafe { (*entry_ptr).hash };
+    let e_key = unsafe { (*entry_ptr).key };
+    let eq = unsafe { rb_core_st_entry_equal(type_ptr, e_hash, e_key, hash_val, key) };
+    if !res.is_null() {
+        unsafe { *res = eq };
+    }
+    if !rebuilt_p.is_null() {
+        let new_rebuilds_num = unsafe { (*tab_ptr).rebuilds_num };
+        unsafe { *rebuilt_p = if old_rebuilds_num != new_rebuilds_num { 1 } else { 0 } };
+    }
 }
