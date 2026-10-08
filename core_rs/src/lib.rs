@@ -24,6 +24,10 @@ pub mod complex;
 pub mod ffi;
 pub mod re;
 pub mod util;
+pub mod value;
+
+pub use ffi::protect::{jump_tag, protect};
+pub use value::Value;
 
 /// C runtime pieces that `no_std` code needs.
 mod libc {

@@ -5,7 +5,7 @@
 //! these bindings instead of declaring their own, so every port agrees on the
 //! same, checked definitions.
 //!
-//! * [`value`]: `VALUE`, `ID`, the special constants and the inline helpers
+//! * [`value`]: `Value`, `VALUE`, `ID`, the special constants and the inline helpers
 //!   of `include/ruby/internal/special_consts.h` and
 //!   `include/ruby/internal/arithmetic/{long,fixnum}.h`, transcribed from the
 //!   C (same formulas, same wrapping arithmetic).
@@ -45,4 +45,6 @@ pub mod api;
 pub mod protect;
 pub mod value;
 
-pub use value::{ID, SIGNED_VALUE, VALUE};
+pub use api::*;
+pub use protect::{jump_tag, protect};
+pub use value::{ID, SIGNED_VALUE, VALUE, Value};

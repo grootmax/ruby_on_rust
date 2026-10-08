@@ -11,12 +11,13 @@
 # Keep in sync with core_rs/src/.
 CORE_RS_SRCS = $(srcdir)/core_rs/src/lib.rs \
 	$(srcdir)/core_rs/src/complex.rs \
-	$(srcdir)/core_rs/src/ffi/mod.rs \
+	$(srcdir)/core_rs/src/ffi.rs \
 	$(srcdir)/core_rs/src/ffi/api.rs \
 	$(srcdir)/core_rs/src/ffi/protect.rs \
 	$(srcdir)/core_rs/src/ffi/value.rs \
 	$(srcdir)/core_rs/src/re.rs \
 	$(srcdir)/core_rs/src/util.rs \
+	$(srcdir)/core_rs/src/value.rs \
 	$(empty)
 
 # rustc --cfg options that mirror the C configuration core_rs/src/ffi/

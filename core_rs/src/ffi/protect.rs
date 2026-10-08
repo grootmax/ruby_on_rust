@@ -12,7 +12,7 @@
 //! is written in a port as
 //!
 //! ```ignore
-//! let ret = unsafe { protect(|| /* raising calls */ Qnil) };
+//! let ret = unsafe { protect(|| /* raising calls */ Value::Qnil) };
 //! /* cleanup */
 //! let ret = match ret { Ok(v) => v, Err(state) => unsafe { jump_tag(state) } };
 //! ```
@@ -22,7 +22,7 @@
 //! trampoline below are discarded by `longjmp()` (see the exception-safety
 //! rule in [`super`]).  The same rule applies to the closure's own body.
 
-use super::value::VALUE;
+use super::value::{Value, VALUE};
 use core::ffi::c_int;
 
 #[cfg(not(test))]
@@ -50,22 +50,23 @@ use self::mock::{rb_jump_tag, rb_protect};
 /// # Safety
 /// Must be called on a Ruby thread holding the GVL, as `rb_protect()`.
 /// `f` must follow the exception-safety rule of [`super`].
-pub unsafe fn protect<F>(f: F) -> Result<VALUE, c_int>
+pub unsafe fn protect<F, R>(f: F) -> Result<Value, c_int>
 where
-    F: FnOnce() -> VALUE + Copy,
+    F: FnOnce() -> R + Copy,
+    R: Into<Value>,
 {
-    extern "C" fn trampoline<F: FnOnce() -> VALUE + Copy>(arg: VALUE) -> VALUE {
+    extern "C" fn trampoline<F: FnOnce() -> R + Copy, R: Into<Value>>(arg: VALUE) -> VALUE {
         // SAFETY: `arg` is the address of `f` in `protect` below, which
         // outlives the rb_protect() call that invokes this trampoline.
         let f = unsafe { *(arg as *const F) };
-        f()
+        f().into().0
     }
 
     let mut state: c_int = 0;
-    // SAFETY: the caller guarantees the GVL; `trampoline::<F>` reads `f`
+    // SAFETY: the caller guarantees the GVL; `trampoline::<F, R>` reads `f`
     // through the pointer only while `f` is alive; `state` is a valid int.
-    let ret = unsafe { rb_protect(trampoline::<F>, &f as *const F as VALUE, &mut state) };
-    if state == 0 { Ok(ret) } else { Err(state) }
+    let ret = unsafe { rb_protect(trampoline::<F, R>, &f as *const F as VALUE, &mut state) };
+    if state == 0 { Ok(Value(ret)) } else { Err(state) }
 }
 
 /// Resumes the non-local exit recorded by [`protect`] (`rb_jump_tag()`).
@@ -116,14 +117,14 @@ mod mock {
 mod tests {
     use super::mock::{CALLS, RAISE_TAG};
     use super::*;
-    use crate::ffi::value::{INT2FIX, Qnil};
+    use crate::ffi::value::{Value, INT2FIX, Qnil};
 
     #[test]
     fn normal_return_passes_the_value_through() {
         let x = 20;
         let before = CALLS.with(|c| c.get());
         let r = unsafe { protect(|| INT2FIX(x + 1)) };
-        assert_eq!(r, Ok(INT2FIX(21)));
+        assert_eq!(r, Ok(Value::int2fix(21)));
         assert_eq!(CALLS.with(|c| c.get()), before + 1);
     }
 
@@ -131,7 +132,7 @@ mod tests {
     fn closure_reads_captured_references() {
         let buf = [1u8, 2, 3, 4];
         let r = unsafe { protect(|| INT2FIX(buf.iter().map(|&b| b as i64).sum())) };
-        assert_eq!(r, Ok(INT2FIX(10)));
+        assert_eq!(r, Ok(Value::int2fix(10)));
     }
 
     #[test]
@@ -145,7 +146,45 @@ mod tests {
         };
         assert_eq!(r, Err(6));
         // The next call is unaffected.
-        assert_eq!(unsafe { protect(|| Qnil) }, Ok(Qnil));
+        assert_eq!(unsafe { protect(|| Qnil) }, Ok(Value::Qnil));
+    }
+
+    #[test]
+    fn drops_local_rust_variables_on_exception_and_normal_return() {
+        use std::cell::Cell;
+
+        struct Guard<'a>(&'a Cell<u32>);
+        impl Drop for Guard<'_> {
+            fn drop(&mut self) {
+                self.0.set(self.0.get() + 1);
+            }
+        }
+
+        let dropped = Cell::new(0);
+
+        // 1. Normal return case
+        {
+            let _guard = Guard(&dropped);
+            let r = unsafe { protect(|| Value::Qnil) };
+            assert_eq!(r, Ok(Value::Qnil));
+            assert_eq!(dropped.get(), 0);
+        }
+        assert_eq!(dropped.get(), 1);
+
+        // 2. Exception / non-local exit case
+        dropped.set(0);
+        let result = {
+            let _guard = Guard(&dropped);
+            let r = unsafe {
+                protect(|| {
+                    RAISE_TAG.with(|t| t.set(6));
+                    Value::Qnil
+                })
+            };
+            r
+        };
+        assert_eq!(result, Err(6));
+        assert_eq!(dropped.get(), 1);
     }
 
     #[test]
