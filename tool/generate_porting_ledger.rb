@@ -143,8 +143,33 @@ if check_mode
   end
 
   existing_markdown = File.read(porting_md_path)
+
+  # Line counts change with every upstream sync, so --check ignores them:
+  # it masks the "Lines (LOC)", "Lines of Code (LOC)" and "% of Total LOC"
+  # cells (found by their column headers) and compares everything else --
+  # the file list, statuses, file counts, targets, subsystems and notes.
+  mask_loc = lambda do |markdown|
+    masked_columns = []
+    markdown.lines.map do |line|
+      unless line.start_with?("|")
+        masked_columns = []
+        next line
+      end
+      cells = line.chomp.split("|", -1)
+      if cells.any? { |c| c.include?("LOC") }
+        masked_columns = cells.each_index.select { |i| cells[i].include?("LOC") }
+        next line
+      end
+      masked_columns.each { |i| cells[i] = " # " if cells[i] }
+      cells.join("|") + "\n"
+    end.join
+  end
+
   if existing_markdown == generated_markdown
     puts "PORTING.md is up to date."
+    exit 0
+  elsif mask_loc.(existing_markdown) == mask_loc.(generated_markdown)
+    puts "PORTING.md is up to date (line counts have drifted; run 'ruby tool/generate_porting_ledger.rb' to refresh them)."
     exit 0
   else
     warn "Error: PORTING.md is out of date. Please run 'ruby tool/generate_porting_ledger.rb' to update."

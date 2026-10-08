@@ -32,9 +32,14 @@
 #include "ruby/util.h"
 #include "ruby_atomic.h"
 
+#ifndef USE_RUST_PORTS
+# define USE_RUST_PORTS 0
+#endif
+
 const char ruby_hexdigits[] = "0123456789abcdef0123456789ABCDEF";
 #define hexdigit ruby_hexdigits
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/util.rs */
 unsigned long
 ruby_scan_oct(const char *start, size_t len, size_t *retlen)
 {
@@ -52,6 +57,7 @@ ruby_scan_hex(const char *start, size_t len, size_t *retlen)
     (void)overflow;
     return val;
 }
+#endif /* !USE_RUST_PORTS: ruby_scan_oct, ruby_scan_hex */
 
 const signed char ruby_digit36_to_number_table[] = {
     /*     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f */
@@ -73,6 +79,7 @@ const signed char ruby_digit36_to_number_table[] = {
     /*f*/ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 };
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/util.rs */
 NO_SANITIZE("unsigned-integer-overflow", extern unsigned long ruby_scan_digits(const char *str, ssize_t len, int base, size_t *retlen, int *overflow));
 unsigned long
 ruby_scan_digits(const char *str, ssize_t len, int base, size_t *retlen, int *overflow)
@@ -182,6 +189,7 @@ ruby_strtoul(const char *str, char **endptr, int base)
         return ret;
     }
 }
+#endif /* !USE_RUST_PORTS: ruby_scan_digits, ruby_strtoul */
 
 #if !defined HAVE_GNU_QSORT_R
 #include <sys/types.h>
@@ -586,6 +594,7 @@ ruby_getcwd(void)
 
 #endif
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/util.rs */
 void
 ruby_each_words(const char *str, void (*func)(const char*, int, void*), void *arg)
 {
@@ -602,6 +611,7 @@ ruby_each_words(const char *str, void (*func)(const char*, int, void*), void *ar
         (*func)(str, len, arg);
     }
 }
+#endif /* !USE_RUST_PORTS: ruby_each_words */
 
 #undef strtod
 #define strtod ruby_strtod

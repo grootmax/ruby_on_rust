@@ -453,6 +453,15 @@ endif
 include $(top_srcdir)/yjit/yjit.mk
 include $(top_srcdir)/zjit/zjit.mk
 include $(top_srcdir)/defs/jit.mk
+ifneq ($(CORE_RS_OBJ),)
+include $(top_srcdir)/core_rs/core_rs.mk
+# target/.rustc-version (defs/jit.mk) empties target/ on the first build and
+# whenever rustc changes.  core_rs is built inside target/, so like the JIT
+# crates it must wait for that; otherwise a parallel make can delete its
+# output while rustc writes it.  This also rebuilds core_rs after a rustc
+# upgrade.
+$(CORE_RS_LIB): target/.rustc-version
+endif
 
 # Query on the generated rdoc
 #

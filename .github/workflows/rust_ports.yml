@@ -1,0 +1,177 @@
+name: Rust ports
+# Ruby on Rust: build with and without the core_rs ports and run the same
+# tests in both modes.  `--with-rust-ports` makes configure fail if the ports
+# cannot be built, so these jobs prove that the default `auto` mode really
+# uses Rust on Linux and macOS.  The full upstream matrix runs separately.
+on:
+  # Branches are checked through their pull requests; push runs only on
+  # master, so each PR push starts one gate run, not two.
+  push:
+    branches: [master]
+    paths-ignore:
+      - 'doc/**'
+      - '**/man/*'
+      - '**.md'
+      - '**.rdoc'
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }} / ${{ startsWith(github.event_name, 'pull') && github.ref_name || github.sha }}
+  cancel-in-progress: ${{ startsWith(github.event_name, 'pull') }}
+
+permissions:
+  contents: read
+
+jobs:
+  rust-ports:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+        ports: [with, without]
+
+    name: ${{ matrix.os }} (${{ matrix.ports }} rust ports)
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    env:
+      GITPULLOPTIONS: --no-tags origin ${{ github.ref }}
+      RUBY_DEBUG: ci
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: /.github
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup/ubuntu
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+
+      - uses: ./.github/actions/setup/macos
+        if: ${{ startsWith(matrix.os, 'macos') }}
+
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: '3.1'
+          bundler: none
+
+      - uses: ./.github/actions/setup/directories
+        with:
+          srcdir: src
+          builddir: build
+          makeup: true
+          clean: true
+          dummy-files: true
+
+      - name: Show rustc
+        run: rustc --version
+
+      - name: Run configure
+        run: ../src/configure -C --disable-install-doc ${ruby_configure_args} --${{ matrix.ports }}-rust-ports
+
+      - run: make
+
+      - name: Check the build mode
+        env:
+          EXPECTED: ${{ matrix.ports == 'with' && '1' || '0' }}
+        run: |
+          make TESTRUN_SCRIPT="-rrbconfig -e 'p RbConfig::CONFIG[%(USE_RUST_PORTS)]; exit RbConfig::CONFIG[%(USE_RUST_PORTS)] == ENV[%(EXPECTED)]'" run
+          if [ "$EXPECTED" = 1 ]; then test -f target/core_rs/core_rs.o; else test ! -e target/core_rs/core_rs.o; fi
+
+      - name: core_rs unit tests
+        run: make core-rs-test
+        if: ${{ matrix.ports == 'with' }}
+
+      - run: make btest
+
+      - name: test-all (ported functions and their callers)
+        run: >-
+          make test-all TESTS="
+          ../src/test/ruby/test_rust_ports.rb
+          ../src/test/ruby/test_rust_ports_complex.rb
+          ../src/test/ruby/test_complex.rb
+          ../src/test/ruby/test_rational.rb
+          ../src/test/ruby/test_integer.rb
+          ../src/test/ruby/test_bignum.rb
+          ../src/test/ruby/test_string.rb
+          ../src/test/ruby/test_regexp.rb
+          ../src/test/ruby/test_time.rb
+          ../src/test/ruby/test_rubyoptions.rb
+          ../src/test/ruby/test_literal.rb
+          ../src/test/ruby/test_m17n.rb
+          "
+
+  # The proofs that need both build modes side by side: differential fuzzing
+  # of every core_rs/fuzz unit, identical exported symbols, hidden internal
+  # symbols, and the ledger/inventory checks.  Linux only: the fuzz harness
+  # needs GNU or LLVM nm/objcopy (core_rs/fuzz/README.md).
+  port-proofs:
+    name: ubuntu-24.04 (fuzz, exports, ledger)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+
+    env:
+      GITPULLOPTIONS: --no-tags origin ${{ github.ref }}
+      RUBY_DEBUG: ci
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: /.github
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup/ubuntu
+
+      - uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+        with:
+          ruby-version: '3.1'
+          bundler: none
+
+      - uses: ./.github/actions/setup/directories
+        with:
+          srcdir: src
+          builddir: build
+          makeup: true
+          clean: true
+
+      - name: Configure both modes (shared libruby)
+        run: |
+          ../src/configure -C --disable-install-doc --enable-shared ${ruby_configure_args} --with-rust-ports
+          mkdir ../build-c
+          cd ../build-c
+          ../src/configure -C --disable-install-doc --enable-shared ${ruby_configure_args} --without-rust-ports
+
+      - name: Build with Rust ports
+        run: make
+
+      - name: Build without Rust ports
+        run: make
+        working-directory: build-c
+
+      - name: Internal rb_core_* symbols are hidden
+        run: make core-rs-check-hidden
+
+      - name: Exported symbols are identical in both modes
+        run: |
+          nm -D --defined-only ../build-c/libruby.so | awk '{print $3}' | sort > exports-c.txt
+          nm -D --defined-only libruby.so | awk '{print $3}' | sort > exports-rs.txt
+          wc -l exports-c.txt exports-rs.txt
+          diff -u exports-c.txt exports-rs.txt
+
+      - name: Differential fuzz (every unit, 1M cases plus mutation check)
+        run: ruby core_rs/fuzz/run.rb --with-ports ../build --without-ports ../build-c core_rs/fuzz/units/*.c
+        working-directory: src
+
+      - name: Porting ledger is current
+        run: ruby tool/generate_porting_ledger.rb --check
+        working-directory: src
+
+      - name: core_rs inventory check
+        run: ruby tool/core_rs/inventory.rb --check
+        working-directory: src
+
+defaults:
+  run:
+    working-directory: build
