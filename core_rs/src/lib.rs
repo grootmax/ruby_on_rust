@@ -22,6 +22,7 @@
 
 pub mod complex;
 pub mod ffi;
+pub mod gc_safety;
 pub mod re;
 pub mod util;
 

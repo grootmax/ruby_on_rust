@@ -84,3 +84,43 @@ unsafe extern "C" {
     /// `VALUE rb_hash_aset(VALUE hash, VALUE key, VALUE val)`
     pub fn rb_hash_aset(hash: VALUE, key: VALUE, val: VALUE) -> VALUE;
 }
+
+#[cfg(not(test))]
+unsafe extern "C" {
+    // ---- GC write barrier: include/ruby/internal/gc.h ----
+    /// `void rb_gc_writebarrier(VALUE old, VALUE young)`
+    pub fn rb_gc_writebarrier(old: VALUE, young: VALUE);
+    /// `void rb_gc_writebarrier_unprotect(VALUE obj)`
+    pub fn rb_gc_writebarrier_unprotect(obj: VALUE);
+}
+
+#[cfg(test)]
+pub use self::mock::{rb_gc_writebarrier, rb_gc_writebarrier_unprotect};
+
+#[cfg(test)]
+pub mod mock {
+    use super::super::value::VALUE;
+    use core::sync::atomic::{AtomicUsize, Ordering};
+
+    pub static WRITE_BARRIER_COUNT: AtomicUsize = AtomicUsize::new(0);
+    pub static UNPROTECT_COUNT: AtomicUsize = AtomicUsize::new(0);
+    pub static LAST_WB_OLD: AtomicUsize = AtomicUsize::new(0);
+    pub static LAST_WB_YOUNG: AtomicUsize = AtomicUsize::new(0);
+
+    pub fn reset_counts() {
+        WRITE_BARRIER_COUNT.store(0, Ordering::SeqCst);
+        UNPROTECT_COUNT.store(0, Ordering::SeqCst);
+        LAST_WB_OLD.store(0, Ordering::SeqCst);
+        LAST_WB_YOUNG.store(0, Ordering::SeqCst);
+    }
+
+    pub unsafe fn rb_gc_writebarrier(old: VALUE, young: VALUE) {
+        WRITE_BARRIER_COUNT.fetch_add(1, Ordering::SeqCst);
+        LAST_WB_OLD.store(old, Ordering::SeqCst);
+        LAST_WB_YOUNG.store(young, Ordering::SeqCst);
+    }
+
+    pub unsafe fn rb_gc_writebarrier_unprotect(_obj: VALUE) {
+        UNPROTECT_COUNT.fetch_add(1, Ordering::SeqCst);
+    }
+}
