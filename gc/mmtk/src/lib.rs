@@ -31,6 +31,7 @@ pub mod heap;
 pub mod object_model;
 pub mod pinning_registry;
 pub mod reference_glue;
+pub mod safe_api;
 pub mod scanning;
 pub mod utils;
 pub mod weak_proc;
@@ -135,7 +136,7 @@ pub(crate) fn set_panic_hook() {
         if is_gc_thread(std::thread::current().id()) {
             handle_gc_thread_panic(panic_info);
 
-            (crate::binding().upcalls().gc_thread_panic_handler)();
+            crate::binding().upcalls().gc_thread_panic_handler();
         } else {
             old_hook(panic_info);
             (crate::MUTATOR_THREAD_PANIC_HANDLER

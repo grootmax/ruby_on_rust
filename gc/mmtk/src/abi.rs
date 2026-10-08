@@ -327,6 +327,135 @@ pub struct RubyUpcalls {
 
 unsafe impl Sync for RubyUpcalls {}
 
+impl RubyUpcalls {
+    #[inline(always)]
+    pub fn init_gc_worker_thread(&self, gc_worker_tls: *mut GCThreadTLS) {
+        assert!(!gc_worker_tls.is_null(), "gc_worker_tls must not be null");
+        (self.init_gc_worker_thread)(gc_worker_tls);
+    }
+
+    #[inline(always)]
+    pub fn is_mutator(&self) -> bool {
+        (self.is_mutator)()
+    }
+
+    #[inline(always)]
+    pub fn stop_the_world(&self) {
+        (self.stop_the_world)();
+    }
+
+    #[inline(always)]
+    pub fn resume_mutators(&self, gc_may_move: bool) {
+        (self.resume_mutators)(gc_may_move);
+    }
+
+    #[inline(always)]
+    pub fn block_for_gc(&self, tls: VMMutatorThread) {
+        (self.block_for_gc)(tls);
+    }
+
+    #[inline(always)]
+    pub fn before_updating_jit_code(&self) {
+        (self.before_updating_jit_code)();
+    }
+
+    #[inline(always)]
+    pub fn after_updating_jit_code(&self) {
+        (self.after_updating_jit_code)();
+    }
+
+    #[inline(always)]
+    pub fn number_of_mutators(&self) -> usize {
+        (self.number_of_mutators)()
+    }
+
+    #[inline(always)]
+    pub fn get_mutators(
+        &self,
+        visit_mutator: extern "C" fn(*mut RubyMutator, *mut libc::c_void),
+        data: *mut libc::c_void,
+    ) {
+        (self.get_mutators)(visit_mutator, data);
+    }
+
+    #[inline(always)]
+    pub fn scan_gc_roots(&self) {
+        (self.scan_gc_roots)();
+    }
+
+    #[inline(always)]
+    pub fn scan_objspace(&self) {
+        (self.scan_objspace)();
+    }
+
+    #[inline(always)]
+    pub fn move_obj_during_marking(&self, from: ObjectReference, to: ObjectReference) {
+        crate::safe_api::assert_object_reference(from);
+        crate::safe_api::assert_object_reference(to);
+        (self.move_obj_during_marking)(from, to);
+    }
+
+    #[inline(always)]
+    pub fn update_object_references(&self, object: ObjectReference) {
+        crate::safe_api::assert_object_reference(object);
+        (self.update_object_references)(object);
+    }
+
+    #[inline(always)]
+    pub fn call_gc_mark_children(&self, object: ObjectReference) {
+        crate::safe_api::assert_object_reference(object);
+        (self.call_gc_mark_children)(object);
+    }
+
+    #[inline(always)]
+    pub fn handle_weak_references(&self, object: ObjectReference, moving: bool) {
+        crate::safe_api::assert_object_reference(object);
+        (self.handle_weak_references)(object, moving);
+    }
+
+    #[inline(always)]
+    pub fn call_obj_free(&self, object: ObjectReference) {
+        crate::safe_api::assert_object_reference(object);
+        (self.call_obj_free)(object);
+    }
+
+    #[inline(always)]
+    pub fn vm_live_bytes(&self) -> usize {
+        (self.vm_live_bytes)()
+    }
+
+    #[inline(always)]
+    pub fn update_global_tables(&self, tbl_idx: c_int, moving: bool) {
+        (self.update_global_tables)(tbl_idx, moving);
+    }
+
+    #[inline(always)]
+    pub fn global_tables_count(&self) -> c_int {
+        (self.global_tables_count)()
+    }
+
+    #[inline(always)]
+    pub fn update_finalizer_table(&self) {
+        (self.update_finalizer_table)();
+    }
+
+    #[inline(always)]
+    pub fn special_const_p(&self, object: ObjectReference) -> bool {
+        crate::safe_api::assert_object_reference(object);
+        (self.special_const_p)(object)
+    }
+
+    #[inline(always)]
+    pub fn mutator_thread_panic_handler(&self) {
+        (self.mutator_thread_panic_handler)();
+    }
+
+    #[inline(always)]
+    pub fn gc_thread_panic_handler(&self) {
+        (self.gc_thread_panic_handler)();
+    }
+}
+
 #[repr(C)]
 #[derive(Clone)]
 pub struct HeapBounds {

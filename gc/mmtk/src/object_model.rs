@@ -62,7 +62,7 @@ impl ObjectModel<Ruby> for VMObjectModel {
         copy_context.post_copy(to_obj, object_size, semantics);
         trace!("Copied object from {} to {}", from, to_obj);
 
-        (crate::binding().upcalls().move_obj_during_marking)(from, to_obj);
+        crate::binding().upcalls().move_obj_during_marking(from, to_obj);
 
         #[cfg(feature = "clear_old_copy")]
         {
