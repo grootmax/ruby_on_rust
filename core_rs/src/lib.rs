@@ -14,11 +14,14 @@
 //! * Exported symbols use the names of the C functions they replace and must
 //!   start with `rb_` or `ruby_`; everything else is localized when the
 //!   staticlib is partially linked into libruby.
+//! * Ports that handle Ruby objects (Wave B) use the C API bindings in
+//!   [`ffi`] and follow its exception-safety rule.
 
 #![cfg_attr(not(test), no_std)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
 pub mod complex;
+pub mod ffi;
 pub mod re;
 pub mod util;
 
