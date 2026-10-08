@@ -79,6 +79,7 @@ const int ruby_api_version[] = {
 #else
 #define GC_DESCRIPTION ""
 #endif
+#define RUST_DESCRIPTION " +RUST"
 const char ruby_version[] = RUBY_VERSION;
 const char ruby_revision[] = RUBY_FULL_REVISION;
 const char ruby_release_date[] = RUBY_RELEASE_DATE;
@@ -215,6 +216,7 @@ define_ruby_description(const char *const jit_opt)
     static char desc[
         sizeof(ruby_description)
         + rb_strlen_lit(JIT_DESCRIPTION)
+        + rb_strlen_lit(RUST_DESCRIPTION)
         + rb_strlen_lit(" +MN")
         + rb_strlen_lit(" +PRISM")
 #if USE_MODULAR_GC
@@ -232,6 +234,7 @@ define_ruby_description(const char *const jit_opt)
 # define append(s) (n += (int)strlcpy(desc + n, s, sizeof(desc) - n))
     if (*jit_opt) append(jit_opt);
     RUBY_ASSERT(n <= ruby_description_opt_point + (int)rb_strlen_lit(JIT_DESCRIPTION));
+    append(RUST_DESCRIPTION);
     if (ruby_mn_threads_enabled) append(" +MN");
     if (rb_ruby_prism_p()) append(" +PRISM");
 #if USE_MODULAR_GC
