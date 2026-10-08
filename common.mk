@@ -933,7 +933,11 @@ yes-test-tool: prog PHONY
 no-test-tool: PHONY
 
 test-sample: test-basic # backward compatibility for mswin-build
-test-short: test-coroutine $(DOT_WAIT) btest-ruby $(DOT_WAIT) test-knownbug $(DOT_WAIT) test-basic
+test-ruby_on_rust: $(TEST_RUNNABLE)-test-ruby_on_rust
+no-test-ruby_on_rust: PHONY
+yes-test-ruby_on_rust: prog encs PHONY
+	$(gnumake_recursive)$(RUNRUBY) "$(TESTSDIR)/runner.rb" $(TEST_EXCLUDES) $(TESTOPTS) ruby_on_rust
+test-short: test-coroutine $(DOT_WAIT) btest-ruby $(DOT_WAIT) test-knownbug $(DOT_WAIT) test-basic $(DOT_WAIT) test-ruby_on_rust
 test: test-short
 
 # Separate to skip updating encs and exts by `make -o test-precheck`
@@ -1044,7 +1048,7 @@ $(ENC_MK): $(srcdir)/enc/make_encmake.rb $(srcdir)/enc/Makefile.in $(srcdir)/enc
 .PHONY: distclean-srcs distclean-srcs-local distclean-srcs-ext
 .PHONY: realclean realclean-ext realclean-local realclean-enc realclean-golf realclean-extout
 .PHONY: realclean-srcs realclean-srcs-local realclean-srcs-ext
-.PHONY: exam check test test-short test-all test-coroutine btest btest-ruby test-basic test-knownbug
+.PHONY: exam check test test-short test-all test-coroutine btest btest-ruby test-basic test-knownbug test-ruby_on_rust
 .PHONY: run runruby parse benchmark gdb gdb-ruby
 .PHONY: update-mspec update-rubyspec test-rubyspec test-spec
 .PHONY: touch-unicode-files
