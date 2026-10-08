@@ -10,6 +10,41 @@
 **********************************************************************/
 
 #include <math.h>
+#include "internal/core_rs.h"
+#include "insns.inc"
+
+#if USE_RUST_PORTS
+struct rb_vm_insn_opcodes_struct rb_vm_insn_opcodes = {
+    .nop = BIN(nop),
+    .putnil = BIN(putnil),
+    .putself = BIN(putself),
+    .putobject = BIN(putobject),
+    .putobject_INT2FIX_0_ = BIN(putobject_INT2FIX_0_),
+    .putobject_INT2FIX_1_ = BIN(putobject_INT2FIX_1_),
+    .pop = BIN(pop),
+    .dup = BIN(dup),
+    .dupn = BIN(dupn),
+    .swap = BIN(swap),
+    .topn = BIN(topn),
+    .getlocal = BIN(getlocal),
+    .setlocal = BIN(setlocal),
+    .getlocal_WC_0 = BIN(getlocal_WC_0),
+    .setlocal_WC_0 = BIN(setlocal_WC_0),
+    .getlocal_WC_1 = BIN(getlocal_WC_1),
+    .setlocal_WC_1 = BIN(setlocal_WC_1),
+    .opt_plus = BIN(opt_plus),
+    .opt_minus = BIN(opt_minus),
+    .opt_mult = BIN(opt_mult),
+    .opt_div = BIN(opt_div),
+    .opt_mod = BIN(opt_mod),
+    .opt_eq = BIN(opt_eq),
+    .opt_neq = BIN(opt_neq),
+    .opt_lt = BIN(opt_lt),
+    .opt_le = BIN(opt_le),
+    .opt_gt = BIN(opt_gt),
+    .opt_ge = BIN(opt_ge),
+};
+#endif
 
 #if USE_YJIT || USE_ZJIT
 // The number of instructions executed on vm_exec_core. --yjit-stats and --zjit-stats use this.
@@ -90,6 +125,24 @@ vm_exec_core(rb_execution_context_t *ec)
     reg_pc = reg_cfp->pc;
 
   first:
+#if USE_RUST_PORTS
+    {
+        reg_cfp->pc = reg_pc;
+        ec->cfp = reg_cfp;
+        size_t batch_count = rb_vm_exec_batch_rs(ec);
+        reg_cfp = ec->cfp;
+        reg_pc = reg_cfp->pc;
+        if (batch_count > 0) {
+#if OPT_DIRECT_THREADED_CODE
+            goto *(void const *)*reg_pc;
+#elif OPT_TOKEN_THREADED_CODE
+            goto *insns_address_table[*reg_pc];
+#else
+            goto first;
+#endif
+        }
+    }
+#endif
     INSN_DISPATCH();
 /*****************/
  #include "vm.inc"

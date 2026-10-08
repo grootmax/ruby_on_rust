@@ -60,6 +60,44 @@ int rb_core_complex_read_rat_nos(const char **s, int strict, char **b);
 int rb_core_complex_read_rat(const char **s, int strict, char **b);
 void rb_core_complex_skip_ws(const char **s);
 
+/* Chunked instruction batching (core_rs/src/vm_batch.rs) */
+struct rb_execution_context_struct;
+
+struct rb_vm_insn_opcodes_struct {
+    int nop;
+    int putnil;
+    int putself;
+    int putobject;
+    int putobject_INT2FIX_0_;
+    int putobject_INT2FIX_1_;
+    int pop;
+    int dup;
+    int dupn;
+    int swap;
+    int topn;
+    int getlocal;
+    int setlocal;
+    int getlocal_WC_0;
+    int setlocal_WC_0;
+    int getlocal_WC_1;
+    int setlocal_WC_1;
+    int opt_plus;
+    int opt_minus;
+    int opt_mult;
+    int opt_div;
+    int opt_mod;
+    int opt_eq;
+    int opt_neq;
+    int opt_lt;
+    int opt_le;
+    int opt_gt;
+    int opt_ge;
+};
+
+extern struct rb_vm_insn_opcodes_struct rb_vm_insn_opcodes;
+
+size_t rb_vm_exec_batch_rs(struct rb_execution_context_struct *ec);
+
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop
 #endif
