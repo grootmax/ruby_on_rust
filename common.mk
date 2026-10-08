@@ -1673,6 +1673,16 @@ yes-test-bundled-gems-spec: yes-test-all-precheck $(PREPARE_BUNDLED_GEMS)
 	$(ACTIONS_ENDGROUP)
 no-test-bundled-gems-spec:
 
+C_EXTENSION_GEMS =
+test-c-extension-gems: $(TEST_RUNNABLE)-test-c-extension-gems
+yes-test-c-extension-gems: test-c-extension-gems-run
+no-test-c-extension-gems:
+
+test-c-extension-gems-run: $(TEST_RUNNABLE)-test-c-extension-gems-run
+yes-test-c-extension-gems-run:
+	$(gnumake_recursive)$(Q) $(XRUBY) $(tooldir)/ruby_on_rust/test-c-extension-gems.rb $(C_EXTENSION_GEMS)
+no-test-c-extension-gems-run:
+
 
 test-syntax-suggest-precheck: $(TEST_RUNNABLE)-test-syntax-suggest-precheck
 no-test-syntax-suggest-precheck:
@@ -2086,6 +2096,7 @@ help: PHONY
 	"  test-bundler-parallel: run the Bundler spec with parallel" \
 	"  test-syntax-suggest:   run the SyntaxSuggest spec" \
 	"  test-bundled-gems:     run the test suite of bundled gems [BUNDLED_GEMS=<gems>]" \
+	"  test-c-extension-gems: run the test suite of native C extension gems [C_EXTENSION_GEMS=<gems>]" \
 	"  test-tool:             tests under the tool/test" \
 	"  update-gems:           download files of the bundled gems" \
 	"  update-bundled_gems:   update the latest version of bundled gems" \

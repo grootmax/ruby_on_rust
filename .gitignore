@@ -65,6 +65,7 @@ lcov*.info
 /*.rc
 /*_prelude.c
 /.downloaded-cache
+/.c_ext_gems
 /.top-enc.mk
 /build*/
 /COPYING.LIB

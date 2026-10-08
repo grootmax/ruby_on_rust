@@ -1,0 +1,68 @@
+# Tier-1 and Tier-2 C Extension Gem Definitions for Ruby on Rust
+# Format:
+#   <gem_name>:
+#     repository: <git repository url>
+#     revision: <git commit hash, tag, or branch>
+#     tier: <tier number (1 or 2)>
+#     system_packages:
+#       - <apt package name>
+#     system_headers:
+#       - <header file name>
+#     extconf_args: <arguments to pass to extconf.rb>
+#     test_command: <test execution command>
+
+gems:
+  nokogiri:
+    repository: "https://github.com/sparklemotion/nokogiri.git"
+    revision: "v1.16.2"
+    tier: 1
+    system_packages:
+      - "libxml2-dev"
+      - "libxslt1-dev"
+      - "zlib1g-dev"
+    system_headers:
+      - "libxml/parser.h"
+      - "libxslt/xslt.h"
+    extconf_args: "--use-system-libraries"
+    test_command: "bundle exec rake test"
+
+  pg:
+    repository: "https://github.com/ged/ruby-pg.git"
+    revision: "v1.5.6"
+    tier: 1
+    system_packages:
+      - "libpq-dev"
+    system_headers:
+      - "libpq-fe.h"
+    test_command: "bundle exec rake test"
+
+  puma:
+    repository: "https://github.com/puma/puma.git"
+    revision: "v6.4.2"
+    tier: 1
+    system_packages:
+      - "libssl-dev"
+    system_headers:
+      - "openssl/ssl.h"
+    test_command: "bundle exec rake test"
+
+  fiddle:
+    repository: "https://github.com/ruby/fiddle.git"
+    revision: "v1.1.2"
+    tier: 1
+    system_packages:
+      - "libffi-dev"
+    system_headers:
+      - "ffi.h"
+    test_command: "bundle exec rake test"
+
+  sqlite3:
+    repository: "https://github.com/sparklemotion/sqlite3-ruby.git"
+    revision: "v1.7.2"
+    tier: 1
+    system_packages:
+      - "libsqlite3-dev"
+    system_headers:
+      - "sqlite3.h"
+    extconf_args: "--enable-system-libraries"
+    test_command: "bundle exec rake test"

@@ -1,0 +1,11 @@
+# Allowlist for C Extension Gems on Ruby on Rust
+# Non-zero test exit codes or non-blocking divergences listed here will not fail CI runs.
+#
+# Format:
+#   allowed_failures:
+#     - gem: <gem_name>
+#       reason: <description of known issue or flakiness>
+#       non_blocking: true
+
+allowed_failures: []
+

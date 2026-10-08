@@ -1,0 +1,74 @@
+name: C Extension Gems
+
+on:
+  push:
+    branches:
+      - master
+      - 'claude/**'
+      - 'stitch/**'
+      - 'jules/**'
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }} / ${{ startsWith(github.event_name, 'pull') && github.ref_name || github.sha }}
+  cancel-in-progress: ${{ startsWith(github.event_name, 'pull') }}
+
+permissions:
+  contents: read
+
+jobs:
+  test-c-extension-gems:
+    name: ${{ matrix.gem.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        gem:
+          - name: nokogiri
+            packages: 'libxml2-dev libxslt1-dev zlib1g-dev'
+          - name: pg
+            packages: 'libpq-dev'
+          - name: puma
+            packages: 'libssl-dev'
+          - name: fiddle
+            packages: 'libffi-dev'
+          - name: sqlite3
+            packages: 'libsqlite3-dev'
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -qq -y \
+            autoconf build-essential libyaml-dev zlib1g-dev libssl-dev \
+            ${{ matrix.gem.packages }}
+
+      - name: Cache C extension gem repository
+        uses: actions/cache@v4
+        with:
+          path: .c_ext_gems/repos/${{ matrix.gem.name }}
+          key: c-ext-repo-${{ matrix.gem.name }}-${{ hashFiles('gems/c_extension_gems.yml') }}
+          restore-keys: |
+            c-ext-repo-${{ matrix.gem.name }}-
+
+      - name: Configure and build Ruby on Rust
+        run: |
+          ./autogen.sh
+          ./configure -C --disable-install-doc
+          make -j$(nproc)
+
+      - name: Run C extension gem test harness
+        run: |
+          make test-c-extension-gems C_EXTENSION_GEMS=${{ matrix.gem.name }}
+        timeout-minutes: 25
