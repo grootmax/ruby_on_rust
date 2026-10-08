@@ -132,7 +132,7 @@ module DocLock
 
   # Manages allowlisted differences from tool/doc_lock_allowlist.yml
   class Allowlist
-    attr_reader :classes, :methods, :parameter_mismatches, :call_seq_mismatches, :comment_mismatches, :exclusions
+    attr_reader :classes, :methods, :parameter_mismatches, :call_seq_mismatches, :comment_mismatches, :visibility_mismatches, :exclusions
 
     def initialize(allowlist_file = nil)
       @classes = []
@@ -140,6 +140,7 @@ module DocLock
       @parameter_mismatches = []
       @call_seq_mismatches = []
       @comment_mismatches = []
+      @visibility_mismatches = []
       @exclusions = []
 
       load_file(allowlist_file) if allowlist_file && File.file?(allowlist_file)
@@ -152,6 +153,7 @@ module DocLock
       @parameter_mismatches = Array(yaml_data['parameter_mismatches'] || yaml_data['signatures'] || yaml_data['params'])
       @call_seq_mismatches = Array(yaml_data['call_seq_mismatches'] || yaml_data['call_seqs'])
       @comment_mismatches = Array(yaml_data['comment_mismatches'] || yaml_data['comments'])
+      @visibility_mismatches = Array(yaml_data['visibility_mismatches'] || yaml_data['visibilities'])
       @exclusions = Array(yaml_data['exclusions'])
     end
 
@@ -167,6 +169,8 @@ module DocLock
         @call_seq_mismatches.include?(entity_name) || @methods.include?(entity_name)
       when 'comment_mismatch'
         @comment_mismatches.include?(entity_name) || @methods.include?(entity_name)
+      when 'visibility_mismatch', 'singleton_mismatch', 'class_type_mismatch'
+        @visibility_mismatches.include?(entity_name) || @methods.include?(entity_name) || @classes.include?(entity_name)
       else
         false
       end || @exclusions.any? do |rule|
@@ -338,7 +342,7 @@ module DocLock
     end
 
     def self.run_dump(options)
-      ensure_store_exists(options[:store_dir])
+      ensure_store_exists(options)
       puts "DocLock: Extracting metadata from #{options[:store_dir]}..." if options[:verbose]
 
       parser = StoreParser.new(options[:store_dir])
@@ -357,7 +361,7 @@ module DocLock
     end
 
     def self.run_check(options)
-      ensure_store_exists(options[:store_dir])
+      ensure_store_exists(options)
 
       target_parser = StoreParser.new(options[:store_dir])
       target_metadata = target_parser.parse
@@ -395,13 +399,26 @@ module DocLock
       end
     end
 
-    def self.ensure_store_exists(store_dir)
-      return if File.directory?(store_dir) && File.file?(File.join(store_dir, 'cache.ri'))
+    def self.ensure_store_exists(options)
+      store_dir = options[:store_dir]
+      return store_dir if File.directory?(store_dir) && File.file?(File.join(store_dir, 'cache.ri'))
+
+      root_dir = File.expand_path('..', __dir__)
+      candidates = [
+        File.join(root_dir, 'tmp/rdoc'),
+        File.join(root_dir, '.ext/rdoc')
+      ]
+      candidates.each do |candidate|
+        if File.directory?(candidate) && File.file?(File.join(candidate, 'cache.ri'))
+          options[:store_dir] = candidate
+          return candidate
+        end
+      end
 
       puts "DocLock: Target RDoc store not found at #{store_dir}. Generating RDoc store..."
-      root_dir = File.expand_path('..', __dir__)
       rdoc_cmd = "LC_ALL=C.UTF-8 ruby -EUTF-8 \"#{File.join(root_dir, 'tool/rdoc-srcdir')}\" --ri --op \"#{store_dir}\" \"#{root_dir}\""
       system(rdoc_cmd) or raise "Failed to generate RDoc store via #{rdoc_cmd}"
+      store_dir
     end
 
     def self.resolve_reference_metadata(options, current_target_metadata)

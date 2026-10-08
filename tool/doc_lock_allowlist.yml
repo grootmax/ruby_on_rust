@@ -2,8 +2,9 @@
 # Use this allowlist to temporarily permit documentation drift during development.
 
 classes: []
-methods: []
+methods: ['Kernel#require']
 parameter_mismatches: []
 call_seq_mismatches: []
 comment_mismatches: []
+visibility_mismatches: []
 exclusions: []

@@ -654,7 +654,7 @@ rdoc-coverage: PHONY $(RDOC_DEPENDS) $(RBCONFIG)
 	$(Q)-$(RDOC) --quiet -C $(RDOCFLAGS) $(RDOC_COVERAGE_EXCLUDES) .
 
 check-doc-lock: PHONY rdoc
-	$(Q) $(XRUBY) "$(srcdir)/tool/doc_lock.rb" --check
+	$(Q) $(XRUBY) "$(srcdir)/tool/doc_lock.rb" --check --store "$(RDOCOUT)"
 
 undocumented: PHONY $(RDOC_DEPENDS) $(RBCONFIG)
 	$(Q)-$(RDOC) --quiet -C $(RDOCFLAGS) $(RDOC_COVERAGE_EXCLUDES) . | \

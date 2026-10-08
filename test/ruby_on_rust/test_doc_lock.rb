@@ -110,4 +110,46 @@ class TestDocLock < Test::Unit::TestCase
     assert_equal 1, results['approved'].size
     assert_equal 'Array#pack', results['approved'].first['entity']
   end
+
+  def test_allowlist_suppresses_visibility_mismatches
+    ref = {
+      'ZJIT' => {
+        'name' => 'ZJIT',
+        'type' => 'module',
+        'methods' => {
+          'ZJIT::enable' => {
+            'name' => 'enable',
+            'full_name' => 'ZJIT::enable',
+            'singleton' => true,
+            'visibility' => 'public'
+          }
+        }
+      }
+    }
+
+    target = {
+      'ZJIT' => {
+        'name' => 'ZJIT',
+        'type' => 'module',
+        'methods' => {
+          'ZJIT::enable' => {
+            'name' => 'enable',
+            'full_name' => 'ZJIT::enable',
+            'singleton' => true,
+            'visibility' => 'private'
+          }
+        }
+      }
+    }
+
+    allowlist = DocLock::Allowlist.new
+    allowlist.visibility_mismatches << 'ZJIT::enable'
+
+    comparator = DocLock::Comparator.new(ref, target, allowlist)
+    results = comparator.compare
+
+    assert_equal 0, results['unapproved'].size
+    assert_equal 1, results['approved'].size
+    assert_equal 'visibility_mismatch', results['approved'].first['type']
+  end
 end
