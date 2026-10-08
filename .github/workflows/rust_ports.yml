@@ -168,6 +168,10 @@ jobs:
         run: ruby tool/generate_porting_ledger.rb --check
         working-directory: src
 
+      - name: Compatibility report is current
+        run: ruby tool/generate_compatibility_report.rb --check
+        working-directory: src
+
       - name: core_rs inventory check
         run: ruby tool/core_rs/inventory.rb --check
         working-directory: src

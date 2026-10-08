@@ -1,0 +1,26 @@
+{
+  "core_rs": {
+    "total": 21,
+    "passed": 21,
+    "failed": 0,
+    "skipped": 0
+  },
+  "btest": {
+    "total": 2106,
+    "passed": 2106,
+    "failed": 0,
+    "skipped": 0
+  },
+  "test_all": {
+    "total": 491,
+    "passed": 491,
+    "failed": 0,
+    "skipped": 0
+  },
+  "test_spec": {
+    "total": 33323,
+    "passed": 33312,
+    "failed": 11,
+    "skipped": 0
+  }
+}
