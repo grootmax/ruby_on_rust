@@ -548,7 +548,8 @@ pub extern "C" fn rb_yjit_invalidate_no_singleton_class(klass: VALUE) {
     }
 
     // We apply this optimization only to Array, Hash, and String for now.
-    if unsafe { [rb_cArray, rb_cHash, rb_cString].contains(&klass) } {
+    let globals = CRubyGlobals::get();
+    if [globals.rb_cArray(), globals.rb_cHash(), globals.rb_cString()].contains(&klass) {
         with_vm_lock(src_loc!(), || {
             let no_singleton_classes = &mut Invariants::get_instance().no_singleton_classes;
             match no_singleton_classes.get_mut(&klass) {

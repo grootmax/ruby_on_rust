@@ -87,6 +87,7 @@ use std::ffi::{CString, CStr};
 use std::fmt::{Debug, Formatter};
 use std::os::raw::{c_char, c_int, c_uint};
 use std::panic::{catch_unwind, UnwindSafe};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 // We check that we can do this with the configure script and a couple of
 // static asserts. u64 and not usize to play nice with lowering to x86.
@@ -415,7 +416,7 @@ impl VALUE {
     }
 
     pub fn string_p(self) -> bool {
-        self.class_of() == unsafe { rb_cString }
+        self.class_of() == CRubyGlobals::get().rb_cString()
     }
 
     /// Read the flags bits from the RBasic object, then return a Ruby type enum (e.g. RUBY_T_ARRAY)
@@ -432,6 +433,7 @@ impl VALUE {
         return flags_bits;
     }
 
+    #[cfg(not(test))]
     pub fn class_of(self) -> VALUE {
         if !self.special_const_p() {
             let builtin_type = self.builtin_type();
@@ -440,6 +442,11 @@ impl VALUE {
         }
 
         unsafe { rb_yarv_class_of(self) }
+    }
+
+    #[cfg(test)]
+    pub fn class_of(self) -> VALUE {
+        VALUE(0)
     }
 
     pub fn is_frozen(self) -> bool {
@@ -830,3 +837,188 @@ macro_rules! ID {
     }
 }
 pub(crate) use ID;
+
+/// Centralized cache of CRuby global symbols (classes, modules, etc.).
+/// Initialized once during YJIT startup to avoid repeated raw unsafe C symbol reads.
+#[derive(Debug)]
+#[allow(non_snake_case)]
+pub struct CRubyGlobals {
+    pub rb_cBasicObject: AtomicUsize,
+    pub rb_cArray: AtomicUsize,
+    pub rb_cClass: AtomicUsize,
+    pub rb_cFalseClass: AtomicUsize,
+    pub rb_cFloat: AtomicUsize,
+    pub rb_cHash: AtomicUsize,
+    pub rb_cIO: AtomicUsize,
+    pub rb_cInteger: AtomicUsize,
+    pub rb_cModule: AtomicUsize,
+    pub rb_cNilClass: AtomicUsize,
+    pub rb_cNumeric: AtomicUsize,
+    pub rb_cString: AtomicUsize,
+    pub rb_cSymbol: AtomicUsize,
+    pub rb_cThread: AtomicUsize,
+    pub rb_cTrueClass: AtomicUsize,
+    pub rb_cRubyVM: AtomicUsize,
+    pub rb_mKernel: AtomicUsize,
+    pub rb_mRubyVMFrozenCore: AtomicUsize,
+    pub rb_block_param_proxy: AtomicUsize,
+}
+
+static CRUBY_GLOBALS: CRubyGlobals = CRubyGlobals::new();
+
+#[allow(non_snake_case)]
+#[allow(dead_code)]
+impl CRubyGlobals {
+    pub const fn new() -> Self {
+        Self {
+            rb_cBasicObject: AtomicUsize::new(0),
+            rb_cArray: AtomicUsize::new(0),
+            rb_cClass: AtomicUsize::new(0),
+            rb_cFalseClass: AtomicUsize::new(0),
+            rb_cFloat: AtomicUsize::new(0),
+            rb_cHash: AtomicUsize::new(0),
+            rb_cIO: AtomicUsize::new(0),
+            rb_cInteger: AtomicUsize::new(0),
+            rb_cModule: AtomicUsize::new(0),
+            rb_cNilClass: AtomicUsize::new(0),
+            rb_cNumeric: AtomicUsize::new(0),
+            rb_cString: AtomicUsize::new(0),
+            rb_cSymbol: AtomicUsize::new(0),
+            rb_cThread: AtomicUsize::new(0),
+            rb_cTrueClass: AtomicUsize::new(0),
+            rb_cRubyVM: AtomicUsize::new(0),
+            rb_mKernel: AtomicUsize::new(0),
+            rb_mRubyVMFrozenCore: AtomicUsize::new(0),
+            rb_block_param_proxy: AtomicUsize::new(0),
+        }
+    }
+
+    /// Return a reference to the global `CRubyGlobals` instance.
+    pub fn get() -> &'static CRubyGlobals {
+        &CRUBY_GLOBALS
+    }
+
+    /// Read and cache raw C global symbols into `CRubyGlobals`.
+    pub fn init() {
+        #[cfg(not(test))]
+        unsafe {
+            CRUBY_GLOBALS.rb_cBasicObject.store(rb_cBasicObject.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cArray.store(rb_cArray.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cClass.store(rb_cClass.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cFalseClass.store(rb_cFalseClass.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cFloat.store(rb_cFloat.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cHash.store(rb_cHash.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cIO.store(rb_cIO.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cInteger.store(rb_cInteger.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cModule.store(rb_cModule.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cNilClass.store(rb_cNilClass.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cNumeric.store(rb_cNumeric.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cString.store(rb_cString.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cSymbol.store(rb_cSymbol.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cThread.store(rb_cThread.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cTrueClass.store(rb_cTrueClass.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_cRubyVM.store(rb_cRubyVM.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_mKernel.store(rb_mKernel.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_mRubyVMFrozenCore.store(rb_mRubyVMFrozenCore.as_usize(), Ordering::Relaxed);
+            CRUBY_GLOBALS.rb_block_param_proxy.store(rb_block_param_proxy.as_usize(), Ordering::Relaxed);
+        }
+    }
+
+    /// Explicitly stub the global cache with a given value (for unit tests or injection).
+    pub fn init_stub(val: VALUE) {
+        let u = val.as_usize();
+        CRUBY_GLOBALS.rb_cBasicObject.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cArray.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cClass.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cFalseClass.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cFloat.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cHash.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cIO.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cInteger.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cModule.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cNilClass.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cNumeric.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cString.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cSymbol.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cThread.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cTrueClass.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_cRubyVM.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_mKernel.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_mRubyVMFrozenCore.store(u, Ordering::Relaxed);
+        CRUBY_GLOBALS.rb_block_param_proxy.store(u, Ordering::Relaxed);
+    }
+
+    pub fn rb_cBasicObject(&self) -> VALUE { VALUE(self.rb_cBasicObject.load(Ordering::Relaxed)) }
+    pub fn rb_cArray(&self) -> VALUE { VALUE(self.rb_cArray.load(Ordering::Relaxed)) }
+    pub fn rb_cClass(&self) -> VALUE { VALUE(self.rb_cClass.load(Ordering::Relaxed)) }
+    pub fn rb_cFalseClass(&self) -> VALUE { VALUE(self.rb_cFalseClass.load(Ordering::Relaxed)) }
+    pub fn rb_cFloat(&self) -> VALUE { VALUE(self.rb_cFloat.load(Ordering::Relaxed)) }
+    pub fn rb_cHash(&self) -> VALUE { VALUE(self.rb_cHash.load(Ordering::Relaxed)) }
+    pub fn rb_cIO(&self) -> VALUE { VALUE(self.rb_cIO.load(Ordering::Relaxed)) }
+    pub fn rb_cInteger(&self) -> VALUE { VALUE(self.rb_cInteger.load(Ordering::Relaxed)) }
+    pub fn rb_cModule(&self) -> VALUE { VALUE(self.rb_cModule.load(Ordering::Relaxed)) }
+    pub fn rb_cNilClass(&self) -> VALUE { VALUE(self.rb_cNilClass.load(Ordering::Relaxed)) }
+    pub fn rb_cNumeric(&self) -> VALUE { VALUE(self.rb_cNumeric.load(Ordering::Relaxed)) }
+    pub fn rb_cString(&self) -> VALUE { VALUE(self.rb_cString.load(Ordering::Relaxed)) }
+    pub fn rb_cSymbol(&self) -> VALUE { VALUE(self.rb_cSymbol.load(Ordering::Relaxed)) }
+    pub fn rb_cThread(&self) -> VALUE { VALUE(self.rb_cThread.load(Ordering::Relaxed)) }
+    pub fn rb_cTrueClass(&self) -> VALUE { VALUE(self.rb_cTrueClass.load(Ordering::Relaxed)) }
+    pub fn rb_cRubyVM(&self) -> VALUE { VALUE(self.rb_cRubyVM.load(Ordering::Relaxed)) }
+    pub fn rb_mKernel(&self) -> VALUE { VALUE(self.rb_mKernel.load(Ordering::Relaxed)) }
+    pub fn rb_mRubyVMFrozenCore(&self) -> VALUE { VALUE(self.rb_mRubyVMFrozenCore.load(Ordering::Relaxed)) }
+    pub fn rb_block_param_proxy(&self) -> VALUE { VALUE(self.rb_block_param_proxy.load(Ordering::Relaxed)) }
+
+    pub fn basic_object(&self) -> VALUE { self.rb_cBasicObject() }
+    pub fn array(&self) -> VALUE { self.rb_cArray() }
+    pub fn class(&self) -> VALUE { self.rb_cClass() }
+    pub fn false_class(&self) -> VALUE { self.rb_cFalseClass() }
+    pub fn float(&self) -> VALUE { self.rb_cFloat() }
+    pub fn hash(&self) -> VALUE { self.rb_cHash() }
+    pub fn io(&self) -> VALUE { self.rb_cIO() }
+    pub fn integer(&self) -> VALUE { self.rb_cInteger() }
+    pub fn module(&self) -> VALUE { self.rb_cModule() }
+    pub fn nil_class(&self) -> VALUE { self.rb_cNilClass() }
+    pub fn numeric(&self) -> VALUE { self.rb_cNumeric() }
+    pub fn string(&self) -> VALUE { self.rb_cString() }
+    pub fn symbol(&self) -> VALUE { self.rb_cSymbol() }
+    pub fn thread(&self) -> VALUE { self.rb_cThread() }
+    pub fn true_class(&self) -> VALUE { self.rb_cTrueClass() }
+    pub fn ruby_vm(&self) -> VALUE { self.rb_cRubyVM() }
+    pub fn kernel(&self) -> VALUE { self.rb_mKernel() }
+    pub fn block_param_proxy(&self) -> VALUE { self.rb_block_param_proxy() }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cruby_globals_stub_and_getters() {
+        let stub_val = VALUE(0x1234_5678);
+        CRubyGlobals::init_stub(stub_val);
+
+        let globals = CRubyGlobals::get();
+        assert_eq!(globals.rb_cArray(), stub_val);
+        assert_eq!(globals.rb_cHash(), stub_val);
+        assert_eq!(globals.rb_cString(), stub_val);
+        assert_eq!(globals.rb_cBasicObject(), stub_val);
+        assert_eq!(globals.rb_cClass(), stub_val);
+        assert_eq!(globals.rb_cFalseClass(), stub_val);
+        assert_eq!(globals.rb_cFloat(), stub_val);
+        assert_eq!(globals.rb_cIO(), stub_val);
+        assert_eq!(globals.rb_cInteger(), stub_val);
+        assert_eq!(globals.rb_cModule(), stub_val);
+        assert_eq!(globals.rb_cNilClass(), stub_val);
+        assert_eq!(globals.rb_cNumeric(), stub_val);
+        assert_eq!(globals.rb_cSymbol(), stub_val);
+        assert_eq!(globals.rb_cThread(), stub_val);
+        assert_eq!(globals.rb_cTrueClass(), stub_val);
+        assert_eq!(globals.rb_cRubyVM(), stub_val);
+        assert_eq!(globals.rb_mKernel(), stub_val);
+        assert_eq!(globals.rb_block_param_proxy(), stub_val);
+
+        assert_eq!(globals.array(), stub_val);
+        assert_eq!(globals.hash(), stub_val);
+        assert_eq!(globals.string(), stub_val);
+    }
+}
