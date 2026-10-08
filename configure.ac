@@ -3870,6 +3870,12 @@ AC_SUBST(INSTALL_STATIC_LIBRARY)
 }
 
 [begin]_group "JIT section" && {
+AC_ARG_WITH(rust-target,
+    AS_HELP_STRING([--with-rust-target=TRIPLE],
+    [specify target Rust triple for cross-compilation]),
+    [RUST_TARGET=$withval], [RUST_TARGET=])
+AS_IF([test "$RUST_TARGET" = "yes" || test "$RUST_TARGET" = "no"], [RUST_TARGET=])
+
 AC_CHECK_PROG(RUSTC, [rustc], [rustc], [no]) dnl no ac_tool_prefix
 
 dnl check if rustc is recent enough to build YJIT (rustc >= 1.58.0)
@@ -3881,19 +3887,23 @@ AS_IF([test "$RUSTC" != "no"],
         [arm64|aarch64], [JIT_TARGET_ARCH=aarch64],
         [x86_64], [JIT_TARGET_ARCH=x86_64],
     )
+    rb_rustc_target_flag=
+    AS_IF([test -n "$RUST_TARGET"], [rb_rustc_target_flag="--target $RUST_TARGET"])
     dnl Fails in case rustc target doesn't match ruby target.
     dnl Can happen on Rosetta, for example.
     AS_IF([echo "#[cfg(target_arch = \"$JIT_TARGET_ARCH\")] fn main() { let x = 1; format!(\"{x}\"); }" |
-            $RUSTC - --emit asm=/dev/null 2>/dev/null],
+            $RUSTC - $rb_rustc_target_flag --emit asm=/dev/null 2>/dev/null],
         [JIT_RUSTC_OK=yes]
     )
     AC_MSG_RESULT($JIT_RUSTC_OK)
 )
 
 dnl check if we can build YJIT/ZJIT on this target platform
-dnl we can't easily cross-compile with rustc so we don't support that
+dnl we can't easily cross-compile with rustc so we don't support that unless --with-rust-target is specified
 JIT_TARGET_OK=no
-AS_IF([test "$cross_compiling" = no],
+AS_IF([test -n "$RUST_TARGET"], [
+    JIT_TARGET_OK=yes
+], [test "$cross_compiling" = no], [
     AS_CASE(["$target_cpu-$target_os"],
         [*android*], [
             JIT_TARGET_OK=no
@@ -3908,7 +3918,7 @@ AS_IF([test "$cross_compiling" = no],
             JIT_TARGET_OK=yes
         ]
     )
-)
+])
 
 dnl build YJIT in release mode if rustc >= 1.58.0 is present and we are on a supported platform
 AC_ARG_ENABLE(yjit,
@@ -3936,7 +3946,7 @@ AC_ARG_ENABLE(zjit,
             # Fails in case rustc target doesn't match ruby target. Can happen on Rosetta, for example.
             # 1.85.0 is the first stable version that supports the 2024 edition.
             AS_IF([test "$RUSTC" != "no" && echo "#[cfg(target_arch = \"$JIT_TARGET_ARCH\")] fn main() {}" |
-                    $RUSTC - --edition=2024 --emit asm=/dev/null 2>/dev/null],
+                    $RUSTC - $rb_rustc_target_flag --edition=2024 --emit asm=/dev/null 2>/dev/null],
                 AS_IF([test "$gnumake" = "yes"], [
                     rb_zjit_build_possible=yes
                 ])
@@ -3977,7 +3987,11 @@ AS_CASE(["${YJIT_SUPPORT}"],
 	AC_DEFINE(YJIT_STATS, 1)
     ])
 
-    YJIT_LIBS="target/release/libyjit.a"
+    AS_IF([test -n "${RUST_TARGET}"], [
+        YJIT_LIBS="target/\$(RUST_TARGET)/release/libyjit.a"
+    ], [
+        YJIT_LIBS="target/release/libyjit.a"
+    ])
     RUST_LIB='$(YJIT_LIBS)'
     YJIT_OBJ='yjit.$(OBJEXT)'
     JIT_OBJ='jit.$(OBJEXT)'
@@ -4014,7 +4028,11 @@ AS_CASE(["${ZJIT_SUPPORT}"],
         AC_DEFINE(ZJIT_STATS, 1)
     ])
 
-    ZJIT_LIBS="target/release/libzjit.a"
+    AS_IF([test -n "${RUST_TARGET}"], [
+        ZJIT_LIBS="target/\$(RUST_TARGET)/release/libzjit.a"
+    ], [
+        ZJIT_LIBS="target/release/libzjit.a"
+    ])
     RUST_LIB='$(ZJIT_LIBS)'
     ZJIT_OBJ='zjit.$(OBJEXT)'
     JIT_OBJ='jit.$(OBJEXT)'
@@ -4038,8 +4056,13 @@ AS_CASE(["$JIT_CARGO_SUPPORT:$YJIT_SUPPORT:$ZJIT_SUPPORT"],
     YJIT_LIBS=
     ZJIT_LIBS=
     JIT_RUST_FLAGS="--crate-type=rlib"
-    RLIB_DIR="target/release"
-    RUST_LIB="target/release/libruby.a"
+    AS_IF([test -n "${RUST_TARGET}"], [
+        RLIB_DIR="target/\$(RUST_TARGET)/release"
+        RUST_LIB="target/\$(RUST_TARGET)/release/libruby.a"
+    ], [
+        RLIB_DIR="target/release"
+        RUST_LIB="target/release/libruby.a"
+    ])
 ],
 [no:*], [],
 [ # JIT_CARGO_SUPPORT not "no" -- cargo required.
@@ -4067,10 +4090,21 @@ AS_CASE(["$JIT_CARGO_SUPPORT:$YJIT_SUPPORT:$ZJIT_SUPPORT"],
         JIT_CARGO_SUPPORT=release
     ])
     CARGO_BUILD_ARGS="--profile ${JIT_CARGO_SUPPORT} --features ${rb_cargo_features}"
+    AS_IF([test -n "${RUST_TARGET}"], [
+        CARGO_BUILD_ARGS="${CARGO_BUILD_ARGS} --target \$(RUST_TARGET)"
+    ])
     AS_IF([test "${JIT_CARGO_SUPPORT}" = "dev"], [
-        RUST_LIB="target/debug/libruby.a"
+        AS_IF([test -n "${RUST_TARGET}"], [
+            RUST_LIB="target/\$(RUST_TARGET)/debug/libruby.a"
+        ], [
+            RUST_LIB="target/debug/libruby.a"
+        ])
     ], [
-        RUST_LIB="target/${JIT_CARGO_SUPPORT}/libruby.a"
+        AS_IF([test -n "${RUST_TARGET}"], [
+            RUST_LIB="target/\$(RUST_TARGET)/${JIT_CARGO_SUPPORT}/libruby.a"
+        ], [
+            RUST_LIB="target/${JIT_CARGO_SUPPORT}/libruby.a"
+        ])
     ])
 ])
 
@@ -4091,6 +4125,7 @@ AC_SUBST(JIT_RUST_FLAGS)dnl the common rustc flags for JIT crates such as zjit
 AC_SUBST(RUSTC_FLAGS)dnl user-configurable rustc compiler flags
 AC_SUBST(CARGO)dnl Cargo command for Rust builds
 AC_SUBST(CARGO_BUILD_ARGS)dnl for selecting Rust build profiles
+AC_SUBST(RUST_TARGET)dnl target Rust triple for cross-compilation
 AC_SUBST(YJIT_SUPPORT)dnl what flavor of YJIT the Ruby build includes
 AC_SUBST(X_YJIT_LIBS, [$YJIT_LIBS])dnl the .a library of YJIT
 AC_SUBST(X_YJIT_OBJ, [$YJIT_OBJ])dnl for optionally building the C parts of YJIT
