@@ -177,7 +177,7 @@ define_split_jumps! {
 fn update_self_is_heap_object(iseq: IseqPtr, cfp: CfpPtr) {
     let cme = unsafe { rb_vm_frame_method_entry(cfp) };
     let self_is_heap_object = !cme.is_null()
-        && iseq_self_is_heap_object(iseq, unsafe { (*cme).owner });
+        && iseq_self_is_heap_object(iseq, unsafe { cme.owner() });
     get_or_create_iseq_payload(iseq).self_is_heap_object = self_is_heap_object;
 }
 
@@ -1136,7 +1136,7 @@ fn gen_ccall_with_frame(
 
     let mut cfunc_args = vec![recv];
     cfunc_args.extend(args);
-    asm.count_call_to_with(|| qualified_method_name(unsafe { (*cme).owner }, name));
+    asm.count_call_to_with(|| qualified_method_name(unsafe { cme.owner() }, name));
     let result = asm.ccall(cfunc, cfunc_args);
 
     asm_comment!(asm, "pop C frame");
@@ -1226,7 +1226,7 @@ fn gen_ccall_variadic(
     asm.store(Opnd::mem(64, EC, RUBY_OFFSET_EC_CFP), CFP);
 
     let argv_ptr = gen_push_opnds(jit, asm, &args);
-    asm.count_call_to_with(|| qualified_method_name(unsafe { (*cme).owner }, name));
+    asm.count_call_to_with(|| qualified_method_name(unsafe { cme.owner() }, name));
     let result = asm.ccall(cfunc, vec![args.len().into(), argv_ptr, recv]);
 
     asm_comment!(asm, "pop C frame");
@@ -1694,8 +1694,8 @@ fn gen_push_inline_frame(
     state: &FrameState,
     blockiseq: Option<IseqPtr>,
 ) {
-    let local_size = unsafe { get_iseq_body_local_table_size(iseq) }.to_usize();
-    let stack_growth = state.stack_size() + local_size + unsafe { get_iseq_body_stack_max(iseq) }.to_usize();
+    let local_size = unsafe { iseq.local_table_size() }.to_usize();
+    let stack_growth = state.stack_size() + local_size + unsafe { iseq.stack_max() }.to_usize();
     gen_stack_overflow_check(jit, asm, function, state, stack_growth);
 
     // Save cfp->pc and cfp->sp for the caller frame.
@@ -1712,11 +1712,11 @@ fn gen_push_inline_frame(
     // `unspecializable_call_type`.
     let block_handler = blockiseq.map(|b| gen_block_handler_specval(asm, b));
 
-    let callee_is_bmethod = VM_METHOD_TYPE_BMETHOD == unsafe { get_cme_def_type(cme) };
+    let callee_is_bmethod = VM_METHOD_TYPE_BMETHOD == unsafe { cme.def_type() };
 
     let (frame_type, specval) = if callee_is_bmethod {
         // Extract EP from the Proc instance
-        let procv = unsafe { rb_get_def_bmethod_proc((*cme).def) };
+        let procv = unsafe { cme.def_bmethod_proc() };
         let proc = unsafe { rb_jit_get_proc_ptr(procv) };
         let proc_block = unsafe { (*proc).block.as_ref() };
         let capture = unsafe { proc_block.as_.captured.as_ref() };
@@ -1803,7 +1803,7 @@ fn gen_pop_inline_frame(
     argc: usize,
     state: &FrameState,
 ) {
-    let local_size = unsafe { get_iseq_body_local_table_size(iseq) }.to_usize();
+    let local_size = unsafe { iseq.local_table_size() }.to_usize();
     let sp_offset = (state.stack().len() + local_size - argc + VM_ENV_DATA_SIZE.to_usize()) * SIZEOF_VALUE;
 
     asm_comment!(asm, "restore caller SP after inline");
@@ -1837,12 +1837,12 @@ fn gen_send_iseq_direct(
     // The ISEQ of `def foo(...)` takes only 1 parameter for the forwarded callinfo, but the callee
     // frame's local_size is increased by the callinfo's argc (see vm_call_iseq_forwardable()) to
     // keep the caller's arguments as part of the callee's extra locals.
-    let forwarding = unsafe { rb_get_iseq_flags_forwardable(iseq) };
+    let forwarding = unsafe { iseq.flags_forwardable() };
     let forwarded_argc = if forwarding { args.len() } else { 0 };
     // Bake the callinfo as a GC offset since a non-packed (`vm_ci_packed_p`) callinfo is a movable imemo_callinfo.
     let forwarded_ci = Opnd::Value(unsafe { (*cd).ci }.into());
-    let local_size = unsafe { get_iseq_body_local_table_size(iseq) }.to_usize() + forwarded_argc;
-    let stack_growth = state.stack_size() + local_size + unsafe { get_iseq_body_stack_max(iseq) }.to_usize();
+    let local_size = unsafe { iseq.local_table_size() }.to_usize() + forwarded_argc;
+    let stack_growth = state.stack_size() + local_size + unsafe { iseq.stack_max() }.to_usize();
     gen_stack_overflow_check(jit, asm, function, state, stack_growth);
 
     // Save cfp->pc and cfp->sp for the caller frame
@@ -1864,11 +1864,11 @@ fn gen_send_iseq_direct(
         lir::BlockHandler::Proc(proc) => proc,
     });
 
-    let callee_is_bmethod = VM_METHOD_TYPE_BMETHOD == unsafe { get_cme_def_type(cme) };
+    let callee_is_bmethod = VM_METHOD_TYPE_BMETHOD == unsafe { cme.def_type() };
 
     let (frame_type, specval) = if callee_is_bmethod {
         // Extract EP from the Proc instance
-        let procv = unsafe { rb_get_def_bmethod_proc((*cme).def) };
+        let procv = unsafe { cme.def_bmethod_proc() };
         let proc = unsafe { rb_jit_get_proc_ptr(procv) };
         let proc_block = unsafe { (*proc).block.as_ref() };
         let capture = unsafe { proc_block.as_.captured.as_ref() };
@@ -1899,8 +1899,8 @@ fn gen_send_iseq_direct(
     // We write this to the local table slot at bits_start so that:
     // 1. The interpreter can read it via checkkeyword if we side-exit
     // 2. The JIT entry can read it from the callee frame slot
-    if unsafe { rb_get_iseq_flags_has_kw(iseq) } {
-        let keyword = unsafe { rb_get_iseq_body_param_keyword(iseq) };
+    if unsafe { iseq.flags_has_kw() } {
+        let keyword = unsafe { iseq.param_keyword() };
         let bits_start = unsafe { (*keyword).bits_start } as usize;
         let unspecified_bits = VALUE::fixnum_from_usize(kw_bits as usize);
         let bits_offset = (state.stack().len() - args.len() + bits_start) * SIZEOF_VALUE;
@@ -2088,8 +2088,8 @@ fn gen_invoke_block_iseq_direct(
 ) -> lir::Opnd {
     gen_incr_counter(asm, Counter::block_iseq_direct_optimized_send_count);
 
-    let local_size = unsafe { get_iseq_body_local_table_size(block_iseq) }.to_usize();
-    let stack_growth = state.stack_size() + local_size + unsafe { get_iseq_body_stack_max(block_iseq) }.to_usize();
+    let local_size = unsafe { block_iseq.local_table_size() }.to_usize();
+    let stack_growth = state.stack_size() + local_size + unsafe { block_iseq.stack_max() }.to_usize();
     gen_stack_overflow_check(jit, asm, function, state, stack_growth);
 
     // `captured` is the guarded `struct rb_captured_block *` (block handler with the ISEQ tag
@@ -3608,7 +3608,7 @@ fn inline_frame_stack_gap(iseq: IseqPtr) -> usize {
     // The extra slot is for the callee's receiver below its local table.
     // We currently never map out the stack for `invokeblock`, which doesn't
     // put a receiver on cfp->sp stack.
-    1 + unsafe { get_iseq_body_local_table_size(iseq) }.to_usize() + VM_ENV_DATA_SIZE.to_usize()
+    1 + unsafe { iseq.local_table_size() }.to_usize() + VM_ENV_DATA_SIZE.to_usize()
 }
 
 /// Prepare for calling a C function that may call an arbitrary method.
@@ -3662,7 +3662,7 @@ fn gen_push_frame(asm: &mut Assembler, argc: usize, state: &FrameState, frame: C
     asm_comment!(asm, "push cme, specval, frame type");
     // ep[-2]: cref of cme
     let local_size = if let Some(iseq) = frame.iseq {
-        (unsafe { get_iseq_body_local_table_size(iseq) }) as i32 + frame.forwarded_argc.unwrap_or(0) as i32
+        (unsafe { iseq.local_table_size() }) as i32 + frame.forwarded_argc.unwrap_or(0) as i32
     } else {
         0
     };
@@ -3733,7 +3733,7 @@ fn compile_iseq(iseq: IseqPtr) -> Result<Function, CompileError> {
 
     // Reject ISEQs with very large temp stacks.
     // We cannot encode too large offsets to access locals in arm64.
-    let stack_max = unsafe { rb_get_iseq_body_stack_max(iseq) };
+    let stack_max = unsafe { iseq.stack_max() };
     if stack_max >= i8::MAX as u32 {
         debug!("ISEQ stack too large: {stack_max}");
         return Err(CompileError::IseqStackTooLarge);
@@ -3921,7 +3921,7 @@ c_callable! {
                     // Set SP which gen_push_frame() doesn't set
                     rb_set_cfp_sp(cfp, sp);
 
-                    let local_size = get_iseq_body_local_table_size(iseq).to_usize();
+                    let local_size = iseq.local_table_size().to_usize();
                     let params = iseq.params();
                     let params_size = params.size.to_usize();
                     let frame_base = sp.offset(-local_size_and_idx_to_bp_offset(local_size, 0) as isize);
@@ -3994,7 +3994,7 @@ c_callable! {
             // the owning class and thus whether `self` is always a heap object.
             let cme = unsafe { rb_vm_frame_method_entry(cfp) };
             payload.self_is_heap_object = !cme.is_null()
-                && iseq_self_is_heap_object(iseq, unsafe { (*cme).owner });
+                && iseq_self_is_heap_object(iseq, unsafe { cme.owner() });
             let last_status = payload.versions.last().map(|version| &unsafe { version.as_ref() }.status);
             let compile_error = match last_status {
                 Some(IseqStatus::CantCompile(err)) => Some(err),
@@ -4077,7 +4077,7 @@ fn gen_function_stub(cb: &mut CodeBlock, iseq_call: IseqCallRef) -> Result<CodeP
     // packed argument locals first. prepare_for_exit() will reshape these around
     // any optional positional gaps.
     let argc = iseq_call.argc.to_usize();
-    let local_size = unsafe { get_iseq_body_local_table_size(iseq_call.iseq.get()) }.to_usize();
+    let local_size = unsafe { iseq_call.iseq.get().local_table_size() }.to_usize();
 
     // Mirror the argument layout of gen_send_direct: self, then the packed
     // positional arguments, and the block handler if it exists.

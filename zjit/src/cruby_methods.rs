@@ -59,10 +59,10 @@ impl Annotations {
     /// Query about properties of a C method
     pub fn get_cfunc_properties(&self, method: *const rb_callable_method_entry_t) -> Option<FnProperties> {
         let fn_ptr = unsafe {
-            if VM_METHOD_TYPE_CFUNC != get_cme_def_type(method) {
+            if VM_METHOD_TYPE_CFUNC != method.def_type() {
                 return None;
             }
-            get_mct_func(get_cme_def_body_cfunc(method.cast()))
+            get_mct_func(method.def_body_cfunc())
         };
         self.cfuncs.get(&fn_ptr).copied()
     }
@@ -87,8 +87,9 @@ fn annotate_c_method(props_map: &mut HashMap<*mut c_void, FnProperties>, class: 
         let method = rb_method_entry_at(class, method_id);
         assert!(!method.is_null());
         // ME-to-CME cast is fine due to identical layout
-        debug_assert_eq!(VM_METHOD_TYPE_CFUNC, get_cme_def_type(method.cast()));
-        get_mct_func(get_cme_def_body_cfunc(method.cast()))
+        let cme: CmePtr = method.cast();
+        debug_assert_eq!(VM_METHOD_TYPE_CFUNC, cme.def_type());
+        get_mct_func(cme.def_body_cfunc())
     };
 
     props_map.insert(fn_ptr, props);
@@ -106,7 +107,7 @@ fn annotate_builtin_method(props_map: &mut HashMap<*mut c_void, FnProperties>, c
 
         // Cast ME to CME - they have identical layout
         let cme = method.cast::<rb_callable_method_entry_t>();
-        let def_type = get_cme_def_type(cme);
+        let def_type = cme.def_type();
 
         if def_type != VM_METHOD_TYPE_ISEQ {
             panic!("Method {}#{} is not an ISEQ method (type: {})",
@@ -115,7 +116,7 @@ fn annotate_builtin_method(props_map: &mut HashMap<*mut c_void, FnProperties>, c
         }
 
         // Get the ISEQ from the method definition
-        let iseq = get_def_iseq_ptr((*cme).def);
+        let iseq = cme.def_iseq_ptr();
         if iseq.is_null() {
             panic!("Failed to get ISEQ for {}#{}",
                 std::ffi::CStr::from_ptr(rb_class2name(class)).to_str().unwrap_or("?"),
@@ -123,7 +124,7 @@ fn annotate_builtin_method(props_map: &mut HashMap<*mut c_void, FnProperties>, c
         }
 
         // Get the size of the ISEQ in instruction units
-        let encoded_size = rb_iseq_encoded_size(iseq);
+        let encoded_size = iseq.encoded_size();
 
         // Scan through the ISEQ to find invokebuiltin instructions
         let mut insn_idx: u32 = 0;
@@ -413,8 +414,8 @@ fn inline_kernel_block_given_p(fun: &mut hir::Function, block: hir::BlockId, _re
     // walks the wrong number of EP links at runtime (crashes when the outer is a block iseq
     // and the callee is a method, because the walk overshoots the inlined method's frame).
     let call_site_iseq = fun.frame_state(state).iseq;
-    let local_iseq = unsafe { rb_get_iseq_body_local_iseq(call_site_iseq) };
-    if unsafe { rb_get_iseq_body_type(local_iseq) } == ISEQ_TYPE_METHOD {
+    let local_iseq = unsafe { call_site_iseq.local_iseq() };
+    if unsafe { local_iseq.body_type() } == ISEQ_TYPE_METHOD {
         // Get the EP of the ISeq of the containing method, or "local level", skipping over block-level EPs.
         // Equivalent of GET_LEP() macro.
         let level = crate::cruby::get_lvar_level(call_site_iseq);
@@ -1122,7 +1123,7 @@ fn inline_kernel_respond_to_p(
         "Should never be null, as in that case we will be returned a \"negative CME\""
     );
 
-    let cme_def_type = unsafe { get_cme_def_type(target_cme) };
+    let cme_def_type = unsafe { target_cme.def_type() };
 
     // Cannot inline a refined method, since their refinement depends on lexical scope
     if cme_def_type == VM_METHOD_TYPE_REFINED {
@@ -1131,7 +1132,7 @@ fn inline_kernel_respond_to_p(
 
     let visibility = match cme_def_type {
         VM_METHOD_TYPE_UNDEF => METHOD_VISI_UNDEF,
-        _ => unsafe { METHOD_ENTRY_VISI(target_cme) },
+        _ => unsafe { target_cme.visibility() },
     };
 
     let result = match (visibility, allow_priv) {

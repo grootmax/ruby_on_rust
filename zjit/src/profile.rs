@@ -23,7 +23,7 @@ impl Profiler {
         Profiler {
             cfp,
             iseq,
-            insn_idx: unsafe { get_cfp_pc(cfp).offset_from(get_iseq_body_iseq_encoded(iseq)) as usize },
+            insn_idx: unsafe { get_cfp_pc(cfp).offset_from(iseq.body_iseq_encoded()) as usize },
         }
     }
 
