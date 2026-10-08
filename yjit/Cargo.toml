@@ -19,7 +19,7 @@ jit = { version = "0.1.0", path = "../jit" }
 # For debugging, `make V=1` shows exact cargo invocation.
 [features]
 # Support --yjit-dump-disasm and RubyVM::YJIT.disasm using libcapstone.
-disasm = ["dep:capstone"]
+disasm = ["capstone"]
 # Modify generated code for runtime checks, e.g. poison value in PC
 # for C method calls, and stack canary. This is managed separately
 # from cfg!(debug_assertions) so that we can see disasm of the code

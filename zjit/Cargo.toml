@@ -21,6 +21,6 @@ yjit = { path = "../yjit" }
 # For debugging, `make V=1` shows exact cargo invocation.
 [features]
 # Support --yjit-dump-disasm and RubyVM::YJIT.disasm using libcapstone.
-disasm = ["dep:capstone"]
+disasm = ["capstone"]
 runtime_checks = []
 stats_allocator = []

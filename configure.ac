@@ -3947,14 +3947,6 @@ AC_ARG_ENABLE(zjit,
     )]
 )
 
-dnl build offline without network connection in Cargo
-AC_ARG_ENABLE(offline-build,
-    AS_HELP_STRING([--enable-offline-build],
-    [pass --offline flag to Cargo during build]),
-    [enable_offline_build=$enableval],
-    [enable_offline_build=no]
-)
-
 CARGO_BUILD_ARGS=
 YJIT_LIBS=
 JIT_CARGO_SUPPORT=no
@@ -4075,9 +4067,6 @@ AS_CASE(["$JIT_CARGO_SUPPORT:$YJIT_SUPPORT:$ZJIT_SUPPORT"],
         JIT_CARGO_SUPPORT=release
     ])
     CARGO_BUILD_ARGS="--profile ${JIT_CARGO_SUPPORT} --features ${rb_cargo_features}"
-    AS_IF([test "x${enable_offline_build}" = "xyes"], [
-        CARGO_BUILD_ARGS="${CARGO_BUILD_ARGS} --offline"
-    ])
     AS_IF([test "${JIT_CARGO_SUPPORT}" = "dev"], [
         RUST_LIB="target/debug/libruby.a"
     ], [
