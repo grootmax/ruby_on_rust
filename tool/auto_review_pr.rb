@@ -54,6 +54,16 @@ class AutoReviewPR
     Thank you for your contribution!
   COMMENT
 
+  RULE_16_COMMENT_PREFIX = 'This pull request appears to modify C-to-Rust porting files or PORTING.md, but is missing required Rule 16 documentation.'
+
+  RULE_16_SECTIONS = [
+    { title: 'Ported Functions/Files', pattern: /^#+\s*(?:\d+\.\s*)?Ported\s+Functions(?:\s*[\/&]\s*Files|\s+and\s+Files)?/i },
+    { title: 'Exported Symbols Kept', pattern: /^#+\s*(?:\d+\.\s*)?Exported\s+Symbols(?:\s+Kept)?/i },
+    { title: 'Test Run Results', pattern: /^#+\s*(?:\d+\.\s*)?Test\s+Run\s+Results/i },
+    { title: 'Benchmark Numbers', pattern: /^#+\s*(?:\d+\.\s*)?Benchmark\s+Numbers/i },
+    { title: 'Unsafe Blocks & Safety Rationales', pattern: /^#+\s*(?:\d+\.\s*)?Unsafe\s+Blocks(?:\s*(?:&|and)\s*Safety\s*Rationales)?/i },
+  ].freeze
+
   def initialize(client)
     @client = client
   end
@@ -64,13 +74,91 @@ class AutoReviewPR
     review_non_fork_branch(pr_number, pr, existing_comments)
     review_upstream_repos(pr_number, existing_comments)
     review_redmine_links(pr_number, pr, existing_comments)
+    review_rule_16_compliance(pr_number, pr, existing_comments)
+  end
+
+  def check_missing_rule_16_sections(body)
+    return RULE_16_SECTIONS.map { |s| s[:title] } if body.nil? || body.to_s.strip.empty?
+
+    sections_content = {}
+    current_section = nil
+
+    body.to_s.each_line do |line|
+      if line =~ /^\s*#+\s*(.*)$/
+        matching = RULE_16_SECTIONS.find { |s| line =~ s[:pattern] }
+        if matching
+          current_section = matching[:title]
+          sections_content[current_section] ||= +''
+        else
+          current_section = nil
+        end
+      elsif current_section
+        sections_content[current_section] << line
+      end
+    end
+
+    missing = []
+    RULE_16_SECTIONS.each do |section|
+      title = section[:title]
+      if !sections_content.key?(title)
+        missing << title
+      else
+        cleaned = sections_content[title].gsub(/<!--.*?-->/m, '').strip
+        missing << title if cleaned.empty?
+      end
+    end
+
+    missing
+  end
+
+  def porting_pr?(pr_number, changed_files = nil)
+    changed_files ||= fetch_changed_files(pr_number)
+    porting_files = porting_status_c_files
+    changed_files.any? do |file|
+      file == 'PORTING.md' ||
+        file == 'tool/porting_status.yml' ||
+        file.start_with?('core_rs/') ||
+        file.end_with?('.rs') ||
+        porting_files.include?(file)
+    end
+  end
+
+  def format_rule_16_comment(missing_sections)
+    comment = +"#{RULE_16_COMMENT_PREFIX}\n\n"
+    comment << "According to Conversion Rule 16, pull requests modifying C-to-Rust porting files must include details for all required sections. "
+    comment << "The following required sections are missing or incomplete in your PR description:\n\n"
+    missing_sections.each do |section|
+      comment << "* #{section}\n"
+    end
+    comment << "\nPlease update the pull request description using `.github/PULL_REQUEST_TEMPLATE.md` to include these details. Thank you!\n"
+    comment
   end
 
   private
 
   def fetch_existing_comments(pr_number)
     comments = @client.get("/repos/#{REPO}/issues/#{pr_number}/comments")
-    comments.map { [it.fetch(:user).fetch(:login), it.fetch(:body)] }
+    comments.map { |c| [c.fetch(:user).fetch(:login), c.fetch(:body)] }
+  end
+
+  def fetch_changed_files(pr_number)
+    files = @client.get("/repos/#{REPO}/pulls/#{pr_number}/files")
+    files.map { |f| f[:filename] || f['filename'] || f.fetch(:filename) }
+  end
+
+  def porting_status_c_files
+    @porting_status_c_files ||= begin
+      yaml_path = File.expand_path('porting_status.yml', __dir__)
+      if File.exist?(yaml_path)
+        require 'yaml'
+        data = YAML.load_file(yaml_path)
+        (data['files'] || {}).keys
+      else
+        []
+      end
+    rescue
+      []
+    end
   end
 
   def already_commented?(existing_comments, prefix)
@@ -80,6 +168,27 @@ class AutoReviewPR
   def post_comment(pr_number, comment)
     result = @client.post("/repos/#{REPO}/issues/#{pr_number}/comments", { body: comment })
     puts "Success: #{JSON.pretty_generate(result)}"
+  end
+
+  # Check Rule 16 compliance for C-to-Rust porting PRs
+  def review_rule_16_compliance(pr_number, pr, existing_comments)
+    if already_commented?(existing_comments, RULE_16_COMMENT_PREFIX)
+      puts "Skipped: The PR ##{pr_number} already has a Rule 16 compliance comment."
+      return
+    end
+
+    unless porting_pr?(pr_number)
+      puts "Skipped: The PR ##{pr_number} does not modify C-to-Rust porting files or PORTING.md."
+      return
+    end
+
+    missing_sections = check_missing_rule_16_sections(pr[:body])
+    if missing_sections.empty?
+      puts "Skipped: The PR ##{pr_number} complies with Rule 16 requirements."
+      return
+    end
+
+    post_comment(pr_number, format_rule_16_comment(missing_sections))
   end
 
   # Suggest re-filing from a fork if the PR branch is in ruby/ruby itself
@@ -111,7 +220,7 @@ class AutoReviewPR
       return
     end
 
-    changed_files = @client.get("/repos/#{REPO}/pulls/#{pr_number}/files").map { it.fetch(:filename) }
+    changed_files = fetch_changed_files(pr_number)
 
     upstream_repos = SyncDefaultGems::Repository.group(changed_files)
     upstream_repos.delete(nil)
@@ -168,7 +277,9 @@ class AutoReviewPR
   end
 end
 
-pr_number = ARGV[0] || abort("Usage: #{$0} <pr_number>")
-client = GitHubAPIClient.new(ENV.fetch('GITHUB_TOKEN'))
+if __FILE__ == $0
+  pr_number = ARGV[0] || abort("Usage: #{$0} <pr_number>")
+  client = GitHubAPIClient.new(ENV.fetch('GITHUB_TOKEN'))
 
-AutoReviewPR.new(client).review(pr_number)
+  AutoReviewPR.new(client).review(pr_number)
+end
