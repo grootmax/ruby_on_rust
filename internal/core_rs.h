@@ -60,6 +60,20 @@ int rb_core_complex_read_rat_nos(const char **s, int strict, char **b);
 int rb_core_complex_read_rat(const char **s, int strict, char **b);
 void rb_core_complex_skip_ws(const char **s);
 
+/* eval.c: C trampoline shims and deferred exception functions */
+struct rb_execution_context_struct;
+VALUE rb_core_protect_call(VALUE (*proc)(VALUE), VALUE data);
+VALUE rb_core_protect_call0(VALUE (*proc)(void));
+VALUE rb_core_protect_call2(VALUE (*proc)(VALUE, VALUE), VALUE arg1, VALUE arg2);
+void rb_core_set_deferred_status(int state);
+int rb_core_get_deferred_status(void);
+void rb_core_clear_deferred_status(void);
+void rb_core_check_and_jump_deferred(void);
+void rb_ec_set_deferred_status(struct rb_execution_context_struct *ec, int state);
+int rb_ec_get_deferred_status(struct rb_execution_context_struct *ec);
+void rb_ec_clear_deferred_status(struct rb_execution_context_struct *ec);
+void rb_ec_check_and_jump_deferred(struct rb_execution_context_struct *ec);
+
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop
 #endif

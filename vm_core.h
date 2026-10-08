@@ -1117,6 +1117,7 @@ struct rb_execution_context_struct {
     /* temporary places */
     VALUE errinfo;
     VALUE passed_block_handler; /* for rb_iterate */
+    int deferred_status; /* recorded exception tag state for deferred exception trampolines */
 
     uint8_t raised_flag; /* only 3 bits needed */
 

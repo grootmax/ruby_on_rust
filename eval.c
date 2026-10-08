@@ -31,6 +31,7 @@
 #include "internal/thread.h"
 #include "internal/variable.h"
 #include "internal/vm.h"
+#include "internal/core_rs.h"
 #include "ruby/fiber/scheduler.h"
 #include "iseq.h"
 #include "probes.h"
@@ -1160,6 +1161,134 @@ rb_protect(VALUE (* proc) (VALUE), VALUE data, int *pstate_arg)
     EC_POP_TAG();
 
     if (pstate != NULL) *pstate = state;
+    return result;
+}
+
+void
+rb_ec_set_deferred_status(rb_execution_context_t *ec, int state)
+{
+    if (ec) {
+        ec->deferred_status = state;
+    }
+}
+
+int
+rb_ec_get_deferred_status(rb_execution_context_t *ec)
+{
+    return ec ? ec->deferred_status : 0;
+}
+
+void
+rb_ec_clear_deferred_status(rb_execution_context_t *ec)
+{
+    if (ec) {
+        ec->deferred_status = 0;
+    }
+}
+
+void
+rb_ec_check_and_jump_deferred(rb_execution_context_t *ec)
+{
+    if (ec && ec->deferred_status != TAG_NONE) {
+        int state = ec->deferred_status;
+        ec->deferred_status = TAG_NONE;
+        rb_jump_tag(state);
+    }
+}
+
+void
+rb_core_set_deferred_status(int state)
+{
+    rb_ec_set_deferred_status(GET_EC(), state);
+}
+
+int
+rb_core_get_deferred_status(void)
+{
+    return rb_ec_get_deferred_status(GET_EC());
+}
+
+void
+rb_core_clear_deferred_status(void)
+{
+    rb_ec_clear_deferred_status(GET_EC());
+}
+
+void
+rb_core_check_and_jump_deferred(void)
+{
+    rb_ec_check_and_jump_deferred(GET_EC());
+}
+
+VALUE
+rb_core_protect_call(VALUE (*proc)(VALUE), VALUE data)
+{
+    volatile VALUE result = Qnil;
+    volatile enum ruby_tag_type state;
+    rb_execution_context_t * volatile ec = GET_EC();
+    rb_control_frame_t *volatile cfp = ec->cfp;
+
+    EC_PUSH_TAG(ec);
+    if ((state = EC_EXEC_TAG()) == TAG_NONE) {
+        result = (*proc)(data);
+    }
+    else {
+        rb_vm_rewind_cfp(ec, cfp);
+    }
+    EC_POP_TAG();
+
+    if (state != TAG_NONE) {
+        rb_ec_set_deferred_status(ec, (int)state);
+        return Qundef;
+    }
+    return result;
+}
+
+VALUE
+rb_core_protect_call0(VALUE (*proc)(void))
+{
+    volatile VALUE result = Qnil;
+    volatile enum ruby_tag_type state;
+    rb_execution_context_t * volatile ec = GET_EC();
+    rb_control_frame_t *volatile cfp = ec->cfp;
+
+    EC_PUSH_TAG(ec);
+    if ((state = EC_EXEC_TAG()) == TAG_NONE) {
+        result = (*proc)();
+    }
+    else {
+        rb_vm_rewind_cfp(ec, cfp);
+    }
+    EC_POP_TAG();
+
+    if (state != TAG_NONE) {
+        rb_ec_set_deferred_status(ec, (int)state);
+        return Qundef;
+    }
+    return result;
+}
+
+VALUE
+rb_core_protect_call2(VALUE (*proc)(VALUE, VALUE), VALUE arg1, VALUE arg2)
+{
+    volatile VALUE result = Qnil;
+    volatile enum ruby_tag_type state;
+    rb_execution_context_t * volatile ec = GET_EC();
+    rb_control_frame_t *volatile cfp = ec->cfp;
+
+    EC_PUSH_TAG(ec);
+    if ((state = EC_EXEC_TAG()) == TAG_NONE) {
+        result = (*proc)(arg1, arg2);
+    }
+    else {
+        rb_vm_rewind_cfp(ec, cfp);
+    }
+    EC_POP_TAG();
+
+    if (state != TAG_NONE) {
+        rb_ec_set_deferred_status(ec, (int)state);
+        return Qundef;
+    }
     return result;
 }
 
