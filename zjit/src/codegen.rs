@@ -341,7 +341,7 @@ pub fn gen_entry_trampoline(cb: &mut CodeBlock) -> Result<CodePtr, CompileError>
 /// Compile an ISEQ into machine code if not compiled yet
 fn gen_iseq(cb: &mut CodeBlock, iseq: IseqPtr, function: Option<&Function>) -> Result<IseqCodePtrs, CompileError> {
     // Return an existing pointer if it's already compiled
-    let mut payload = get_or_create_iseq_payload(iseq);
+    let payload = get_or_create_iseq_payload(iseq);
     let last_status = payload.versions.last().map(|version| &unsafe { version.as_ref() }.status);
     match last_status {
         Some(IseqStatus::Compiled(code_ptrs)) => return Ok(code_ptrs.clone()),
@@ -3846,7 +3846,7 @@ c_callable! {
         // The check is on the compiled unit because that is the version we invalidate.
         {
             let compiled_iseq: IseqPtr = compiled_iseq_raw.as_iseq();
-            let mut payload = get_or_create_iseq_payload(compiled_iseq);
+            let payload = get_or_create_iseq_payload(compiled_iseq);
             let already_done = payload.versions.last()
                 .map_or(false, |v| unsafe { v.as_ref() }.is_invalidated())
                 || payload.versions.len() >= max_iseq_versions();
@@ -3863,7 +3863,7 @@ c_callable! {
 
         with_vm_lock(src_loc!(), || {
             let compiled_iseq: IseqPtr = compiled_iseq_raw.as_iseq();
-            let mut payload = get_or_create_iseq_payload(compiled_iseq);
+            let payload = get_or_create_iseq_payload(compiled_iseq);
             if let Some(version) = payload.versions.last_mut() {
                 let cb = ZJITState::get_code_block();
                 invalidate_iseq_version(cb, compiled_iseq, version);
@@ -3989,7 +3989,7 @@ c_callable! {
             // code path can be made read-only. But you still need the check as is while holding the VM lock in any case.
             let cb = ZJITState::get_code_block();
             let native_stack_full = unsafe { rb_ec_stack_check(ec as _) } != 0;
-            let mut payload = get_or_create_iseq_payload(iseq);
+            let payload = get_or_create_iseq_payload(iseq);
             // cfp is the callee's (this ISEQ's) frame here, so its method entry gives
             // the owning class and thus whether `self` is always a heap object.
             let cme = unsafe { rb_vm_frame_method_entry(cfp) };
