@@ -1,13 +1,170 @@
-#!ruby -W0
+#!/ruby -W0
+
+Encoding.default_external = Encoding::UTF_8
 
 require 'rubygems'
 require 'rdoc/rdoc'
+require 'fileutils'
 
 # Make only the output directory relative to the invoked directory.
 invoked = Dir.pwd
 
 # Load options and parse files from srcdir.
-Dir.chdir(File.dirname(__dir__))
+srcdir = File.dirname(__dir__)
+Dir.chdir(srcdir)
+
+def find_target_dirs(argv)
+  dirs = []
+  skip_next = false
+  argv.each do |arg|
+    if skip_next
+      skip_next = false
+      next
+    end
+    if ['--op', '-o', '--title', '-t', '--exclude', '-x', '--main', '-m'].include?(arg)
+      skip_next = true
+      next
+    end
+    next if arg.start_with?('-')
+    dirs << arg if File.directory?(arg)
+  end
+  dirs.empty? ? [Dir.pwd] : dirs
+end
+
+def generate_rust_stubs(target_dirs, stubs_dir)
+  FileUtils.mkdir_p(stubs_dir)
+  rs_files = target_dirs.flat_map do |d|
+    Dir.glob("#{d}/**/*.rs")
+  end.uniq.reject do |f|
+    f.include?("/target/") || f.include?("/vendor/") || f.include?("/.git/") || f.include?("/autom4te.cache/")
+  end
+
+  items = []
+
+  rs_files.each do |f|
+    lines = begin
+      File.readlines(f, encoding: "UTF-8", chomp: true)
+    rescue
+      []
+    end
+    inner_docs = []
+    outer_docs = []
+    i = 0
+    while i < lines.length
+      line = lines[i]
+      stripped = line.strip
+      if stripped.start_with?("//!")
+        inner_docs << stripped.sub(%r{^\//! ?}, "")
+        i += 1
+      elsif stripped.start_with?("///")
+        outer_docs << stripped.sub(%r{^\/// ?}, "")
+        i += 1
+      else
+        if outer_docs.any?
+          j = i
+          while j < lines.length
+            s = lines[j].strip
+            if s.empty? || s.start_with?("#[") || s.start_with?("//")
+              j += 1
+            else
+              break
+            end
+          end
+          item_line = lines[j] || ""
+          if item_line =~ /^\s*(?:pub\s+)?(?:unsafe\s+)?(?:extern\s+"C"\s+)?(?:const\s+)?fn\s+([a-zA-Z0-9_]+)/
+            func_name = $1
+            items << { docs: outer_docs.dup, func_name: func_name, file: f }
+          elsif outer_docs.join("\n") =~ /Document-(method|class|module|const):/
+            items << { docs: outer_docs.dup, file: f }
+          end
+          outer_docs.clear
+        end
+        i += 1
+      end
+    end
+    if inner_docs.any?
+      items << { docs: inner_docs.dup, file: f }
+      inner_docs.clear
+    end
+  end
+
+  c_code = []
+  init_code = []
+
+  items.each_with_index do |item, idx|
+    func_stub_name = "rdoc_rust_stub_#{idx}"
+    doc_text = item[:docs].join("\n")
+    sanitized_docs = item[:docs].map { |line| line.gsub("*/", "* /") }
+    formatted_docs = sanitized_docs.map { |line| line.empty? ? " *" : " * #{line}" }.join("\n")
+
+    if doc_text =~ /Document-class:\s*(\S+)/
+      klass = $1
+      c_code << "/*\n#{formatted_docs}\n */"
+      parts = klass.split("::")
+      var = "c_#{idx}"
+      init_code << "    VALUE #{var} = rb_define_class(#{parts[0].inspect}, rb_cObject);"
+      parts[1..].each do |p|
+        init_code << "    #{var} = rb_define_class_under(#{var}, #{p.inspect}, rb_cObject);"
+      end
+    elsif doc_text =~ /Document-module:\s*(\S+)/
+      mod = $1
+      c_code << "/*\n#{formatted_docs}\n */"
+      parts = mod.split("::")
+      var = "m_#{idx}"
+      init_code << "    VALUE #{var} = rb_define_module(#{parts[0].inspect});"
+      parts[1..].each do |p|
+        init_code << "    #{var} = rb_define_module_under(#{var}, #{p.inspect});"
+      end
+    elsif doc_text =~ /Document-method:\s*(\S+)/
+      target = $1
+      c_code << "/*\n#{formatted_docs}\n */"
+      c_code << "static VALUE #{func_stub_name}(VALUE self) { return self; }"
+      if target =~ /^([^#.:]+)(#|\.|::)(.+)$/
+        klass, sep, meth = $1, $2, $3
+        parts = klass.split("::")
+        var = "c_#{idx}"
+        init_code << "    VALUE #{var} = rb_define_class(#{parts[0].inspect}, rb_cObject);"
+        parts[1..].each do |p|
+          init_code << "    #{var} = rb_define_class_under(#{var}, #{p.inspect}, rb_cObject);"
+        end
+        if sep == "#"
+          init_code << "    rb_define_method(#{var}, #{meth.inspect}, #{func_stub_name}, -1);"
+        else
+          init_code << "    rb_define_singleton_method(#{var}, #{meth.inspect}, #{func_stub_name}, -1);"
+        end
+      else
+        meth = target
+        init_code << "    rb_define_global_function(#{meth.inspect}, #{func_stub_name}, -1);"
+      end
+    elsif item[:func_name]
+      meth = item[:func_name]
+      doc_with_directive = " * Document-method: #{meth}\n#{formatted_docs}"
+      c_code << "/*\n#{doc_with_directive}\n */"
+      c_code << "static VALUE #{func_stub_name}(VALUE self) { return self; }"
+      init_code << "    rb_define_global_function(#{meth.inspect}, #{func_stub_name}, -1);"
+    else
+      c_code << "/*\n#{formatted_docs}\n */"
+    end
+  end
+
+  stub_c_path = File.join(stubs_dir, "rust_stubs.c")
+  c_content = <<~C
+    #{c_code.join("\n\n")}
+
+    void Init_rust_stubs(void) {
+    #{init_code.join("\n")}
+    }
+  C
+  File.write(stub_c_path, c_content)
+  stub_c_path
+end
+
+target_dirs = find_target_dirs(ARGV)
+base_dir = target_dirs.first || Dir.pwd
+stubs_dir = File.expand_path("doc/rust_stubs", base_dir)
+generate_rust_stubs(target_dirs, stubs_dir)
+
+ARGV.unshift(stubs_dir) unless ARGV.include?(stubs_dir) || ARGV.include?("doc/rust_stubs")
 
 options = RDoc::Options.load_options
 options.title = options.title.sub(/Ruby \K.*version/) {

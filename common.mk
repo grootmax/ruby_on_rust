@@ -77,8 +77,10 @@ RDOCOUT       = $(EXTOUT)/rdoc
 HTMLOUT       = $(EXTOUT)/html
 CAPIOUT       = doc/capi
 INSTALL_DOC_OPTS = --rdoc-output="$(RDOCOUT)" --html-output="$(HTMLOUT)"
+RDOC_RUST_STUBS_DIR = doc/rust_stubs
 RDOC_GEN_OPTS = --no-force-update \
 	--exclude '^lib/rubygems/core_ext/kernel_require\.rb$$' \
+	$(RDOC_RUST_STUBS_DIR) \
 	$(empty)
 RDOC_SERVER_PORT = 4000
 
@@ -815,7 +817,7 @@ clean-enc.d: PHONY
 
 clean-rdoc distclean-rdoc realclean-rdoc:
 	@echo $(@:-rdoc=ing) rdoc
-	$(Q)$(RMALL) $(RDOCOUT)
+	$(Q)$(RMALL) $(RDOCOUT) $(RDOC_RUST_STUBS_DIR)
 
 clean-html distclean-html realclean-html:
 	@echo $(@:-html=ing) HTML
