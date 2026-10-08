@@ -190,6 +190,13 @@ pub struct RBasic {
     pub flags: VALUE,
     pub klass: VALUE,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RBasic"][::std::mem::size_of::<RBasic>() - 16usize];
+    ["Alignment of RBasic"][::std::mem::align_of::<RBasic>() - 8usize];
+    ["Offset of field: RBasic::flags"][::std::mem::offset_of!(RBasic, flags) - 0usize];
+    ["Offset of field: RBasic::klass"][::std::mem::offset_of!(RBasic, klass) - 8usize];
+};
 pub const RUBY_T_NONE: ruby_value_type = 0;
 pub const RUBY_T_OBJECT: ruby_value_type = 1;
 pub const RUBY_T_CLASS: ruby_value_type = 2;
@@ -256,6 +263,85 @@ pub type ruby_fl_type = i32;
 pub const RSTRING_NOEMBED: ruby_rstring_flags = 8192;
 pub const RSTRING_FSTR: ruby_rstring_flags = 536870912;
 pub type ruby_rstring_flags = u32;
+#[repr(C)]
+pub struct RString {
+    pub basic: RBasic,
+    pub len: ::std::os::raw::c_long,
+    pub as_: RString__bindgen_ty_1,
+}
+#[repr(C)]
+pub struct RString__bindgen_ty_1 {
+    pub heap: __BindgenUnionField<RString__bindgen_ty_1__bindgen_ty_1>,
+    pub embed: __BindgenUnionField<RString__bindgen_ty_1__bindgen_ty_2>,
+    pub bindgen_union_field: [u64; 2usize],
+}
+#[repr(C)]
+pub struct RString__bindgen_ty_1__bindgen_ty_1 {
+    pub ptr: *mut ::std::os::raw::c_char,
+    pub aux: RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1,
+}
+#[repr(C)]
+pub struct RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1 {
+    pub capa: __BindgenUnionField<::std::os::raw::c_long>,
+    pub shared: __BindgenUnionField<VALUE>,
+    pub bindgen_union_field: u64,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1"]
+        [::std::mem::size_of::<RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1>() - 8usize];
+    ["Alignment of RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1"]
+        [::std::mem::align_of::<RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1>() - 8usize];
+    ["Offset of field: RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1::capa"]
+        [::std::mem::offset_of!(RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, capa) - 0usize];
+    ["Offset of field: RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1::shared"][::std::mem::offset_of!(
+        RString__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1,
+        shared
+    ) - 0usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RString__bindgen_ty_1__bindgen_ty_1"]
+        [::std::mem::size_of::<RString__bindgen_ty_1__bindgen_ty_1>() - 16usize];
+    ["Alignment of RString__bindgen_ty_1__bindgen_ty_1"]
+        [::std::mem::align_of::<RString__bindgen_ty_1__bindgen_ty_1>() - 8usize];
+    ["Offset of field: RString__bindgen_ty_1__bindgen_ty_1::ptr"]
+        [::std::mem::offset_of!(RString__bindgen_ty_1__bindgen_ty_1, ptr) - 0usize];
+    ["Offset of field: RString__bindgen_ty_1__bindgen_ty_1::aux"]
+        [::std::mem::offset_of!(RString__bindgen_ty_1__bindgen_ty_1, aux) - 8usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RString__bindgen_ty_1__bindgen_ty_2 {
+    pub ary: [::std::os::raw::c_char; 1usize],
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RString__bindgen_ty_1__bindgen_ty_2"]
+        [::std::mem::size_of::<RString__bindgen_ty_1__bindgen_ty_2>() - 1usize];
+    ["Alignment of RString__bindgen_ty_1__bindgen_ty_2"]
+        [::std::mem::align_of::<RString__bindgen_ty_1__bindgen_ty_2>() - 1usize];
+    ["Offset of field: RString__bindgen_ty_1__bindgen_ty_2::ary"]
+        [::std::mem::offset_of!(RString__bindgen_ty_1__bindgen_ty_2, ary) - 0usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RString__bindgen_ty_1"][::std::mem::size_of::<RString__bindgen_ty_1>() - 16usize];
+    ["Alignment of RString__bindgen_ty_1"]
+        [::std::mem::align_of::<RString__bindgen_ty_1>() - 8usize];
+    ["Offset of field: RString__bindgen_ty_1::heap"]
+        [::std::mem::offset_of!(RString__bindgen_ty_1, heap) - 0usize];
+    ["Offset of field: RString__bindgen_ty_1::embed"]
+        [::std::mem::offset_of!(RString__bindgen_ty_1, embed) - 0usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RString"][::std::mem::size_of::<RString>() - 40usize];
+    ["Alignment of RString"][::std::mem::align_of::<RString>() - 8usize];
+    ["Offset of field: RString::basic"][::std::mem::offset_of!(RString, basic) - 0usize];
+    ["Offset of field: RString::len"][::std::mem::offset_of!(RString, len) - 16usize];
+    ["Offset of field: RString::as_"][::std::mem::offset_of!(RString, as_) - 24usize];
+};
 pub type st_data_t = u64;
 pub const ST_CONTINUE: st_retval = 0;
 pub const ST_STOP: st_retval = 1;
@@ -268,8 +354,101 @@ pub const RARRAY_EMBED_LEN_MASK: ruby_rarray_flags = 4161536;
 pub type ruby_rarray_flags = u32;
 pub const RARRAY_EMBED_LEN_SHIFT: ruby_rarray_consts = 15;
 pub type ruby_rarray_consts = u32;
+#[repr(C)]
+pub struct RArray {
+    pub basic: RBasic,
+    pub as_: RArray__bindgen_ty_1,
+}
+#[repr(C)]
+pub struct RArray__bindgen_ty_1 {
+    pub heap: __BindgenUnionField<RArray__bindgen_ty_1__bindgen_ty_1>,
+    pub ary: __BindgenUnionField<[VALUE; 1usize]>,
+    pub bindgen_union_field: [u64; 3usize],
+}
+#[repr(C)]
+pub struct RArray__bindgen_ty_1__bindgen_ty_1 {
+    pub len: ::std::os::raw::c_long,
+    pub aux: RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1,
+    pub ptr: *const VALUE,
+}
+#[repr(C)]
+pub struct RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1 {
+    pub capa: __BindgenUnionField<::std::os::raw::c_long>,
+    pub shared_root: __BindgenUnionField<VALUE>,
+    pub bindgen_union_field: u64,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1"]
+        [::std::mem::size_of::<RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1>() - 8usize];
+    ["Alignment of RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1"]
+        [::std::mem::align_of::<RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1>() - 8usize];
+    ["Offset of field: RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1::capa"]
+        [::std::mem::offset_of!(RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1, capa) - 0usize];
+    ["Offset of field: RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1::shared_root"][::std::mem::offset_of!(
+        RArray__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1,
+        shared_root
+    ) - 0usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RArray__bindgen_ty_1__bindgen_ty_1"]
+        [::std::mem::size_of::<RArray__bindgen_ty_1__bindgen_ty_1>() - 24usize];
+    ["Alignment of RArray__bindgen_ty_1__bindgen_ty_1"]
+        [::std::mem::align_of::<RArray__bindgen_ty_1__bindgen_ty_1>() - 8usize];
+    ["Offset of field: RArray__bindgen_ty_1__bindgen_ty_1::len"]
+        [::std::mem::offset_of!(RArray__bindgen_ty_1__bindgen_ty_1, len) - 0usize];
+    ["Offset of field: RArray__bindgen_ty_1__bindgen_ty_1::aux"]
+        [::std::mem::offset_of!(RArray__bindgen_ty_1__bindgen_ty_1, aux) - 8usize];
+    ["Offset of field: RArray__bindgen_ty_1__bindgen_ty_1::ptr"]
+        [::std::mem::offset_of!(RArray__bindgen_ty_1__bindgen_ty_1, ptr) - 16usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RArray__bindgen_ty_1"][::std::mem::size_of::<RArray__bindgen_ty_1>() - 24usize];
+    ["Alignment of RArray__bindgen_ty_1"][::std::mem::align_of::<RArray__bindgen_ty_1>() - 8usize];
+    ["Offset of field: RArray__bindgen_ty_1::heap"]
+        [::std::mem::offset_of!(RArray__bindgen_ty_1, heap) - 0usize];
+    ["Offset of field: RArray__bindgen_ty_1::ary"]
+        [::std::mem::offset_of!(RArray__bindgen_ty_1, ary) - 0usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RArray"][::std::mem::size_of::<RArray>() - 40usize];
+    ["Alignment of RArray"][::std::mem::align_of::<RArray>() - 8usize];
+    ["Offset of field: RArray::basic"][::std::mem::offset_of!(RArray, basic) - 0usize];
+    ["Offset of field: RArray::as_"][::std::mem::offset_of!(RArray, as_) - 16usize];
+};
 pub const RMODULE_IS_REFINEMENT: ruby_rmodule_flags = 8192;
 pub type ruby_rmodule_flags = u32;
+#[repr(C)]
+pub struct RObject {
+    pub basic: RBasic,
+    pub as_: RObject__bindgen_ty_1,
+}
+#[repr(C)]
+pub struct RObject__bindgen_ty_1 {
+    pub ary: __BindgenUnionField<[VALUE; 1usize]>,
+    pub extended: __BindgenUnionField<VALUE>,
+    pub bindgen_union_field: u64,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RObject__bindgen_ty_1"][::std::mem::size_of::<RObject__bindgen_ty_1>() - 8usize];
+    ["Alignment of RObject__bindgen_ty_1"]
+        [::std::mem::align_of::<RObject__bindgen_ty_1>() - 8usize];
+    ["Offset of field: RObject__bindgen_ty_1::ary"]
+        [::std::mem::offset_of!(RObject__bindgen_ty_1, ary) - 0usize];
+    ["Offset of field: RObject__bindgen_ty_1::extended"]
+        [::std::mem::offset_of!(RObject__bindgen_ty_1, extended) - 0usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of RObject"][::std::mem::size_of::<RObject>() - 24usize];
+    ["Alignment of RObject"][::std::mem::align_of::<RObject>() - 8usize];
+    ["Offset of field: RObject::basic"][::std::mem::offset_of!(RObject, basic) - 0usize];
+    ["Offset of field: RObject::as_"][::std::mem::offset_of!(RObject, as_) - 16usize];
+};
 pub type rb_block_call_func = ::std::option::Option<
     unsafe extern "C" fn(
         yielded_arg: VALUE,
@@ -323,6 +502,13 @@ pub struct vm_ifunc_argc {
     pub min: ::std::os::raw::c_int,
     pub max: ::std::os::raw::c_int,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vm_ifunc_argc"][::std::mem::size_of::<vm_ifunc_argc>() - 8usize];
+    ["Alignment of vm_ifunc_argc"][::std::mem::align_of::<vm_ifunc_argc>() - 4usize];
+    ["Offset of field: vm_ifunc_argc::min"][::std::mem::offset_of!(vm_ifunc_argc, min) - 0usize];
+    ["Offset of field: vm_ifunc_argc::max"][::std::mem::offset_of!(vm_ifunc_argc, max) - 4usize];
+};
 #[repr(C)]
 pub struct vm_ifunc {
     pub flags: VALUE,
@@ -331,6 +517,16 @@ pub struct vm_ifunc {
     pub data: *const ::std::os::raw::c_void,
     pub argc: vm_ifunc_argc,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of vm_ifunc"][::std::mem::size_of::<vm_ifunc>() - 40usize];
+    ["Alignment of vm_ifunc"][::std::mem::align_of::<vm_ifunc>() - 8usize];
+    ["Offset of field: vm_ifunc::flags"][::std::mem::offset_of!(vm_ifunc, flags) - 0usize];
+    ["Offset of field: vm_ifunc::svar_lep"][::std::mem::offset_of!(vm_ifunc, svar_lep) - 8usize];
+    ["Offset of field: vm_ifunc::func"][::std::mem::offset_of!(vm_ifunc, func) - 16usize];
+    ["Offset of field: vm_ifunc::data"][::std::mem::offset_of!(vm_ifunc, data) - 24usize];
+    ["Offset of field: vm_ifunc::argc"][::std::mem::offset_of!(vm_ifunc, argc) - 32usize];
+};
 pub type attr_index_t = u8;
 pub type shape_id_t = u32;
 pub const SHAPE_ID_HAS_IVAR_MASK: shape_id_mask = 67633150;
@@ -388,6 +584,22 @@ pub struct rb_method_entry_struct {
     pub called_id: ID,
     pub owner: VALUE,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_method_entry_struct"][::std::mem::size_of::<rb_method_entry_struct>() - 40usize];
+    ["Alignment of rb_method_entry_struct"]
+        [::std::mem::align_of::<rb_method_entry_struct>() - 8usize];
+    ["Offset of field: rb_method_entry_struct::flags"]
+        [::std::mem::offset_of!(rb_method_entry_struct, flags) - 0usize];
+    ["Offset of field: rb_method_entry_struct::defined_class"]
+        [::std::mem::offset_of!(rb_method_entry_struct, defined_class) - 8usize];
+    ["Offset of field: rb_method_entry_struct::def"]
+        [::std::mem::offset_of!(rb_method_entry_struct, def) - 16usize];
+    ["Offset of field: rb_method_entry_struct::called_id"]
+        [::std::mem::offset_of!(rb_method_entry_struct, called_id) - 24usize];
+    ["Offset of field: rb_method_entry_struct::owner"]
+        [::std::mem::offset_of!(rb_method_entry_struct, owner) - 32usize];
+};
 pub type rb_method_entry_t = rb_method_entry_struct;
 #[repr(C)]
 pub struct rb_callable_method_entry_struct {
@@ -397,6 +609,23 @@ pub struct rb_callable_method_entry_struct {
     pub called_id: ID,
     pub owner: VALUE,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_callable_method_entry_struct"]
+        [::std::mem::size_of::<rb_callable_method_entry_struct>() - 40usize];
+    ["Alignment of rb_callable_method_entry_struct"]
+        [::std::mem::align_of::<rb_callable_method_entry_struct>() - 8usize];
+    ["Offset of field: rb_callable_method_entry_struct::flags"]
+        [::std::mem::offset_of!(rb_callable_method_entry_struct, flags) - 0usize];
+    ["Offset of field: rb_callable_method_entry_struct::defined_class"]
+        [::std::mem::offset_of!(rb_callable_method_entry_struct, defined_class) - 8usize];
+    ["Offset of field: rb_callable_method_entry_struct::def"]
+        [::std::mem::offset_of!(rb_callable_method_entry_struct, def) - 16usize];
+    ["Offset of field: rb_callable_method_entry_struct::called_id"]
+        [::std::mem::offset_of!(rb_callable_method_entry_struct, called_id) - 24usize];
+    ["Offset of field: rb_callable_method_entry_struct::owner"]
+        [::std::mem::offset_of!(rb_callable_method_entry_struct, owner) - 32usize];
+};
 pub type rb_callable_method_entry_t = rb_callable_method_entry_struct;
 pub const VM_METHOD_TYPE_ISEQ: rb_method_type_t = 0;
 pub const VM_METHOD_TYPE_CFUNC: rb_method_type_t = 1;
@@ -426,6 +655,18 @@ pub struct rb_method_cfunc_struct {
     >,
     pub argc: ::std::os::raw::c_int,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_method_cfunc_struct"][::std::mem::size_of::<rb_method_cfunc_struct>() - 24usize];
+    ["Alignment of rb_method_cfunc_struct"]
+        [::std::mem::align_of::<rb_method_cfunc_struct>() - 8usize];
+    ["Offset of field: rb_method_cfunc_struct::func"]
+        [::std::mem::offset_of!(rb_method_cfunc_struct, func) - 0usize];
+    ["Offset of field: rb_method_cfunc_struct::invoker"]
+        [::std::mem::offset_of!(rb_method_cfunc_struct, invoker) - 8usize];
+    ["Offset of field: rb_method_cfunc_struct::argc"]
+        [::std::mem::offset_of!(rb_method_cfunc_struct, argc) - 16usize];
+};
 pub const OPTIMIZED_METHOD_TYPE_SEND: method_optimized_type = 0;
 pub const OPTIMIZED_METHOD_TYPE_CALL: method_optimized_type = 1;
 pub const OPTIMIZED_METHOD_TYPE_BLOCK_CALL: method_optimized_type = 2;
@@ -455,23 +696,69 @@ pub struct iseq_inline_constant_cache_entry {
     pub ic_cref: *const rb_cref_t,
     pub ractor_id: rb_serial_t,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of iseq_inline_constant_cache_entry"]
+        [::std::mem::size_of::<iseq_inline_constant_cache_entry>() - 32usize];
+    ["Alignment of iseq_inline_constant_cache_entry"]
+        [::std::mem::align_of::<iseq_inline_constant_cache_entry>() - 8usize];
+    ["Offset of field: iseq_inline_constant_cache_entry::flags"]
+        [::std::mem::offset_of!(iseq_inline_constant_cache_entry, flags) - 0usize];
+    ["Offset of field: iseq_inline_constant_cache_entry::value"]
+        [::std::mem::offset_of!(iseq_inline_constant_cache_entry, value) - 8usize];
+    ["Offset of field: iseq_inline_constant_cache_entry::ic_cref"]
+        [::std::mem::offset_of!(iseq_inline_constant_cache_entry, ic_cref) - 16usize];
+    ["Offset of field: iseq_inline_constant_cache_entry::ractor_id"]
+        [::std::mem::offset_of!(iseq_inline_constant_cache_entry, ractor_id) - 24usize];
+};
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct iseq_inline_constant_cache {
     pub entry: *mut iseq_inline_constant_cache_entry,
     pub segments: *const ID,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of iseq_inline_constant_cache"]
+        [::std::mem::size_of::<iseq_inline_constant_cache>() - 16usize];
+    ["Alignment of iseq_inline_constant_cache"]
+        [::std::mem::align_of::<iseq_inline_constant_cache>() - 8usize];
+    ["Offset of field: iseq_inline_constant_cache::entry"]
+        [::std::mem::offset_of!(iseq_inline_constant_cache, entry) - 0usize];
+    ["Offset of field: iseq_inline_constant_cache::segments"]
+        [::std::mem::offset_of!(iseq_inline_constant_cache, segments) - 8usize];
+};
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct iseq_inline_iv_cache_entry {
     pub value: u64,
     pub iv_set_name: ID,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of iseq_inline_iv_cache_entry"]
+        [::std::mem::size_of::<iseq_inline_iv_cache_entry>() - 16usize];
+    ["Alignment of iseq_inline_iv_cache_entry"]
+        [::std::mem::align_of::<iseq_inline_iv_cache_entry>() - 8usize];
+    ["Offset of field: iseq_inline_iv_cache_entry::value"]
+        [::std::mem::offset_of!(iseq_inline_iv_cache_entry, value) - 0usize];
+    ["Offset of field: iseq_inline_iv_cache_entry::iv_set_name"]
+        [::std::mem::offset_of!(iseq_inline_iv_cache_entry, iv_set_name) - 8usize];
+};
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct iseq_inline_cvar_cache_entry {
     pub entry: *mut rb_cvar_class_tbl_entry,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of iseq_inline_cvar_cache_entry"]
+        [::std::mem::size_of::<iseq_inline_cvar_cache_entry>() - 8usize];
+    ["Alignment of iseq_inline_cvar_cache_entry"]
+        [::std::mem::align_of::<iseq_inline_cvar_cache_entry>() - 8usize];
+    ["Offset of field: iseq_inline_cvar_cache_entry::entry"]
+        [::std::mem::offset_of!(iseq_inline_cvar_cache_entry, entry) - 0usize];
+};
 pub const ISEQ_TYPE_TOP: rb_iseq_type = 0;
 pub const ISEQ_TYPE_METHOD: rb_iseq_type = 1;
 pub const ISEQ_TYPE_BLOCK: rb_iseq_type = 2;
@@ -499,6 +786,29 @@ pub struct rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword {
     pub table: *const ID,
     pub default_values: *mut VALUE,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword"][::std::mem::size_of::<
+        rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword,
+    >() - 32usize];
+    ["Alignment of rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword"]
+        [::std::mem::align_of::<rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword>()
+            - 8usize];
+    ["Offset of field: rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword::num"][::std::mem::offset_of!(
+        rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword,
+        num
+    )
+        - 0usize];
+    ["Offset of field: rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword::required_num"] [:: std :: mem :: offset_of ! (rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword , required_num) - 4usize] ;
+    ["Offset of field: rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword::bits_start"] [:: std :: mem :: offset_of ! (rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword , bits_start) - 8usize] ;
+    ["Offset of field: rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword::rest_start"] [:: std :: mem :: offset_of ! (rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword , rest_start) - 12usize] ;
+    ["Offset of field: rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword::table"][::std::mem::offset_of!(
+        rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword,
+        table
+    )
+        - 16usize];
+    ["Offset of field: rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword::default_values"] [:: std :: mem :: offset_of ! (rb_iseq_constant_body_rb_iseq_parameters_rb_iseq_param_keyword , default_values) - 24usize] ;
+};
 #[repr(C)]
 pub struct rb_captured_block {
     pub self_: VALUE,
@@ -512,6 +822,30 @@ pub struct rb_captured_block__bindgen_ty_1 {
     pub val: __BindgenUnionField<VALUE>,
     pub bindgen_union_field: u64,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_captured_block__bindgen_ty_1"]
+        [::std::mem::size_of::<rb_captured_block__bindgen_ty_1>() - 8usize];
+    ["Alignment of rb_captured_block__bindgen_ty_1"]
+        [::std::mem::align_of::<rb_captured_block__bindgen_ty_1>() - 8usize];
+    ["Offset of field: rb_captured_block__bindgen_ty_1::iseq"]
+        [::std::mem::offset_of!(rb_captured_block__bindgen_ty_1, iseq) - 0usize];
+    ["Offset of field: rb_captured_block__bindgen_ty_1::ifunc"]
+        [::std::mem::offset_of!(rb_captured_block__bindgen_ty_1, ifunc) - 0usize];
+    ["Offset of field: rb_captured_block__bindgen_ty_1::val"]
+        [::std::mem::offset_of!(rb_captured_block__bindgen_ty_1, val) - 0usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_captured_block"][::std::mem::size_of::<rb_captured_block>() - 24usize];
+    ["Alignment of rb_captured_block"][::std::mem::align_of::<rb_captured_block>() - 8usize];
+    ["Offset of field: rb_captured_block::self_"]
+        [::std::mem::offset_of!(rb_captured_block, self_) - 0usize];
+    ["Offset of field: rb_captured_block::ep"]
+        [::std::mem::offset_of!(rb_captured_block, ep) - 8usize];
+    ["Offset of field: rb_captured_block::code"]
+        [::std::mem::offset_of!(rb_captured_block, code) - 16usize];
+};
 pub const block_type_iseq: rb_block_type = 0;
 pub const block_type_ifunc: rb_block_type = 1;
 pub const block_type_symbol: rb_block_type = 2;
@@ -530,6 +864,24 @@ pub struct rb_block__bindgen_ty_1 {
     pub proc_: __BindgenUnionField<VALUE>,
     pub bindgen_union_field: [u64; 3usize],
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_block__bindgen_ty_1"][::std::mem::size_of::<rb_block__bindgen_ty_1>() - 24usize];
+    ["Alignment of rb_block__bindgen_ty_1"]
+        [::std::mem::align_of::<rb_block__bindgen_ty_1>() - 8usize];
+    ["Offset of field: rb_block__bindgen_ty_1::captured"]
+        [::std::mem::offset_of!(rb_block__bindgen_ty_1, captured) - 0usize];
+    ["Offset of field: rb_block__bindgen_ty_1::symbol"]
+        [::std::mem::offset_of!(rb_block__bindgen_ty_1, symbol) - 0usize];
+    ["Offset of field: rb_block__bindgen_ty_1::proc_"]
+        [::std::mem::offset_of!(rb_block__bindgen_ty_1, proc_) - 0usize];
+};
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_block"][::std::mem::size_of::<rb_block>() - 32usize];
+    ["Alignment of rb_block"][::std::mem::align_of::<rb_block>() - 8usize];
+    ["Offset of field: rb_block::as_"][::std::mem::offset_of!(rb_block, as_) - 8usize];
+};
 impl rb_block {
     #[inline]
     pub fn type_(&self) -> rb_block_type {
@@ -561,6 +913,11 @@ pub struct rb_proc_header_t {
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 2usize]>,
     pub __bindgen_padding_0: u16,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_proc_header_t"][::std::mem::size_of::<rb_proc_header_t>() - 4usize];
+    ["Alignment of rb_proc_header_t"][::std::mem::align_of::<rb_proc_header_t>() - 4usize];
+};
 impl rb_proc_header_t {
     #[inline]
     pub fn type_(&self) -> rb_block_type {
@@ -654,16 +1011,43 @@ pub struct rb_proc_captured_t {
     pub header: rb_proc_header_t,
     pub captured: rb_captured_block,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_proc_captured_t"][::std::mem::size_of::<rb_proc_captured_t>() - 32usize];
+    ["Alignment of rb_proc_captured_t"][::std::mem::align_of::<rb_proc_captured_t>() - 8usize];
+    ["Offset of field: rb_proc_captured_t::header"]
+        [::std::mem::offset_of!(rb_proc_captured_t, header) - 0usize];
+    ["Offset of field: rb_proc_captured_t::captured"]
+        [::std::mem::offset_of!(rb_proc_captured_t, captured) - 8usize];
+};
 #[repr(C)]
 pub struct rb_proc_symbol_t {
     pub header: rb_proc_header_t,
     pub symbol: VALUE,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_proc_symbol_t"][::std::mem::size_of::<rb_proc_symbol_t>() - 16usize];
+    ["Alignment of rb_proc_symbol_t"][::std::mem::align_of::<rb_proc_symbol_t>() - 8usize];
+    ["Offset of field: rb_proc_symbol_t::header"]
+        [::std::mem::offset_of!(rb_proc_symbol_t, header) - 0usize];
+    ["Offset of field: rb_proc_symbol_t::symbol"]
+        [::std::mem::offset_of!(rb_proc_symbol_t, symbol) - 8usize];
+};
 #[repr(C)]
 pub struct rb_proc_proc_t {
     pub header: rb_proc_header_t,
     pub proc_: VALUE,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_proc_proc_t"][::std::mem::size_of::<rb_proc_proc_t>() - 16usize];
+    ["Alignment of rb_proc_proc_t"][::std::mem::align_of::<rb_proc_proc_t>() - 8usize];
+    ["Offset of field: rb_proc_proc_t::header"]
+        [::std::mem::offset_of!(rb_proc_proc_t, header) - 0usize];
+    ["Offset of field: rb_proc_proc_t::proc_"]
+        [::std::mem::offset_of!(rb_proc_proc_t, proc_) - 8usize];
+};
 #[repr(C)]
 pub struct rb_proc_t {
     pub block: __BindgenUnionField<rb_block>,
@@ -673,6 +1057,16 @@ pub struct rb_proc_t {
     pub proc_: __BindgenUnionField<rb_proc_proc_t>,
     pub bindgen_union_field: [u64; 4usize],
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_proc_t"][::std::mem::size_of::<rb_proc_t>() - 32usize];
+    ["Alignment of rb_proc_t"][::std::mem::align_of::<rb_proc_t>() - 8usize];
+    ["Offset of field: rb_proc_t::block"][::std::mem::offset_of!(rb_proc_t, block) - 0usize];
+    ["Offset of field: rb_proc_t::header"][::std::mem::offset_of!(rb_proc_t, header) - 0usize];
+    ["Offset of field: rb_proc_t::captured"][::std::mem::offset_of!(rb_proc_t, captured) - 0usize];
+    ["Offset of field: rb_proc_t::symbol"][::std::mem::offset_of!(rb_proc_t, symbol) - 0usize];
+    ["Offset of field: rb_proc_t::proc_"][::std::mem::offset_of!(rb_proc_t, proc_) - 0usize];
+};
 pub const VM_CHECKMATCH_TYPE_WHEN: vm_check_match_type = 1;
 pub const VM_CHECKMATCH_TYPE_CASE: vm_check_match_type = 2;
 pub const VM_CHECKMATCH_TYPE_RESCUE: vm_check_match_type = 3;
@@ -722,6 +1116,22 @@ pub struct rb_cvar_class_tbl_entry {
     pub cref: *const rb_cref_t,
     pub class_value: VALUE,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_cvar_class_tbl_entry"][::std::mem::size_of::<rb_cvar_class_tbl_entry>() - 40usize];
+    ["Alignment of rb_cvar_class_tbl_entry"]
+        [::std::mem::align_of::<rb_cvar_class_tbl_entry>() - 8usize];
+    ["Offset of field: rb_cvar_class_tbl_entry::imemo_flags"]
+        [::std::mem::offset_of!(rb_cvar_class_tbl_entry, imemo_flags) - 0usize];
+    ["Offset of field: rb_cvar_class_tbl_entry::index"]
+        [::std::mem::offset_of!(rb_cvar_class_tbl_entry, index) - 8usize];
+    ["Offset of field: rb_cvar_class_tbl_entry::global_cvar_state"]
+        [::std::mem::offset_of!(rb_cvar_class_tbl_entry, global_cvar_state) - 16usize];
+    ["Offset of field: rb_cvar_class_tbl_entry::cref"]
+        [::std::mem::offset_of!(rb_cvar_class_tbl_entry, cref) - 24usize];
+    ["Offset of field: rb_cvar_class_tbl_entry::class_value"]
+        [::std::mem::offset_of!(rb_cvar_class_tbl_entry, class_value) - 32usize];
+};
 pub const VM_CALL_ARGS_SPLAT_bit: vm_call_flag_bits = 0;
 pub const VM_CALL_ARGS_BLOCKARG_bit: vm_call_flag_bits = 1;
 pub const VM_CALL_FCALL_bit: vm_call_flag_bits = 2;
@@ -744,6 +1154,17 @@ pub struct rb_callinfo_kwarg {
     pub references: rb_atomic_t,
     pub keywords: __IncompleteArrayField<VALUE>,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_callinfo_kwarg"][::std::mem::size_of::<rb_callinfo_kwarg>() - 8usize];
+    ["Alignment of rb_callinfo_kwarg"][::std::mem::align_of::<rb_callinfo_kwarg>() - 8usize];
+    ["Offset of field: rb_callinfo_kwarg::keyword_len"]
+        [::std::mem::offset_of!(rb_callinfo_kwarg, keyword_len) - 0usize];
+    ["Offset of field: rb_callinfo_kwarg::references"]
+        [::std::mem::offset_of!(rb_callinfo_kwarg, references) - 4usize];
+    ["Offset of field: rb_callinfo_kwarg::keywords"]
+        [::std::mem::offset_of!(rb_callinfo_kwarg, keywords) - 8usize];
+};
 #[repr(C)]
 pub struct rb_callinfo {
     pub flags: VALUE,
@@ -752,12 +1173,29 @@ pub struct rb_callinfo {
     pub flag: ::std::os::raw::c_uint,
     pub argc: ::std::os::raw::c_uint,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_callinfo"][::std::mem::size_of::<rb_callinfo>() - 32usize];
+    ["Alignment of rb_callinfo"][::std::mem::align_of::<rb_callinfo>() - 8usize];
+    ["Offset of field: rb_callinfo::flags"][::std::mem::offset_of!(rb_callinfo, flags) - 0usize];
+    ["Offset of field: rb_callinfo::kwarg"][::std::mem::offset_of!(rb_callinfo, kwarg) - 8usize];
+    ["Offset of field: rb_callinfo::mid"][::std::mem::offset_of!(rb_callinfo, mid) - 16usize];
+    ["Offset of field: rb_callinfo::flag"][::std::mem::offset_of!(rb_callinfo, flag) - 24usize];
+    ["Offset of field: rb_callinfo::argc"][::std::mem::offset_of!(rb_callinfo, argc) - 28usize];
+};
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rb_call_data {
     pub ci: *const rb_callinfo,
     pub cc: *const rb_callcache,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_call_data"][::std::mem::size_of::<rb_call_data>() - 16usize];
+    ["Alignment of rb_call_data"][::std::mem::align_of::<rb_call_data>() - 8usize];
+    ["Offset of field: rb_call_data::ci"][::std::mem::offset_of!(rb_call_data, ci) - 0usize];
+    ["Offset of field: rb_call_data::cc"][::std::mem::offset_of!(rb_call_data, cc) - 8usize];
+};
 pub const RSTRING_CHILLED: ruby_rstring_private_flags = 16384;
 pub type ruby_rstring_private_flags = u32;
 pub const RHASH_PASS_AS_KEYWORDS: ruby_rhash_flags = 8192;
@@ -779,6 +1217,19 @@ pub struct rb_builtin_function {
     pub index: ::std::os::raw::c_int,
     pub name: *const ::std::os::raw::c_char,
 }
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of rb_builtin_function"][::std::mem::size_of::<rb_builtin_function>() - 24usize];
+    ["Alignment of rb_builtin_function"][::std::mem::align_of::<rb_builtin_function>() - 8usize];
+    ["Offset of field: rb_builtin_function::func_ptr"]
+        [::std::mem::offset_of!(rb_builtin_function, func_ptr) - 0usize];
+    ["Offset of field: rb_builtin_function::argc"]
+        [::std::mem::offset_of!(rb_builtin_function, argc) - 8usize];
+    ["Offset of field: rb_builtin_function::index"]
+        [::std::mem::offset_of!(rb_builtin_function, index) - 12usize];
+    ["Offset of field: rb_builtin_function::name"]
+        [::std::mem::offset_of!(rb_builtin_function, name) - 16usize];
+};
 pub const YARVINSN_nop: ruby_vminsn_type = 0;
 pub const YARVINSN_getlocal: ruby_vminsn_type = 1;
 pub const YARVINSN_setlocal: ruby_vminsn_type = 2;
