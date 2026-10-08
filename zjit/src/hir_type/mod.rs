@@ -697,7 +697,7 @@ impl Type {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod tests {
     use super::*;
     use crate::cruby::rust_str_to_ruby;

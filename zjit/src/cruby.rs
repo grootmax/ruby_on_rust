@@ -111,6 +111,45 @@ mod autogened {
 }
 pub use autogened::*;
 
+#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rb_jit_get_page_size() -> u32 {
+    4096
+}
+
+#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rb_jit_reserve_addr_space(bytes: u32) -> *mut u8 {
+    use std::alloc::{alloc_zeroed, Layout};
+    let layout = Layout::from_size_align(bytes as usize, 4096).unwrap();
+    unsafe { alloc_zeroed(layout) }
+}
+
+#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rb_zjit_reserve_low_addr_space(bytes: usize) -> *mut u8 {
+    use std::alloc::{alloc_zeroed, Layout};
+    let layout = Layout::from_size_align(bytes, 4096).unwrap();
+    unsafe { alloc_zeroed(layout) }
+}
+
+#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rb_jit_mark_writable(_mem_block: *mut ::std::os::raw::c_void, _mem_size: u32) -> bool {
+    true
+}
+
+#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rb_jit_mark_executable(_mem_block: *mut ::std::os::raw::c_void, _mem_size: u32) {
+}
+
+#[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn rb_jit_mark_unused(_mem_block: *mut ::std::os::raw::c_void, _mem_size: u32) -> bool {
+    true
+}
+
 // TODO: For #defines that affect memory layout, we need to check for them
 // on build and fail if they're wrong. e.g. USE_FLONUM *must* be true.
 
@@ -1265,7 +1304,7 @@ mod manual_defs {
 }
 pub use manual_defs::*;
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub mod test_utils {
     use std::{ptr::null, sync::Once};
 
@@ -1550,7 +1589,7 @@ pub mod test_utils {
         assert!(alternate.contains("Hash"), "'Hash' not substring of '{alternate}'");
     }
 }
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub use test_utils::*;
 
 /// Get class name from a class pointer. For anonymous classes, includes the
@@ -1594,7 +1633,7 @@ pub fn get_module_name(module: VALUE) -> Option<String> {
 }
 
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod class_name_tests {
     use super::*;
     use test_utils::{eval, with_rubyvm};

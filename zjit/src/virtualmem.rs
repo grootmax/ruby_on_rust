@@ -136,6 +136,22 @@ impl VirtualMem {
     }
 }
 
+impl<A: Allocator> Drop for VirtualMemory<A> {
+    fn drop(&mut self) {
+        #[cfg(any(miri, fuzzing, not(feature = "c-ffi")))]
+        {
+            use std::alloc::{dealloc, Layout};
+            let ptr = self.region_start.as_ptr();
+            let size = self.region_size_bytes;
+            if !ptr.is_null() && size > 0 {
+                if let Ok(layout) = Layout::from_size_align(size, 4096) {
+                    unsafe { dealloc(ptr, layout); }
+                }
+            }
+        }
+    }
+}
+
 impl<A: Allocator> VirtualMemory<A> {
     /// Bring a part of the address space under management.
     pub fn new(

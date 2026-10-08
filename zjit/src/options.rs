@@ -689,7 +689,7 @@ fn update_profile_threshold() {
 }
 
 /// Update --zjit-call-threshold for testing
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub fn set_call_threshold(call_threshold: CallThreshold) {
     unsafe { rb_zjit_call_threshold = call_threshold; }
     rb_zjit_prepare_options();
@@ -697,28 +697,28 @@ pub fn set_call_threshold(call_threshold: CallThreshold) {
 }
 
 /// Update --zjit-num-exits-until-invalidate for testing
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub fn set_num_exits_until_invalidate(num_exits_until_invalidate: NumExits) {
     rb_zjit_prepare_options();
     unsafe { OPTIONS.as_mut().unwrap().num_exits_until_invalidate = num_exits_until_invalidate; }
 }
 
 /// Update --zjit-max-versions for testing
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub fn set_max_versions(max_versions: usize) {
     rb_zjit_prepare_options();
     unsafe { OPTIONS.as_mut().unwrap().max_versions = max_versions; }
 }
 
 /// Update --zjit-inline-threshold for testing
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub fn set_inline_threshold(inline_threshold: InlineThreshold) {
     rb_zjit_prepare_options();
     unsafe { OPTIONS.as_mut().unwrap().inline_threshold = inline_threshold; }
 }
 
 /// Update --zjit-num-profiles for testing
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub fn set_num_profiles(num_profiles: NumProfiles) {
     rb_zjit_prepare_options();
     unsafe { OPTIONS.as_mut().unwrap().num_profiles = num_profiles; }
@@ -726,14 +726,14 @@ pub fn set_num_profiles(num_profiles: NumProfiles) {
 }
 
 /// Set --zjit-mem-size for testing. It's used to force OOM in tests.
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub fn set_mem_bytes(mem_bytes: usize) {
     rb_zjit_prepare_options();
     unsafe { OPTIONS.as_mut().unwrap().mem_bytes = mem_bytes; }
 }
 
 /// Enable --zjit-stats for testing
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub fn enable_zjit_stats() {
     rb_zjit_prepare_options();
     unsafe { OPTIONS.as_mut() }.unwrap().stats = true;
@@ -807,7 +807,7 @@ pub extern "C" fn rb_zjit_get_stats_file_path_p(_ec: EcPtr, _self: VALUE) -> VAL
     Qnil
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod tests {
     use super::*;
 

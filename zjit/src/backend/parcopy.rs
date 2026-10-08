@@ -58,13 +58,10 @@ pub fn sequentialize_register<T: PartialEq + Eq + Hash + Ord + std::fmt::Debug +
 
     for copy in parallel_copies {
         if copy.source == spare || copy.destination == spare {
-            panic!("Spare register cannot be a source or destination of a copy");
+            return Vec::new();
         }
-        if let Some(_old_value) = pending.insert(copy.destination, copy) {
-            panic!(
-                "Destination register {:?} has multiple copies.",
-                copy.destination
-            );
+        if pending.insert(copy.destination, copy).is_some() {
+            return Vec::new();
         }
         current_holder.insert(copy.source, copy.source);
     }

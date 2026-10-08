@@ -255,7 +255,7 @@ pub extern "C" fn rb_zjit_root_mark() {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod tests {
     use crate::cruby::test_utils::{eval, with_rubyvm};
     use crate::options::set_call_threshold;

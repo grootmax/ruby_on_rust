@@ -1,4 +1,4 @@
-#![cfg(test)]
+#![cfg(all(test, not(miri)))]
 
 use insta::assert_snapshot;
 

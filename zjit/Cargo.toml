@@ -5,6 +5,9 @@ edition = "2024"
 rust-version = "1.85.0" # Minimally supported rust version
 publish = false         # Don't publish to crates.io
 
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
+
 [dependencies]
 # No required dependencies to simplify build process.
 # Optional For development and testing purposes.
@@ -20,6 +23,8 @@ yjit = { path = "../yjit" }
 # NOTE: Development builds select a set of these via configure.ac
 # For debugging, `make V=1` shows exact cargo invocation.
 [features]
+default = ["c-ffi"]
+c-ffi = []
 # Support --yjit-dump-disasm and RubyVM::YJIT.disasm using libcapstone.
 disasm = ["capstone"]
 runtime_checks = []

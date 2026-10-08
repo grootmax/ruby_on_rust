@@ -19,7 +19,9 @@ use crate::profile::{ProfiledType, SplatLength, TypeDistributionSummary};
 use crate::stats::{Counter, incr_counter};
 use SendFallbackReason::*;
 
+#[cfg(all(test, not(miri)))]
 pub(crate) mod tests;
+#[cfg(all(test, not(miri)))]
 mod opt_tests;
 
 #[allow(unused_macros)]
@@ -11565,7 +11567,7 @@ mod rpo_tests {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod validation_tests {
     use super::*;
 
@@ -11882,7 +11884,7 @@ mod validation_tests {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod infer_tests {
     use super::*;
 

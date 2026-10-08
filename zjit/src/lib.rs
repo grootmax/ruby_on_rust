@@ -24,15 +24,15 @@ mod codegen;
 mod stats;
 mod cast;
 mod virtualmem;
-mod asm;
-mod backend;
+pub mod asm;
+pub mod backend;
 #[cfg(feature = "disasm")]
 mod disasm;
 mod options;
 mod perf;
 mod profile;
 mod invariants;
-mod bitset;
+pub mod bitset;
 mod gc;
 mod jit_frame;
 mod payload;
@@ -47,5 +47,8 @@ mod ttycolors;
 ///
 /// Only relevant for YJIT+ZJIT configurations, but building YJIT is fast, so always do it for the
 /// test binary for simplicity.
+#[cfg(test)]
+mod miri_tests;
+
 #[cfg(test)]
 use yjit as _;

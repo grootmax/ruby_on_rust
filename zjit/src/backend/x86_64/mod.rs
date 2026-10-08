@@ -1282,7 +1282,7 @@ impl Assembler {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod tests {
     use insta::assert_snapshot;
     use crate::assert_disasm_snapshot;

@@ -1,0 +1,39 @@
+[package]
+name = "zjit-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+zjit = { path = "../zjit" }
+
+# Prevent _fuzz_target_... from being hidden in doc tests
+[features]
+
+[[bin]]
+name = "fuzz_arm64_encoder"
+path = "fuzz_targets/fuzz_arm64_encoder.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_x86_64_encoder"
+path = "fuzz_targets/fuzz_x86_64_encoder.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_bitset"
+path = "fuzz_targets/fuzz_bitset.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_parcopy"
+path = "fuzz_targets/fuzz_parcopy.rs"
+test = false
+doc = false

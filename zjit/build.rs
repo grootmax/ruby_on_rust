@@ -13,7 +13,7 @@ fn main() {
 
         // System libraries that libminiruby needs. Has to be
         // ordered after -lminiruby above.
-        let link_flags = env::var("RUBY_LD_FLAGS").unwrap();
+        let link_flags = env::var("RUBY_LD_FLAGS").unwrap_or_default();
 
         let mut split_iter = link_flags.split(" ");
         while let Some(token) = split_iter.next() {

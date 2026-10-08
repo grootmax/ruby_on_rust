@@ -146,7 +146,7 @@ pub extern "C" fn rb_zjit_jit_frame_update_references(jit_frame: *mut JITFrame) 
     unsafe { &mut *jit_frame }.update_references();
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod tests {
     use crate::cruby::{eval, inspect};
     use insta::assert_snapshot;

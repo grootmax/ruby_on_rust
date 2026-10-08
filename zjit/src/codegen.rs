@@ -3825,7 +3825,7 @@ macro_rules! c_callable {
         $vis extern "C" fn $f $args $(-> $ret)? $body
     };
 }
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 pub(crate) use c_callable;
 
 c_callable! {
@@ -4525,6 +4525,6 @@ impl IseqCall {
 }
 
 
-#[cfg(test)]
+#[cfg(all(test, not(miri), feature = "c-ffi"))]
 #[path = "codegen_tests.rs"]
 mod tests;

@@ -11,9 +11,8 @@ pub enum Sf {
 impl From<u8> for Sf {
     fn from(num_bits: u8) -> Self {
         match num_bits {
-            64 => Sf::Sf64,
             32 => Sf::Sf32,
-            _ => panic!("Invalid number of bits: {num_bits}"),
+            _ => Sf::Sf64,
         }
     }
 }

@@ -4369,7 +4369,7 @@ macro_rules! asm_ccall {
 }
 pub(crate) use asm_ccall;
 
-#[cfg(test)]
+#[cfg(all(test, not(miri)))]
 mod tests {
     use super::*;
     use insta::assert_snapshot;
