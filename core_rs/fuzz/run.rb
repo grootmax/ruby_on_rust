@@ -209,11 +209,24 @@ def find_llvm_tool(name)
   return which_out.strip if st.success? && !which_out.strip.empty?
 
   sysroot, st = Open3.capture2("rustc", "--print", "sysroot")
-  if st.success?
-    sysroot = sysroot.strip
+  sysroot = sysroot.strip if st.success?
+  if sysroot
     tool_path = Dir[File.join(sysroot, "lib/rustlib/*/bin", name)].first
     return tool_path if tool_path && File.exist?(tool_path)
   end
+
+  versioned = Dir["/usr/bin/#{name}-*", "/usr/lib/llvm-*/bin/#{name}"].sort.last
+  return versioned if versioned && File.exist?(versioned)
+
+  if system("which rustup >/dev/null 2>&1")
+    Open3.capture2("rustup", "component", "add", "llvm-tools")
+    Open3.capture2("rustup", "component", "add", "llvm-tools-preview")
+    if sysroot
+      tool_path = Dir[File.join(sysroot, "lib/rustlib/*/bin", name)].first
+      return tool_path if tool_path && File.exist?(tool_path)
+    end
+  end
+
   nil
 end
 

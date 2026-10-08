@@ -162,6 +162,7 @@ jobs:
 
       - name: Differential fuzz and 100% coverage gate
         run: |
+          rustup component add llvm-tools || rustup component add llvm-tools-preview || true
           ruby core_rs/fuzz/run.rb --inventory-check
           ruby core_rs/fuzz/run.rb --coverage --with-ports ../build --without-ports ../build-c core_rs/fuzz/units/*.c
         working-directory: src
