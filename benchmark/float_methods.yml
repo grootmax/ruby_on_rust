@@ -7,8 +7,66 @@ benchmark:
     flo.abs
   magnitude: |
     flo.magnitude
-  -@: |
+  "-@": |
     -flo
   zero?: |
     flo.zero?
+  to_s: |
+    flo.to_s
+  to_i: |
+    flo.to_i
+  to_int: |
+    flo.to_int
+  floor: |
+    flo.floor
+  ceil: |
+    flo.ceil
+  round: |
+    flo.round
+  truncate: |
+    flo.truncate
+  nan?: |
+    flo.nan?
+  infinite?: |
+    flo.infinite?
+  finite?: |
+    flo.finite?
+  positive?: |
+    flo.positive?
+  negative?: |
+    flo.negative?
+  next_float: |
+    flo.next_float
+  prev_float: |
+    flo.prev_float
+  hash: |
+    flo.hash
+  eql?: |
+    flo.eql?(4.2)
+  "<=>": |
+    flo <=> 4.2
+  "+": |
+    flo + 1.5
+  "-": |
+    flo - 1.5
+  "*": |
+    flo * 1.5
+  "/": |
+    flo / 1.5
+  "**": |
+    flo ** 1.5
+  modulo: |
+    flo.modulo(1.5)
+  divmod: |
+    flo.divmod(1.5)
+  arg: |
+    flo.arg
+  numerator: |
+    flo.numerator
+  denominator: |
+    flo.denominator
+  to_r: |
+    flo.to_r
+  rationalize: |
+    flo.rationalize
 loop_count: 20000000

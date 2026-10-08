@@ -1,0 +1,68 @@
+prelude: |
+  c = Complex(3, 4)
+  c2 = Complex(1, 2)
+  cz = Complex(3, 0)
+benchmark:
+  abs: |
+    c.abs
+  magnitude: |
+    c.magnitude
+  abs2: |
+    c.abs2
+  arg: |
+    c.arg
+  angle: |
+    c.angle
+  phase: |
+    c.phase
+  rect: |
+    c.rect
+  rectangular: |
+    c.rectangular
+  polar: |
+    c.polar
+  conjugate: |
+    c.conjugate
+  conj: |
+    c.conj
+  real?: |
+    c.real?
+  numerator: |
+    c.numerator
+  denominator: |
+    c.denominator
+  hash: |
+    c.hash
+  eql?: |
+    c.eql?(c2)
+  to_s: |
+    c.to_s
+  inspect: |
+    c.inspect
+  finite?: |
+    c.finite?
+  infinite?: |
+    c.infinite?
+  to_i: |
+    cz.to_i
+  to_f: |
+    cz.to_f
+  to_r: |
+    cz.to_r
+  rationalize: |
+    cz.rationalize
+  to_c: |
+    c.to_c
+  "+": |
+    c + c2
+  "-": |
+    c - c2
+  "*": |
+    c * c2
+  "/": |
+    c / c2
+  "**": |
+    c ** 2
+  "==": |
+    c == c2
+loop_count: 20000000

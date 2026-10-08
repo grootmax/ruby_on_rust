@@ -1,6 +1,7 @@
 prelude: |
   int = 42
   flo = 4.2
+  big = 123456789012345678901234567890
 benchmark:
   real?: |
     int.real?
@@ -26,4 +27,82 @@ benchmark:
     int.numerator
   integer_denominator: |
     int.denominator
+  zero?: |
+    int.zero?
+  nonzero?: |
+    int.nonzero?
+  positive?: |
+    int.positive?
+  negative?: |
+    int.negative?
+  abs: |
+    int.abs
+  magnitude: |
+    int.magnitude
+  succ: |
+    int.succ
+  next: |
+    int.next
+  pred: |
+    int.pred
+  to_s: |
+    int.to_s
+  to_f: |
+    int.to_f
+  to_i: |
+    int.to_i
+  floor: |
+    int.floor
+  ceil: |
+    int.ceil
+  round: |
+    int.round
+  truncate: |
+    int.truncate
+  upto: |
+    int.upto(43) {}
+  downto: |
+    int.downto(41) {}
+  chr: |
+    int.chr
+  ord: |
+    int.ord
+  digits: |
+    int.digits
+  bit_length: |
+    int.bit_length
+  even?: |
+    int.even?
+  odd?: |
+    int.odd?
+  gcd: |
+    int.gcd(12)
+  lcm: |
+    int.lcm(12)
+  pow: |
+    int.pow(3)
+  allbits?: |
+    int.allbits?(42)
+  anybits?: |
+    int.anybits?(42)
+  nobits?: |
+    int.nobits?(1)
+  bignum_to_s: |
+    big.to_s
+  bignum_to_f: |
+    big.to_f
+  bignum_abs: |
+    big.abs
+  bignum_bit_length: |
+    big.bit_length
+  bignum_even?: |
+    big.even?
+  bignum_odd?: |
+    big.odd?
+  bignum_pow: |
+    big.pow(3)
+  bignum_gcd: |
+    big.gcd(int)
+  bignum_lcm: |
+    big.lcm(int)
 loop_count: 20000000

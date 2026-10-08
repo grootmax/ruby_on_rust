@@ -1,0 +1,61 @@
+prelude: |
+  r = Rational(22, 7)
+  r2 = Rational(3, 4)
+benchmark:
+  numerator: |
+    r.numerator
+  denominator: |
+    r.denominator
+  "-@": |
+    -r
+  "+": |
+    r + r2
+  "-": |
+    r - r2
+  "*": |
+    r * r2
+  "/": |
+    r / r2
+  quo: |
+    r.quo(r2)
+  fdiv: |
+    r.fdiv(r2)
+  "**": |
+    r ** 2
+  "<=>": |
+    r <=> r2
+  "==": |
+    r == r2
+  coerce: |
+    r.coerce(2)
+  positive?: |
+    r.positive?
+  negative?: |
+    r.negative?
+  abs: |
+    r.abs
+  magnitude: |
+    r.magnitude
+  floor: |
+    r.floor
+  ceil: |
+    r.ceil
+  truncate: |
+    r.truncate
+  round: |
+    r.round
+  to_i: |
+    r.to_i
+  to_f: |
+    r.to_f
+  to_r: |
+    r.to_r
+  rationalize: |
+    r.rationalize
+  hash: |
+    r.hash
+  to_s: |
+    r.to_s
+  inspect: |
+    r.inspect
+loop_count: 20000000

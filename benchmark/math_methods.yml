@@ -1,0 +1,57 @@
+prelude: |
+  x = 1.0
+  y = 0.5
+benchmark:
+  sin: |
+    Math.sin(x)
+  cos: |
+    Math.cos(x)
+  tan: |
+    Math.tan(x)
+  asin: |
+    Math.asin(y)
+  acos: |
+    Math.acos(y)
+  atan: |
+    Math.atan(x)
+  atan2: |
+    Math.atan2(x, y)
+  sinh: |
+    Math.sinh(x)
+  cosh: |
+    Math.cosh(x)
+  tanh: |
+    Math.tanh(x)
+  asinh: |
+    Math.asinh(x)
+  acosh: |
+    Math.acosh(1.5)
+  atanh: |
+    Math.atanh(y)
+  exp: |
+    Math.exp(x)
+  log: |
+    Math.log(2.0)
+  log2: |
+    Math.log2(2.0)
+  log10: |
+    Math.log10(10.0)
+  sqrt: |
+    Math.sqrt(4.0)
+  cbrt: |
+    Math.cbrt(8.0)
+  frexp: |
+    Math.frexp(1.5)
+  ldexp: |
+    Math.ldexp(0.75, 1)
+  hypot: |
+    Math.hypot(3.0, 4.0)
+  erf: |
+    Math.erf(x)
+  erfc: |
+    Math.erfc(x)
+  gamma: |
+    Math.gamma(5.0)
+  lgamma: |
+    Math.lgamma(5.0)
+loop_count: 20000000
