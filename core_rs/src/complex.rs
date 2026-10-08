@@ -36,9 +36,7 @@ impl<'a> Cursor<'a> {
     }
 
     /// Number of bytes consumed since the start.
-    pub fn pos(&self) -> usize {
-        self.pos
-    }
+    
 
     /// `**s` as a C `char` promoted to `int` (sign extended where `char`
     /// is signed, exactly like the C).  Past the terminator it reads NUL,

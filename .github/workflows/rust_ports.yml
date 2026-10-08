@@ -160,9 +160,18 @@ jobs:
           wc -l exports-c.txt exports-rs.txt
           diff -u exports-c.txt exports-rs.txt
 
-      - name: Differential fuzz (every unit, 1M cases plus mutation check)
-        run: ruby core_rs/fuzz/run.rb --with-ports ../build --without-ports ../build-c core_rs/fuzz/units/*.c
+      - name: Differential fuzz and 100% coverage gate
+        run: |
+          ruby core_rs/fuzz/run.rb --inventory-check
+          ruby core_rs/fuzz/run.rb --coverage --with-ports ../build --without-ports ../build-c core_rs/fuzz/units/*.c
         working-directory: src
+
+      - name: Upload LCOV coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: core_rs-coverage-lcov
+          path: build/target/core_rs/fuzz/coverage.lcov
+          if-no-files-found: error
 
       - name: Porting ledger is current
         run: ruby tool/generate_porting_ledger.rb --check

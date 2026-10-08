@@ -172,9 +172,8 @@ pub struct StrToUl {
 pub fn strtoul(s: &[u8], base: c_int) -> StrToUl {
     let at = |i: usize| s.get(i).copied().unwrap_or(0);
 
-    if base < 0 || base == 1 || 36 < base {
-        return StrToUl { value: 0, end: 0, errno: Some(libc::EINVAL) };
-    }
+    if base < 0 { return StrToUl { value: 0, end: 0, errno: Some(libc::EINVAL) }; }
+    if base == 1 || 36 < base { return StrToUl { value: 0, end: 0, errno: Some(libc::EINVAL) }; }
 
     let mut i = 0;
     while at(i) != 0 && is_space(at(i)) {
@@ -231,15 +230,10 @@ pub fn strtoul(s: &[u8], base: c_int) -> StrToUl {
 /// `str` is a NUL-terminated C string; `endptr` is null or writable.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn ruby_strtoul(str: *const c_char, endptr: *mut *mut c_char, base: c_int) -> c_ulong {
-    if base < 0 || base == 1 || 36 < base {
-        // As in C: return before reading the string or touching endptr.
-        libc::set_errno(libc::EINVAL);
-        return 0;
-    }
     // SAFETY: `str` is a C string per the contract.
     let bytes = unsafe { CStr::from_ptr(str) }.to_bytes();
     let r = strtoul(bytes, base);
-    if !endptr.is_null() {
+    if !endptr.is_null() && r.errno != Some(libc::EINVAL) {
         // SAFETY: `r.end <= bytes.len()`, so the pointer stays in the string.
         unsafe { *endptr = str.add(r.end) as *mut c_char };
     }

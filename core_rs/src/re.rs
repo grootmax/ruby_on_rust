@@ -83,6 +83,7 @@ fn at(s: &[u8], i: usize) -> u8 {
 /// Apple): first byte via memchr, then a rolling hash of up to
 /// `size_of::<VALUE>()` bytes.  Requires `2 <= x.len() <= VALUE_BYTES` and
 /// `x.len() < y.len()`.
+#[cfg(any(target_vendor = "apple", test))]
 pub fn search_ss_rolling(x: &[u8], y: &[u8]) -> c_long {
     let (m, n) = (x.len(), y.len());
     debug_assert!((2..=VALUE_BYTES).contains(&m) && m < n);

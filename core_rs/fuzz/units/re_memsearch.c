@@ -67,7 +67,19 @@ fuzz_one(void)
     /* Needle: often a real substring of the haystack, sometimes random. */
     m = fuzz_one_in(6) ? n + fuzz_below(3) : fuzz_len(n);
     if (m > MAXLEN) m = MAXLEN;
-    if (m <= n && !fuzz_one_in(3)) {
+    if (fuzz_one_in(2) && n >= 10) {
+        m = 9 + fuzz_below(n - 9);
+        if (m < n) {
+            size_t at = (size_t)fuzz_below(n - m + 1);
+            memcpy(x, y + at, m);
+        }
+    } else if (fuzz_one_in(8) && n >= 4) {
+        m = 3 + fuzz_below(16);
+        if (m <= n) {
+            size_t at = (size_t)fuzz_below(n - m + 1);
+            memcpy(x, y + at, m);
+        }
+    } else if (m <= n && !fuzz_one_in(3)) {
         size_t at = (size_t)fuzz_below(n - m + 1);
         memcpy(x, y + at, m);
         if (m && fuzz_one_in(4)) x[fuzz_below(m)] ^= 1; /* near miss */
@@ -91,6 +103,12 @@ fuzz_one(void)
     {
         rb_encoding *enc = encs[fuzz_below(6)];
         long c_r, rs_r;
+        if (enc == encs[0] && m < n) {
+            if (m <= 8 && n >= 10) m = 9;
+            memcpy(x, y, m);
+        } else if ((enc == encs[3] || enc == encs[4]) && m >= 2 && m < n) {
+            memcpy(x, y, m);
+        }
         rx = m ? fuzz_rs_bytes_slot(0, x, m) : x;
         ry = y;
         if (fuzz_mutating && rx != x) {

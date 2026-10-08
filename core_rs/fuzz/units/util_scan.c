@@ -50,7 +50,12 @@ fuzz_one(void)
     /* Long digit runs reach the overflow paths. */
     if (fuzz_one_in(4)) {
         size_t k;
-        for (k = 0; k < len; k++) buf[k] = "0123456789abcdefzZ"[fuzz_below(fuzz_one_in(2) ? 10 : 18)];
+        if (fuzz_one_in(4) && len >= 20) {
+            memcpy(buf, "18446744073709551616", 20);
+        } else {
+            char fill = "0123456789abcdefzZ"[fuzz_below(18)];
+            for (k = 0; k < len; k++) buf[k] = fuzz_one_in(2) ? fill : "0123456789abcdefzZ"[fuzz_below(18)];
+        }
     }
     fuzz_input("str", buf, len);
     c_in = (const char *)buf;
@@ -87,7 +92,7 @@ fuzz_one(void)
       }
       case 3: { /* ruby_strtoul: any base -2..40, endptr, errno */
         static const int bases[] = { -1, 0, 0, 0, 1, 2, 8, 10, 16, 36, 37 };
-        int base = fuzz_one_in(2) ? bases[fuzz_below(sizeof(bases) / sizeof(bases[0]))] : (int)fuzz_below(43) - 2;
+        int base = fuzz_one_in(10) ? -1 : (fuzz_one_in(10) ? 1 : (fuzz_one_in(10) ? 37 : (fuzz_one_in(2) ? bases[fuzz_below(sizeof(bases) / sizeof(bases[0]))] : (int)fuzz_below(43) - 2)));
         char *c_end = NULL, *rs_end = NULL;
         int c_errno, rs_errno, use_end = !fuzz_one_in(8);
         unsigned long c_v, rs_v;
@@ -106,6 +111,12 @@ fuzz_one(void)
       }
       default: { /* ruby_each_words */
         static struct words cw, rw;
+        if (fuzz_one_in(16)) {
+            ref_ruby_each_words(NULL, collect, &cw);
+            rs_ruby_each_words(NULL, collect, &rw);
+            FUZZ_EQ("each_words NULL count", cw.n, rw.n);
+            break;
+        }
         cw.base = c_in; cw.n = 0;
         rw.base = rs_in; rw.n = 0;
         ref_ruby_each_words(c_in, collect, &cw);
