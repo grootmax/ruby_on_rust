@@ -1,0 +1,16 @@
+# Clippy configuration for Ruby on Rust workspace
+# Conversion Rule 10: Disallow silent-drift traps that break Ruby compatibility.
+
+disallowed-types = [
+    { path = "std::collections::HashMap", reason = "Ruby Hash requires insertion-order stability; use st_table or indexmap" },
+    { path = "std::collections::HashSet", reason = "Ruby Set requires insertion-order stability; use indexmap::IndexSet" },
+]
+
+disallowed-methods = [
+    { path = "std::str::from_utf8", reason = "Ruby strings are arbitrary byte sequences and not guaranteed to be valid UTF-8" },
+    { path = "core::str::from_utf8", reason = "Ruby strings are arbitrary byte sequences and not guaranteed to be valid UTF-8" },
+    { path = "std::str::from_utf8_mut", reason = "Ruby strings are arbitrary byte sequences and not guaranteed to be valid UTF-8" },
+    { path = "core::str::from_utf8_mut", reason = "Ruby strings are arbitrary byte sequences and not guaranteed to be valid UTF-8" },
+    { path = "std::string::String::from_utf8", reason = "Ruby strings are arbitrary byte sequences and not guaranteed to be valid UTF-8" },
+    { path = "std::string::String::from_utf8_lossy", reason = "Ruby strings are arbitrary byte sequences; lossy conversion corrupts raw byte data" },
+]

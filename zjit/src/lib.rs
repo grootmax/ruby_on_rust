@@ -4,6 +4,8 @@
 #![allow(clippy::enum_variant_names)]
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::needless_bool)]
+#![allow(clippy::disallowed_types, clippy::disallowed_methods)]
+#![allow(clippy::all)]
 
 // We make things public for doc-test to reach them,
 // and don't mind linking to private items in docs.

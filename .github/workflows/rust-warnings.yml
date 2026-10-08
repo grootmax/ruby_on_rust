@@ -55,6 +55,10 @@ jobs:
             | tee messages.txt
           (exit "${PIPESTATUS[0]}") && ! grep --quiet '[^[:space:]]' messages.txt
 
+      - name: Cargo Clippy
+        shell: bash
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
       - name: "📜 `rustdoc` warnings"
         shell: bash
         run: |

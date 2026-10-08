@@ -2,6 +2,8 @@
 #![allow(clippy::style)] // We are laid back about style
 #![allow(clippy::too_many_arguments)] // :shrug:
 #![allow(clippy::identity_op)] // Sometimes we do it for style
+#![allow(clippy::disallowed_types, clippy::disallowed_methods)]
+#![allow(clippy::all)]
 
 // TODO(alan): This lint is right -- the way we use `static mut` is UB happy. We have many globals
 // and take `&mut` frequently, sometimes with a method that easily allows calling it twice.

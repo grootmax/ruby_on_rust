@@ -5,6 +5,9 @@ edition = "2024"
 rust-version = "1.85.0" # Minimally supported rust version
 publish = false         # Don't publish to crates.io
 
+[lints]
+workspace = true
+
 [dependencies]
 # No required dependencies to simplify build process.
 # Optional For development and testing purposes.
