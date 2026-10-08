@@ -50,6 +50,11 @@ jobs:
           ruby tool/generate_porting_ledger.rb --check
         if: always()
 
+      - name: Check Ruby API lock
+        run: |
+          ruby tool/dump_api.rb --check
+        if: always()
+
       - name: Check for code styles
         run: |
           set -x

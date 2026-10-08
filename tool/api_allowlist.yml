@@ -1,0 +1,50 @@
+# Maintainer Allowlist for Approved Ruby API Divergences
+#
+# Use this file to grant explicit approval for intentional core API changes
+# (added/removed/changed modules, methods, constants, or ancestors) without failing CI builds.
+#
+# Schema format:
+#
+# modules:
+#   added:
+#     - "SomeModule"
+#   removed:
+#     - "DeprecatedModule"
+#
+# ancestors:
+#   changed:
+#     - "SomeClass"
+#
+# constants:
+#   added:
+#     - "String::NEW_CONSTANT"
+#   removed:
+#     - "Float::OLD_CONSTANT"
+#   changed:
+#     - "Object::RUBY_VERSION"
+#
+# methods:
+#   added:
+#     - "String#new_method"
+#     - "Array.new_singleton_method"
+#   removed:
+#     - "String#old_method"
+#   changed:
+#     - "String#slice"
+
+modules:
+  added: []
+  removed: []
+
+ancestors:
+  changed: []
+
+constants:
+  added: []
+  removed: []
+  changed: []
+
+methods:
+  added: []
+  removed: []
+  changed: []
