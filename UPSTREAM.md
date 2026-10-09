@@ -1,12 +1,14 @@
 # Upstream base
 
-Ruby on Rust is a fork of [ruby/ruby](https://github.com/ruby/ruby). On
-2026-10-07 the owner made the final "Sync fork", and the fork stopped
-syncing from upstream.
+Ruby on Rust is a fork of [ruby/ruby](https://github.com/ruby/ruby). The owner
+made a "Sync fork" on 2026-10-07 and a last one on 2026-10-08 (the cutoff
+day), after which the fork stopped syncing from upstream.
 
 | | |
 |---|---|
-| Last upstream sync | `4d835210ecbf9de894f39041ae2d7d59b80bb06f` ("Merge branch 'ruby:master' into master", 2026-10-07) |
+| Last upstream sync | `70f1b59a0ce29e2e59b09780a2f94cfb782d61ff` ("Merge branch 'ruby:master' into master", 2026-10-08) |
+| Upstream base commit | `e4672be48dca6184fe63ef858f3f335eb347a72d` (ruby/ruby, "ZJIT: Inline write barrier check in LIR (#18641)", 2026-10-08) |
+| Previous sync | `4d835210ecbf9de894f39041ae2d7d59b80bb06f` (2026-10-07) |
 | Cutoff | 2026-10-08. No upstream merges after this point |
 | Ruby version line | 4.1.0dev |
 
@@ -23,5 +25,5 @@ syncing from upstream.
 - **Other upstream bug fixes** may be cherry-picked case by case, as normal
   PRs that reference the upstream commit.
 
-To compare with upstream: `git diff 4d835210ecbf9de894f39041ae2d7d59b80bb06f`
+To compare with upstream: `git diff e4672be48dca6184fe63ef858f3f335eb347a72d`
 shows everything Ruby on Rust has changed since the base.
