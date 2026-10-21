@@ -120,6 +120,13 @@ const char *rb_core_rational_skip_ws(const char *s, const char *e);
 
 /* re.c (core_rs/src/re.rs) */
 int rb_core_re_check_unicode_range(unsigned long code, char *err);
+struct re_pattern_buffer; /* OnigRegexType, include/ruby/onigmo.h */
+int rb_core_re_char_to_option(int c);
+char *rb_core_re_option_to_str(char *str, int options);
+int rb_core_re_pair_byte_cmp(const void *pair1, const void *pair2);
+int rb_core_re_match_inspect_name_iter(const unsigned char *name, const unsigned char *name_end,
+                                       int back_num, int *back_refs, struct re_pattern_buffer *regex, void *arg0);
+int rb_core_re_read_escaped_byte(const char **pp, const char *end, char *err);
 
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop

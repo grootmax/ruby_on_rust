@@ -327,6 +327,7 @@ rb_memsearch(const void *x0, rb_len_t m, const void *y0, rb_len_t n, rb_encoding
 }
 #endif /* !USE_RUST_PORTS: rb_memcicmp, rb_memsearch */
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/re.rs (port unit re-A-01) */
 static int
 char_to_option(int c)
 {
@@ -348,9 +349,13 @@ char_to_option(int c)
     }
     return val;
 }
+#else
+#define char_to_option rb_core_re_char_to_option
+#endif /* !USE_RUST_PORTS: char_to_option */
 
 enum { OPTBUF_SIZE = 4 };
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/re.rs (port unit re-A-01) */
 static char *
 option_to_str(char str[OPTBUF_SIZE], int options)
 {
@@ -387,6 +392,20 @@ rb_char_to_option_kcode(int c, int *option, int *kcode)
     *option = ARG_ENCODING_FIXED;
     return 1;
 }
+#else
+#define option_to_str rb_core_re_option_to_str
+/* core_rs/src/re.rs copies these constants; fail the C build if they drift. */
+STATIC_ASSERT(core_rs_re_optbuf_size, OPTBUF_SIZE == 4);
+STATIC_ASSERT(core_rs_re_option_ignorecase, ONIG_OPTION_IGNORECASE == 1);
+STATIC_ASSERT(core_rs_re_option_extend, ONIG_OPTION_EXTEND == 2);
+STATIC_ASSERT(core_rs_re_option_multiline, ONIG_OPTION_MULTILINE == 4);
+STATIC_ASSERT(core_rs_re_arg_encoding_fixed, ARG_ENCODING_FIXED == 16);
+STATIC_ASSERT(core_rs_re_arg_encoding_none, ARG_ENCODING_NONE == 32);
+STATIC_ASSERT(core_rs_re_encindex_ascii8bit, rb_ascii8bit_encindex() == 0);
+STATIC_ASSERT(core_rs_re_encindex_utf8, rb_utf8_encindex() == 1);
+STATIC_ASSERT(core_rs_re_encindex_euc_jp, ENCINDEX_EUC_JP == 10);
+STATIC_ASSERT(core_rs_re_encindex_windows_31j, ENCINDEX_Windows_31J == 11);
+#endif /* !USE_RUST_PORTS: option_to_str, rb_char_to_option_kcode */
 
 static bool
 reg_initialized_p(VALUE re)
@@ -1161,6 +1180,7 @@ typedef struct {
     rb_len_t char_pos;
 } pair_t;
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/re.rs (port unit re-A-01) */
 static int
 pair_byte_cmp(const void *pair1, const void *pair2)
 {
@@ -1171,6 +1191,12 @@ pair_byte_cmp(const void *pair1, const void *pair2)
     return (int)diff;
 #endif
 }
+#else
+#define pair_byte_cmp rb_core_re_pair_byte_cmp
+/* core_rs/src/re.rs reads byte_pos as a long at offset 0 of pair_t. */
+STATIC_ASSERT(core_rs_re_pair_byte_pos, offsetof(pair_t, byte_pos) == 0);
+STATIC_ASSERT(core_rs_re_len_t, sizeof(rb_len_t) == sizeof(long));
+#endif /* !USE_RUST_PORTS: pair_byte_cmp */
 
 static void
 update_char_offset(VALUE match)
@@ -2748,6 +2774,7 @@ struct backref_name_tag {
     rb_len_t len;
 };
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/re.rs (port unit re-A-01) */
 static int
 match_inspect_name_iter(const OnigUChar *name, const OnigUChar *name_end,
           int back_num, int *back_refs, OnigRegex regex, void *arg0)
@@ -2761,6 +2788,16 @@ match_inspect_name_iter(const OnigUChar *name, const OnigUChar *name_end,
     }
     return 0;
 }
+#else
+#define match_inspect_name_iter rb_core_re_match_inspect_name_iter
+/* core_rs/src/re.rs mirrors struct backref_name_tag with #[repr(C)] and
+ * asserts the same layout on its side; fail the C build if the two could
+ * disagree. */
+STATIC_ASSERT(core_rs_re_backref_name, offsetof(struct backref_name_tag, name) == 0);
+STATIC_ASSERT(core_rs_re_backref_len, offsetof(struct backref_name_tag, len) == sizeof(const UChar *));
+STATIC_ASSERT(core_rs_re_backref_len_t, sizeof(rb_len_t) == sizeof(long));
+STATIC_ASSERT(core_rs_re_backref_size, sizeof(struct backref_name_tag) == sizeof(const UChar *) + sizeof(rb_len_t));
+#endif /* !USE_RUST_PORTS: match_inspect_name_iter */
 
 /*
  *  call-seq:
@@ -2836,6 +2873,7 @@ match_inspect(VALUE match)
 
 VALUE rb_cRegexp;
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/re.rs (port unit re-A-01) */
 static int
 read_escaped_byte(const char **pp, const char *end, onig_errmsg_buffer err)
 {
@@ -2941,6 +2979,9 @@ again:
     *pp = p;
     return code;
 }
+#else
+#define read_escaped_byte rb_core_re_read_escaped_byte
+#endif /* !USE_RUST_PORTS: read_escaped_byte */
 
 static int
 unescape_escaped_nonascii(const char **pp, const char *end, rb_encoding *enc,
