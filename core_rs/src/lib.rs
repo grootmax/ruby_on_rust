@@ -26,6 +26,7 @@ pub mod alloc;
 pub mod array;
 pub mod complex;
 pub mod ffi;
+pub mod imemo;
 pub mod io_buffer;
 pub mod mt19937;
 pub mod numeric;

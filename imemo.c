@@ -2,10 +2,15 @@
 #include "constant.h"
 #include "id_table.h"
 #include "internal.h"
+#include "internal/core_rs.h"
 #include "internal/imemo.h"
 #include "internal/object.h"
 #include "internal/st.h"
 #include "vm_callinfo.h"
+
+#ifndef USE_RUST_PORTS
+# define USE_RUST_PORTS 0
+#endif
 
 size_t rb_iseq_memsize(const rb_iseq_t *iseq);
 void rb_iseq_mark_and_move(const struct rb_gc_mark_ctx *ctx, rb_iseq_t *iseq, bool reference_updating);
@@ -32,6 +37,7 @@ rb_imemo_callcache_get_data(VALUE obj, struct rb_imemo_callcache_data *data)
     return true;
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/imemo.rs (port unit imemo-A-01) */
 const char *
 rb_imemo_name(enum imemo_type type)
 {
@@ -58,6 +64,27 @@ rb_imemo_name(enum imemo_type type)
     }
     rb_bug("unreachable");
 }
+#else
+/* core_rs/src/imemo.rs maps these values to names; keep them in sync. */
+#define IMEMO_VALUE(x, v) STATIC_ASSERT(core_rs_imemo_##x, imemo_##x == (v))
+IMEMO_VALUE(env, 0);
+IMEMO_VALUE(cref, 1);
+IMEMO_VALUE(svar, 2);
+IMEMO_VALUE(throw_data, 3);
+IMEMO_VALUE(ifunc, 4);
+IMEMO_VALUE(memo, 5);
+IMEMO_VALUE(ment, 6);
+IMEMO_VALUE(iseq, 7);
+IMEMO_VALUE(tmpbuf, 8);
+IMEMO_VALUE(cvar_entry, 9);
+IMEMO_VALUE(callinfo, 10);
+IMEMO_VALUE(callcache, 11);
+IMEMO_VALUE(constcache, 12);
+IMEMO_VALUE(fields, 13);
+IMEMO_VALUE(subclasses, 14);
+IMEMO_VALUE(cdhash, 15);
+#undef IMEMO_VALUE
+#endif /* !USE_RUST_PORTS: rb_imemo_name */
 
 /* =========================================================================
  * allocation

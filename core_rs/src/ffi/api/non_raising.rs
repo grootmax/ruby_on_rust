@@ -8,10 +8,15 @@
 #![allow(non_upper_case_globals, unused_imports)]
 
 use crate::ffi::value::VALUE;
-use core::ffi::{c_double, c_longlong, c_ulonglong, c_void};
+use core::ffi::{c_char, c_double, c_longlong, c_ulonglong, c_void};
 
 #[cfg(not(test))]
 unsafe extern "C" {
+    // ---- fatal errors: include/ruby/internal/error.h ----
+    /// `void rb_bug(const char *fmt, ...)`: prints the crash report and
+    /// aborts.  It never returns, so it never raises either.
+    pub fn rb_bug(fmt: *const c_char, ...) -> !;
+
     // ---- memory allocation: include/ruby/internal/xmalloc.h ----
     /// `void ruby_xfree(void *ptr)`
     pub fn ruby_xfree(ptr: *mut c_void);
