@@ -29,6 +29,7 @@
 #include "internal/array.h"
 #include "internal/compilers.h"
 #include "internal/complex.h"
+#include "internal/core_rs.h"
 #include "internal/enumerator.h"
 #include "internal/error.h"
 #include "internal/gc.h"
@@ -43,6 +44,23 @@
 #include "ruby/encoding.h"
 #include "ruby/util.h"
 #include "builtin.h"
+
+#ifndef USE_RUST_PORTS
+# define USE_RUST_PORTS 0
+#endif
+
+#if USE_RUST_PORTS
+#define round_half_up rb_core_numeric_round_half_up
+#define round_half_down rb_core_numeric_round_half_down
+#define round_half_even rb_core_numeric_round_half_even
+#define double_div_double rb_core_numeric_double_div_double
+#define rb_dbl_hash rb_core_numeric_rb_dbl_hash
+#define int_round_half_even rb_core_numeric_int_round_half_even
+#define int_round_half_up rb_core_numeric_int_round_half_up
+#define int_round_half_down rb_core_numeric_int_round_half_down
+#define float_round_overflow rb_core_numeric_float_round_overflow
+#define float_round_underflow rb_core_numeric_float_round_underflow
+#endif
 
 /* use IEEE 64bit values if not defined */
 #ifndef FLT_RADIX
@@ -92,6 +110,7 @@ const union bytesequence4_or_float rb_nan = {{0x00, 0x00, 0xc0, 0x7f}};
 const union bytesequence4_or_float rb_nan = {{0x7f, 0xc0, 0x00, 0x00}};
 #endif
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/numeric.rs (port unit numeric-A-01) */
 #ifndef HAVE_ROUND
 double
 round(double x)
@@ -180,6 +199,11 @@ round_half_even(double x, double s)
     }
     return us + x;
 }
+#else
+#define round_half_up rb_core_numeric_round_half_up
+#define round_half_down rb_core_numeric_round_half_down
+#define round_half_even rb_core_numeric_round_half_even
+#endif /* !USE_RUST_PORTS: round .. round_half_even */
 
 static VALUE fix_lshift(long, unsigned long);
 static VALUE fix_rshift(long, unsigned long);
@@ -187,8 +211,10 @@ static VALUE int_pow(long x, unsigned long y);
 static VALUE rb_int_floor(VALUE num, int ndigits);
 static VALUE rb_int_ceil(VALUE num, int ndigits);
 static VALUE flo_to_i(VALUE num);
+#if !USE_RUST_PORTS
 static int float_round_overflow(int ndigits, int binexp);
 static int float_round_underflow(int ndigits, int binexp);
+#endif
 
 static ID id_coerce;
 #define id_div idDiv
@@ -1151,6 +1177,7 @@ rb_float_mul(VALUE x, VALUE y)
     }
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/numeric.rs (port unit numeric-A-01) */
 static double
 double_div_double(double x, double y)
 {
@@ -1165,6 +1192,9 @@ double_div_double(double x, double y)
         return x * z * HUGE_VAL;
     }
 }
+#else
+#define double_div_double rb_core_numeric_double_div_double
+#endif /* !USE_RUST_PORTS: double_div_double */
 
 VALUE
 rb_flo_div_flo(VALUE x, VALUE y)
@@ -1537,7 +1567,9 @@ rb_float_equal(VALUE x, VALUE y)
 }
 
 #define flo_eq rb_float_equal
+#if !USE_RUST_PORTS
 static VALUE rb_dbl_hash(double d);
+#endif
 
 /*
  * call-seq:
@@ -1554,11 +1586,15 @@ flo_hash(VALUE num)
     return rb_dbl_hash(RFLOAT_VALUE(num));
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/numeric.rs (port unit numeric-A-01) */
 static VALUE
 rb_dbl_hash(double d)
 {
     return ST2FIX(rb_dbl_long_hash(d));
 }
+#else
+#define rb_dbl_hash rb_core_numeric_rb_dbl_hash
+#endif /* !USE_RUST_PORTS: rb_dbl_hash */
 
 VALUE
 rb_dbl_cmp(double a, double b)
@@ -2264,6 +2300,7 @@ int_round_zero_p(VALUE num, int ndigits)
     return (-0.415241 * ndigits - 0.125 > bytes);
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/numeric.rs (port unit numeric-A-01) */
 static SIGNED_VALUE
 int_round_half_even(SIGNED_VALUE x, SIGNED_VALUE y)
 {
@@ -2285,6 +2322,11 @@ int_round_half_down(SIGNED_VALUE x, SIGNED_VALUE y)
 {
     return (x + y / 2 - 1) / y * y;
 }
+#else
+#define int_round_half_even rb_core_numeric_int_round_half_even
+#define int_round_half_up rb_core_numeric_int_round_half_up
+#define int_round_half_down rb_core_numeric_int_round_half_down
+#endif /* !USE_RUST_PORTS: int_round_half_even .. int_round_half_down */
 
 static int
 int_half_p_half_even(VALUE num, VALUE n, VALUE f)
@@ -2509,6 +2551,7 @@ flo_round(int argc, VALUE *argv, VALUE num)
     return num;
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/numeric.rs (port unit numeric-A-01) */
 static int
 float_round_overflow(int ndigits, int binexp)
 {
@@ -2545,6 +2588,10 @@ float_round_underflow(int ndigits, int binexp)
     }
     return FALSE;
 }
+#else
+#define float_round_overflow rb_core_numeric_float_round_overflow
+#define float_round_underflow rb_core_numeric_float_round_underflow
+#endif /* !USE_RUST_PORTS: float_round_overflow .. float_round_underflow */
 
 /*
  *  call-seq:
@@ -2697,6 +2744,7 @@ num_truncate(int argc, VALUE *argv, VALUE num)
     return flo_truncate(argc, argv, rb_Float(num));
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/numeric.rs (port unit numeric-A-01) */
 double
 ruby_float_step_size(double beg, double end, double unit, int excl)
 {
@@ -2743,6 +2791,7 @@ ruby_float_step_size(double beg, double end, double unit, int excl)
     }
     return n+1;
 }
+#endif /* !USE_RUST_PORTS: ruby_float_step_size */
 
 int
 ruby_float_step(VALUE from, VALUE to, VALUE step, int excl, int allow_endless)
