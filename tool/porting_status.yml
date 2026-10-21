@@ -473,10 +473,10 @@ files:
     subsystem: "Utilities & Support"
     notes: "Portable vsnprintf"
   siphash.c:
-    status: Not Started
-    target: "crate::siphash"
+    status: In Progress
+    target: "core_rs::siphash"
     subsystem: "Utilities & Support"
-    notes: "SipHash hashing algorithm"
+    notes: "Ported (siphash-A-01): u8to64_le, u64to8_le, rotl64_to, rotl64_swap, add64_to, xor64_to, int_sip_dump, int_sip_init, sip_hash_dump. Remaining: sip_hash13, streaming API methods"
   id_table.c:
     status: Not Started
     target: "crate::id_table"

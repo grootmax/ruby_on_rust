@@ -22,6 +22,7 @@ CORE_RS_SRCS = $(srcdir)/core_rs/src/lib.rs \
 	$(srcdir)/core_rs/src/numeric.rs \
 	$(srcdir)/core_rs/src/pack.rs \
 	$(srcdir)/core_rs/src/re.rs \
+	$(srcdir)/core_rs/src/siphash.rs \
 	$(srcdir)/core_rs/src/util.rs \
 	$(empty)
 
