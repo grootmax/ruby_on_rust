@@ -60,6 +60,19 @@ int rb_core_complex_read_rat_nos(const char **s, int strict, char **b);
 int rb_core_complex_read_rat(const char **s, int strict, char **b);
 void rb_core_complex_skip_ws(const char **s);
 
+/* numeric.c (core_rs/src/numeric.rs) */
+double rb_core_numeric_round_half_up(double x, double s);
+double rb_core_numeric_round_half_down(double x, double s);
+double rb_core_numeric_round_half_even(double x, double s);
+double rb_core_numeric_double_div_double(double x, double y);
+VALUE rb_core_numeric_rb_dbl_hash(double d);
+SIGNED_VALUE rb_core_numeric_int_round_half_even(SIGNED_VALUE x, SIGNED_VALUE y);
+SIGNED_VALUE rb_core_numeric_int_round_half_up(SIGNED_VALUE x, SIGNED_VALUE y);
+SIGNED_VALUE rb_core_numeric_int_round_half_down(SIGNED_VALUE x, SIGNED_VALUE y);
+int rb_core_numeric_float_round_overflow(int ndigits, int binexp);
+int rb_core_numeric_float_round_underflow(int ndigits, int binexp);
+double ruby_float_step_size(double beg, double end, double unit, int excl);
+
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop
 #endif
