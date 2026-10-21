@@ -7,8 +7,8 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 318,328 | 100.0% |
-| **Not Started** | 101 | 301,862 | 94.8% |
+| **Total C Source Files** | 113 | 318,372 | 100.0% |
+| **Not Started** | 101 | 301,906 | 94.8% |
 | **In Progress** | 5 | 16,120 | 5.1% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
@@ -33,7 +33,7 @@ _Built-in data types, objects, and core classes_
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `array.c` | 9,182 | Not Started | `crate::array` | Array object implementation |
-| `bignum.c` | 7,350 | Not Started | `crate::bignum` | Big integer support |
+| `bignum.c` | 7,394 | Not Started | `crate::bignum` | Big integer support |
 | `class.c` | 3,412 | Not Started | `crate::class` | Class and module hierarchy |
 | `compar.c` | 355 | Not Started | `crate::compar` | Comparable mixin module |
 | `complex.c` | 2,839 | In Progress | `core_rs::complex` | Ported (complex-A-01, string scanner statics): issign, read_sign, isdecimal, read_rat_nos, read_rat, isimagunit, skip_ws and helpers. Remaining: Complex class methods |
@@ -196,7 +196,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `addr2line.c` | Utilities & Support | 2,787 | Not Started | `crate::addr2line` | Address to source line resolution |
 | `array.c` | Core Data Structures | 9,182 | Not Started | `crate::array` | Array object implementation |
 | `ast.c` | Parser & AST | 1,269 | Not Started | `crate::parser::ast` | Ruby::AST module |
-| `bignum.c` | Core Data Structures | 7,350 | Not Started | `crate::bignum` | Big integer support |
+| `bignum.c` | Core Data Structures | 7,394 | Not Started | `crate::bignum` | Big integer support |
 | `box.c` | Utilities & Support | 1,346 | Not Started | `crate::box` | Value boxing helpers |
 | `builtin.c` | Utilities & Support | 145 | Not Started | `crate::builtin` | Builtin Ruby class loader |
 | `class.c` | Core Data Structures | 3,412 | Not Started | `crate::class` | Class and module hierarchy |
