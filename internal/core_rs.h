@@ -63,6 +63,22 @@ int rb_core_complex_read_rat_nos(const char **s, int strict, char **b);
 int rb_core_complex_read_rat(const char **s, int strict, char **b);
 void rb_core_complex_skip_ws(const char **s);
 
+/* io_buffer.c (core_rs/src/io_buffer.rs).  The C definitions qualify the
+ * pointer parameters with `restrict`; callers guarantee the ranges do not
+ * overlap. */
+void rb_core_io_buffer_memory_or_inplace(unsigned char *base, size_t size, unsigned char *mask, size_t mask_size);
+void rb_core_io_buffer_memory_xor_inplace(unsigned char *base, size_t size, unsigned char *mask, size_t mask_size);
+void rb_core_io_buffer_memory_not_inplace(unsigned char *base, size_t size);
+size_t rb_core_io_buffer_memory_bit_count(const unsigned char *base, size_t size);
+
+/* missing/mt19937.c, compiled as part of random.c (core_rs/src/mt19937.rs).
+ * struct MT is defined in missing/mt19937.c, which asserts that its layout
+ * matches the #[repr(C)] mirror in mt19937.rs. */
+struct MT;
+void rb_core_mt19937_init_genrand(struct MT *mt, unsigned int s);
+void rb_core_mt19937_init_by_array(struct MT *mt, const uint32_t init_key[], int key_length);
+unsigned int rb_core_mt19937_genrand_int32(struct MT *mt);
+
 /* numeric.c (core_rs/src/numeric.rs) */
 double rb_core_numeric_round_half_up(double x, double s);
 double rb_core_numeric_round_half_down(double x, double s);
@@ -91,6 +107,13 @@ int rb_core_pack_is_bigendian(void);
 char *rb_core_pack_skip_to_eol(const char *p, const char *pend);
 size_t rb_core_pack_pack_alignof(char type, int natint);
 int rb_core_pack_hex2num(char c);
+
+/* rational.c (core_rs/src/rational.rs) */
+long rb_core_rational_i_gcd(long x, long y);
+int rb_core_rational_read_sign(const char **s, const char *const e);
+int rb_core_rational_islettere(int c);
+int rb_core_rational_isletterr(int c);
+const char *rb_core_rational_skip_ws(const char *s, const char *e);
 
 /* re.c (core_rs/src/re.rs) */
 int rb_core_re_check_unicode_range(unsigned long code, char *err);
