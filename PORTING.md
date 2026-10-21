@@ -45,7 +45,7 @@ _Built-in data types, objects, and core classes_
 | `pack.c` | 1,955 | Not Started | `crate::pack` | Array#pack and String#unpack |
 | `proc.c` | 5,609 | Not Started | `crate::proc` | Proc, Method, and Binding objects |
 | `range.c` | 3,006 | Not Started | `crate::range` | Range object implementation |
-| `rational.c` | 2,847 | Not Started | `crate::rational` | Rational number implementation |
+| `rational.c` | 2,866 | Not Started | `crate::rational` | Rational number implementation |
 | `set.c` | 2,677 | Not Started | `crate::set` | Core Set class support |
 | `string.c` | 14,488 | Not Started | `crate::string` | String object implementation |
 | `struct.c` | 2,352 | Not Started | `crate::struct` | Struct class implementation |

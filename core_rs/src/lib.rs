@@ -27,6 +27,7 @@ pub mod complex;
 pub mod ffi;
 pub mod numeric;
 pub mod pack;
+pub mod rational;
 pub mod re;
 pub mod siphash;
 pub mod util;
