@@ -123,7 +123,7 @@ _Input/Output operations, files, directories, and processes_
 | `dir.c` | 4,202 | Not Started | `crate::dir` | Directory operations |
 | `file.c` | 9,658 | Not Started | `crate::file` | File system operations |
 | `io.c` | 16,279 | Not Started | `crate::io` | IO class operations |
-| `io_buffer.c` | 5,060 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
+| `io_buffer.c` | 5,081 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
 | `pathname.c` | 457 | Not Started | `crate::pathname` | Pathname standard helper |
 | `process.c` | 9,659 | Not Started | `crate::process` | Process management |
 | `random.c` | 1,862 | Not Started | `crate::random` | Random number generation |
@@ -134,7 +134,7 @@ _String encodings, transcoding, and regular expressions_
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `encoding.c` | 2,105 | Not Started | `crate::encoding` | String encoding support |
-| `re.c` | 5,212 | In Progress | `core_rs::re` | Ported: rb_memsearch (all search algorithms), rb_memcicmp. Remaining: Regexp class interface |
+| `re.c` | 5,217 | In Progress | `core_rs::re` | Ported: rb_memsearch (all search algorithms), rb_memcicmp. Remaining: Regexp class interface |
 | `regcomp.c` | 6,763 | Not Started | `crate::regcomp` | Onigmo regex compiler |
 | `regenc.c` | 1,032 | Not Started | `crate::regenc` | Onigmo encoding engine |
 | `regerror.c` | 408 | Not Started | `crate::regerror` | Onigmo regex error reporting |
@@ -228,7 +228,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `imemo.c` | Memory & Garbage Collection | 726 | Not Started | `crate::imemo` | Internal memo objects |
 | `inits.c` | Utilities & Support | 117 | Not Started | `crate::inits` | Subsystem initializers |
 | `io.c` | IO & Filesystem | 16,279 | Not Started | `crate::io` | IO class operations |
-| `io_buffer.c` | IO & Filesystem | 5,060 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
+| `io_buffer.c` | IO & Filesystem | 5,081 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
 | `iseq.c` | JIT Compiler | 4,737 | Not Started | `crate::iseq` | Instruction sequences |
 | `jit.c` | JIT Compiler | 1,043 | Not Started | `jit` | C helpers shared by upstream YJIT/ZJIT |
 | `load.c` | Utilities & Support | 1,829 | Not Started | `crate::load` | Require and load mechanism |
@@ -255,8 +255,8 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `ractor_sync.c` | Concurrency & Threads | 1,953 | Not Started | `crate::ractor::sync` | Ractor synchronization |
 | `random.c` | IO & Filesystem | 1,862 | Not Started | `crate::random` | Random number generation |
 | `range.c` | Core Data Structures | 3,006 | Not Started | `crate::range` | Range object implementation |
-| `rational.c` | Core Data Structures | 2,866 | Not Started | `crate::rational` | Rational number implementation |
-| `re.c` | Encoding & Regex | 5,212 | In Progress | `core_rs::re` | Ported: rb_memsearch (all search algorithms), rb_memcicmp. Remaining: Regexp class interface |
+| `rational.c` | Core Data Structures | 2,847 | Not Started | `crate::rational` | Rational number implementation |
+| `re.c` | Encoding & Regex | 5,217 | In Progress | `core_rs::re` | Ported: rb_memsearch (all search algorithms), rb_memcicmp. Remaining: Regexp class interface |
 | `regcomp.c` | Encoding & Regex | 6,763 | Not Started | `crate::regcomp` | Onigmo regex compiler |
 | `regenc.c` | Encoding & Regex | 1,032 | Not Started | `crate::regenc` | Onigmo encoding engine |
 | `regerror.c` | Encoding & Regex | 408 | Not Started | `crate::regerror` | Onigmo regex error reporting |
