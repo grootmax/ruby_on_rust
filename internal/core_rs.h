@@ -28,6 +28,7 @@
 
 #if USE_RUST_PORTS
 
+#include <stdint.h>
 #include "ruby/internal/special_consts.h"
 #include "ruby/internal/static_assert.h"
 
