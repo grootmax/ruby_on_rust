@@ -16,6 +16,7 @@
 #include "internal.h"
 #include "internal/array.h"
 #include "internal/compar.h"
+#include "internal/core_rs.h"
 #include "internal/enum.h"
 #include "internal/gc.h"
 #include "internal/hash.h"
@@ -42,6 +43,10 @@
 # define NDEBUG
 #endif
 #include "ruby_assert.h"
+
+#ifndef USE_RUST_PORTS
+# define USE_RUST_PORTS 0
+#endif
 
 VALUE rb_cArray;
 VALUE rb_cArray_empty_frozen;
@@ -3430,11 +3435,15 @@ rb_ary_reverse_m(VALUE ary)
     return dup;
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/array.rs (port unit array-A-01) */
 static inline rb_len_t
 rotate_count(rb_len_t cnt, rb_len_t len)
 {
     return (cnt < 0) ? (len - (~cnt % len) - 1) : (cnt % len);
 }
+#else
+#define rotate_count rb_core_array_rotate_count
+#endif /* !USE_RUST_PORTS: rotate_count */
 
 static void
 ary_rotate_ptr(VALUE *ptr, rb_len_t len, rb_len_t cnt)

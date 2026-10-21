@@ -54,6 +54,9 @@ RBIMPL_STATIC_ASSERT(core_rs_special_shift, RUBY_SPECIAL_SHIFT == 8);
 # pragma GCC visibility push(hidden)
 #endif
 
+/* array.c (core_rs/src/array.rs) */
+long rb_core_array_rotate_count(long cnt, long len);
+
 /* complex.c (core_rs/src/complex.rs) */
 int rb_core_complex_issign(int c);
 int rb_core_complex_isdecimal(int c);
