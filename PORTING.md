@@ -7,9 +7,9 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 318,137 | 100.0% |
-| **Not Started** | 103 | 309,118 | 97.2% |
-| **In Progress** | 3 | 8,673 | 2.7% |
+| **Total C Source Files** | 113 | 318,206 | 100.0% |
+| **Not Started** | 101 | 301,786 | 94.8% |
+| **In Progress** | 5 | 16,074 | 5.1% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
 | **N/A** | 7 | 346 | 0.1% |
@@ -40,7 +40,7 @@ _Built-in data types, objects, and core classes_
 | `enum.c` | 5,311 | Not Started | `crate::enum` | Enumerable module |
 | `enumerator.c` | 4,794 | Not Started | `crate::enumerator` | Enumerator class |
 | `hash.c` | 8,014 | Not Started | `crate::hash` | Hash map implementation |
-| `numeric.c` | 6,818 | Not Started | `crate::numeric` | Numeric base classes and operations |
+| `numeric.c` | 6,867 | In Progress | `crate::numeric` | Numeric base classes and operations |
 | `object.c` | 4,762 | Not Started | `crate::object` | Object class methods and operations |
 | `pack.c` | 1,955 | Not Started | `crate::pack` | Array#pack and String#unpack |
 | `proc.c` | 5,609 | Not Started | `crate::proc` | Proc, Method, and Binding objects |
@@ -166,7 +166,7 @@ _Internal utility functions, tables, and system helpers_
 | `math.c` | 1,212 | Not Started | `crate::math` | Math module functions |
 | `mini_builtin.c` | 119 | Not Started | `crate::mini_builtin` | Miniruby builtin features |
 | `miniinit.c` | 109 | Not Started | `crate::miniinit` | Miniruby initializers |
-| `siphash.c` | 493 | Not Started | `crate::siphash` | SipHash hashing algorithm |
+| `siphash.c` | 534 | In Progress | `core_rs::siphash` | Ported (siphash-A-01): u8to64_le, u64to8_le, rotl64_to, rotl64_swap, add64_to, xor64_to, int_sip_dump, int_sip_init, sip_hash_dump. Remaining: sip_hash13, streaming API methods |
 | `sprintf.c` | 1,290 | Not Started | `crate::sprintf` | Kernel#sprintf formatting |
 | `st.c` | 3,396 | Not Started | `crate::st` | Symbol table / hash table internal implementation |
 | `strftime.c` | 1,288 | Not Started | `crate::strftime` | Date/time formatting |
@@ -242,7 +242,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `miniinit.c` | Utilities & Support | 109 | Not Started | `crate::miniinit` | Miniruby initializers |
 | `node.c` | Parser & AST | 447 | Not Started | `crate::parser::node` | AST node construction |
 | `node_dump.c` | Parser & AST | 1,325 | Not Started | `crate::parser::node_dump` | AST dump utilities |
-| `numeric.c` | Core Data Structures | 6,818 | Not Started | `crate::numeric` | Numeric base classes and operations |
+| `numeric.c` | Core Data Structures | 6,867 | In Progress | `crate::numeric` | Numeric base classes and operations |
 | `object.c` | Core Data Structures | 4,762 | Not Started | `crate::object` | Object class methods and operations |
 | `pack.c` | Core Data Structures | 1,955 | Not Started | `crate::pack` | Array#pack and String#unpack |
 | `parser_st.c` | Parser & AST | 173 | Not Started | `crate::parser::parser_st` | Parser symbol table |
@@ -271,7 +271,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `set.c` | Core Data Structures | 2,677 | Not Started | `crate::set` | Core Set class support |
 | `shape.c` | Memory & Garbage Collection | 1,716 | Not Started | `crate::shape` | Object shape / property layout tracking |
 | `signal.c` | Concurrency & Threads | 1,641 | Not Started | `crate::signal` | Signal handling |
-| `siphash.c` | Utilities & Support | 493 | Not Started | `crate::siphash` | SipHash hashing algorithm |
+| `siphash.c` | Utilities & Support | 534 | In Progress | `core_rs::siphash` | Ported (siphash-A-01): u8to64_le, u64to8_le, rotl64_to, rotl64_swap, add64_to, xor64_to, int_sip_dump, int_sip_init, sip_hash_dump. Remaining: sip_hash13, streaming API methods |
 | `sparc.c` | Platform & Miscellaneous | 40 | N/A | `N/A` | SPARC architecture assembly helper |
 | `sprintf.c` | Utilities & Support | 1,290 | Not Started | `crate::sprintf` | Kernel#sprintf formatting |
 | `st.c` | Utilities & Support | 3,396 | Not Started | `crate::st` | Symbol table / hash table internal implementation |
