@@ -94,7 +94,7 @@ files:
     subsystem: "Core Data Structures"
     notes: "Hash map implementation"
   numeric.c:
-    status: Not Started
+    status: In Progress
     target: "crate::numeric"
     subsystem: "Core Data Structures"
     notes: "Numeric base classes and operations"

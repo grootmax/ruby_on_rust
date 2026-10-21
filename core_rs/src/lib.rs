@@ -25,6 +25,7 @@ extern crate alloc as std_alloc;
 pub mod alloc;
 pub mod complex;
 pub mod ffi;
+pub mod numeric;
 pub mod pack;
 pub mod re;
 pub mod siphash;
@@ -89,3 +90,8 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
         )
     }
 }
+
+/// Stub personality function for landing pads generated when no_std code panics.
+#[cfg(not(test))]
+#[unsafe(export_name = "rust_eh_personality")]
+pub extern "C" fn rust_eh_personality() {}
