@@ -91,6 +91,9 @@ char *rb_core_pack_skip_to_eol(const char *p, const char *pend);
 size_t rb_core_pack_pack_alignof(char type, int natint);
 int rb_core_pack_hex2num(char c);
 
+/* re.c (core_rs/src/re.rs) */
+int rb_core_re_check_unicode_range(unsigned long code, char *err);
+
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop
 #endif
