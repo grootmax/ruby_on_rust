@@ -7,8 +7,8 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 318,251 | 100.0% |
-| **Not Started** | 101 | 301,826 | 94.8% |
+| **Total C Source Files** | 113 | 318,260 | 100.0% |
+| **Not Started** | 101 | 301,835 | 94.8% |
 | **In Progress** | 5 | 16,079 | 5.1% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
@@ -32,7 +32,7 @@ _Built-in data types, objects, and core classes_
 
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `array.c` | 9,173 | Not Started | `crate::array` | Array object implementation |
+| `array.c` | 9,182 | Not Started | `crate::array` | Array object implementation |
 | `bignum.c` | 7,350 | Not Started | `crate::bignum` | Big integer support |
 | `class.c` | 3,412 | Not Started | `crate::class` | Class and module hierarchy |
 | `compar.c` | 355 | Not Started | `crate::compar` | Comparable mixin module |
@@ -194,7 +194,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | C Source File | Subsystem | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `addr2line.c` | Utilities & Support | 2,787 | Not Started | `crate::addr2line` | Address to source line resolution |
-| `array.c` | Core Data Structures | 9,173 | Not Started | `crate::array` | Array object implementation |
+| `array.c` | Core Data Structures | 9,182 | Not Started | `crate::array` | Array object implementation |
 | `ast.c` | Parser & AST | 1,269 | Not Started | `crate::parser::ast` | Ruby::AST module |
 | `bignum.c` | Core Data Structures | 7,350 | Not Started | `crate::bignum` | Big integer support |
 | `box.c` | Utilities & Support | 1,346 | Not Started | `crate::box` | Value boxing helpers |
