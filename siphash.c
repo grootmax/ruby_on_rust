@@ -93,14 +93,6 @@ do {					\
 } while (0)
 
 #ifdef HAVE_UINT64_T
-#if USE_RUST_PORTS
-#define U8TO64_LE(p) u8to64_le(p)
-#define U64TO8_LE(p, v) u64to8_le((p), (v))
-#define ROTL64_TO(v, s) rotl64_to(&(v), (s))
-#define ADD64_TO(v, s) add64_to(&(v), (s))
-#define XOR64_TO(v, s) xor64_to(&(v), (s))
-#define XOR64_INT(v, x) xor64_to(&(v), (x))
-#else
 #define U8TO64_LE(p) 							\
     ((uint64_t)U8TO32_LE(p) | ((uint64_t)U8TO32_LE((p) + 4)) << 32 )
 
@@ -118,7 +110,6 @@ do {						\
 #define ADD64_TO(v, s) ((v) += (s))
 #define XOR64_TO(v, s) ((v) ^= (s))
 #define XOR64_INT(v, x) ((v) ^= (x))
-#endif /* USE_RUST_PORTS */
 #else
 #if !USE_RUST_PORTS /* ported to core_rs/src/siphash.rs (siphash-A-01) */
 #define U8TO64_LE(p) u8to64_le(p)

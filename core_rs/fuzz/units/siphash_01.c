@@ -2,7 +2,7 @@
  * Differential fuzz: siphash.c (port unit siphash-A-01, core_rs/src/siphash.rs)
  * against the original C reference.
  *
- * FUZZ-EXTRACT: siphash.c sip_init_state_bin:186-193 int_sip_dump int_sip_init sip_hash_dump
+ * FUZZ-EXTRACT: siphash.c sip_init_state_bin:177-184 int_sip_dump int_sip_init sip_hash_dump
  */
 #define FUZZ_UNIT "siphash_01"
 #include <unistd.h>
