@@ -7,8 +7,8 @@ Generated automatically by `ruby tool/generate_porting_ledger.rb`. Do not edit m
 
 | Metric | File Count | Lines of Code (LOC) | % of Total LOC |
 | :--- | :--- | :--- | :--- |
-| **Total C Source Files** | 113 | 318,260 | 100.0% |
-| **Not Started** | 101 | 301,835 | 94.8% |
+| **Total C Source Files** | 113 | 318,287 | 100.0% |
+| **Not Started** | 101 | 301,862 | 94.8% |
 | **In Progress** | 5 | 16,079 | 5.1% |
 | **Ported** | 0 | 0 | 0.0% |
 | **Blocked** | 0 | 0 | 0.0% |
@@ -79,7 +79,7 @@ _Garbage collector, object allocator, and memory views_
 | C Source File | Lines (LOC) | Status | Target Rust Crate/Module | Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `gc.c` | 7,122 | Not Started | `gc::mmtk` | MMTk support is upstream modular GC, not a port by this project |
-| `imemo.c` | 726 | Not Started | `crate::imemo` | Internal memo objects |
+| `imemo.c` | 753 | Not Started | `crate::imemo` | Internal memo objects |
 | `memory_view.c` | 902 | Not Started | `crate::memory_view` | Memory view interface |
 | `shape.c` | 1,716 | Not Started | `crate::shape` | Object shape / property layout tracking |
 
@@ -225,7 +225,7 @@ _Platform stubs, runner wrappers, and target-specific code_
 | `goruby.c` | Platform & Miscellaneous | 68 | N/A | `N/A` | Golf Ruby executable wrapper |
 | `hash.c` | Core Data Structures | 8,014 | Not Started | `crate::hash` | Hash map implementation |
 | `id_table.c` | Utilities & Support | 573 | Not Started | `crate::id_table` | ID lookup table |
-| `imemo.c` | Memory & Garbage Collection | 726 | Not Started | `crate::imemo` | Internal memo objects |
+| `imemo.c` | Memory & Garbage Collection | 753 | Not Started | `crate::imemo` | Internal memo objects |
 | `inits.c` | Utilities & Support | 117 | Not Started | `crate::inits` | Subsystem initializers |
 | `io.c` | IO & Filesystem | 16,279 | Not Started | `crate::io` | IO class operations |
 | `io_buffer.c` | IO & Filesystem | 5,081 | Not Started | `crate::io::buffer` | IO::Buffer implementation |
