@@ -1483,7 +1483,7 @@ rb_require_internal(VALUE fname)
     return require_internal(ec, fname, 1, RTEST(ruby_verbose));
 }
 
-int
+RUBY_FUNC_EXPORTED int
 ruby_require_internal(const char *fname, unsigned int len)
 {
     struct RString fake = {RBASIC_INIT};
