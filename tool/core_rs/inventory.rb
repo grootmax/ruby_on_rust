@@ -174,6 +174,7 @@ end
 def inventory
   pub, aliases = public_names
   paths = Dir[File.join(SRCDIR, "*.c")].sort
+  paths = paths.reject { |p| system("git", "check-ignore", "-q", p, out: File::NULL, err: File::NULL) }
   # missing/*.c sources that a core file compiles in with #include
   # (missing/dtoa.c in util.c, missing/mt19937.c in random.c).
   included = paths.reject { |p| File.basename(p) =~ WAVE_D || File.basename(p) =~ WAVE_X }.flat_map do |p|
