@@ -72,6 +72,12 @@ uint64_t *rb_core_siphash_xor64_to(uint64_t *v, const uint64_t s);
 void rb_core_siphash_int_sip_dump(sip_state *state);
 void rb_core_siphash_int_sip_init(sip_state *state, const uint8_t key[16]);
 
+/* pack.c (core_rs/src/pack.rs) */
+int rb_core_pack_is_bigendian(void);
+char *rb_core_pack_skip_to_eol(const char *p, const char *pend);
+size_t rb_core_pack_pack_alignof(char type, int natint);
+int rb_core_pack_hex2num(char c);
+
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop
 #endif
