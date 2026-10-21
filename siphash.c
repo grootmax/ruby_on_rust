@@ -1,6 +1,39 @@
+#include "ruby/internal/config.h"
+#include "internal.h"
 #include <string.h>
 #include <stdio.h>
 #include "siphash.h"
+
+#ifndef USE_RUST_PORTS
+# define USE_RUST_PORTS 0
+#endif
+
+#if USE_RUST_PORTS
+#define u8to64_le rb_core_siphash_u8to64_le
+#define u64to8_le rb_core_siphash_u64to8_le
+#define rotl64_to rb_core_siphash_rotl64_to
+#define rotl64_swap rb_core_siphash_rotl64_swap
+#define add64_to rb_core_siphash_add64_to
+#define xor64_to rb_core_siphash_xor64_to
+#define int_sip_dump rb_core_siphash_int_sip_dump
+#define int_sip_init rb_core_siphash_int_sip_init
+#endif
+
+#include "internal/core_rs.h"
+
+#if USE_RUST_PORTS
+static const void * const siphash_rs_refs[] __attribute__((used)) = {
+    (const void *)(uintptr_t)&u8to64_le,
+    (const void *)(uintptr_t)&u64to8_le,
+    (const void *)(uintptr_t)&rotl64_to,
+    (const void *)(uintptr_t)&rotl64_swap,
+    (const void *)(uintptr_t)&add64_to,
+    (const void *)(uintptr_t)&xor64_to,
+    (const void *)(uintptr_t)&int_sip_dump,
+    (const void *)(uintptr_t)&int_sip_init,
+};
+#endif
+
 #ifndef SIP_HASH_STREAMING
   #define SIP_HASH_STREAMING 1
 #endif
@@ -78,6 +111,7 @@ do {						\
 #define XOR64_TO(v, s) ((v) ^= (s))
 #define XOR64_INT(v, x) ((v) ^= (x))
 #else
+#if !USE_RUST_PORTS /* ported to core_rs/src/siphash.rs (siphash-A-01) */
 #define U8TO64_LE(p) u8to64_le(p)
 static inline uint64_t
 u8to64_le(const uint8_t *p)
@@ -137,6 +171,7 @@ xor64_to(uint64_t *v, const uint64_t s)
 }
 
 #define XOR64_INT(v, x) ((v).lo ^= (x))
+#endif /* !USE_RUST_PORTS */
 #endif
 
 static const union {
@@ -155,7 +190,9 @@ struct sip_interface_st {
     void (*final)(sip_state *s, uint64_t *digest);
 };
 
+#if !USE_RUST_PORTS
 static void int_sip_init(sip_state *state, const uint8_t *key);
+#endif
 static void int_sip_update(sip_state *state, const uint8_t *data, size_t len);
 static void int_sip_final(sip_state *state, uint64_t *digest);
 
@@ -185,6 +222,7 @@ do {					\
 } while(0)
 
 #if SIP_HASH_STREAMING
+#if !USE_RUST_PORTS /* ported to core_rs/src/siphash.rs (siphash-A-01) */
 static void
 int_sip_dump(sip_state *state)
 {
@@ -212,6 +250,7 @@ int_sip_init(sip_state *state, const uint8_t key[16])
     state->v[2] = k0; XOR64_TO(state->v[2], sip_init_state[2]);
     state->v[3] = k1; XOR64_TO(state->v[3], sip_init_state[3]);
 }
+#endif /* !USE_RUST_PORTS */
 
 static inline void
 int_sip_round(sip_state *state, int n)
@@ -390,11 +429,13 @@ sip_hash_free(sip_hash *h)
     free(h);
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/siphash.rs (siphash-A-01) */
 void
 sip_hash_dump(sip_hash *h)
 {
     int_sip_dump(h->state);
 }
+#endif /* !USE_RUST_PORTS */
 #endif /* SIP_HASH_STREAMING */
 
 #define SIP_ROUND(m, v0, v1, v2, v3)	\

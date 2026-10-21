@@ -27,6 +27,7 @@ pub mod complex;
 pub mod ffi;
 pub mod pack;
 pub mod re;
+pub mod siphash;
 pub mod util;
 
 /// C runtime pieces that `no_std` code needs.
