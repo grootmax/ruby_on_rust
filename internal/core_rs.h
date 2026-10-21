@@ -73,6 +73,12 @@ int rb_core_numeric_float_round_overflow(int ndigits, int binexp);
 int rb_core_numeric_float_round_underflow(int ndigits, int binexp);
 double ruby_float_step_size(double beg, double end, double unit, int excl);
 
+/* pack.c (core_rs/src/pack.rs) */
+int rb_core_pack_is_bigendian(void);
+char *rb_core_pack_skip_to_eol(const char *p, const char *pend);
+size_t rb_core_pack_pack_alignof(char type, int natint);
+int rb_core_pack_hex2num(char c);
+
 #if defined(__ELF__) && (defined(__GNUC__) || defined(__clang__))
 # pragma GCC visibility pop
 #endif

@@ -26,6 +26,7 @@ pub mod alloc;
 pub mod complex;
 pub mod ffi;
 pub mod numeric;
+pub mod pack;
 pub mod re;
 pub mod util;
 
