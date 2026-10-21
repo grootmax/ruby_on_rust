@@ -57,6 +57,19 @@ RBIMPL_STATIC_ASSERT(core_rs_special_shift, RUBY_SPECIAL_SHIFT == 8);
 /* array.c (core_rs/src/array.rs) */
 long rb_core_array_rotate_count(long cnt, long len);
 
+/* bignum.c (core_rs/src/bignum.rs).  The digit parameters are BDIGIT,
+ * which is `unsigned int` in every configuration core_rs supports;
+ * bignum.c asserts that in its #if USE_RUST_PORTS branch.
+ * rb_core_bignum_bigdivrem1 takes a struct big_div_struct *, which
+ * bignum.c defines and checks against the #[repr(C)] mirror. */
+int rb_core_bignum_bary_addc(unsigned int *zds, size_t zn, const unsigned int *xds, size_t xn, const unsigned int *yds, size_t yn, int carry);
+int rb_core_bignum_bary_add(unsigned int *zds, size_t zn, const unsigned int *xds, size_t xn, const unsigned int *yds, size_t yn);
+int rb_core_bignum_bary_add_one(unsigned int *ds, size_t n);
+int rb_core_bignum_bary_mulsub_1xN(unsigned int *zds, size_t zn, unsigned int x, const unsigned int *yds, size_t yn);
+void rb_core_bignum_bary_sq_fast(unsigned int *zds, size_t zn, const unsigned int *xds, size_t xn);
+size_t rb_core_bignum_max_size(size_t a, size_t b);
+void *rb_core_bignum_bigdivrem1(void *ptr);
+
 /* complex.c (core_rs/src/complex.rs) */
 int rb_core_complex_issign(int c);
 int rb_core_complex_isdecimal(int c);

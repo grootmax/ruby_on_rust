@@ -12,6 +12,7 @@
 CORE_RS_SRCS = $(srcdir)/core_rs/src/lib.rs \
 	$(srcdir)/core_rs/src/alloc.rs \
 	$(srcdir)/core_rs/src/array.rs \
+	$(srcdir)/core_rs/src/bignum.rs \
 	$(srcdir)/core_rs/src/complex.rs \
 	$(srcdir)/core_rs/src/ffi/mod.rs \
 	$(srcdir)/core_rs/src/ffi/alloc.rs \

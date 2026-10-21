@@ -35,6 +35,7 @@
 #include "internal.h"
 #include "internal/bignum.h"
 #include "internal/complex.h"
+#include "internal/core_rs.h"
 #include "internal/gc.h"
 #include "internal/numeric.h"
 #include "internal/object.h"
@@ -46,6 +47,10 @@
 #include "ruby/util.h"
 #include "ruby_assert.h"
 #include "vm_core.h"            /* for GET_EC() */
+
+#ifndef USE_RUST_PORTS
+# define USE_RUST_PORTS 0
+#endif
 
 #if USE_GMP
 RBIMPL_WARNING_PUSH()
@@ -1427,6 +1432,7 @@ bary_sub_one(BDIGIT *zds, size_t zn)
     return bary_subb(zds, zn, zds, zn, NULL, 0, 1);
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/bignum.rs (port unit bignum-A-04) */
 static int
 bary_addc(BDIGIT *zds, size_t zn, const BDIGIT *xds, size_t xn, const BDIGIT *yds, size_t yn, int carry)
 {
@@ -1492,6 +1498,18 @@ bary_add_one(BDIGIT *ds, size_t n)
     }
     return 1;
 }
+#else
+#define bary_addc rb_core_bignum_bary_addc
+#define bary_add rb_core_bignum_bary_add
+#define bary_add_one rb_core_bignum_bary_add_one
+/* core_rs/src/bignum.rs implements BDIGIT, BDIGIT_DBL and BDIGIT_DBL_SIGNED
+ * as u32, u64 and i64, and internal/core_rs.h declares the digit
+ * parameters as unsigned int; fail the C build if the configuration
+ * differs. */
+STATIC_ASSERT(core_rs_bdigit, SIZEOF_BDIGIT == 4 && sizeof(BDIGIT) == sizeof(unsigned int));
+STATIC_ASSERT(core_rs_bdigit_dbl, sizeof(BDIGIT_DBL) == 8);
+STATIC_ASSERT(core_rs_bdigit_dbl_signed, sizeof(BDIGIT_DBL_SIGNED) == 8);
+#endif /* !USE_RUST_PORTS: bary_addc .. bary_add_one */
 
 static void
 bary_mul_single(BDIGIT *zds, size_t zn, BDIGIT x, BDIGIT y)
@@ -1540,6 +1558,7 @@ bary_muladd_1xN(BDIGIT *zds, size_t zn, BDIGIT x, const BDIGIT *yds, size_t yn)
     return n != 0;
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/bignum.rs (port unit bignum-A-04) */
 static BDIGIT_DBL_SIGNED
 bigdivrem_mulsub(BDIGIT *zds, size_t zn, BDIGIT x, const BDIGIT *yds, size_t yn)
 {
@@ -1580,6 +1599,9 @@ bary_mulsub_1xN(BDIGIT *zds, size_t zn, BDIGIT x, const BDIGIT *yds, size_t yn)
         return 1;
     return 0;
 }
+#else
+#define bary_mulsub_1xN rb_core_bignum_bary_mulsub_1xN
+#endif /* !USE_RUST_PORTS: bigdivrem_mulsub .. bary_mulsub_1xN */
 
 static void
 bary_mul_normal(BDIGIT *zds, size_t zn, const BDIGIT *xds, size_t xn, const BDIGIT *yds, size_t yn)
@@ -1609,6 +1631,7 @@ rb_big_mul_normal(VALUE x, VALUE y)
  * ref: Handbook of Applied Cryptography, Algorithm 14.16
  *      https://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf
  */
+#if !USE_RUST_PORTS /* ported to core_rs/src/bignum.rs (port unit bignum-A-04) */
 static void
 bary_sq_fast(BDIGIT *zds, size_t zn, const BDIGIT *xds, size_t xn)
 {
@@ -1662,6 +1685,9 @@ bary_sq_fast(BDIGIT *zds, size_t zn, const BDIGIT *xds, size_t xn)
         zds[i + xn] += BIGLO(c);
     }
 }
+#else
+#define bary_sq_fast rb_core_bignum_bary_sq_fast
+#endif /* !USE_RUST_PORTS: bary_sq_fast */
 
 VALUE
 rb_big_sq_fast(VALUE x)
@@ -1673,11 +1699,15 @@ rb_big_sq_fast(VALUE x)
     return z;
 }
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/bignum.rs (port unit bignum-A-04) */
 static inline size_t
 max_size(size_t a, size_t b)
 {
     return (a > b ? a : b);
 }
+#else
+#define max_size rb_core_bignum_max_size
+#endif /* !USE_RUST_PORTS: max_size */
 
 /* balancing multiplication by slicing larger argument */
 static void
@@ -2615,6 +2645,7 @@ struct big_div_struct {
     volatile VALUE stop;
 };
 
+#if !USE_RUST_PORTS /* ported to core_rs/src/bignum.rs (port unit bignum-A-04) */
 static void *
 bigdivrem1(void *ptr)
 {
@@ -2649,6 +2680,19 @@ bigdivrem1(void *ptr)
     } while (zn > yn);
     return 0;
 }
+#else
+#define bigdivrem1 rb_core_bignum_bigdivrem1
+/* core_rs/src/bignum.rs mirrors struct big_div_struct with #[repr(C)] and
+ * asserts the same layout on its side; fail the C build if the two could
+ * disagree. */
+STATIC_ASSERT(core_rs_big_div_yn, offsetof(struct big_div_struct, yn) == 0);
+STATIC_ASSERT(core_rs_big_div_zn, offsetof(struct big_div_struct, zn) == sizeof(size_t));
+STATIC_ASSERT(core_rs_big_div_yds, offsetof(struct big_div_struct, yds) == 2 * sizeof(size_t));
+STATIC_ASSERT(core_rs_big_div_zds, offsetof(struct big_div_struct, zds) == 2 * sizeof(size_t) + sizeof(BDIGIT *));
+STATIC_ASSERT(core_rs_big_div_stop, offsetof(struct big_div_struct, stop) == 2 * sizeof(size_t) + 2 * sizeof(BDIGIT *));
+STATIC_ASSERT(core_rs_big_div_size, sizeof(struct big_div_struct) == 2 * sizeof(size_t) + 2 * sizeof(BDIGIT *) + sizeof(VALUE));
+STATIC_ASSERT(core_rs_big_div_value, sizeof(VALUE) == sizeof(size_t));
+#endif /* !USE_RUST_PORTS: bigdivrem1 */
 
 /* async-signal-safe */
 static void

@@ -24,6 +24,7 @@ extern crate alloc as std_alloc;
 
 pub mod alloc;
 pub mod array;
+pub mod bignum;
 pub mod complex;
 pub mod ffi;
 pub mod imemo;
