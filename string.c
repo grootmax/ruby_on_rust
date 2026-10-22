@@ -4149,7 +4149,7 @@ rb_str_append_as_bytes(int argc, VALUE *argv, VALUE str)
  *  Raises RangeError if that codepoint is not representable in the encoding of +self+:
  *
  *    s = 'foo'
- *    s.encoding              # => <Encoding:UTF-8>
+ *    s.encoding              # => #<Encoding:UTF-8>
  *    s << 0x00110000         # 1114112 out of char range (RangeError)
  *    s = 'foo'.encode(Encoding::EUC_JP)
  *    s << 0x00800080         # invalid codepoint 0x800080 in EUC-JP (RangeError)
@@ -7571,6 +7571,66 @@ rb_str_bitwise_not_bang(VALUE str)
     return str;
 }
 
+/*
+ * Document-method: String#bitwise_and
+ *
+ * call-seq:
+ *   bitwise_and -> new_string
+ *
+ *  :include: doc/string/bitwise_and.rdoc
+ *
+ */
+
+/*
+ * Document-method: String#bitwise_and!
+ *
+ * call-seq:
+ *   bitwise_and! -> self
+ *
+ *  :include: doc/string/bitwise_and_bang.rdoc
+ *
+ */
+
+/*
+ * Document-method: String#bitwise_or
+ *
+ * call-seq:
+ *   bitwise_or -> new_string
+ *
+ *  :include: doc/string/bitwise_or.rdoc
+ *
+ */
+
+/*
+ * Document-method: String#bitwise_or!
+ *
+ * call-seq:
+ *   bitwise_or! -> self
+ *
+ *  :include: doc/string/bitwise_or_bang.rdoc
+ *
+ */
+
+/*
+ * Document-method: String#bitwise_xor
+ *
+ * call-seq:
+ *   bitwise_xor -> new_string
+ *
+ *  :include: doc/string/bitwise_xor.rdoc
+ *
+ */
+
+/*
+ * Document-method: String#bitwise_xor!
+ *
+ * call-seq:
+ *   bitwise_xor! -> self
+ *
+ *  :include: doc/string/bitwise_xor_bang.rdoc
+ *
+ */
+
 #define STR_DEFINE_BINARY_BITWISE_METHOD(name)                              \
     static VALUE                                                            \
     rb_str_bitwise_##name(VALUE str, VALUE other)                           \
@@ -10015,23 +10075,26 @@ rb_str_tr_bang(int argc, VALUE *argv, VALUE str)
 
 /*
  *  call-seq:
- *    tr(selector, replacements) -> new_string
  *    tr(pairs) -> new_string
+ *    tr(selector, replacements) -> new_string
  *
- *  Accepts either a +selector+ and a +replacements+ string,
- *  or a single +pairs+ Hash.
+ *  With hash argument +pairs+ given,
+ *  returns a copy of +self+ with some codepoints replaced:
  *
- *  When a +pairs+ Hash is provided the keys, returns a copy of +self+ with
- *  the keys of the hash replaced by the values.
+ *  - Each key in +pairs+ is a string contains a single codepoint.
+ *  - Each value in +pairs+ is a string of any length (even length zero).
  *
- *  - They keys must be strings containing a single codepoints.
- *  - The values can be of any length.
+ *  Each codepoint in +self+ is examined;
+ *  when the codepoint in +self+ matches a key codepoint in +pairs+,
+ *  the string value for that key replaces the codepoint in +self+.
  *
- *  Example:
+ *  Examples:
  *
- *    'hello'.tr('e' => 'er', 'l' => '', 'o' => 'o !') #=> "hero !"
+ *    h = {'h' => 'H', 'e' => 'er', 'l' => '', 'o' => 'o!'}
+ *    'hello'.tr(h)           # => "Hero!"
  *
- *  When +selector+ and +replacements+are provided, returns a copy of +self+
+ *  With string arguments +selector+ and +replacements+ given,
+ *  returns a copy of +self+
  *  with each character specified by string +selector+ translated to the
  *  corresponding character in string +replacements+.
  *  The correspondence is _positional_:

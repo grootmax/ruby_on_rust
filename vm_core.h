@@ -410,6 +410,8 @@ enum rb_builtin_attr {
     BUILTIN_ATTR_WITHOUT_INTERRUPTS = 0x10,
     // The iseq operates on the nearest user box in its caller frames.
     BUILTIN_ATTR_CALLER_USER_BOX = 0x20,
+    // The JIT should inline the iseq regardless of its size heuristics.
+    BUILTIN_ATTR_ALWAYS_INLINE = 0x40,
 };
 
 typedef VALUE (*rb_jit_func_t)(struct rb_execution_context_struct *, struct rb_control_frame_struct *);
@@ -2216,11 +2218,7 @@ static inline rb_execution_context_t *
 rb_current_execution_context(bool expect_ec)
 {
 #ifdef RB_THREAD_LOCAL_SPECIFIER
-  #ifdef RB_THREAD_CURRENT_EC_NOINLINE
     rb_execution_context_t * volatile ec = rb_current_ec();
-  #else
-    rb_execution_context_t * volatile ec = ruby_current_ec;
-  #endif
 
     /* On the shared objects, `__tls_get_addr()` is used to access the TLS
      * and the address of the `ruby_current_ec` can be stored on a function
